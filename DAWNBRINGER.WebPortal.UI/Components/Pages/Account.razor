@@ -7,174 +7,184 @@
 
 <PageTitle>Account</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="portal-form-page">
-
-    <MudText Typo="Typo.h4" Class="portal-form-page-title">Account Management</MudText>
-
+<div class="portal-account-page">
     <AuthorizeView Context="userContext">
         <Authorized>
+            <section class="portal-account-shell">
+                <div class="portal-account-hero">
+                    <div class="portal-account-header">
+                        <div class="portal-account-crest-shell">
+                            <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-account-crest" />
+                        </div>
+                        <div>
+                            <div class="portal-account-kicker">Project KONGOR Account</div>
+                            <div class="portal-brand-title">Command Centre</div>
+                        </div>
+                    </div>
 
-            <!-- Account Information -->
-            <MudCard Elevation="2" Class="mb-6 portal-form-card">
-                <MudCardHeader>
-                    <CardHeaderAvatar>
-                        <MudAvatar Color="Color.Primary" Variant="Variant.Filled">
-                            <MudIcon Icon="@Icons.Material.Filled.Person" />
-                        </MudAvatar>
-                    </CardHeaderAvatar>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h6">@GetClaimValue("sub")</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">@GetClaimValue("email")</MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudGrid>
-                        <MudItem xs="12" sm="6">
-                            <MudField Label="Account Name" Variant="Variant.Outlined">@GetClaimValue("sub")</MudField>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudField Label="Email Address" Variant="Variant.Outlined">@GetClaimValue("email")</MudField>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudField Label="User Role" Variant="Variant.Outlined">@GetClaimValue("user_role")</MudField>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudField Label="Clan" Variant="Variant.Outlined">
-                                @(string.IsNullOrWhiteSpace(GetClaimValue("clan_name")) ? "None" : GetClaimValue("clan_name"))
-                            </MudField>
-                        </MudItem>
-                    </MudGrid>
-                </MudCardContent>
-            </MudCard>
+                    <h1 class="portal-account-title">@GetClaimValue("sub")</h1>
+                    <p class="portal-account-summary">
+                        Review your identity details, request credential changes, and keep your portal access aligned with the rebuilt shell.
+                    </p>
 
-            <!-- Update Email Address Section -->
-            <MudExpansionPanels Elevation="2" Class="mb-6">
-                <MudExpansionPanel Text="Update Email Address" Icon="@Icons.Material.Filled.Email">
+                    <ul class="portal-account-points">
+                        <li>Primary e-mail and role details are surfaced at a glance.</li>
+                        <li>Security requests remain protected behind your current credentials.</li>
+                        <li>All actions still use the same verified backend flows.</li>
+                    </ul>
 
-                    <MudText Typo="Typo.body2" Class="mb-4">
-                        Enter a new email address below. A verification link will be sent to your new email address.
-                    </MudText>
+                    <div class="portal-account-stat-grid">
+                        <article class="portal-account-stat-card">
+                            <span class="portal-account-stat-label">Account Name</span>
+                            <strong class="portal-account-stat-value">@GetClaimValue("sub")</strong>
+                        </article>
 
-                    <EditForm Model="EmailUpdateFormModel" OnValidSubmit="HandleEmailUpdateSubmit">
-                        <DataAnnotationsValidator />
+                        <article class="portal-account-stat-card">
+                            <span class="portal-account-stat-label">E-mail Address</span>
+                            <strong class="portal-account-stat-value">@GetClaimValue("email")</strong>
+                        </article>
 
-                        <MudTextField Label="New Email Address"
-                                      HelperText="Enter your new email address"
-                                      Class="mt-3"
-                                      @bind-Value="EmailUpdateFormModel.EmailAddress"
-                                      For="() => EmailUpdateFormModel.EmailAddress"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Email"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Email" />
+                        <article class="portal-account-stat-card">
+                            <span class="portal-account-stat-label">User Role</span>
+                            <strong class="portal-account-stat-value">@GetClaimValue("user_role")</strong>
+                        </article>
 
-                        <MudTextField Label="Confirm New Email Address"
-                                      HelperText="Type your new email address again for confirmation"
-                                      Class="mt-3"
-                                      @bind-Value="EmailUpdateFormModel.ConfirmEmailAddress"
-                                      For="() => EmailUpdateFormModel.ConfirmEmailAddress"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Email"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Email" />
+                        <article class="portal-account-stat-card">
+                            <span class="portal-account-stat-label">Clan</span>
+                            <strong class="portal-account-stat-value">@(string.IsNullOrWhiteSpace(GetClaimValue("clan_name")) ? "None" : GetClaimValue("clan_name"))</strong>
+                        </article>
+                    </div>
+                </div>
 
-                        <MudTextField Label="Current Password"
-                                      HelperText="Enter your current password to confirm the change"
-                                      Class="mt-3"
-                                      @bind-Value="EmailUpdateFormModel.Password"
-                                      For="() => EmailUpdateFormModel.Password"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Password"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
-
-                        <div class="d-flex justify-end mt-4">
-                            <MudButton Disabled="EmailUpdateProcessing"
-                                       ButtonType="ButtonType.Submit"
-                                       Variant="Variant.Filled"
-                                       Color="Color.Primary">
-                                @if (EmailUpdateProcessing)
-                                {
-                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                                    <MudText Class="ms-2">Processing ...</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Request Email Update</MudText>
-                                }
-                            </MudButton>
+                <div class="portal-account-management-grid">
+                    <section class="portal-management-card">
+                        <div>
+                            <div class="portal-management-kicker">Identity</div>
+                            <h2 class="portal-management-title">Update E-mail Address</h2>
+                            <p class="portal-management-copy">Enter a new e-mail address below. A verification link will be sent to your new e-mail address.</p>
                         </div>
 
-                    </EditForm>
+                        <EditForm Model="EmailUpdateFormModel" OnValidSubmit="HandleEmailUpdateSubmit">
+                            <DataAnnotationsValidator />
 
-                </MudExpansionPanel>
-            </MudExpansionPanels>
+                            <MudCard Elevation="0" Class="portal-form-card portal-account-card-surface">
+                                <MudCardContent>
+                                    <MudTextField Label="New Email Address"
+                                                  HelperText="Enter your new email address"
+                                                  Class="mt-3"
+                                                  @bind-Value="EmailUpdateFormModel.EmailAddress"
+                                                  For="() => EmailUpdateFormModel.EmailAddress"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Email"
+                                                  Adornment="Adornment.Start"
+                                                  AdornmentIcon="@Icons.Material.Filled.Email" />
 
-            <!-- Update Password Section -->
-            <MudExpansionPanels Elevation="2" Class="mb-6">
-                <MudExpansionPanel Text="Update Password" Icon="@Icons.Material.Filled.Lock">
+                                    <MudTextField Label="Confirm New Email Address"
+                                                  HelperText="Type your new email address again for confirmation"
+                                                  Class="mt-3"
+                                                  @bind-Value="EmailUpdateFormModel.ConfirmEmailAddress"
+                                                  For="() => EmailUpdateFormModel.ConfirmEmailAddress"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Email"
+                                                  Adornment="Adornment.Start"
+                                                  AdornmentIcon="@Icons.Material.Filled.Email" />
 
-                    <MudText Typo="Typo.body2" Class="mb-4">
-                        Choose a new password below. A confirmation link will be sent to your email address to activate the change.
-                    </MudText>
+                                    <MudTextField Label="Current Password"
+                                                  HelperText="Enter your current password to confirm the change"
+                                                  Class="mt-3"
+                                                  @bind-Value="EmailUpdateFormModel.Password"
+                                                  For="() => EmailUpdateFormModel.Password"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Password"
+                                                  Adornment="Adornment.Start"
+                                                  AdornmentIcon="@Icons.Material.Filled.Lock" />
+                                </MudCardContent>
+                                <MudCardActions Class="pa-4">
+                                    <MudSpacer />
+                                    <MudButton Disabled="EmailUpdateProcessing"
+                                               ButtonType="ButtonType.Submit"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary">
+                                        @if (EmailUpdateProcessing)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                            <MudText Class="ms-2">Processing ...</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>Request E-mail Update</MudText>
+                                        }
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </EditForm>
+                    </section>
 
-                    <EditForm Model="PasswordUpdateFormModel" OnValidSubmit="HandlePasswordUpdateSubmit">
-                        <DataAnnotationsValidator />
-
-                        <MudTextField Label="Current Password"
-                                      HelperText="Enter your current password"
-                                      Class="mt-3"
-                                      @bind-Value="PasswordUpdateFormModel.CurrentPassword"
-                                      For="() => PasswordUpdateFormModel.CurrentPassword"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Password"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
-
-                        <MudTextField Label="New Password"
-                                      HelperText="Choose a strong password at least 8 characters long"
-                                      Class="mt-3"
-                                      @bind-Value="PasswordUpdateFormModel.Password"
-                                      For="() => PasswordUpdateFormModel.Password"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Password"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.VpnKey" />
-
-                        <MudTextField Label="Confirm New Password"
-                                      HelperText="Type your new password again for confirmation"
-                                      Class="mt-3"
-                                      @bind-Value="PasswordUpdateFormModel.ConfirmPassword"
-                                      For="() => PasswordUpdateFormModel.ConfirmPassword"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Password" />
-
-                        <div class="d-flex justify-end mt-4">
-                            <MudButton Disabled="PasswordUpdateProcessing"
-                                       ButtonType="ButtonType.Submit"
-                                       Variant="Variant.Filled"
-                                       Color="Color.Primary">
-                                @if (PasswordUpdateProcessing)
-                                {
-                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                                    <MudText Class="ms-2">Processing ...</MudText>
-                                }
-                                else
-                                {
-                                    <MudText>Request Password Update</MudText>
-                                }
-                            </MudButton>
+                    <section class="portal-management-card">
+                        <div>
+                            <div class="portal-management-kicker">Security</div>
+                            <h2 class="portal-management-title">Update Password</h2>
+                            <p class="portal-management-copy">Choose a new password below. A confirmation link will be sent to your e-mail address to activate the change.</p>
                         </div>
 
-                    </EditForm>
+                        <EditForm Model="PasswordUpdateFormModel" OnValidSubmit="HandlePasswordUpdateSubmit">
+                            <DataAnnotationsValidator />
 
-                </MudExpansionPanel>
-            </MudExpansionPanels>
+                            <MudCard Elevation="0" Class="portal-form-card portal-account-card-surface">
+                                <MudCardContent>
+                                    <MudTextField Label="Current Password"
+                                                  HelperText="Enter your current password"
+                                                  Class="mt-3"
+                                                  @bind-Value="PasswordUpdateFormModel.CurrentPassword"
+                                                  For="() => PasswordUpdateFormModel.CurrentPassword"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Password"
+                                                  Adornment="Adornment.Start"
+                                                  AdornmentIcon="@Icons.Material.Filled.Lock" />
 
+                                    <MudTextField Label="New Password"
+                                                  HelperText="Choose a strong password at least 8 characters long"
+                                                  Class="mt-3"
+                                                  @bind-Value="PasswordUpdateFormModel.Password"
+                                                  For="() => PasswordUpdateFormModel.Password"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Password"
+                                                  Adornment="Adornment.Start"
+                                                  AdornmentIcon="@Icons.Material.Filled.VpnKey" />
+
+                                    <MudTextField Label="Confirm New Password"
+                                                  HelperText="Type your new password again for confirmation"
+                                                  Class="mt-3"
+                                                  @bind-Value="PasswordUpdateFormModel.ConfirmPassword"
+                                                  For="() => PasswordUpdateFormModel.ConfirmPassword"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Password" />
+                                </MudCardContent>
+                                <MudCardActions Class="pa-4">
+                                    <MudSpacer />
+                                    <MudButton Disabled="PasswordUpdateProcessing"
+                                               ButtonType="ButtonType.Submit"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Primary">
+                                        @if (PasswordUpdateProcessing)
+                                        {
+                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                            <MudText Class="ms-2">Processing ...</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText>Request Password Update</MudText>
+                                        }
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </EditForm>
+                    </section>
+                </div>
+            </section>
         </Authorized>
     </AuthorizeView>
-
-</MudContainer>
+</div>
 
 @code {
 

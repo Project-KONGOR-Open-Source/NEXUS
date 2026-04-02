@@ -10,6 +10,7 @@
 
 <div class="portal-shell @(IsDarkMode ? "portal-theme-dark" : "portal-theme-light")">
     <div class="portal-background" aria-hidden="true">
+        <div class="portal-background-image"></div>
         <div class="portal-background-orb portal-background-orb-left"></div>
         <div class="portal-background-orb portal-background-orb-right"></div>
         <div class="portal-background-grid"></div>
@@ -29,7 +30,7 @@
                 <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-site-footer-crest" />
                 <div>
                     <div class="portal-site-footer-title">Project KONGOR</div>
-                    <div class="portal-site-footer-copy">A modern front door for the community portal.</div>
+                    <div class="portal-site-footer-copy">The portal gateway to Newerth.</div>
                 </div>
             </div>
 
@@ -50,73 +51,43 @@
     {
         PaletteLight = new PaletteLight
         {
-            Primary = "#a53d2d",
-            Secondary = "#355f87",
-            Tertiary = "#c4a46d",
-            AppbarBackground = "rgba(246, 240, 230, 0.88)",
-            AppbarText = "#231a14",
-            Background = "#f6f0e6",
-            Surface = "#fffaf2",
-            TextPrimary = "#231a14",
-            TextSecondary = "#5d4e40",
-            DrawerBackground = "#fffaf2",
-            DrawerText = "#231a14",
-            ActionDefault = "#5d4e40",
-            ActionDisabled = "#a7998c",
-            Divider = "rgba(35, 26, 20, 0.12)"
+            Primary = "#5f7d3b",
+            Secondary = "#c5a64b",
+            Tertiary = "#2f4725",
+            AppbarBackground = "rgba(245, 242, 230, 0.88)",
+            AppbarText = "#182112",
+            Background = "#f5f2e6",
+            Surface = "#fffcf1",
+            TextPrimary = "#182112",
+            TextSecondary = "#5c664e",
+            DrawerBackground = "#fffcf1",
+            DrawerText = "#182112",
+            ActionDefault = "#5c664e",
+            ActionDisabled = "#9ca58b",
+            Divider = "rgba(95, 125, 59, 0.16)"
         },
         PaletteDark = new PaletteDark
         {
-            Primary = "#d06a3c",
-            Secondary = "#7aa4d2",
-            Tertiary = "#d5bc83",
-            AppbarBackground = "rgba(10, 17, 27, 0.86)",
-            AppbarText = "#f6efe4",
-            Background = "#0b111b",
-            Surface = "#121c29",
-            TextPrimary = "#f6efe4",
-            TextSecondary = "#b8c0cb",
-            DrawerBackground = "#121c29",
-            DrawerText = "#f6efe4",
-            ActionDefault = "#b8c0cb",
-            ActionDisabled = "#5c6470",
-            Divider = "rgba(245, 197, 122, 0.12)"
+            Primary = "#86aa56",
+            Secondary = "#d8bb62",
+            Tertiary = "#416034",
+            AppbarBackground = "rgba(13, 22, 16, 0.88)",
+            AppbarText = "#eef0e6",
+            Background = "#0d1610",
+            Surface = "#162118",
+            TextPrimary = "#eef0e6",
+            TextSecondary = "#bcc6b2",
+            DrawerBackground = "#162118",
+            DrawerText = "#eef0e6",
+            ActionDefault = "#bcc6b2",
+            ActionDisabled = "#65715f",
+            Divider = "rgba(216, 187, 98, 0.16)"
         },
         Typography = new Typography
         {
             Default = new DefaultTypography
             {
                 FontFamily = ["Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"]
-            },
-            H1 = new H1Typography
-            {
-                FontFamily = ["Cinzel", "Georgia", "serif"],
-                FontWeight = "700"
-            },
-            H2 = new H2Typography
-            {
-                FontFamily = ["Cinzel", "Georgia", "serif"],
-                FontWeight = "700"
-            },
-            H3 = new H3Typography
-            {
-                FontFamily = ["Cinzel", "Georgia", "serif"],
-                FontWeight = "700"
-            },
-            H4 = new H4Typography
-            {
-                FontFamily = ["Cinzel", "Georgia", "serif"],
-                FontWeight = "700"
-            },
-            H5 = new H5Typography
-            {
-                FontFamily = ["Cinzel", "Georgia", "serif"],
-                FontWeight = "700"
-            },
-            H6 = new H6Typography
-            {
-                FontFamily = ["Cinzel", "Georgia", "serif"],
-                FontWeight = "700"
             }
         },
         LayoutProperties = new LayoutProperties

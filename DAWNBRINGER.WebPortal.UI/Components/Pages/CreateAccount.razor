@@ -6,75 +6,97 @@
 
 <PageTitle>Create Account</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page">
+<div class="portal-auth-page">
+    <section class="portal-auth-shell">
+        <div class="portal-auth-aside">
+            <div class="portal-auth-crest-row">
+                <div class="portal-auth-crest-shell">
+                    <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-auth-crest" />
+                </div>
+                <div>
+                    <div class="portal-auth-kicker">Project KONGOR Access</div>
+                    <div class="portal-brand-title">Account Creation</div>
+                </div>
+            </div>
 
-    <MudText Typo="Typo.h4" Class="portal-form-page-title">Create Account</MudText>
+            <h1 class="portal-auth-display">Forge A New Identity</h1>
+            <p class="portal-auth-summary">
+                Complete the final stage of registration by choosing an account name and a strong password for your new portal identity.
+            </p>
 
-    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
+            <ul class="portal-auth-points">
+                <li>Choose a distinct account name.</li>
+                <li>Use a strong password with a memorable structure.</li>
+                <li>Move straight into sign-in once the account is created.</li>
+            </ul>
+        </div>
 
-        <MudCard Elevation="2" Class="portal-form-card">
-            <MudCardContent>
+        <div class="portal-auth-main">
+            <div class="portal-auth-panel-heading">
+                <div class="portal-section-kicker">Registration</div>
+                <h2 class="portal-form-page-title">Create Account</h2>
+                <p class="portal-auth-panel-copy">Choose an account name and a strong password to complete your registration.</p>
+            </div>
 
-                <MudText Typo="Typo.body2" Class="mb-4">
-                    Choose an account name and a strong password to complete your registration.
-                </MudText>
+            <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
 
-                <MudTextField Label="Account Name"
-                              HelperText="Between 4 and 12 characters (letters, numbers, underscores, hyphens)"
-                              Class="mt-3"
-                              @bind-Value="FormModel.Name"
-                              For="() => FormModel.Name"
-                              Variant="Variant.Outlined"
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Person" />
+                <MudCard Elevation="0" Class="portal-form-card">
+                    <MudCardContent>
+                        <MudTextField Label="Account Name"
+                                      HelperText="Between 4 and 12 characters (letters, numbers, underscores, hyphens)"
+                                      Class="mt-3"
+                                      @bind-Value="FormModel.Name"
+                                      For="() => FormModel.Name"
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Person" />
 
-                <MudTextField Label="Password"
-                              HelperText="Choose a strong password at least 8 characters long"
-                              Class="mt-3"
-                              @bind-Value="FormModel.Password"
-                              For="() => FormModel.Password"
-                              Variant="Variant.Outlined"
-                              InputType="@PasswordInputType"
-                              Adornment="Adornment.End"
-                              AdornmentIcon="@PasswordVisibilityIcon"
-                              OnAdornmentClick="TogglePasswordVisibility" />
+                        <MudTextField Label="Password"
+                                      HelperText="Choose a strong password at least 8 characters long"
+                                      Class="mt-3"
+                                      @bind-Value="FormModel.Password"
+                                      For="() => FormModel.Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@PasswordInputType"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@PasswordVisibilityIcon"
+                                      OnAdornmentClick="TogglePasswordVisibility" />
 
-                <MudTextField Label="Confirm Password"
-                              HelperText="Type your chosen password again for confirmation"
-                              Class="mt-3"
-                              @bind-Value="FormModel.ConfirmPassword"
-                              For="() => FormModel.ConfirmPassword"
-                              Variant="Variant.Outlined"
-                              InputType="@ConfirmPasswordInputType"
-                              Adornment="Adornment.End"
-                              AdornmentIcon="@ConfirmPasswordVisibilityIcon"
-                              OnAdornmentClick="ToggleConfirmPasswordVisibility" />
-
-            </MudCardContent>
-            <MudCardActions Class="pa-4">
-                <MudSpacer />
-                <MudButton Disabled="Processing"
-                           ButtonType="ButtonType.Submit"
-                           Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Size="Size.Large">
-                    @if (Processing)
-                    {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                        <MudText Class="ms-2">Creating account ...</MudText>
-                    }
-                    else
-                    {
-                        <MudText>Create Account</MudText>
-                    }
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-
-    </EditForm>
-
-</MudContainer>
+                        <MudTextField Label="Confirm Password"
+                                      HelperText="Type your chosen password again for confirmation"
+                                      Class="mt-3"
+                                      @bind-Value="FormModel.ConfirmPassword"
+                                      For="() => FormModel.ConfirmPassword"
+                                      Variant="Variant.Outlined"
+                                      InputType="@ConfirmPasswordInputType"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@ConfirmPasswordVisibilityIcon"
+                                      OnAdornmentClick="ToggleConfirmPasswordVisibility" />
+                    </MudCardContent>
+                    <MudCardActions Class="pa-4">
+                        <MudSpacer />
+                        <MudButton Disabled="Processing"
+                                   ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Large">
+                            @if (Processing)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                <MudText Class="ms-2">Creating account ...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Create Account</MudText>
+                            }
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </EditForm>
+        </div>
+    </section>
+</div>
 
 @code {
 

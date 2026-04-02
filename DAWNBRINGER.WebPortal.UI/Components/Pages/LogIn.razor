@@ -6,71 +6,97 @@
 
 <PageTitle>Log In</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page">
+<div class="portal-auth-page">
+    <section class="portal-auth-shell">
+        <div class="portal-auth-aside">
+            <div class="portal-auth-crest-row">
+                <div class="portal-auth-crest-shell">
+                    <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-auth-crest" />
+                </div>
+                <div>
+                    <div class="portal-auth-kicker">Project KONGOR Access</div>
+                    <div class="portal-brand-title">Portal Entry</div>
+                </div>
+            </div>
 
-    <MudText Typo="Typo.h4" Class="portal-form-page-title">Log In</MudText>
+            <h1 class="portal-auth-display">Return To Newerth</h1>
+            <p class="portal-auth-summary">
+                Sign back into the portal to manage credentials, open protected routes, and keep hold of your community-facing identity.
+            </p>
 
-    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
+            <ul class="portal-auth-points">
+                <li>Use your main account credentials.</li>
+                <li>Recover access if you no longer remember your password.</li>
+                <li>Continue into the rebuilt green-and-gold portal shell.</li>
+            </ul>
+        </div>
 
-        <MudCard Elevation="2" Class="portal-form-card">
-            <MudCardContent>
+        <div class="portal-auth-main">
+            <div class="portal-auth-panel-heading">
+                <div class="portal-section-kicker">Sign In</div>
+                <h2 class="portal-form-page-title">Log In</h2>
+                <p class="portal-auth-panel-copy">Use your account name and password to enter the user portal.</p>
+            </div>
 
-                <MudTextField Label="Account Name"
-                              HelperText="Enter your account name"
-                              Class="mt-3"
-                              @bind-Value="FormModel.Name"
-                              For="() => FormModel.Name"
-                              Variant="Variant.Outlined"
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Person" />
+            <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
 
-                <MudTextField Label="Password"
-                              HelperText="Enter your password"
-                              Class="mt-3"
-                              @bind-Value="FormModel.Password"
-                              For="() => FormModel.Password"
-                              Variant="Variant.Outlined"
-                              InputType="@PasswordInputType"
-                              Adornment="Adornment.End"
-                              AdornmentIcon="@PasswordVisibilityIcon"
-                              OnAdornmentClick="TogglePasswordVisibility" />
+                <MudCard Elevation="0" Class="portal-form-card">
+                    <MudCardContent>
+                        <MudTextField Label="Account Name"
+                                      HelperText="Enter your account name"
+                                      Class="mt-3"
+                                      @bind-Value="FormModel.Name"
+                                      For="() => FormModel.Name"
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Person" />
 
-            </MudCardContent>
-            <MudCardActions Class="pa-4">
-                <MudButton Href="/recover"
-                           Variant="Variant.Text"
-                           Color="Color.Default"
-                           Size="Size.Small">
-                    Forgotten Password
-                </MudButton>
-                <MudSpacer />
-                <MudButton Disabled="Processing"
-                           ButtonType="ButtonType.Submit"
-                           Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Size="Size.Large">
-                    @if (Processing)
-                    {
-                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                        <MudText Class="ms-2">Logging in ...</MudText>
-                    }
-                    else
-                    {
-                        <MudText>Log In</MudText>
-                    }
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
+                        <MudTextField Label="Password"
+                                      HelperText="Enter your password"
+                                      Class="mt-3"
+                                      @bind-Value="FormModel.Password"
+                                      For="() => FormModel.Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="@PasswordInputType"
+                                      Adornment="Adornment.End"
+                                      AdornmentIcon="@PasswordVisibilityIcon"
+                                      OnAdornmentClick="TogglePasswordVisibility" />
+                    </MudCardContent>
+                    <MudCardActions Class="pa-4">
+                        <MudButton Href="/recover"
+                                   Variant="Variant.Text"
+                                   Color="Color.Default"
+                                   Size="Size.Small">
+                            Forgotten Password
+                        </MudButton>
+                        <MudSpacer />
+                        <MudButton Disabled="Processing"
+                                   ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Large">
+                            @if (Processing)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                <MudText Class="ms-2">Logging in ...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Log In</MudText>
+                            }
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </EditForm>
 
-    </EditForm>
-
-    <MudText Typo="Typo.body2" Align="Align.Center" Class="portal-page-link-text">
-        Do not have an account yet?
-        <MudLink Href="/register" Typo="Typo.body2">Register here</MudLink>
-    </MudText>
-
-</MudContainer>
+            <MudText Typo="Typo.body2" Class="portal-page-link-text">
+                Do not have an account yet?
+                <MudLink Href="/register" Typo="Typo.body2">Register here</MudLink>
+            </MudText>
+        </div>
+    </section>
+</div>
 
 @code {
 
