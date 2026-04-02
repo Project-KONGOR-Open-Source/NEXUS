@@ -126,11 +126,11 @@ public class ASPIRE
         // Add Local STMP Server In Development
         if (builder.Environment.IsDevelopment())
         {
-            IResourceBuilder<ContainerResource> smtpServer = builder.AddContainer("mailpit", "axllent/mailpit")
+            IResourceBuilder<ContainerResource> smtpServer = builder.AddContainer("smtp-server", "axllent/mailpit")
                 .WithImageTag("latest") // Latest MailPit Image: https://github.com/axllent/mailpit/releases/latest
                 .WithLifetime(ContainerLifetime.Persistent)
-                .WithEndpoint(port: 1025, targetPort: 1025, name: "smtp", scheme: "tcp") // SMTP Port
-                .WithHttpEndpoint(port: 8025, targetPort: 8025, name: "http"); // Web UI Port
+                .WithEndpoint(port: 1025, targetPort: 1025, name: "smtp", scheme: "tcp") // Default SMTP Port
+                .WithHttpEndpoint(port: 8025, targetPort: 8025, name: "http"); // Default Web UI Port
 
             webPortalAPI.WaitFor(smtpServer);
         }
