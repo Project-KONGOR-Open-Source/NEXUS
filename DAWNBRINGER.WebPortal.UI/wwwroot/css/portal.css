@@ -4,9 +4,15 @@
     font-display: swap;
 }
 
+@font-face {
+    font-family: "Metamorphous";
+    src: url("../fonts/metamorphous.ttf") format("truetype");
+    font-display: swap;
+}
+
 :root {
     color-scheme: dark light;
-    font-family: Inter, "Segoe UI", sans-serif;
+    font-family: "Metamorphous", "Palatino Linotype", "Book Antiqua", Palatino, serif;
 }
 
 html {
@@ -16,7 +22,7 @@ html {
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: Inter, "Segoe UI", sans-serif;
+    font-family: "Metamorphous", "Palatino Linotype", "Book Antiqua", Palatino, serif;
 }
 
 .portal-app-body {
@@ -253,6 +259,7 @@ body {
     font-size: 1.34rem;
     font-weight: 700;
     letter-spacing: 0.08rem;
+    font-family: "Metamorphous", "Palatino Linotype", "Book Antiqua", Palatino, serif;
 }
 
 .portal-primary-navigation {
@@ -501,7 +508,7 @@ body {
 .portal-management-title {
     margin: 0;
     line-height: 0.96;
-    font-family: Inter, "Segoe UI", sans-serif;
+    font-family: "Metamorphous", "Palatino Linotype", "Book Antiqua", Palatino, serif;
     font-weight: 800;
     letter-spacing: 0.01rem;
 }
