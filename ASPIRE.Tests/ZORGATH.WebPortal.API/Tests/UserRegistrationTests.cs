@@ -213,7 +213,7 @@ public sealed class UserRegistrationTests
 
         await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
 
-        // Second Registration Attempt With Consumed Token Should Return Conflict Because Email Already Exists
+        // Second Registration Attempt With Consumed Token Should Return Conflict
         IActionResult secondResponse = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(tokenValue, $"{accountName}2", password, password));
 

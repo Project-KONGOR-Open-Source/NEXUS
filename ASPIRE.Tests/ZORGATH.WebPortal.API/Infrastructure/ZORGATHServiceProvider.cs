@@ -13,7 +13,13 @@ public static class ZORGATHServiceProvider
         string databaseName = identifier ?? Guid.CreateVersion7().ToString();
 
         // Replace Database Context And Distributed Cache With In-Memory Implementations
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder =>
+        {
+            // Set The Infrastructure Gateway Environment Variable Required By The Forwarded Headers Configuration
+            builder.UseSetting("INFRASTRUCTURE_GATEWAY", "localhost");
+            Environment.SetEnvironmentVariable("INFRASTRUCTURE_GATEWAY", "localhost");
+
+            builder.ConfigureServices(services =>
         {
             // TODO: Use SQL Server TestContainer
 
@@ -51,7 +57,8 @@ public static class ZORGATHServiceProvider
 
             // Register Stub Email Service For Test Environments
             services.AddSingleton<IEmailService, StubEmailService>();
-        }));
+            });
+        });
 
         // Ensure That OnModelCreating From MerrickContext Has Been Called
         webApplicationFactory.Services.GetRequiredService<MerrickContext>().Database.EnsureCreated();
