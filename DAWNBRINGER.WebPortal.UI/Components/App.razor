@@ -36,7 +36,7 @@
     <body>
 
         <!-- Blazor Application Root -->
-        <Routes @rendermode="InteractiveServer" />
+        <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
 
         <!-- Blazor Server Script -->
         <script src="_framework/blazor.web.js"></script>

@@ -21,15 +21,22 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
     {
+        // Validate Account Name In All Environments
+        ValidationResult accountNameValidationResult = await new AccountNameValidator(HostEnvironment.IsDevelopment()).ValidateAsync(payload.Name);
+
+        if (accountNameValidationResult.IsValid is false)
+            return BadRequest(accountNameValidationResult.Errors.Select(error => error.ErrorMessage));
+
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
 
+        // Validate Password Strength In Non-Development Environments
         if (HostEnvironment.IsDevelopment() is false)
         {
-            ValidationResult result = await new PasswordValidator().ValidateAsync(payload.Password);
+            ValidationResult passwordValidationResult = await new PasswordValidator().ValidateAsync(payload.Password);
 
-            if (result.IsValid is false)
-                return BadRequest(result.Errors.Select(error => error.ErrorMessage));
+            if (passwordValidationResult.IsValid is false)
+                return BadRequest(passwordValidationResult.Errors.Select(error => error.ErrorMessage));
         }
 
         Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Value.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));

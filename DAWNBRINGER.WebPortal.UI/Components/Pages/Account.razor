@@ -51,11 +51,11 @@
             <MudExpansionPanels Elevation="2" Class="mb-6">
                 <MudExpansionPanel Text="Update Email Address" Icon="@Icons.Material.Filled.Email">
 
-                    <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
+                    <MudText Typo="Typo.body2" Class="mb-4">
                         Enter a new email address below. A verification link will be sent to your new email address.
                     </MudText>
 
-                    <EditForm Model="EmailUpdateFormModel" OnValidSubmit="HandleEmailUpdateSubmit" FormName="update-email">
+                    <EditForm Model="EmailUpdateFormModel" OnValidSubmit="HandleEmailUpdateSubmit">
                         <DataAnnotationsValidator />
 
                         <MudTextField Label="New Email Address"
@@ -77,6 +77,16 @@
                                       InputType="InputType.Email"
                                       Adornment="Adornment.Start"
                                       AdornmentIcon="@Icons.Material.Filled.Email" />
+
+                        <MudTextField Label="Current Password"
+                                      HelperText="Enter your current password to confirm the change"
+                                      Class="mt-3"
+                                      @bind-Value="EmailUpdateFormModel.Password"
+                                      For="() => EmailUpdateFormModel.Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Password"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
 
                         <div class="d-flex justify-end mt-4">
                             <MudButton Disabled="EmailUpdateProcessing"
@@ -100,6 +110,67 @@
                 </MudExpansionPanel>
             </MudExpansionPanels>
 
+            <!-- Update Password Section -->
+            <MudExpansionPanels Elevation="2" Class="mb-6">
+                <MudExpansionPanel Text="Update Password" Icon="@Icons.Material.Filled.Lock">
+
+                    <MudText Typo="Typo.body2" Class="mb-4">
+                        Choose a new password below. A confirmation link will be sent to your email address to activate the change.
+                    </MudText>
+
+                    <EditForm Model="PasswordUpdateFormModel" OnValidSubmit="HandlePasswordUpdateSubmit">
+                        <DataAnnotationsValidator />
+
+                        <MudTextField Label="Current Password"
+                                      HelperText="Enter your current password"
+                                      Class="mt-3"
+                                      @bind-Value="PasswordUpdateFormModel.CurrentPassword"
+                                      For="() => PasswordUpdateFormModel.CurrentPassword"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Password"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
+
+                        <MudTextField Label="New Password"
+                                      HelperText="Choose a strong password at least 8 characters long"
+                                      Class="mt-3"
+                                      @bind-Value="PasswordUpdateFormModel.Password"
+                                      For="() => PasswordUpdateFormModel.Password"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Password"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.VpnKey" />
+
+                        <MudTextField Label="Confirm New Password"
+                                      HelperText="Type your new password again for confirmation"
+                                      Class="mt-3"
+                                      @bind-Value="PasswordUpdateFormModel.ConfirmPassword"
+                                      For="() => PasswordUpdateFormModel.ConfirmPassword"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Password" />
+
+                        <div class="d-flex justify-end mt-4">
+                            <MudButton Disabled="PasswordUpdateProcessing"
+                                       ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary">
+                                @if (PasswordUpdateProcessing)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Processing ...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Request Password Update</MudText>
+                                }
+                            </MudButton>
+                        </div>
+
+                    </EditForm>
+
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+
         </Authorized>
     </AuthorizeView>
 
@@ -110,9 +181,11 @@
     [CascadingParameter]
     private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
-    private RegisterEmailAddressFormModel EmailUpdateFormModel { get; set; } = new();
+    private RequestEmailAddressUpdateFormModel EmailUpdateFormModel { get; set; } = new();
+    private RequestAccountPasswordUpdateFormModel PasswordUpdateFormModel { get; set; } = new();
 
     private bool EmailUpdateProcessing { get; set; }
+    private bool PasswordUpdateProcessing { get; set; }
 
     private string GetClaimValue(string claimType)
     {
@@ -133,13 +206,13 @@
         {
             HttpClient client = AuthenticationService.CreateAuthenticatedClient();
 
-            RegisterEmailAddressRequest request = new(EmailUpdateFormModel.EmailAddress, EmailUpdateFormModel.ConfirmEmailAddress);
+            RequestEmailAddressUpdateRequest request = new(EmailUpdateFormModel.EmailAddress, EmailUpdateFormModel.Password);
 
-            HttpResponseMessage response = await client.PostAsJsonAsync("/EmailAddress/Register", request);
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Email/Update/Request", request);
 
             if (response.StatusCode is HttpStatusCode.OK)
             {
-                EmailUpdateFormModel = new RegisterEmailAddressFormModel();
+                EmailUpdateFormModel = new RequestEmailAddressUpdateFormModel();
                 Snackbar.Add("Email address update successfully requested", Severity.Success);
                 Snackbar.Add("Check your email inbox to continue", Severity.Info);
             }
@@ -156,6 +229,40 @@
         finally
         {
             EmailUpdateProcessing = false;
+        }
+    }
+
+    private async Task HandlePasswordUpdateSubmit()
+    {
+        PasswordUpdateProcessing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            RequestAccountPasswordUpdateRequest request = new(PasswordUpdateFormModel.CurrentPassword, PasswordUpdateFormModel.Password, PasswordUpdateFormModel.ConfirmPassword);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Password/Update/Request", request);
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                PasswordUpdateFormModel = new RequestAccountPasswordUpdateFormModel();
+                Snackbar.Add("Password update successfully requested", Severity.Success);
+                Snackbar.Add("Check your email inbox to continue", Severity.Info);
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            PasswordUpdateProcessing = false;
         }
     }
 }

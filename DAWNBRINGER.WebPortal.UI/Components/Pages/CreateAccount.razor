@@ -10,13 +10,13 @@
 
     <MudText Typo="Typo.h4" Class="portal-form-page-title">Create Account</MudText>
 
-    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" FormName="create-account">
+    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
 
         <MudCard Elevation="2" Class="portal-form-card">
             <MudCardContent>
 
-                <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
+                <MudText Typo="Typo.body2" Class="mb-4">
                     Choose an account name and a strong password to complete your registration.
                 </MudText>
 
@@ -46,7 +46,10 @@
                               @bind-Value="FormModel.ConfirmPassword"
                               For="() => FormModel.ConfirmPassword"
                               Variant="Variant.Outlined"
-                              InputType="InputType.Password" />
+                              InputType="@ConfirmPasswordInputType"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@ConfirmPasswordVisibilityIcon"
+                              OnAdornmentClick="ToggleConfirmPasswordVisibility" />
 
             </MudCardContent>
             <MudCardActions Class="pa-4">
@@ -83,14 +86,22 @@
     private bool Processing { get; set; }
 
     private bool PasswordVisible { get; set; }
+    private bool ConfirmPasswordVisible { get; set; }
 
     private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
+    private InputType ConfirmPasswordInputType => ConfirmPasswordVisible ? InputType.Text : InputType.Password;
 
     private string PasswordVisibilityIcon => PasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+    private string ConfirmPasswordVisibilityIcon => ConfirmPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
 
     private void TogglePasswordVisibility()
     {
         PasswordVisible = !PasswordVisible;
+    }
+
+    private void ToggleConfirmPasswordVisibility()
+    {
+        ConfirmPasswordVisible = !ConfirmPasswordVisible;
     }
 
     private async Task HandleValidSubmit()

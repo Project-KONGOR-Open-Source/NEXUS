@@ -76,8 +76,8 @@ public class ZORGATH
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? [ "https://localhost:5553",      "https://localhost:5554",  "http://localhost:5555", "https://localhost:5556",        "https://localhost:5557"      ]
-            : [ "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net", "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
+            ? [ "https://localhost:5553",      "https://localhost:5554",  "http://localhost:5555", "https://localhost:5556",        "https://localhost:5557"    ]
+            : [ "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net", "https://portal.api.kongor.net", "https://portal.kongor.net" ];
 
         // Add CORS Policy To Allow Cross-Origin Requests
         builder.Services.AddCors(options =>
@@ -96,44 +96,8 @@ public class ZORGATH
             options.AddPolicy(OutputCachePolicies.CacheForOneWeek, policy => policy.Cache().Expire(TimeSpan.FromDays(7)));
         });
 
-        // TODO: Implement Username And Password Validation Policies
-        //if (builder.Environment.IsDevelopment())
-        //{
-        //    builder.Services.Configure<IdentityOptions>(options =>
-        //    {
-        //        options.User.RequireUniqueEmail = false;
-        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
-
-        //        options.Password.RequiredLength = 0;
-        //        options.Password.RequiredUniqueChars = 0;
-        //        options.Password.RequireNonAlphanumeric = false;
-        //        options.Password.RequireLowercase = false;
-        //        options.Password.RequireUppercase = false;
-        //        options.Password.RequireDigit = false;
-
-        //        options.Lockout.MaxFailedAccessAttempts = 5;
-        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
-        //    });
-        //}
-
-        //else
-        //{
-        //    builder.Services.Configure<IdentityOptions>(options =>
-        //    {
-        //        options.User.RequireUniqueEmail = true;
-        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
-
-        //        options.Password.RequiredLength = 8;
-        //        options.Password.RequiredUniqueChars = 4;
-        //        options.Password.RequireNonAlphanumeric = true;
-        //        options.Password.RequireLowercase = true;
-        //        options.Password.RequireUppercase = true;
-        //        options.Password.RequireDigit = true;
-
-        //        options.Lockout.MaxFailedAccessAttempts = 3;
-        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-        //    });
-        //}
+        // Username And Password Validation Policies Are Enforced By FluentValidation Validators (AccountNameValidator And PasswordValidator) In The Controller Actions
+        // Account name validation runs in all environments; password strength validation is skipped in development for testing convenience
 
         // Add JWT Bearer Authentication Configuration
         builder.Services

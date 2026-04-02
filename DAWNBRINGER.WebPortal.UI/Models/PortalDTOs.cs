@@ -19,6 +19,7 @@ public class RegisterEmailAddressFormModel
 public class CreateAccountFormModel
 {
     [Required(ErrorMessage = "Account name is required")]
+    // The Server Allows Up To 16 Characters In Development; Use Swagger UI To Bypass This Limit
     [StringLength(12, ErrorMessage = "The account name must be between 4 and 12 characters long", MinimumLength = 4)]
     [RegularExpression(@"^[a-zA-Z0-9_\-`]+$", ErrorMessage = "The account name may only contain letters, numbers, underscores, hyphens, and backticks")]
     public string Name { get; set; } = string.Empty;
@@ -44,7 +45,7 @@ public class LogInFormModel
     public string Password { get; set; } = string.Empty;
 }
 
-// Password Recovery
+// Password Reset
 
 public class RequestPasswordResetFormModel
 {
@@ -58,15 +59,37 @@ public class RequestPasswordResetFormModel
     public string ConfirmEmailAddress { get; set; } = string.Empty;
 }
 
-public class ResetForgottenPasswordFormModel
+// Password Update
+
+public class RequestAccountPasswordUpdateFormModel
 {
-    [Required(ErrorMessage = "Password is required")]
+    [Required(ErrorMessage = "Current password is required")]
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "New password is required")]
     [StringLength(128, ErrorMessage = "The password must be at least 8 characters long", MinimumLength = 8)]
     public string Password { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password confirmation is required")]
     [Compare(nameof(Password), ErrorMessage = "The passwords do not match")]
     public string ConfirmPassword { get; set; } = string.Empty;
+}
+
+// Email Address Update
+
+public class RequestEmailAddressUpdateFormModel
+{
+    [Required(ErrorMessage = "Email address is required")]
+    [EmailAddress(ErrorMessage = "The email address is invalid")]
+    public string EmailAddress { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Email address confirmation is required")]
+    [EmailAddress(ErrorMessage = "The email address is invalid")]
+    [Compare(nameof(EmailAddress), ErrorMessage = "The email addresses do not match")]
+    public string ConfirmEmailAddress { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Password is required")]
+    public string Password { get; set; } = string.Empty;
 }
 
 // API Request DTOs (Matching ZORGATH.WebPortal.API Contracts)
@@ -76,6 +99,16 @@ public record RegisterEmailAddressRequest(string EmailAddress, string ConfirmEma
 public record RegisterUserAndMainAccountRequest(string Token, string Name, string Password, string ConfirmPassword);
 
 public record LogInUserRequest(string Name, string Password);
+
+public record RequestAccountPasswordResetRequest(string EmailAddress);
+
+public record ConfirmAccountPasswordResetRequest(string Token);
+
+public record RequestAccountPasswordUpdateRequest(string CurrentPassword, string Password, string ConfirmPassword);
+
+public record ConfirmAccountPasswordUpdateRequest(string Token);
+
+public record RequestEmailAddressUpdateRequest(string EmailAddress, string Password);
 
 // API Response DTOs
 

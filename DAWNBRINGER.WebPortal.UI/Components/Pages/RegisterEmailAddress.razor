@@ -9,13 +9,13 @@
 
     <MudText Typo="Typo.h4" Class="portal-form-page-title">Register Email Address</MudText>
 
-    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" FormName="register-email">
+    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
         <DataAnnotationsValidator />
 
         <MudCard Elevation="2" Class="portal-form-card">
             <MudCardContent>
 
-                <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
+                <MudText Typo="Typo.body2" Class="mb-4">
                     Enter your email address to begin the registration process. A verification link will be sent to your inbox.
                 </MudText>
 
@@ -86,7 +86,7 @@
 
             RegisterEmailAddressRequest request = new(FormModel.EmailAddress, FormModel.ConfirmEmailAddress);
 
-            HttpResponseMessage response = await client.PostAsJsonAsync("/EmailAddress/Register", request);
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Email/Register", request);
 
             if (response.StatusCode is HttpStatusCode.OK)
             {
