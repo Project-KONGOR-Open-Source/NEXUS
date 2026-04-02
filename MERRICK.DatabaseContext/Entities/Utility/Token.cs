@@ -22,5 +22,7 @@ public enum TokenPurpose
 {
     EmailAddressVerification,
     EmailAddressUpdate,
-    AccountPasswordRecovery
+    AccountPasswordRecovery,
+    AccountPasswordReset,
+    AccountPasswordUpdate
 }
