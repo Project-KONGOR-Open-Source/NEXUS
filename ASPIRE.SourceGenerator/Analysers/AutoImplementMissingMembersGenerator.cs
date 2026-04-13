@@ -133,7 +133,7 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine();
 
         // Suppress Pragma Warnings
-        sourceBuilder.AppendLine("# pragma warning disable SER001 // Suppress StackExchange.Redis Experimental API Warnings");
+        sourceBuilder.AppendLine("# pragma warning disable SER001, SER003 // Suppress StackExchange.Redis Experimental API Warnings");
         sourceBuilder.AppendLine();
 
         // Add Namespace
