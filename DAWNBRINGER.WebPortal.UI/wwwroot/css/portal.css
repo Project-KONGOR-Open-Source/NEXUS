@@ -322,16 +322,22 @@ body {
     position: absolute;
     top: calc(100% + 0.95rem);
     left: 50%;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(11rem, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 0.9rem;
-    min-width: 25rem;
+    min-width: 13rem;
     padding: 1rem;
     border: 1px solid var(--portal-border);
     border-radius: 1.25rem;
     background: linear-gradient(180deg, var(--portal-surface) 0%, var(--portal-surface-strong) 100%);
     box-shadow: var(--portal-shadow);
     transform: translateX(-50%);
+}
+
+.portal-nav-disclosure-panel--wide {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(11rem, 1fr));
+    min-width: 25rem;
 }
 
 .portal-nav-disclosure-group,
