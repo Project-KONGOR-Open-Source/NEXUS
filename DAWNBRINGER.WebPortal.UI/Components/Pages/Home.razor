@@ -64,27 +64,6 @@
         </div>
     </section>
 
-    <section class="portal-section" id="timeline">
-        <div class="portal-section-heading">
-            <div class="portal-section-kicker">Project Timeline</div>
-            <h2>The Road That Led Here</h2>
-            <p>The portal overhaul sits on top of the same community story. The visual language is new, but the project milestones remain intact.</p>
-        </div>
-
-        <div class="portal-timeline-list">
-            @foreach (PortalMilestone portalMilestone in PortalMilestones)
-            {
-                <article class="portal-timeline-entry">
-                    <div class="portal-timeline-date">@portalMilestone.DateLabel</div>
-                    <div class="portal-timeline-body">
-                        <h3>@portalMilestone.Title</h3>
-                        <p>@portalMilestone.Description</p>
-                    </div>
-                </article>
-            }
-        </div>
-    </section>
-
     <section class="portal-final-call">
         <div class="portal-section-kicker">Enter The Portal</div>
         <h2>Ready To Keep Going?</h2>
@@ -105,16 +84,3 @@
     </section>
 </div>
 
-@code {
-
-    private static readonly PortalMilestone[] PortalMilestones =
-    [
-        new PortalMilestone("16 September 2022", "GOPO retires from the development team", "After helping establish Project KONGOR as the canonical Heroes of Newerth successor, the original founder stepped back to focus on personal life."),
-        new PortalMilestone("5 August 2022", "Project KONGOR enters open beta testing", "The project publicly invited players to begin using the service and testing the community-driven experience."),
-        new PortalMilestone("20 June 2022", "Official HoN servers shut down", "The original service closed after more than thirteen years, making room for community revival efforts to carry the torch."),
-        new PortalMilestone("13 December 2021", "Project KONGOR development begins", "Packet capture work began and the first proof-of-concept experiences appeared as the community effort took shape."),
-        new PortalMilestone("13 December 2021", "Heroes of Newerth end-of-life announced", "Frostburn announced the shutdown plan that ultimately set the stage for KONGOR and related revival work.")
-    ];
-
-    private sealed record PortalMilestone(string DateLabel, string Title, string Description);
-}
