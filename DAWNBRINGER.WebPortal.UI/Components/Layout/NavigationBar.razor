@@ -15,6 +15,19 @@
             <a href="/">Home</a>
             <details class="portal-nav-disclosure">
                 <summary>
+                    Community
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Class="portal-nav-disclosure-icon" />
+                </summary>
+
+                <div class="portal-nav-disclosure-panel">
+                    <section class="portal-nav-disclosure-group">
+                        <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer">Discord</a>
+                        <a href="https://www.reddit.com/r/HeroesOfNewerth/" target="_blank" rel="noreferrer">Reddit</a>
+                    </section>
+                </div>
+            </details>
+            <details class="portal-nav-disclosure">
+                <summary>
                     Download
                     <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Class="portal-nav-disclosure-icon" />
                 </summary>
@@ -34,15 +47,14 @@
                 </div>
             </details>
             <a href="https://codex.kongor.net" target="_blank" rel="noreferrer">Knowledge Base</a>
-            <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer">Community</a>
         </nav>
 
         <div class="portal-header-actions">
             <AuthorizeView>
                 <NotAuthorized>
                     <div class="portal-header-action-group" aria-label="Account actions">
-                        <a href="/login" class="portal-header-pill portal-utility-link">Log In</a>
                         <a href="/register" class="portal-call-to-action portal-call-to-action-compact">Create Account</a>
+                        <a href="/login" class="portal-header-pill portal-utility-link">Log In</a>
                     </div>
                 </NotAuthorized>
 
@@ -71,6 +83,16 @@
         <div class="portal-mobile-panel">
             <a href="/" @onclick="CloseMobileMenu">Home</a>
             <details class="portal-mobile-disclosure">
+                <summary>Community</summary>
+
+                <div class="portal-mobile-disclosure-panel">
+                    <section class="portal-mobile-disclosure-group">
+                        <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer" @onclick="CloseMobileMenu">Discord</a>
+                        <a href="https://www.reddit.com/r/HeroesOfNewerth/" target="_blank" rel="noreferrer" @onclick="CloseMobileMenu">Reddit</a>
+                    </section>
+                </div>
+            </details>
+            <details class="portal-mobile-disclosure">
                 <summary>Download</summary>
 
                 <div class="portal-mobile-disclosure-panel">
@@ -88,12 +110,11 @@
                 </div>
             </details>
             <a href="https://codex.kongor.net" target="_blank" rel="noreferrer" @onclick="CloseMobileMenu">Knowledge Base</a>
-            <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer" @onclick="CloseMobileMenu">Community</a>
 
             <AuthorizeView>
                 <NotAuthorized>
-                    <a href="/login" @onclick="CloseMobileMenu">Log In</a>
                     <a href="/register" class="portal-call-to-action" @onclick="CloseMobileMenu">Create Account</a>
+                    <a href="/login" @onclick="CloseMobileMenu">Log In</a>
                 </NotAuthorized>
 
                 <Authorized>
