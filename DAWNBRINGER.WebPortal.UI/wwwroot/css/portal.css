@@ -517,6 +517,80 @@ body {
     transform: translateY(-2px);
 }
 
+.portal-theme-dark .portal-call-to-action {
+    background: linear-gradient(
+        160deg,
+        #fff3ae 0%,
+        #f1d36b 22%,
+        #b8861e 52%,
+        #e8c455 76%,
+        #fef0a0 100%
+    );
+    border: 1.5px solid rgba(255, 245, 165, 0.75);
+    color: #162a0f;
+    box-shadow:
+        0 0 18px rgba(255, 215, 60, 0.38),
+        0 12px 36px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 225, 0.65),
+        inset 0 -1px 0 rgba(120, 78, 4, 0.4);
+    text-shadow: 0 1px 0 rgba(255, 252, 190, 0.25);
+}
+
+.portal-theme-dark .portal-call-to-action:hover {
+    background: linear-gradient(
+        160deg,
+        #fff8c0 0%,
+        #f5dc78 22%,
+        #c8952a 52%,
+        #eed062 76%,
+        #fff5b2 100%
+    );
+    box-shadow:
+        0 0 26px rgba(255, 215, 60, 0.56),
+        0 16px 42px rgba(0, 0, 0, 0.46),
+        inset 0 1px 0 rgba(255, 255, 235, 0.75),
+        inset 0 -1px 0 rgba(120, 78, 4, 0.35);
+}
+
+.portal-theme-dark .mud-button-filled-primary {
+    background: linear-gradient(
+        160deg,
+        #fff3ae 0%,
+        #f1d36b 22%,
+        #b8861e 52%,
+        #e8c455 76%,
+        #fef0a0 100%
+    ) !important;
+    border: 1.5px solid rgba(255, 245, 165, 0.75) !important;
+    color: #162a0f !important;
+    box-shadow:
+        0 0 18px rgba(255, 215, 60, 0.38),
+        0 8px 24px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 225, 0.65),
+        inset 0 -1px 0 rgba(120, 78, 4, 0.4) !important;
+    text-shadow: 0 1px 0 rgba(255, 252, 190, 0.25) !important;
+}
+
+.portal-theme-dark .mud-button-filled-primary * {
+    color: #162a0f !important;
+}
+
+.portal-theme-dark .mud-button-filled-primary:hover {
+    background: linear-gradient(
+        160deg,
+        #fff8c0 0%,
+        #f5dc78 22%,
+        #c8952a 52%,
+        #eed062 76%,
+        #fff5b2 100%
+    ) !important;
+    box-shadow:
+        0 0 26px rgba(255, 215, 60, 0.56),
+        0 12px 30px rgba(0, 0, 0, 0.46),
+        inset 0 1px 0 rgba(255, 255, 235, 0.75),
+        inset 0 -1px 0 rgba(120, 78, 4, 0.35) !important;
+}
+
 .portal-call-to-action-compact {
     min-height: 2.8rem;
     padding-inline: 1.2rem;
