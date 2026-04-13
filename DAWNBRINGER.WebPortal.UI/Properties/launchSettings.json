@@ -14,7 +14,7 @@
         },
         "DAWNBRINGER.WebPortal.UI Production": {
             "commandName": "Project",
-            "launchBrowser": true,
+            "launchBrowser": false,
             "applicationUrl": "https://0.0.0.0:5557",
             "environmentVariables": {
                 "APPLICATION_URL": "https://portal.kongor.net",
