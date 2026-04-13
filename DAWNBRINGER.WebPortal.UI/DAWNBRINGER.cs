@@ -43,13 +43,23 @@ public class DAWNBRINGER
         // Build The Application
         WebApplication application = builder.Build();
 
-        // Configure The HTTP Request Pipeline
-        if (application.Environment.IsDevelopment().Equals(false))
+        // Configure Development-Specific Middleware
+        if (application.Environment.IsDevelopment())
         {
-            application.UseExceptionHandler("/error");
-            application.UseHsts();
+            // Show Detailed Error Pages In Development
+            application.UseDeveloperExceptionPage();
         }
 
+        else
+        {
+            // Use Global Exception Handler In Production
+            application.UseExceptionHandler("/error");
+        }
+
+        // Enforce HTTPS With Strict Transport Security
+        application.UseHsts();
+
+        // Automatically Redirect HTTP Requests To HTTPS
         application.UseHttpsRedirection();
         application.UseAntiforgery();
         application.MapStaticAssets();
@@ -58,10 +68,10 @@ public class DAWNBRINGER
         application.MapRazorComponents<Components.App>()
             .AddInteractiveServerRenderMode();
 
-        // Map Default Aspire Endpoints
+        // Map Aspire Default Health Check Endpoints
         application.MapDefaultEndpoints();
 
-        // Start The Application
+        // Run The Application
         application.Run();
     }
 }

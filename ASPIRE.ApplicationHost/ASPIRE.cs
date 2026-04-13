@@ -2,10 +2,10 @@ namespace ASPIRE.ApplicationHost;
 
 public class ASPIRE
 {
-    public static void Main(string[] args)
+    public static void Main(string[] arguments)
     {
         // Create Distributed Application Builder
-        IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
+        IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(arguments);
 
         // Get Configuration From Environment Variables And User Secrets
         IConfiguration configuration = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build();

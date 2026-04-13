@@ -2,10 +2,10 @@
 
 public class ZORGATH
 {
-    public static void Main(string[] args)
+    public static void Main(string[] arguments)
     {
         // Create The Application Builder
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(arguments);
 
         // Map User-Defined Configuration Section
         builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
