@@ -365,7 +365,7 @@ body {
 
 .portal-nav-disclosure-group a:hover,
 .portal-mobile-disclosure-panel a:hover {
-    background: var(--portal-accent-soft);
+    background: var(--portal-surface-ornament);
     color: var(--portal-text);
 }
 
@@ -413,7 +413,7 @@ body {
 .portal-mobile-toggle:hover,
 .portal-utility-button:hover {
     border-color: var(--portal-border-strong);
-    background: var(--portal-accent-soft);
+    background: var(--portal-surface-ornament);
     color: var(--portal-text);
     transform: translateY(-1px);
 }
@@ -518,6 +518,11 @@ body {
     transform: translateY(-2px);
 }
 
+.portal-secondary-action:hover {
+    background: var(--portal-surface-ornament);
+    border-color: var(--portal-border-strong);
+}
+
 .portal-theme-dark .portal-call-to-action {
     background: linear-gradient(
         135deg,
@@ -592,6 +597,7 @@ body {
 }
 
 .portal-theme-dark .mud-button-filled-primary:hover {
+    transform: translateY(-2px);
     filter: brightness(1.08);
     box-shadow:
         0 0 3px  rgba(255, 252, 185, 0.78),
@@ -1054,7 +1060,7 @@ body {
 
 .portal-password-visibility-button:hover {
     color: var(--portal-text);
-    background: var(--portal-accent-soft);
+    background: var(--portal-surface-ornament);
 }
 
 .portal-password-visibility-button:focus-visible {
@@ -1120,6 +1126,21 @@ body {
 .portal-management-card .mud-button-root,
 .portal-account-card-surface .mud-button-root {
     border-radius: 999px !important;
+    will-change: transform;
+    transition: transform 0.2s ease, filter 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.portal-auth-main .mud-button-root:hover,
+.portal-management-card .mud-button-root:hover,
+.portal-account-card-surface .mud-button-root:hover {
+    transform: translateY(-2px);
+}
+
+.portal-auth-main .mud-button-text:hover,
+.portal-management-card .mud-button-text:hover,
+.portal-account-card-surface .mud-button-text:hover {
+    background-color: var(--portal-surface-ornament) !important;
+    color: var(--portal-text) !important;
 }
 
 .portal-account-shell {
