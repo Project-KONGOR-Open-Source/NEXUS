@@ -497,7 +497,8 @@ body {
     border-radius: 999px;
     font-weight: 700;
     text-decoration: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    will-change: transform;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .portal-call-to-action {
@@ -526,27 +527,25 @@ body {
         #e8c455 76%,
         #fef0a0 100%
     );
-    border: 1.5px solid rgba(255, 245, 165, 0.75);
-    color: #162a0f;
+    border: 1.5px solid transparent;
+    color: #1e5218;
     box-shadow:
-        0 0 18px rgba(255, 215, 60, 0.38),
+        0 0 2px  rgba(255, 248, 175, 0.95),
+        0 0 8px  rgba(255, 228, 95,  0.70),
+        0 0 18px rgba(255, 205, 50,  0.46),
+        0 0 36px rgba(255, 182, 18,  0.24),
+        0 0 56px rgba(255, 158, 4,   0.11),
         0 12px 36px rgba(0, 0, 0, 0.42),
         inset 0 1px 0 rgba(255, 255, 225, 0.65),
         inset 0 -1px 0 rgba(120, 78, 4, 0.4);
-    text-shadow: 0 1px 0 rgba(255, 252, 190, 0.25);
-}
-
-.portal-theme-dark .portal-call-to-action:hover {
-    background: linear-gradient(
-        160deg,
-        #fff8c0 0%,
-        #f5dc78 22%,
-        #c8952a 52%,
-        #eed062 76%,
-        #fff5b2 100%
-    );
+    text-shadow: 0 0 5px rgba(255, 242, 170, 0.18), 0 0 12px rgba(50, 150, 35, 0.48);
+    filter: brightness(1.08);
     box-shadow:
-        0 0 26px rgba(255, 215, 60, 0.56),
+        0 0 3px  rgba(255, 252, 185, 0.98),
+        0 0 12px rgba(255, 232, 100, 0.82),
+        0 0 26px rgba(255, 210, 55,  0.58),
+        0 0 48px rgba(255, 186, 22,  0.32),
+        0 0 72px rgba(255, 158, 4,   0.14),
         0 16px 42px rgba(0, 0, 0, 0.46),
         inset 0 1px 0 rgba(255, 255, 235, 0.75),
         inset 0 -1px 0 rgba(120, 78, 4, 0.35);
@@ -561,31 +560,41 @@ body {
         #e8c455 76%,
         #fef0a0 100%
     ) !important;
-    border: 1.5px solid rgba(255, 245, 165, 0.75) !important;
-    color: #162a0f !important;
+    border: 1.5px solid transparent !important;
+    color: #1e5218 !important;
     box-shadow:
-        0 0 18px rgba(255, 215, 60, 0.38),
+        0 0 2px  rgba(255, 248, 175, 0.95),
+        0 0 8px  rgba(255, 228, 95,  0.70),
+        0 0 18px rgba(255, 205, 50,  0.46),
+        0 0 36px rgba(255, 182, 18,  0.24),
+        0 0 56px rgba(255, 158, 4,   0.11),
         0 8px 24px rgba(0, 0, 0, 0.42),
         inset 0 1px 0 rgba(255, 255, 225, 0.65),
         inset 0 -1px 0 rgba(120, 78, 4, 0.4) !important;
-    text-shadow: 0 1px 0 rgba(255, 252, 190, 0.25) !important;
+    text-shadow: 0 0 5px rgba(255, 242, 170, 0.18), 0 0 12px rgba(50, 150, 35, 0.48) !important;
 }
 
 .portal-theme-dark .mud-button-filled-primary * {
-    color: #162a0f !important;
+    color: #1e5218 !important;
+}
+
+.portal-theme-dark .mud-button-filled-primary::before {
+    display: none !important;
+}
+
+.portal-theme-dark .mud-button-filled-primary .mud-button-label {
+    transition: none !important;
+    will-change: auto !important;
 }
 
 .portal-theme-dark .mud-button-filled-primary:hover {
-    background: linear-gradient(
-        160deg,
-        #fff8c0 0%,
-        #f5dc78 22%,
-        #c8952a 52%,
-        #eed062 76%,
-        #fff5b2 100%
-    ) !important;
+    filter: brightness(1.08);
     box-shadow:
-        0 0 26px rgba(255, 215, 60, 0.56),
+        0 0 3px  rgba(255, 252, 185, 0.98),
+        0 0 12px rgba(255, 232, 100, 0.82),
+        0 0 26px rgba(255, 210, 55,  0.58),
+        0 0 48px rgba(255, 186, 22,  0.32),
+        0 0 72px rgba(255, 158, 4,   0.14),
         0 12px 30px rgba(0, 0, 0, 0.46),
         inset 0 1px 0 rgba(255, 255, 235, 0.75),
         inset 0 -1px 0 rgba(120, 78, 4, 0.35) !important;
