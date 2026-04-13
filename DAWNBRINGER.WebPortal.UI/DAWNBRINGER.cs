@@ -46,7 +46,7 @@ public class DAWNBRINGER
         // Configure The HTTP Request Pipeline
         if (application.Environment.IsDevelopment().Equals(false))
         {
-            application.UseExceptionHandler("/Error");
+            application.UseExceptionHandler("/error");
             application.UseHsts();
         }
 
