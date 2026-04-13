@@ -1,5 +1,7 @@
+@implements IAsyncDisposable
 @inject NavigationManager NavigationManager
 @inject PortalAuthenticationService AuthenticationService
+@inject IJSRuntime JavaScript
 
 <header class="portal-site-header">
     <div class="portal-site-header-inner">
@@ -149,7 +151,29 @@
         ])
     ];
 
+    private IJSObjectReference? NavigationModule { get; set; }
+
     private bool IsMobileMenuOpen { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender is false)
+        {
+            return;
+        }
+
+        NavigationModule = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/portalNavigation.js");
+        await NavigationModule.InvokeVoidAsync("initialise");
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (NavigationModule is not null)
+        {
+            await NavigationModule.InvokeVoidAsync("dispose");
+            await NavigationModule.DisposeAsync();
+        }
+    }
 
     private Task HandleThemeSelection()
     {
