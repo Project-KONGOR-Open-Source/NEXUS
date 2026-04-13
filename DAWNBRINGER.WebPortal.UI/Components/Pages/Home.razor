@@ -64,53 +64,6 @@
         </div>
     </section>
 
-    <section class="portal-section portal-feature-banner" id="features">
-        <div class="portal-feature-banner-copy">
-            <div class="portal-section-kicker">Portal Focus</div>
-            <h2>Sharper Navigation. Cleaner Identity. Better Access.</h2>
-            <p>
-                The new shell keeps the familiar portal functionality, trims away irrelevant menu items, and makes the important actions obvious whether a visitor is browsing casually, downloading builds, or managing an account.
-            </p>
-            <div class="portal-hero-actions">
-                <a href="https://codex.kongor.net" target="_blank" rel="noreferrer" class="portal-secondary-action">Open Knowledge Base</a>
-                <a href="https://example.com/kongor/launcher/client" target="_blank" rel="noreferrer" class="portal-secondary-action">Placeholder Client Download</a>
-            </div>
-        </div>
-
-        <div class="portal-feature-grid">
-            @foreach (PortalFeature portalFeature in PortalFeatures)
-            {
-                <article class="portal-feature-card">
-                    <MudIcon Icon="@portalFeature.Icon" Class="portal-feature-icon" />
-                    <h3>@portalFeature.Title</h3>
-                    <p>@portalFeature.Description</p>
-                </article>
-            }
-        </div>
-    </section>
-
-    <section class="portal-section" id="heroes">
-        <div class="portal-section-heading">
-            <div class="portal-section-kicker">Choose Your Path</div>
-            <h2>Everything Important Has A Place</h2>
-            <p>The presentation borrows the strong silhouettes and section rhythm of the Dota reference while mapping each panel to practical portal tasks such as account access, downloads, and documentation.</p>
-        </div>
-
-        <div class="portal-path-grid">
-            @foreach (PortalPath portalPath in PortalPaths)
-            {
-                <article class="portal-path-card">
-                    <div class="portal-path-icon-shell">
-                        <MudIcon Icon="@portalPath.Icon" />
-                    </div>
-                    <h3>@portalPath.Title</h3>
-                    <p>@portalPath.Description</p>
-                    <a href="@portalPath.Link" class="portal-inline-link" target="@portalPath.Target">@portalPath.LinkLabel</a>
-                </article>
-            }
-        </div>
-    </section>
-
     <section class="portal-section" id="timeline">
         <div class="portal-section-heading">
             <div class="portal-section-kicker">Project Timeline</div>
@@ -154,22 +107,6 @@
 
 @code {
 
-    private static readonly PortalFeature[] PortalFeatures =
-    [
-        new PortalFeature(Icons.Material.Filled.PersonAddAlt1, "Sharper onboarding", "Visitors can move from the cinematic hero straight into registration or sign-in without hunting through sparse navigation."),
-        new PortalFeature(Icons.Material.Filled.VerifiedUser, "Security-first actions", "Email and password changes still route through verified flows, but the surrounding presentation is clearer and more modern."),
-        new PortalFeature(Icons.Material.Filled.Download, "Download-aware navigation", "Launcher and distribution targets now sit behind a dedicated menu structure instead of being buried inside generic landing content."),
-        new PortalFeature(Icons.Material.Filled.LibraryBooks, "Documentation in reach", "The knowledge base now sits directly in the primary navigation so public guidance is always one click away.")
-    ];
-
-    private static readonly PortalPath[] PortalPaths =
-    [
-        new PortalPath(Icons.Material.Filled.AccountCircle, "Create or recover", "The portal is tuned for the first few minutes: registration, e-mail confirmation, sign-in, and password recovery.", "/register", "Start here", null),
-        new PortalPath(Icons.Material.Filled.LockReset, "Protect your account", "Authenticated users can request e-mail and password changes through dedicated account-management flows.", "/account", "Open account", null),
-        new PortalPath(Icons.Material.Filled.Download, "Choose a build", "Placeholder download targets are already grouped by launcher and full distribution so the portal structure is ready for real artefacts.", "https://example.com/kongor/distribution/windows", "View downloads", "_blank"),
-        new PortalPath(Icons.Material.Filled.MenuBook, "Read the codex", "Reference material now has a dedicated public destination for documentation, onboarding, and future support content.", "https://codex.kongor.net", "Open Knowledge Base", "_blank")
-    ];
-
     private static readonly PortalMilestone[] PortalMilestones =
     [
         new PortalMilestone("16 September 2022", "GOPO retires from the development team", "After helping establish Project KONGOR as the canonical Heroes of Newerth successor, the original founder stepped back to focus on personal life."),
@@ -178,10 +115,6 @@
         new PortalMilestone("13 December 2021", "Project KONGOR development begins", "Packet capture work began and the first proof-of-concept experiences appeared as the community effort took shape."),
         new PortalMilestone("13 December 2021", "Heroes of Newerth end-of-life announced", "Frostburn announced the shutdown plan that ultimately set the stage for KONGOR and related revival work.")
     ];
-
-    private sealed record PortalFeature(string Icon, string Title, string Description);
-
-    private sealed record PortalPath(string Icon, string Title, string Description, string Link, string LinkLabel, string? Target);
 
     private sealed record PortalMilestone(string DateLabel, string Title, string Description);
 }
