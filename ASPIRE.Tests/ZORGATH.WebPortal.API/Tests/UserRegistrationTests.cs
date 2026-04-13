@@ -48,7 +48,7 @@ public sealed class UserRegistrationTests
         using (Assert.Multiple())
         {
             await Assert.That(userDTO.EmailAddress).IsEqualTo(emailAddress);
-            await Assert.That(userDTO.Accounts).HasCount().EqualTo(1);
+            await Assert.That(userDTO.Accounts).Count().IsEqualTo(1);
             await Assert.That(userDTO.Accounts.First().Name).IsEqualTo(accountName);
         }
 
@@ -60,7 +60,7 @@ public sealed class UserRegistrationTests
 
         using (Assert.Multiple())
         {
-            await Assert.That(user.Accounts).HasCount().EqualTo(1);
+            await Assert.That(user.Accounts).Count().IsEqualTo(1);
             await Assert.That(user.Accounts.First().Name).IsEqualTo(accountName);
             await Assert.That(user.Accounts.First().IsMain).IsTrue();
         }

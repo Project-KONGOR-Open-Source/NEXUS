@@ -156,7 +156,7 @@ public sealed class UserAuthenticationTests
         using (Assert.Multiple())
         {
             await Assert.That(user.EmailAddress).IsEqualTo(emailAddress);
-            await Assert.That(user.Accounts).HasCount().GreaterThanOrEqualTo(1);
+            await Assert.That(user.Accounts).Count().IsGreaterThanOrEqualTo(1);
             await Assert.That(user.Accounts.Any(account => account.Name.Equals(accountName))).IsTrue();
             await Assert.That(user.Role.Name).IsEqualTo(UserRoles.User);
         }
