@@ -90,20 +90,22 @@
     </MudDrawer>
 
     <MudMainContent Style="@ContentStyle">
-        <div class="pt-6">
-            <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
-                @Body
-            </CascadingValue>
-        </div>
+        <div class="d-flex flex-column" style="min-height: calc(100vh - 64px);">
+            <div class="pt-6 flex-grow-1">
+                <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
+                    @Body
+                </CascadingValue>
+            </div>
 
-        <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="px-4 pt-4 pb-8 mt-6" Style="@FooterStyle">
-            <MudText Typo="Typo.caption" Align="Align.Center">
-                Copyright 2024 Project KONGOR. Contact: support@example.com
-            </MudText>
-            <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
-                Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
-            </MudText>
-        </MudStack>
+            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="px-4 pt-4 pb-8 mt-6" Style="@FooterStyle">
+                <MudText Typo="Typo.caption" Align="Align.Center">
+                    Copyright 2024 Project KONGOR. Contact: support@example.com
+                </MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
+                    Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
+                </MudText>
+            </MudStack>
+        </div>
     </MudMainContent>
 </MudLayout>
 
