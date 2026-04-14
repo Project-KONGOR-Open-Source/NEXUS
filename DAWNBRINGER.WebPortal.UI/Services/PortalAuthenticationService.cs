@@ -1,7 +1,7 @@
 namespace DAWNBRINGER.WebPortal.UI.Services;
 
 /// <summary>
-///     Authentication state provider that manages JWT tokens using Blazor's protected browser storage.
+///     Authentication state provider that manages JWTs using Blazor's protected browser storage.
 ///     Extends <see cref="AuthenticationStateProvider"/> to integrate with Blazor's cascading authentication state.
 /// </summary>
 public class PortalAuthenticationService : AuthenticationStateProvider
@@ -14,18 +14,39 @@ public class PortalAuthenticationService : AuthenticationStateProvider
 
     private IHttpClientFactory HTTPClientFactory { get; }
     private ILogger<PortalAuthenticationService> Logger { get; }
+    private ProtectedLocalStorage LocalStorage { get; }
 
-    public PortalAuthenticationService(IHttpClientFactory httpClientFactory, ILogger<PortalAuthenticationService> logger)
+    public PortalAuthenticationService(IHttpClientFactory httpClientFactory, ILogger<PortalAuthenticationService> logger, ProtectedLocalStorage localStorage)
     {
         HTTPClientFactory = httpClientFactory;
         Logger = logger;
+        LocalStorage = localStorage;
     }
 
-    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
+        // Restore The Token From Browser Storage If The In-Memory Cache Is Empty (e.g. After A Page Refresh)
         if (string.IsNullOrWhiteSpace(CachedToken))
         {
-            return Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
+            try
+            {
+                ProtectedBrowserStorageResult<string> storedToken = await LocalStorage.GetAsync<string>(TokenStorageKey);
+
+                if (storedToken.Success && string.IsNullOrWhiteSpace(storedToken.Value).Equals(false))
+                {
+                    CachedToken = storedToken.Value;
+                }
+            }
+
+            catch (InvalidOperationException)
+            {
+                // JS Interop Is Not Available Yet; Return Unauthenticated For Now
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(CachedToken))
+        {
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
         IEnumerable<Claim> claims = ParseClaimsFromJWT(CachedToken);
@@ -40,34 +61,57 @@ public class PortalAuthenticationService : AuthenticationStateProvider
             if (expiration <= DateTimeOffset.UtcNow)
             {
                 CachedToken = null;
-                return Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
+
+                await ClearTokenFromStorageAsync();
+
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
         }
 
         ClaimsIdentity identity = new(claims, "JWT");
         ClaimsPrincipal principal = new(identity);
 
-        return Task.FromResult(new AuthenticationState(principal));
+        return new AuthenticationState(principal);
     }
 
     /// <summary>
-    ///     Stores the JWT token and notifies the authentication state has changed.
+    ///     Stores the JWT in both the in-memory cache and browser storage, then notifies that the authentication state has changed.
     /// </summary>
-    public Task SetToken(string token)
+    public async Task SetToken(string token)
     {
         CachedToken = token;
+
+        await LocalStorage.SetAsync(TokenStorageKey, token);
+
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        return Task.CompletedTask;
     }
 
     /// <summary>
-    ///     Clears the stored JWT token and notifies the authentication state has changed.
+    ///     Clears the JWT from both the in-memory cache and browser storage, then notifies that the authentication state has changed.
     /// </summary>
-    public Task ClearToken()
+    public async Task ClearToken()
     {
         CachedToken = null;
+
+        await ClearTokenFromStorageAsync();
+
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     Removes the JWT from browser storage.
+    /// </summary>
+    private async Task ClearTokenFromStorageAsync()
+    {
+        try
+        {
+            await LocalStorage.DeleteAsync(TokenStorageKey);
+        }
+
+        catch (InvalidOperationException)
+        {
+            // JS Interop Is Not Available; Storage Will Be Cleared On The Next Successful Access
+        }
     }
 
     /// <summary>
@@ -102,8 +146,8 @@ public class PortalAuthenticationService : AuthenticationStateProvider
             return [];
         }
 
-        JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
+        JwtSecurityToken jwt = handler.ReadJwtToken(token);
 
-        return jwtToken.Claims;
+        return jwt.Claims;
     }
 }

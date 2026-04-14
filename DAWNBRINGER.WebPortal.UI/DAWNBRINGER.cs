@@ -33,6 +33,13 @@ public class DAWNBRINGER
             client.BaseAddress = new Uri("https+http://web-portal-api");
         });
 
+        // Add Authentication And Authorization Services
+        builder.Services.AddAuthentication();
+        builder.Services.AddAuthorization();
+
+        // Replace The Default Authorization Middleware Result Handler With A Custom One That Supports Blazor's Navigation Manager
+        builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, BlazorAuthorisationMiddlewareResultHandler>();
+
         // Register Authentication State Provider And Authentication Service
         builder.Services.AddScoped<PortalAuthenticationService>();
         builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<PortalAuthenticationService>());
