@@ -1,0 +1,15 @@
+@font-face {
+    font-family: "Scurlock";
+    src: url("../fonts/scurlock.ttf") format("truetype");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Righteous";
+    src: url("../fonts/righteous.ttf") format("truetype");
+    font-display: swap;
+}
+
+.font-scurlock {
+    font-family: "Scurlock", sans-serif;
+}

@@ -5,244 +5,237 @@
 @inject PortalAuthenticationService AuthenticationService
 @inject ISnackbar Snackbar
 
-<PageTitle>Account</PageTitle>
+<PageTitle>Account - Project KONGOR</PageTitle>
 
-<div class="portal-account-page">
-    <AuthorizeView Context="userContext">
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
+    <AuthorizeView Context="authContext">
         <Authorized>
             @if (LoadingAccountOverview)
             {
-                <section class="portal-account-shell">
-                    <div class="portal-account-hero portal-account-hero-loading">
-                        <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
-                        <p class="portal-account-summary">Loading your account overview.</p>
-                    </div>
-                </section>
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Class="py-16">
+                    <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+                    <MudText Typo="Typo.body1" Color="Color.Secondary">Loading account overview...</MudText>
+                </MudStack>
             }
             else if (AccountOverview is null)
             {
-                <section class="portal-account-shell">
-                    <div class="portal-account-hero portal-account-hero-loading">
-                        <h1 class="portal-account-title">Account Unavailable</h1>
-                        <p class="portal-account-summary">The account overview could not be loaded right now. Please refresh and try again.</p>
-                    </div>
-                </section>
+                <MudAlert Severity="Severity.Error" Variant="Variant.Filled">
+                    Unable to load account overview. Please refresh the page and try again.
+                </MudAlert>
             }
             else
             {
-                <section class="portal-account-shell">
-                    <div class="portal-account-hero">
-                        <div class="portal-account-hero-top">
-                            <div>
-                                <div class="portal-account-kicker">Current Account</div>
-                                <h1 class="portal-account-title">@AccountOverview.CurrentAccountName</h1>
-                            </div>
-                        </div>
+                @* Account Header *@
+                <MudPaper Elevation="2" Class="pa-6 mb-6">
+                    <MudStack Spacing="2">
+                        <MudText Typo="Typo.overline" Color="Color.Secondary">Current Account</MudText>
+                        <MudText Typo="Typo.h4" Class="font-scurlock">@DisplayName</MudText>
 
-                        <div class="portal-account-stat-grid">
-                            <article class="portal-account-stat-card">
-                                <span class="portal-account-stat-label">E-mail Address</span>
-                                <strong class="portal-account-stat-value">@AccountOverview.EmailAddress</strong>
-                            </article>
+                        <MudGrid Spacing="3" Class="mt-4">
+                            <MudItem xs="6" sm="3">
+                                <MudStack Spacing="0">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Email Address</MudText>
+                                    <MudText Typo="Typo.body1">@AccountOverview.EmailAddress</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="6" sm="3">
+                                <MudStack Spacing="0">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">User Role</MudText>
+                                    <MudText Typo="Typo.body1">@AccountOverview.Role</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="6" sm="3">
+                                <MudStack Spacing="0">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Member Since</MudText>
+                                    <MudText Typo="Typo.body1">@FormatTimestamp(AccountOverview.TimestampCreated)</MudText>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem xs="6" sm="3">
+                                <MudStack Spacing="0">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Account Level</MudText>
+                                    <MudText Typo="Typo.body1">@AccountOverview.CurrentAccountLevel</MudText>
+                                </MudStack>
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                </MudPaper>
 
-                            <article class="portal-account-stat-card">
-                                <span class="portal-account-stat-label">User Role</span>
-                                <strong class="portal-account-stat-value">@AccountOverview.Role</strong>
-                            </article>
+                @* Sibling Accounts Table *@
+                <MudPaper Elevation="2" Class="pa-6 mb-6">
+                    <MudStack Spacing="2" Class="mb-4">
+                        <MudText Typo="Typo.h6">Sibling Accounts</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            All accounts linked to this user, including clan membership.
+                        </MudText>
+                    </MudStack>
 
-                            <article class="portal-account-stat-card">
-                                <span class="portal-account-stat-label">Member Since</span>
-                                <strong class="portal-account-stat-value">@FormatTimestamp(AccountOverview.TimestampCreated)</strong>
-                            </article>
+                    <MudTable Items="@AccountOverview.Accounts" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh>Account Name</MudTh>
+                            <MudTh>Main Account</MudTh>
+                            <MudTh>Clan</MudTh>
+                            <MudTh>Clan Tag</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Account Name">@context.Name</MudTd>
+                            <MudTd DataLabel="Main Account">
+                                @if (context.IsMain)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Filled">Yes</MudChip>
+                                }
+                                else
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">No</MudChip>
+                                }
+                            </MudTd>
+                            <MudTd DataLabel="Clan">@GetDisplayValue(context.ClanName)</MudTd>
+                            <MudTd DataLabel="Clan Tag">@GetDisplayValue(context.ClanTag)</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
 
-                            <article class="portal-account-stat-card">
-                                <span class="portal-account-stat-label">Account Level</span>
-                                <strong class="portal-account-stat-value">@AccountOverview.CurrentAccountLevel</strong>
-                            </article>
-                        </div>
-                    </div>
+                @* Update Forms Row *@
+                <MudGrid Spacing="4">
+                    @* Update Email Form *@
+                    <MudItem xs="12" md="6">
+                        <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                            <MudCardContent>
+                                <MudStack Spacing="2" Class="mb-4">
+                                    <MudText Typo="Typo.h6">Update Email Address</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        A verification link will be sent to your new email address.
+                                    </MudText>
+                                </MudStack>
 
-                    <section class="portal-management-card portal-account-overview-card">
-                        <div>
-                            <h2 class="portal-management-title">Sibling Accounts</h2>
-                            <p class="portal-management-copy">All accounts linked to this user, including whether each account is the main account and which clan it belongs to.</p>
-                        </div>
+                                <EditForm Model="EmailUpdateFormModel" OnValidSubmit="HandleEmailUpdateSubmit">
+                                    <DataAnnotationsValidator />
 
-                        <div class="portal-account-table-wrapper">
-                            <table class="portal-account-table">
-                                <thead>
-                                    <tr>
-                                        <th>Account Name</th>
-                                        <th>Main Account</th>
-                                        <th>Clan</th>
-                                        <th>Clan Tag</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (UserAccountResponse account in AccountOverview.Accounts)
-                                    {
-                                        <tr>
-                                            <td>@account.Name</td>
-                                            <td>
-                                                <span class="portal-account-table-badge @(account.IsMain ? "portal-account-table-badge-main" : "portal-account-table-badge-secondary")">
-                                                    @GetMainAccountLabel(account.IsMain)
-                                                </span>
-                                            </td>
-                                            <td>@GetDisplayValue(account.ClanName)</td>
-                                            <td>@GetDisplayValue(account.ClanTag)</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-
-                    <div class="portal-account-management-grid">
-                        <section class="portal-management-card">
-                        <div>
-                            <h2 class="portal-management-title">Update E-mail Address</h2>
-                            <p class="portal-management-copy">Enter a new e-mail address below. A verification link will be sent to your new e-mail address.</p>
-                        </div>
-
-                        <EditForm Model="EmailUpdateFormModel" OnValidSubmit="HandleEmailUpdateSubmit">
-                            <DataAnnotationsValidator />
-
-                            <MudCard Elevation="0" Class="portal-form-card portal-account-card-surface">
-                                <MudCardContent>
-                                    <MudTextField Label="New E-mail Address"
-                                                  HelperText="Enter your new e-mail address"
-                                                  Class="mt-3"
-                                                  @bind-Value="EmailUpdateFormModel.EmailAddress"
-                                                  For="() => EmailUpdateFormModel.EmailAddress"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Email"
-                                                  Adornment="Adornment.Start"
-                                                  AdornmentIcon="@Icons.Material.Filled.Email" />
-
-                                    <MudTextField Label="Confirm New E-mail Address"
-                                                  HelperText="Type your new e-mail address again for confirmation"
-                                                  Class="mt-3"
-                                                  @bind-Value="EmailUpdateFormModel.ConfirmEmailAddress"
-                                                  For="() => EmailUpdateFormModel.ConfirmEmailAddress"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Email"
-                                                  Adornment="Adornment.Start"
-                                                  AdornmentIcon="@Icons.Material.Filled.Email" />
-
-                                    <div class="portal-input-with-visibility mt-3">
-                                        <MudTextField Label="Current Password"
-                                                      HelperText="Enter your current password to confirm the change"
-                                                      @bind-Value="EmailUpdateFormModel.Password"
-                                                      For="() => EmailUpdateFormModel.Password"
+                                    <MudStack Spacing="3">
+                                        <MudTextField @bind-Value="EmailUpdateFormModel.EmailAddress"
+                                                      For="@(() => EmailUpdateFormModel.EmailAddress)"
+                                                      Label="New Email Address"
+                                                      HelperText="A valid email address you have access to."
                                                       Variant="Variant.Outlined"
-                                                      InputType="@GetPasswordInputType(EmailUpdatePasswordVisible)"
+                                                      InputType="InputType.Email"
                                                       Adornment="Adornment.Start"
-                                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
-                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleEmailUpdatePasswordVisibility" aria-label="Toggle current password visibility">
-                                            <MudIcon Icon="@GetPasswordVisibilityIcon(EmailUpdatePasswordVisible)" />
-                                        </button>
-                                    </div>
-                                </MudCardContent>
-                                <MudCardActions Class="pa-4">
-                                    <MudSpacer />
-                                    <MudButton Disabled="EmailUpdateProcessing"
-                                               ButtonType="ButtonType.Submit"
-                                               Variant="Variant.Filled"
-                                               Color="Color.Primary">
-                                        @if (EmailUpdateProcessing)
-                                        {
-                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                                            <MudText Class="ms-2">Processing ...</MudText>
-                                        }
-                                        else
-                                        {
-                                            <MudText>Request E-mail Update</MudText>
-                                        }
-                                    </MudButton>
-                                </MudCardActions>
-                            </MudCard>
-                        </EditForm>
-                        </section>
+                                                      AdornmentIcon="@Icons.Material.Filled.Email" />
 
-                        <section class="portal-management-card">
-                        <div>
-                            <h2 class="portal-management-title">Update Password</h2>
-                            <p class="portal-management-copy">Choose a new password below. A confirmation link will be sent to your e-mail address to activate the change.</p>
-                        </div>
-
-                        <EditForm Model="PasswordUpdateFormModel" OnValidSubmit="HandlePasswordUpdateSubmit">
-                            <DataAnnotationsValidator />
-
-                            <MudCard Elevation="0" Class="portal-form-card portal-account-card-surface">
-                                <MudCardContent>
-                                    <div class="portal-input-with-visibility mt-3">
-                                        <MudTextField Label="Current Password"
-                                                      HelperText="Enter your current password"
-                                                      @bind-Value="PasswordUpdateFormModel.CurrentPassword"
-                                                      For="() => PasswordUpdateFormModel.CurrentPassword"
+                                        <MudTextField @bind-Value="EmailUpdateFormModel.ConfirmEmailAddress"
+                                                      For="@(() => EmailUpdateFormModel.ConfirmEmailAddress)"
+                                                      Label="Confirm New Email Address"
+                                                      HelperText="Enter the same email address again for confirmation."
                                                       Variant="Variant.Outlined"
-                                                      InputType="@GetPasswordInputType(CurrentPasswordVisible)"
+                                                      InputType="InputType.Email"
                                                       Adornment="Adornment.Start"
-                                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
-                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleCurrentPasswordVisibility" aria-label="Toggle current password visibility">
-                                            <MudIcon Icon="@GetPasswordVisibilityIcon(CurrentPasswordVisible)" />
-                                        </button>
-                                    </div>
+                                                      AdornmentIcon="@Icons.Material.Filled.Email" />
 
-                                    <div class="portal-input-with-visibility mt-3">
-                                        <MudTextField Label="New Password"
-                                                      HelperText="Choose a strong password at least 8 characters long"
-                                                      @bind-Value="PasswordUpdateFormModel.Password"
-                                                      For="() => PasswordUpdateFormModel.Password"
+                                        <MudTextField @bind-Value="EmailUpdateFormModel.Password"
+                                                      For="@(() => EmailUpdateFormModel.Password)"
+                                                      Label="Current Password"
+                                                      HelperText="Your current password to confirm the change."
                                                       Variant="Variant.Outlined"
-                                                      InputType="@GetPasswordInputType(NewPasswordVisible)"
-                                                      Adornment="Adornment.Start"
-                                                      AdornmentIcon="@Icons.Material.Filled.VpnKey" />
-                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleNewPasswordVisibility" aria-label="Toggle new password visibility">
-                                            <MudIcon Icon="@GetPasswordVisibilityIcon(NewPasswordVisible)" />
-                                        </button>
-                                    </div>
+                                                      InputType="@EmailPasswordInputType"
+                                                      Adornment="Adornment.End"
+                                                      AdornmentIcon="@EmailPasswordVisibilityIcon"
+                                                      OnAdornmentClick="ToggleEmailPasswordVisibility"
+                                                      AdornmentAriaLabel="Toggle password visibility" />
 
-                                    <div class="portal-input-with-visibility mt-3">
-                                        <MudTextField Label="Confirm New Password"
-                                                      HelperText="Type your new password again for confirmation"
-                                                      @bind-Value="PasswordUpdateFormModel.ConfirmPassword"
-                                                      For="() => PasswordUpdateFormModel.ConfirmPassword"
+                                        <MudStack Row="true" Justify="Justify.FlexEnd">
+                                            <MudButton ButtonType="ButtonType.Submit"
+                                                       Variant="Variant.Filled"
+                                                       Color="Color.Primary"
+                                                       Disabled="EmailUpdateProcessing">
+                                                @if (EmailUpdateProcessing)
+                                                {
+                                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                                    <MudText>Requesting...</MudText>
+                                                }
+                                                else
+                                                {
+                                                    <MudText>Request Email Update</MudText>
+                                                }
+                                            </MudButton>
+                                        </MudStack>
+                                    </MudStack>
+                                </EditForm>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+
+                    @* Update Password Form *@
+                    <MudItem xs="12" md="6">
+                        <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                            <MudCardContent>
+                                <MudStack Spacing="2" Class="mb-4">
+                                    <MudText Typo="Typo.h6">Update Password</MudText>
+                                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                        A confirmation link will be sent to your email address.
+                                    </MudText>
+                                </MudStack>
+
+                                <EditForm Model="PasswordUpdateFormModel" OnValidSubmit="HandlePasswordUpdateSubmit">
+                                    <DataAnnotationsValidator />
+
+                                    <MudStack Spacing="3">
+                                        <MudTextField @bind-Value="PasswordUpdateFormModel.CurrentPassword"
+                                                      For="@(() => PasswordUpdateFormModel.CurrentPassword)"
+                                                      Label="Current Password"
+                                                      HelperText="Your current password."
                                                       Variant="Variant.Outlined"
-                                                      InputType="@GetPasswordInputType(ConfirmPasswordVisible)"
-                                                      Adornment="Adornment.Start"
-                                                      AdornmentIcon="@Icons.Material.Filled.VpnKey" />
-                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleConfirmPasswordVisibility" aria-label="Toggle confirm new password visibility">
-                                            <MudIcon Icon="@GetPasswordVisibilityIcon(ConfirmPasswordVisible)" />
-                                        </button>
-                                    </div>
-                                </MudCardContent>
-                                <MudCardActions Class="pa-4">
-                                    <MudSpacer />
-                                    <MudButton Disabled="PasswordUpdateProcessing"
-                                               ButtonType="ButtonType.Submit"
-                                               Variant="Variant.Filled"
-                                               Color="Color.Primary">
-                                        @if (PasswordUpdateProcessing)
-                                        {
-                                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                                            <MudText Class="ms-2">Processing ...</MudText>
-                                        }
-                                        else
-                                        {
-                                            <MudText>Request Password Update</MudText>
-                                        }
-                                    </MudButton>
-                                </MudCardActions>
-                            </MudCard>
-                        </EditForm>
-                        </section>
-                    </div>
-                </section>
+                                                      InputType="@CurrentPasswordInputType"
+                                                      Adornment="Adornment.End"
+                                                      AdornmentIcon="@CurrentPasswordVisibilityIcon"
+                                                      OnAdornmentClick="ToggleCurrentPasswordVisibility"
+                                                      AdornmentAriaLabel="Toggle password visibility" />
+
+                                        <MudTextField @bind-Value="PasswordUpdateFormModel.Password"
+                                                      For="@(() => PasswordUpdateFormModel.Password)"
+                                                      Label="New Password"
+                                                      HelperText="At least 8 characters long."
+                                                      Variant="Variant.Outlined"
+                                                      InputType="@NewPasswordInputType"
+                                                      Adornment="Adornment.End"
+                                                      AdornmentIcon="@NewPasswordVisibilityIcon"
+                                                      OnAdornmentClick="ToggleNewPasswordVisibility"
+                                                      AdornmentAriaLabel="Toggle password visibility" />
+
+                                        <MudTextField @bind-Value="PasswordUpdateFormModel.ConfirmPassword"
+                                                      For="@(() => PasswordUpdateFormModel.ConfirmPassword)"
+                                                      Label="Confirm New Password"
+                                                      HelperText="Enter the same password again for confirmation."
+                                                      Variant="Variant.Outlined"
+                                                      InputType="@ConfirmPasswordInputType"
+                                                      Adornment="Adornment.End"
+                                                      AdornmentIcon="@ConfirmPasswordVisibilityIcon"
+                                                      OnAdornmentClick="ToggleConfirmPasswordVisibility"
+                                                      AdornmentAriaLabel="Toggle password visibility" />
+
+                                        <MudStack Row="true" Justify="Justify.FlexEnd">
+                                            <MudButton ButtonType="ButtonType.Submit"
+                                                       Variant="Variant.Filled"
+                                                       Color="Color.Primary"
+                                                       Disabled="PasswordUpdateProcessing">
+                                                @if (PasswordUpdateProcessing)
+                                                {
+                                                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                                    <MudText>Requesting...</MudText>
+                                                }
+                                                else
+                                                {
+                                                    <MudText>Request Password Update</MudText>
+                                                }
+                                            </MudButton>
+                                        </MudStack>
+                                    </MudStack>
+                                </EditForm>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
             }
         </Authorized>
     </AuthorizeView>
-</div>
+</MudContainer>
 
 @code {
 
@@ -258,40 +251,29 @@
     private bool PasswordUpdateProcessing { get; set; }
     private bool LoadingAccountOverview { get; set; } = true;
 
-    private bool EmailUpdatePasswordVisible { get; set; }
+    private bool EmailPasswordVisible { get; set; }
     private bool CurrentPasswordVisible { get; set; }
     private bool NewPasswordVisible { get; set; }
     private bool ConfirmPasswordVisible { get; set; }
 
-    private static InputType GetPasswordInputType(bool passwordVisible)
-    {
-        return passwordVisible ? InputType.Text : InputType.Password;
-    }
+    private string DisplayName => string.IsNullOrWhiteSpace(AccountOverview?.CurrentClanTag)
+        ? AccountOverview?.CurrentAccountName ?? string.Empty
+        : $"[{AccountOverview.CurrentClanTag}]{AccountOverview.CurrentAccountName}";
 
-    private static string GetPasswordVisibilityIcon(bool passwordVisible)
-    {
-        return passwordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
-    }
+    private InputType EmailPasswordInputType => EmailPasswordVisible ? InputType.Text : InputType.Password;
+    private InputType CurrentPasswordInputType => CurrentPasswordVisible ? InputType.Text : InputType.Password;
+    private InputType NewPasswordInputType => NewPasswordVisible ? InputType.Text : InputType.Password;
+    private InputType ConfirmPasswordInputType => ConfirmPasswordVisible ? InputType.Text : InputType.Password;
 
-    private void ToggleEmailUpdatePasswordVisibility()
-    {
-        EmailUpdatePasswordVisible = !EmailUpdatePasswordVisible;
-    }
+    private string EmailPasswordVisibilityIcon => EmailPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+    private string CurrentPasswordVisibilityIcon => CurrentPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+    private string NewPasswordVisibilityIcon => NewPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+    private string ConfirmPasswordVisibilityIcon => ConfirmPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
 
-    private void ToggleCurrentPasswordVisibility()
-    {
-        CurrentPasswordVisible = !CurrentPasswordVisible;
-    }
-
-    private void ToggleNewPasswordVisibility()
-    {
-        NewPasswordVisible = !NewPasswordVisible;
-    }
-
-    private void ToggleConfirmPasswordVisibility()
-    {
-        ConfirmPasswordVisible = !ConfirmPasswordVisible;
-    }
+    private void ToggleEmailPasswordVisibility() => EmailPasswordVisible = !EmailPasswordVisible;
+    private void ToggleCurrentPasswordVisibility() => CurrentPasswordVisible = !CurrentPasswordVisible;
+    private void ToggleNewPasswordVisibility() => NewPasswordVisible = !NewPasswordVisible;
+    private void ToggleConfirmPasswordVisibility() => ConfirmPasswordVisible = !ConfirmPasswordVisible;
 
     protected override async Task OnInitializedAsync()
     {
@@ -305,7 +287,7 @@
 
         string? userIDClaimValue = authenticationState.User.Claims.SingleOrDefault(claim => claim.Type.Equals("user_id"))?.Value;
 
-        if (int.TryParse(userIDClaimValue, out int userID).Equals(false))
+        if (int.TryParse(userIDClaimValue, out int userID) is false)
         {
             LoadingAccountOverview = false;
             Snackbar.Add("Unable to determine the authenticated user.", Severity.Error);
@@ -355,11 +337,6 @@
         return string.IsNullOrWhiteSpace(value) ? "-" : value;
     }
 
-    private static string GetMainAccountLabel(bool isMain)
-    {
-        return isMain ? "Yes" : "No";
-    }
-
     private static string FormatTimestamp(DateTimeOffset timestamp)
     {
         return timestamp.ToString("dd MMM yyyy");
@@ -380,8 +357,8 @@
             if (response.StatusCode is HttpStatusCode.OK)
             {
                 EmailUpdateFormModel = new RequestEmailAddressUpdateFormModel();
-                Snackbar.Add("Email address update successfully requested", Severity.Success);
-                Snackbar.Add("Check your email inbox to continue", Severity.Info);
+                Snackbar.Add("Email update requested successfully.", Severity.Success);
+                Snackbar.Add("Check your inbox for the verification link.", Severity.Info);
             }
             else
             {
@@ -414,8 +391,8 @@
             if (response.StatusCode is HttpStatusCode.OK)
             {
                 PasswordUpdateFormModel = new RequestAccountPasswordUpdateFormModel();
-                Snackbar.Add("Password update successfully requested", Severity.Success);
-                Snackbar.Add("Check your email inbox to continue", Severity.Info);
+                Snackbar.Add("Password update requested successfully.", Severity.Success);
+                Snackbar.Add("Check your inbox for the confirmation link.", Severity.Info);
             }
             else
             {

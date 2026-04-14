@@ -3,94 +3,66 @@
 @inject PortalAuthenticationService AuthenticationService
 @inject ISnackbar Snackbar
 
-<PageTitle>Register Email Address</PageTitle>
+<PageTitle>Register - Project KONGOR</PageTitle>
 
-<div class="portal-auth-page">
-    <section class="portal-auth-shell">
-        <div class="portal-auth-aside">
-            <div class="portal-auth-crest-row">
-                <div class="portal-auth-crest-shell">
-                    <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-auth-crest" />
-                </div>
-                <div>
-                    <div class="portal-auth-kicker">Project KONGOR Access</div>
-                    <div class="portal-brand-title">Portal Registration</div>
-                </div>
-            </div>
-
-            <h1 class="portal-auth-display">Register For Project KONGOR</h1>
-            <p class="portal-auth-summary">
-                Enter your e-mail address to begin the registration process. A verification link will be sent to your inbox to continue.
-            </p>
-
-            <ul class="portal-auth-points">
-                <li>Provide a valid e-mail address you have access to.</li>
-                <li>Open the verification link sent to your inbox.</li>
-                <li>Complete your account setup from the verification page.</li>
-            </ul>
-        </div>
-
-        <div class="portal-auth-main">
-            <div class="portal-auth-panel-heading">
-                <div class="portal-section-kicker">Registration</div>
-                <h2 class="portal-form-page-title">Register E-mail Address</h2>
-                <p class="portal-auth-panel-copy">Enter your e-mail address to begin the registration process. A verification link will be sent to your inbox.</p>
-            </div>
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
+    <MudCard Elevation="2" Class="pa-6">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Large" Color="Color.Primary" />
+                <MudText Typo="Typo.h5">Register Email Address</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                    Enter your email address to begin registration. A verification link will be sent to your inbox.
+                </MudText>
+            </MudStack>
 
             <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
 
-                <MudCard Elevation="0" Class="portal-form-card">
-                    <MudCardContent>
-                        <MudTextField Label="Email Address"
-                                      HelperText="Must be a real email address from a major email provider"
-                                      Class="mt-3"
-                                      @bind-Value="FormModel.EmailAddress"
-                                      For="() => FormModel.EmailAddress"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Email"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Email" />
+                <MudStack Spacing="3">
+                    <MudTextField @bind-Value="FormModel.EmailAddress"
+                                  For="@(() => FormModel.EmailAddress)"
+                                  Label="Email Address"
+                                  HelperText="A valid email address you have access to."
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Email"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Email" />
 
-                        <MudTextField Label="Confirm Email Address"
-                                      HelperText="Type your email address again for confirmation"
-                                      Class="mt-3"
-                                      @bind-Value="FormModel.ConfirmEmailAddress"
-                                      For="() => FormModel.ConfirmEmailAddress"
-                                      Variant="Variant.Outlined"
-                                      InputType="InputType.Email"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Email"
-                                      Immediate="false" />
-                    </MudCardContent>
-                    <MudCardActions Class="pa-4">
-                        <MudSpacer />
-                        <MudButton Disabled="Processing"
-                                   ButtonType="ButtonType.Submit"
+                    <MudTextField @bind-Value="FormModel.ConfirmEmailAddress"
+                                  For="@(() => FormModel.ConfirmEmailAddress)"
+                                  Label="Confirm Email Address"
+                                  HelperText="Enter the same email address again for confirmation."
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Email"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Email" />
+
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-2">
+                        <MudButton ButtonType="ButtonType.Submit"
                                    Variant="Variant.Filled"
                                    Color="Color.Primary"
-                                   Size="Size.Large">
+                                   Disabled="Processing">
                             @if (Processing)
                             {
-                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                                <MudText Class="ms-2">Processing ...</MudText>
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Registering...</MudText>
                             }
                             else
                             {
-                                <MudText>Register E-mail Address</MudText>
+                                <MudText>Register Email Address</MudText>
                             }
                         </MudButton>
-                    </MudCardActions>
-                </MudCard>
+                    </MudStack>
+                </MudStack>
             </EditForm>
+        </MudCardContent>
+    </MudCard>
 
-            <MudText Typo="Typo.body2" Class="portal-page-link-text">
-                Already have an account?
-                <MudLink Href="/login" Typo="Typo.body2">Log in here</MudLink>
-            </MudText>
-        </div>
-    </section>
-</div>
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+        Already have an account? <MudLink Href="/login">Log in here</MudLink>
+    </MudText>
+</MudContainer>
 
 @code {
 
@@ -113,8 +85,8 @@
             if (response.StatusCode is HttpStatusCode.OK)
             {
                 FormModel = new RegisterEmailAddressFormModel();
-                Snackbar.Add("Email successfully registered", Severity.Success);
-                Snackbar.Add("Check your email inbox to continue", Severity.Info);
+                Snackbar.Add("Email address registered successfully.", Severity.Success);
+                Snackbar.Add("Check your inbox for the verification link.", Severity.Info);
             }
             else
             {

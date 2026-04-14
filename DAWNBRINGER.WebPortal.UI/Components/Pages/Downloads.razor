@@ -1,0 +1,99 @@
+@page "/downloads"
+
+<PageTitle>Downloads - Project KONGOR</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
+
+    @* Page Header *@
+    <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-8">
+        <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h4" Align="Align.Center">Downloads</MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary" Style="max-width: 600px;">
+            Everything you need to play Heroes Of Newerth or host your own match servers.
+            Choose the tools and distributions for your platform.
+        </MudText>
+    </MudStack>
+
+    @* Launcher Section *@
+    <MudCard Elevation="2" Class="pa-6 mb-6">
+        <MudCardContent>
+            <MudStack Spacing="2">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.RocketLaunch" Size="Size.Medium" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5">Launcher</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body1">
+                    Lightweight tools for launching the game client or match server. The launcher handles updates,
+                    configuration, and starting the application. Requires the corresponding distribution to be installed.
+                </MudText>
+            </MudStack>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton Href="https://example.com/download/launcher/game-client" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SportsEsports">
+                Game Client Launcher
+            </MudButton>
+            <MudButton Href="https://example.com/download/launcher/match-server" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Dns">
+                Match Server Launcher
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+
+    @* Distributions Row *@
+    <MudGrid Spacing="4">
+        @* Game Client Distribution *@
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                <MudCardContent>
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudIcon Icon="@Icons.Material.Filled.SportsEsports" Size="Size.Medium" Color="Color.Primary" />
+                            <MudText Typo="Typo.h5">Game Client Distribution</MudText>
+                        </MudStack>
+                        <MudText Typo="Typo.body1">
+                            The complete game client files required to play Heroes Of Newerth.
+                            Download the distribution for your operating system.
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions Class="flex-wrap gap-2">
+                    <MudButton Href="https://example.com/download/distribution/game-client/windows" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.MicrosoftWindows" Size="Size.Small">
+                        Windows
+                    </MudButton>
+                    <MudButton Href="https://example.com/download/distribution/game-client/linux" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Linux" Size="Size.Small">
+                        Linux
+                    </MudButton>
+                    <MudButton Href="https://example.com/download/distribution/game-client/macos" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Apple" Size="Size.Small">
+                        macOS
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        @* Match Server Distribution *@
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                <MudCardContent>
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudIcon Icon="@Icons.Material.Filled.Dns" Size="Size.Medium" Color="Color.Primary" />
+                            <MudText Typo="Typo.h5">Match Server Distribution</MudText>
+                        </MudStack>
+                        <MudText Typo="Typo.body1">
+                            The complete match server files required to host game servers.
+                            Download the distribution for your operating system.
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions Class="flex-wrap gap-2">
+                    <MudButton Href="https://example.com/download/distribution/match-server/windows" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.MicrosoftWindows" Size="Size.Small">
+                        Windows
+                    </MudButton>
+                    <MudButton Href="https://example.com/download/distribution/match-server/linux" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Linux" Size="Size.Small">
+                        Linux
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+</MudContainer>

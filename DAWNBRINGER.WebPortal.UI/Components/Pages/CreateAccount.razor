@@ -4,99 +4,74 @@
 @inject NavigationManager NavigationManager
 @inject ISnackbar Snackbar
 
-<PageTitle>Create Account</PageTitle>
+<PageTitle>Create Account - Project KONGOR</PageTitle>
 
-<div class="portal-auth-page">
-    <section class="portal-auth-shell">
-        <div class="portal-auth-aside">
-            <div class="portal-auth-crest-row">
-                <div class="portal-auth-crest-shell">
-                    <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-auth-crest" />
-                </div>
-                <div>
-                    <div class="portal-auth-kicker">Project KONGOR Access</div>
-                    <div class="portal-brand-title">Account Creation</div>
-                </div>
-            </div>
-
-            <h1 class="portal-auth-display">Create Your Account</h1>
-            <p class="portal-auth-summary">
-                Choose an account name and a strong password to complete your registration and gain full access to Project KONGOR.
-            </p>
-
-            <ul class="portal-auth-points">
-                <li>Choose a unique account name.</li>
-                <li>Set a strong, memorable password.</li>
-                <li>Sign in immediately after creation.</li>
-            </ul>
-        </div>
-
-        <div class="portal-auth-main">
-            <div class="portal-auth-panel-heading">
-                <div class="portal-section-kicker">Registration</div>
-                <h2 class="portal-form-page-title">Create Account</h2>
-                <p class="portal-auth-panel-copy">Choose an account name and a strong password to complete your registration.</p>
-            </div>
+<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
+    <MudCard Elevation="2" Class="pa-6">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Large" Color="Color.Primary" />
+                <MudText Typo="Typo.h5">Create Account</MudText>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                    Choose an account name and password to complete your registration.
+                </MudText>
+            </MudStack>
 
             <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
                 <DataAnnotationsValidator />
 
-                <MudCard Elevation="0" Class="portal-form-card">
-                    <MudCardContent>
-                        <MudTextField Label="Account Name"
-                                      HelperText="Between 4 and 12 characters (letters, numbers, underscores, hyphens)"
-                                      Class="mt-3"
-                                      @bind-Value="FormModel.Name"
-                                      For="() => FormModel.Name"
-                                      Variant="Variant.Outlined"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.Person" />
+                <MudStack Spacing="3">
+                    <MudTextField @bind-Value="FormModel.Name"
+                                  For="@(() => FormModel.Name)"
+                                  Label="Account Name"
+                                  HelperText="Between 4 and 12 characters. Letters, numbers, underscores, and hyphens only."
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Person" />
 
-                        <MudTextField Label="Password"
-                                      HelperText="Choose a strong password at least 8 characters long"
-                                      Class="mt-3"
-                                      @bind-Value="FormModel.Password"
-                                      For="() => FormModel.Password"
-                                      Variant="Variant.Outlined"
-                                      InputType="@PasswordInputType"
-                                      Adornment="Adornment.End"
-                                      AdornmentIcon="@PasswordVisibilityIcon"
-                                      OnAdornmentClick="TogglePasswordVisibility" />
+                    <MudTextField @bind-Value="FormModel.Password"
+                                  For="@(() => FormModel.Password)"
+                                  Label="Password"
+                                  HelperText="At least 8 characters long."
+                                  Variant="Variant.Outlined"
+                                  InputType="@PasswordInputType"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@PasswordVisibilityIcon"
+                                  OnAdornmentClick="TogglePasswordVisibility"
+                                  AdornmentAriaLabel="Toggle password visibility" />
 
-                        <MudTextField Label="Confirm Password"
-                                      HelperText="Type your chosen password again for confirmation"
-                                      Class="mt-3"
-                                      @bind-Value="FormModel.ConfirmPassword"
-                                      For="() => FormModel.ConfirmPassword"
-                                      Variant="Variant.Outlined"
-                                      InputType="@ConfirmPasswordInputType"
-                                      Adornment="Adornment.End"
-                                      AdornmentIcon="@ConfirmPasswordVisibilityIcon"
-                                      OnAdornmentClick="ToggleConfirmPasswordVisibility" />
-                    </MudCardContent>
-                    <MudCardActions Class="pa-4">
-                        <MudSpacer />
-                        <MudButton Disabled="Processing"
-                                   ButtonType="ButtonType.Submit"
+                    <MudTextField @bind-Value="FormModel.ConfirmPassword"
+                                  For="@(() => FormModel.ConfirmPassword)"
+                                  Label="Confirm Password"
+                                  HelperText="Enter the same password again for confirmation."
+                                  Variant="Variant.Outlined"
+                                  InputType="@ConfirmPasswordInputType"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@ConfirmPasswordVisibilityIcon"
+                                  OnAdornmentClick="ToggleConfirmPasswordVisibility"
+                                  AdornmentAriaLabel="Toggle password visibility" />
+
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-2">
+                        <MudButton ButtonType="ButtonType.Submit"
                                    Variant="Variant.Filled"
                                    Color="Color.Primary"
-                                   Size="Size.Large">
+                                   Disabled="Processing">
                             @if (Processing)
                             {
-                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
-                                <MudText Class="ms-2">Creating account ...</MudText>
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Creating account...</MudText>
                             }
                             else
                             {
                                 <MudText>Create Account</MudText>
                             }
                         </MudButton>
-                    </MudCardActions>
-                </MudCard>
+                    </MudStack>
+                </MudStack>
             </EditForm>
-        </div>
-    </section>
-</div>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
 
 @code {
 
@@ -108,12 +83,15 @@
     private bool Processing { get; set; }
 
     private bool PasswordVisible { get; set; }
+
     private bool ConfirmPasswordVisible { get; set; }
 
     private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
+
     private InputType ConfirmPasswordInputType => ConfirmPasswordVisible ? InputType.Text : InputType.Password;
 
     private string PasswordVisibilityIcon => PasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
     private string ConfirmPasswordVisibilityIcon => ConfirmPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
 
     private void TogglePasswordVisibility()
@@ -141,7 +119,7 @@
             if (response.StatusCode is HttpStatusCode.Created)
             {
                 FormModel = new CreateAccountFormModel();
-                Snackbar.Add("Account successfully created", Severity.Success);
+                Snackbar.Add("Account created successfully.", Severity.Success);
                 NavigationManager.NavigateTo("/login");
             }
             else

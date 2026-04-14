@@ -2,76 +2,242 @@
 
 <PageTitle>Project KONGOR</PageTitle>
 
-<HeadContent>
-    <meta name="description" content="Project KONGOR is a community-driven revival of Heroes of Newerth. Create an account, download the client, and join the community." />
-</HeadContent>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pa-0">
 
-<div class="portal-home-page">
-    <section class="portal-hero-section" id="top">
-        <div class="portal-hero-copy">
-            <div class="portal-section-kicker">Project KONGOR</div>
-            <h1 class="portal-hero-title">Welcome To Project KONGOR</h1>
-            <p class="portal-hero-summary">
-                The community-driven revival of Heroes of Newerth. Create an account, download the client, and return to the land of Newerth.
-            </p>
-
-            <div class="portal-hero-actions">
+    @* Hero Section *@
+    <MudPaper Class="pa-8 mb-6" Style="@HeroStyle" Elevation="0">
+        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4" Class="py-16">
+            <MudText Typo="Typo.h2" Align="Align.Center" Class="font-scurlock">Project KONGOR</MudText>
+            <MudText Typo="Typo.h5" Align="Align.Center">A community-driven revival of Heroes Of Newerth</MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Color="Color.Secondary">By the community, for the community.</MudText>
+            <MudStack Row="true" Spacing="2" Class="mt-4">
                 <AuthorizeView>
                     <NotAuthorized>
-                        <a href="/register" class="portal-call-to-action">Create Account</a>
-                        <a href="/login" class="portal-secondary-action">Log In</a>
+                        <MudButton Href="/register" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large">Register Account</MudButton>
+                        <MudButton Href="/downloads" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Large">Get Started</MudButton>
                     </NotAuthorized>
-
                     <Authorized>
-                        <a href="/account" class="portal-call-to-action">Open Account</a>
-                        <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer" class="portal-secondary-action">Join Community</a>
+                        <MudButton Href="/account" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large">Manage Account</MudButton>
+                        <MudButton Href="/downloads" Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Large">Downloads</MudButton>
                     </Authorized>
                 </AuthorizeView>
-            </div>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
 
-            <div class="portal-hero-caption">Kept alive by the community, for the community.</div>
-        </div>
+    @* Downloads & Community Row *@
+    <MudGrid Spacing="4" Class="mb-6">
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                <MudCardContent>
+                    <MudStack Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Large" Color="Color.Primary" />
+                        <MudText Typo="Typo.h5">Downloads</MudText>
+                        <MudText Typo="Typo.body1">
+                            Get the tools and distributions you need to start playing Heroes Of Newerth or host your own match servers.
+                            Choose from client launchers, server launchers, and full game distributions for Windows, Linux, and macOS.
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Href="/downloads" Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward">
+                        Browse Downloads
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
 
-        <div class="portal-hero-visual" aria-hidden="true">
-            <div class="portal-hero-emblem-card">
-                <img src="images/portal-crest.svg" alt="" class="portal-hero-emblem" />
-                <div class="portal-hero-emblem-copy">
-                    <div>Account management</div>
-                    <div>Secure by default</div>
-                    <div>Community powered</div>
-                </div>
-            </div>
+        <MudItem xs="12" md="6">
+            <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                <MudCardContent>
+                    <MudStack Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Large" Color="Color.Primary" />
+                        <MudText Typo="Typo.h5">Community</MudText>
+                        <MudText Typo="Typo.body1">
+                            Join fellow players and contributors in our community spaces. Get help, share strategies,
+                            find matches, and stay up to date with the latest Project KONGOR news and updates.
+                        </MudText>
+                    </MudStack>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Href="https://example.com/discord" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Discord">
+                        Discord
+                    </MudButton>
+                    <MudButton Href="https://example.com/reddit" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Reddit">
+                        Reddit
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
 
-            <div class="portal-hero-stat-grid">
-                <article class="portal-hero-stat-card">
-                    <span>01</span>
-                    <strong>Create your account</strong>
-                    <p>Register, sign in, and manage your credentials from a single portal.</p>
-                </article>
+    @* Source Code Section *@
+    <MudPaper Class="pa-6 mb-6" Elevation="0">
+        <MudStack AlignItems="AlignItems.Center" Spacing="4">
+            <MudIcon Icon="@Icons.Custom.Brands.GitHub" Size="Size.Large" Color="Color.Primary" />
+            <MudText Typo="Typo.h5" Align="Align.Center">Source Code</MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center" Style="max-width: 600px;">
+                Project KONGOR is open source. Explore our repositories, contribute code, report issues, or fork the projects to run your own services.
+            </MudText>
+        </MudStack>
 
-                <article class="portal-hero-stat-card">
-                    <span>02</span>
-                    <strong>Download the client</strong>
-                    <p>Get the launcher or full distribution for your platform and jump straight in.</p>
-                </article>
+        <MudGrid Spacing="3" Class="mt-4" Justify="Justify.Center">
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="1" Class="pa-3" Style="height: 100%;">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">NEXUS</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Open-Source Project KONGOR Re-Write</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Href="https://github.com/Project-KONGOR-Open-Source/NEXUS" Target="_blank" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" EndIcon="@Icons.Material.Filled.OpenInNew">
+                            View
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
 
-                <article class="portal-hero-stat-card">
-                    <span>03</span>
-                    <strong>Join the community</strong>
-                    <p>Connect with other players on Discord and Reddit to stay in the loop.</p>
-                </article>
-            </div>
-        </div>
-    </section>
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="1" Class="pa-3" Style="height: 100%;">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">WILLOWMAKER</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Heroes Of Newerth Client Launcher</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Href="https://github.com/Project-KONGOR-Open-Source/WILLOWMAKER" Target="_blank" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" EndIcon="@Icons.Material.Filled.OpenInNew">
+                            View
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
 
-    <section class="portal-final-call">
-        <div class="portal-section-kicker">Stay Connected</div>
-        <h2>Need More Information?</h2>
-        <p>Join the community to stay up to date with the latest news, get support, and connect with other players.</p>
-        <div class="portal-hero-actions portal-hero-actions-centred">
-            <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer" class="portal-call-to-action">Join Discord Server</a>
-            <a href="https://www.reddit.com/r/HeroesOfNewerth/" target="_blank" rel="noreferrer" class="portal-secondary-action">Join Reddit Community</a>
-        </div>
-    </section>
-</div>
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="1" Class="pa-3" Style="height: 100%;">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">COMPEL</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Heroes Of Newerth Match Server Launcher</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Href="https://github.com/Project-KONGOR-Open-Source/COMPEL" Target="_blank" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" EndIcon="@Icons.Material.Filled.OpenInNew">
+                            View
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
 
+            <MudItem xs="12" sm="6" md="3">
+                <MudCard Elevation="1" Class="pa-3" Style="height: 100%;">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">CODEX</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Project KONGOR Knowledge Base</MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Href="https://github.com/Project-KONGOR-Open-Source/CODEX" Target="_blank" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" EndIcon="@Icons.Material.Filled.OpenInNew">
+                            View
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @* Knowledge Base Section *@
+    <MudCard Elevation="2" Class="pa-6 mb-6">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" Color="Color.Primary" />
+                <MudText Typo="Typo.h5" Align="Align.Center">Knowledge Base</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Center" Style="max-width: 600px;">
+                    Find comprehensive documentation on all aspects of Project KONGOR. From self-hosting guides for technical users
+                    to in-depth game mechanics for hardcore players, the Knowledge Base has you covered.
+                </MudText>
+            </MudStack>
+        </MudCardContent>
+        <MudCardActions Class="justify-center">
+            <MudButton Href="https://codex.kongor.net" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.OpenInNew">
+                Visit Knowledge Base
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+
+    @* Timeline Section *@
+    <MudPaper Class="pa-6" Elevation="0">
+        <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+            <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large" Color="Color.Primary" />
+            <MudText Typo="Typo.h5" Align="Align.Center">Timeline</MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary">Key milestones in Project KONGOR's journey</MudText>
+        </MudStack>
+
+        <MudTimeline TimelinePosition="TimelinePosition.Alternate">
+            <MudTimelineItem Color="Color.Primary" Variant="Variant.Filled">
+                <ItemOpposite>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudCard Elevation="1" Class="pa-3">
+                        <MudText Typo="Typo.h6">TODO #1</MudText>
+                        <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
+                    </MudCard>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <MudTimelineItem Color="Color.Secondary" Variant="Variant.Filled">
+                <ItemOpposite>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudCard Elevation="1" Class="pa-3">
+                        <MudText Typo="Typo.h6">TODO #2</MudText>
+                        <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
+                    </MudCard>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <MudTimelineItem Color="Color.Primary" Variant="Variant.Filled">
+                <ItemOpposite>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudCard Elevation="1" Class="pa-3">
+                        <MudText Typo="Typo.h6">TODO #3</MudText>
+                        <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
+                    </MudCard>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <MudTimelineItem Color="Color.Secondary" Variant="Variant.Filled">
+                <ItemOpposite>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudCard Elevation="1" Class="pa-3">
+                        <MudText Typo="Typo.h6">TODO #4</MudText>
+                        <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
+                    </MudCard>
+                </ItemContent>
+            </MudTimelineItem>
+
+            <MudTimelineItem Color="Color.Primary" Variant="Variant.Filled">
+                <ItemOpposite>
+                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
+                </ItemOpposite>
+                <ItemContent>
+                    <MudCard Elevation="1" Class="pa-3">
+                        <MudText Typo="Typo.h6">TODO #5</MudText>
+                        <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
+                    </MudCard>
+                </ItemContent>
+            </MudTimelineItem>
+        </MudTimeline>
+    </MudPaper>
+
+</MudContainer>
+
+@code {
+
+    [CascadingParameter(Name = "IsDarkMode")]
+    private bool IsDarkMode { get; set; }
+
+    private string HeroStyle => IsDarkMode
+        ? "background: linear-gradient(rgba(13, 22, 16, 0.85), rgba(13, 22, 16, 0.95)), url('img/caldavar.jpg') center/cover no-repeat;"
+        : "background: linear-gradient(rgba(245, 242, 230, 0.85), rgba(245, 242, 230, 0.95)), url('img/caldavar.jpg') center/cover no-repeat;";
+}

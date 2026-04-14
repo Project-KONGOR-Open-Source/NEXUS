@@ -1,49 +1,107 @@
-@implements IAsyncDisposable
 @inherits LayoutComponentBase
 
-@inject IJSRuntime JavaScript
-
-<MudThemeProvider IsDarkMode="IsDarkMode" Theme="Theme" />
+<MudThemeProvider @ref="ThemeProvider" Theme="Theme" IsDarkMode="IsDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<div class="portal-shell @(IsDarkMode ? "portal-theme-dark" : "portal-theme-light")">
-    <div class="portal-background" aria-hidden="true">
-        <div class="portal-background-image"></div>
-        <div class="portal-background-orb portal-background-orb-left"></div>
-        <div class="portal-background-orb portal-background-orb-right"></div>
-        <div class="portal-background-grid"></div>
-    </div>
+<MudLayout>
+    <MudAppBar Elevation="1" Fixed="true">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" Class="d-flex d-md-none" />
 
-    <NavigationBar IsDarkMode="IsDarkMode" OnThemeToggle="HandleThemeToggle" />
+        <a href="/" class="d-flex align-center text-decoration-none mud-inherit-text">
+            <MudImage Src="images/logo.svg" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
+            <MudText Typo="Typo.h6" Class="font-scurlock">Project KONGOR</MudText>
+        </a>
 
-    <main class="portal-site-main" tabindex="-1">
+        <MudSpacer />
+
+        <MudStack Row="true" Spacing="1" Class="d-none d-md-flex align-center">
+            <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">Home</MudButton>
+
+            <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                <MudMenuItem Href="https://example.com/discord">Discord</MudMenuItem>
+                <MudMenuItem Href="https://example.com/reddit">Reddit</MudMenuItem>
+            </MudMenu>
+
+            <MudButton Href="/downloads" Color="Color.Inherit" Variant="Variant.Text">Downloads</MudButton>
+
+            <MudButton Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Source Code</MudButton>
+
+            <MudButton Href="https://codex.kongor.net" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Knowledge Base</MudButton>
+        </MudStack>
+
+        <MudSpacer />
+
+        <MudStack Row="true" Spacing="1" Class="align-center">
+            <AuthorizeView>
+                <NotAuthorized>
+                    <MudButton Href="/register" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Register Account</MudButton>
+                    <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text" Class="d-none d-md-flex">Log In</MudButton>
+                </NotAuthorized>
+                <Authorized>
+                    <MudButton Href="/account" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Manage Account</MudButton>
+                    <MudButton Color="Color.Inherit" Variant="Variant.Text" OnClick="HandleLogOut" Class="d-none d-md-flex">Log Out</MudButton>
+                </Authorized>
+            </AuthorizeView>
+
+            <MudDivider Vertical="true" FlexItem="true" Class="mx-2 my-4 d-none d-md-flex" />
+
+            <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" OnClick="ToggleTheme" />
+        </MudStack>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="DrawerOpen" Elevation="1" Variant="DrawerVariant.Temporary" Breakpoint="Breakpoint.Md">
+        <MudNavMenu>
+            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
+            <MudNavGroup Title="Community" Icon="@Icons.Material.Filled.People" Expanded="false">
+                <MudNavLink Href="https://example.com/discord">Discord</MudNavLink>
+                <MudNavLink Href="https://example.com/reddit">Reddit</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/downloads" Icon="@Icons.Material.Filled.Download">Downloads</MudNavLink>
+            <MudNavLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Icon="@Icons.Material.Filled.Code">Source Code</MudNavLink>
+            <MudNavLink Href="https://codex.kongor.net" Target="_blank" Icon="@Icons.Material.Filled.MenuBook">Knowledge Base</MudNavLink>
+
+            <MudDivider Class="my-2" />
+
+            <AuthorizeView>
+                <NotAuthorized>
+                    <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">Register Account</MudNavLink>
+                    <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">Log In</MudNavLink>
+                </NotAuthorized>
+                <Authorized>
+                    <MudNavLink Href="/account" Icon="@Icons.Material.Filled.ManageAccounts">Manage Account</MudNavLink>
+                    <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogOut">Log Out</MudNavLink>
+                </Authorized>
+            </AuthorizeView>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Class="pt-16">
         <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
             @Body
         </CascadingValue>
-    </main>
 
-    <footer class="portal-site-footer">
-        <div class="portal-site-footer-inner">
-            <div class="portal-site-footer-brand">
-                <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-site-footer-crest" />
-                <div>
-                    <div class="portal-site-footer-title portal-brand-wordmark">Project KONGOR</div>
-                    <div class="portal-site-footer-copy">A community-driven revival of Heroes of Newerth.</div>
-                </div>
-            </div>
-
-            <div class="portal-site-footer-links">
-                <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer">Discord</a>
-                <a href="https://www.reddit.com/r/HeroesOfNewerth/" target="_blank" rel="noreferrer">Reddit</a>
-                <a href="https://codex.kongor.net" target="_blank" rel="noreferrer">Knowledge Base</a>
-            </div>
-        </div>
-    </footer>
-</div>
+        <MudPaper Elevation="0" Class="pa-4 mt-8">
+            <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.body2" Align="Align.Center">
+                    Copyright 2024 Project KONGOR. Contact: support@example.com
+                </MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
+                    Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
+                </MudText>
+            </MudStack>
+        </MudPaper>
+    </MudMainContent>
+</MudLayout>
 
 @code {
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = null!;
+
+    [Inject]
+    private PortalAuthenticationService AuthenticationService { get; set; } = null!;
 
     private static readonly MudTheme Theme = new()
     {
@@ -52,34 +110,24 @@
             Primary = "#5f7d3b",
             Secondary = "#d8b847",
             Tertiary = "#2f4725",
-            AppbarBackground = "rgba(245, 242, 230, 0.88)",
+            AppbarBackground = "#f5f2e6",
             AppbarText = "#182112",
             Background = "#f5f2e6",
             Surface = "#fffcf1",
             TextPrimary = "#182112",
-            TextSecondary = "#5c664e",
-            DrawerBackground = "#fffcf1",
-            DrawerText = "#182112",
-            ActionDefault = "#5c664e",
-            ActionDisabled = "#9ca58b",
-            Divider = "rgba(216, 184, 71, 0.18)"
+            TextSecondary = "#5c664e"
         },
         PaletteDark = new PaletteDark
         {
             Primary = "#86aa56",
             Secondary = "#f1d36b",
             Tertiary = "#416034",
-            AppbarBackground = "rgba(13, 22, 16, 0.88)",
+            AppbarBackground = "#0d1610",
             AppbarText = "#eef0e6",
             Background = "#0d1610",
             Surface = "#162118",
             TextPrimary = "#eef0e6",
-            TextSecondary = "#bcc6b2",
-            DrawerBackground = "#162118",
-            DrawerText = "#eef0e6",
-            ActionDefault = "#bcc6b2",
-            ActionDisabled = "#65715f",
-            Divider = "rgba(241, 211, 107, 0.2)"
+            TextSecondary = "#bcc6b2"
         },
         Typography = new Typography
         {
@@ -87,62 +135,39 @@
             {
                 FontFamily = ["Righteous", "sans-serif"]
             }
-        },
-        LayoutProperties = new LayoutProperties
-        {
-            DefaultBorderRadius = "18px"
         }
     };
 
-    private IJSObjectReference? ThemeModule { get; set; }
+    private MudThemeProvider ThemeProvider { get; set; } = null!;
 
     private bool IsDarkMode { get; set; } = true;
 
+    private bool DrawerOpen { get; set; }
+
+    private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender is false)
+        if (firstRender)
         {
-            return;
-        }
-
-        ThemeModule = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/portalTheme.js");
-
-        ThemePreference themePreference = await ThemeModule.InvokeAsync<ThemePreference>("getThemePreference");
-        IsDarkMode = themePreference.Mode.Equals("dark", StringComparison.Ordinal);
-
-        StateHasChanged();
-    }
-
-    private async Task HandleThemeToggle()
-    {
-        IsDarkMode = IsDarkMode is false;
-
-        if (ThemeModule is not null)
-        {
-            await ThemeModule.InvokeVoidAsync("setThemePreference", IsDarkMode ? "dark" : "light");
+            IsDarkMode = await ThemeProvider.GetSystemDarkModeAsync();
+            StateHasChanged();
         }
     }
 
-    async ValueTask IAsyncDisposable.DisposeAsync()
+    private void ToggleTheme()
     {
-        if (ThemeModule is null)
-        {
-            return;
-        }
-
-        try
-        {
-            await ThemeModule.DisposeAsync();
-        }
-        catch (JSDisconnectedException)
-        {
-        }
+        IsDarkMode = !IsDarkMode;
     }
 
-    private sealed class ThemePreference
+    private void ToggleDrawer()
     {
-        public string Mode { get; set; } = "dark";
+        DrawerOpen = !DrawerOpen;
+    }
 
-        public string Source { get; set; } = "system";
+    private async Task HandleLogOut()
+    {
+        await AuthenticationService.ClearToken();
+        NavigationManager.NavigateTo("/", forceLoad: true);
     }
 }
