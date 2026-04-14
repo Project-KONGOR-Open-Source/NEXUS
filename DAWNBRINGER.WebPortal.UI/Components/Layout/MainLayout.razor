@@ -7,7 +7,7 @@
 
 <MudLayout>
     <MudAppBar Elevation="1" Fixed="true">
-        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="d-flex align-center px-4 px-sm-6 py-0">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-center px-4 px-sm-6 py-0">
             <MudHidden Breakpoint="Breakpoint.LgAndUp">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
             </MudHidden>
@@ -21,8 +21,6 @@
 
             <MudHidden Breakpoint="Breakpoint.MdAndDown">
                 <MudStack Row="true" Spacing="1" Class="align-center">
-                    <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">Home</MudButton>
-
                     <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
                         <MudMenuItem Href="https://example.com/discord">Discord</MudMenuItem>
                         <MudMenuItem Href="https://example.com/reddit">Reddit</MudMenuItem>
@@ -61,7 +59,6 @@
 
     <MudDrawer @bind-Open="DrawerOpen" Elevation="1" Variant="DrawerVariant.Temporary">
         <MudNavMenu>
-            <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
             <MudNavGroup Title="Community" Icon="@Icons.Material.Filled.People" Expanded="false">
                 <MudNavLink Href="https://example.com/discord">Discord</MudNavLink>
                 <MudNavLink Href="https://example.com/reddit">Reddit</MudNavLink>
