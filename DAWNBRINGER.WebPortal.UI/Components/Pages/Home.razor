@@ -10,7 +10,7 @@
             <MudText Typo="Typo.h2" Align="Align.Center" Class="font-scurlock">Project KONGOR</MudText>
             <MudText Typo="Typo.h5" Align="Align.Center">A community-driven revival of Heroes Of Newerth</MudText>
             <MudText Typo="Typo.subtitle1" Align="Align.Center" Color="Color.Secondary">By the community, for the community.</MudText>
-            <MudStack Row="true" Spacing="2" Class="mt-4">
+            <MudStack Row="true" Class="mt-4 gap-2">
                 <AuthorizeView>
                     <NotAuthorized>
                         <MudButton Href="/register" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large">Register Account</MudButton>
@@ -35,7 +35,7 @@
                         <MudText Typo="Typo.h5">Downloads</MudText>
                         <MudText Typo="Typo.body1">
                             Get the tools and distributions you need to start playing Heroes Of Newerth or host your own match servers.
-                            Choose from client launchers, server launchers, and full game distributions for Windows, Linux, and macOS.
+                            Choose from client launchers, server launchers, and full client and server distributions for Windows, Linux, and macOS.
                         </MudText>
                     </MudStack>
                 </MudCardContent>
@@ -59,15 +59,13 @@
                         </MudText>
                     </MudStack>
                 </MudCardContent>
-                <MudCardActions>
-                    <MudStack Row="true" Spacing="2">
-                        <MudButton Href="https://example.com/discord" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Discord">
-                            Discord
-                        </MudButton>
-                        <MudButton Href="https://example.com/reddit" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Reddit">
-                            Reddit
-                        </MudButton>
-                    </MudStack>
+                <MudCardActions Class="gap-2">
+                    <MudButton Href="https://example.com/discord" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Discord">
+                        Discord
+                    </MudButton>
+                    <MudButton Href="https://example.com/reddit" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Reddit">
+                        Reddit
+                    </MudButton>
                 </MudCardActions>
             </MudCard>
         </MudItem>
