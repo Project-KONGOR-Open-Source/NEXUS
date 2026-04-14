@@ -1,0 +1,85 @@
+@page "/email/update/{Token}"
+
+@inject PortalAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Confirm Email Address Update - Project KONGOR</PageTitle>
+
+<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6" Style="min-height: calc(100vh - 200px);">
+    <MudCard Outlined="true" Class="pa-6" Style="width: 100%; max-width: 640px;">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.MarkEmailRead" Size="Size.Large" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5">Confirm Email Address Update</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                    Click the button below to confirm your new email address for all linked accounts.
+                </MudText>
+            </MudStack>
+
+            <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="Processing"
+                           OnClick="HandleConfirm">
+                    @if (Processing)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        <MudText>Confirming...</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Confirm Email Address Update</MudText>
+                    }
+                </MudButton>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+        <MudLink Href="/login">Return to log in</MudLink>
+    </MudText>
+</MudStack>
+
+@code {
+
+    [Parameter]
+    public string? Token { get; set; }
+
+    private bool Processing { get; set; }
+
+    private async Task HandleConfirm()
+    {
+        Processing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAnonymousClient();
+
+            ConfirmEmailAddressUpdateRequest request = new(Token ?? string.Empty);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Email/Update/Confirm", request);
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                Snackbar.Add("Email address updated successfully.", Severity.Success);
+                NavigationManager.NavigateTo("/login", forceLoad: true);
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            Processing = false;
+        }
+    }
+}

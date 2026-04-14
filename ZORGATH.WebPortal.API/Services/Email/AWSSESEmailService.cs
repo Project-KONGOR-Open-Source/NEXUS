@@ -107,7 +107,7 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
     public async Task<bool> SendEmailAddressUpdateLink(string emailAddress, string token)
     {
-        string link = "https://portal.kongor.net/update/" + token;
+        string link = "https://portal.kongor.net/email/update/" + token;
 
         const string subject = "Update Email Address";
 

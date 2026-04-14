@@ -108,7 +108,7 @@ public class MailPitEmailService(IOptions<OperationalConfiguration> configuratio
 
     public async Task<bool> SendEmailAddressUpdateLink(string emailAddress, string token)
     {
-        string link = "https://localhost:5557/update/" + token;
+        string link = "https://localhost:5557/email/update/" + token;
 
         const string subject = "Update Email Address";
 

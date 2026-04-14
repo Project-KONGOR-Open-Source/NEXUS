@@ -110,6 +110,8 @@ public record ConfirmAccountPasswordUpdateRequest(string Token);
 
 public record RequestEmailAddressUpdateRequest(string EmailAddress, string Password);
 
+public record ConfirmEmailAddressUpdateRequest(string Token);
+
 // API Response DTOs
 
 public record AuthenticationTokenResponse(int UserID, string TokenType, string Token);
