@@ -1,33 +1,20 @@
 @font-face {
+    font-family: "Righteous";
+    src: url("../fonts/righteous.ttf") format("truetype");
+    font-display: swap;
+}
+
+@font-face {
     font-family: "Scurlock";
     src: url("../fonts/scurlock.ttf") format("truetype");
     font-display: swap;
 }
 
-@font-face {
-    font-family: "Friz Quadrata";
-    src: url("../fonts/friz-quadrata-regular.ttf") format("truetype");
-    font-weight: 400;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Friz Quadrata";
-    src: url("../fonts/friz-quadrata-bold.ttf") format("truetype");
-    font-weight: 700;
-    font-display: swap;
+.font-righteous {
+    font-family: "Righteous", sans-serif;
 }
 
 .font-scurlock {
     font-family: "Scurlock", sans-serif;
     text-transform: lowercase;
-}
-
-.font-friz-quadrata {
-    font-family: "Friz Quadrata", sans-serif;
-}
-
-.font-friz-quadrata-bold {
-    font-family: "Friz Quadrata", sans-serif;
-    font-weight: 700;
 }
