@@ -7,48 +7,50 @@
 
 <MudLayout>
     <MudAppBar Elevation="1" Fixed="true">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" Class="d-flex d-md-none" />
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="d-flex align-center pa-0">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" Class="d-flex d-md-none" />
 
-        <a href="/" class="d-flex align-center text-decoration-none mud-inherit-text">
-            <MudImage Src="images/logo.svg" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
-            <MudText Typo="Typo.h6" Class="font-scurlock">Project KONGOR</MudText>
-        </a>
+            <a href="/" class="d-flex align-center text-decoration-none mud-inherit-text">
+                <MudImage Src="images/logo.svg" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
+                <MudText Typo="Typo.h6" Class="font-scurlock">Project KONGOR</MudText>
+            </a>
 
-        <MudSpacer />
+            <MudSpacer />
 
-        <MudStack Row="true" Spacing="1" Class="d-none d-md-flex align-center">
-            <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">Home</MudButton>
+            <MudStack Row="true" Spacing="1" Class="d-none d-md-flex align-center">
+                <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">Home</MudButton>
 
-            <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                <MudMenuItem Href="https://example.com/discord">Discord</MudMenuItem>
-                <MudMenuItem Href="https://example.com/reddit">Reddit</MudMenuItem>
-            </MudMenu>
+                <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                    <MudMenuItem Href="https://example.com/discord">Discord</MudMenuItem>
+                    <MudMenuItem Href="https://example.com/reddit">Reddit</MudMenuItem>
+                </MudMenu>
 
-            <MudButton Href="/downloads" Color="Color.Inherit" Variant="Variant.Text">Downloads</MudButton>
+                <MudButton Href="/downloads" Color="Color.Inherit" Variant="Variant.Text">Downloads</MudButton>
 
-            <MudButton Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Source Code</MudButton>
+                <MudButton Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Source Code</MudButton>
 
-            <MudButton Href="https://codex.kongor.net" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Knowledge Base</MudButton>
-        </MudStack>
+                <MudButton Href="https://codex.kongor.net" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Knowledge Base</MudButton>
+            </MudStack>
 
-        <MudSpacer />
+            <MudSpacer />
 
-        <MudStack Row="true" Spacing="1" Class="align-center">
-            <AuthorizeView>
-                <NotAuthorized>
-                    <MudButton Href="/register" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Register Account</MudButton>
-                    <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text" Class="d-none d-md-flex">Log In</MudButton>
-                </NotAuthorized>
-                <Authorized>
-                    <MudButton Href="/account" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Manage Account</MudButton>
-                    <MudButton Color="Color.Inherit" Variant="Variant.Text" OnClick="HandleLogOut" Class="d-none d-md-flex">Log Out</MudButton>
-                </Authorized>
-            </AuthorizeView>
+            <MudStack Row="true" Spacing="1" Class="align-center">
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <MudButton Href="/register" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Register Account</MudButton>
+                        <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text" Class="d-none d-md-flex">Log In</MudButton>
+                    </NotAuthorized>
+                    <Authorized>
+                        <MudButton Href="/account" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Manage Account</MudButton>
+                        <MudButton Color="Color.Inherit" Variant="Variant.Text" OnClick="HandleLogOut" Class="d-none d-md-flex">Log Out</MudButton>
+                    </Authorized>
+                </AuthorizeView>
 
-            <MudDivider Vertical="true" FlexItem="true" Class="mx-2 my-4 d-none d-md-flex" />
+                <MudDivider Vertical="true" FlexItem="true" Class="mx-2 my-4 d-none d-md-flex" />
 
-            <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" OnClick="ToggleTheme" />
-        </MudStack>
+                <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" OnClick="ToggleTheme" />
+            </MudStack>
+        </MudContainer>
     </MudAppBar>
 
     <MudDrawer @bind-Open="DrawerOpen" Elevation="1" Variant="DrawerVariant.Temporary" Breakpoint="Breakpoint.Md">
@@ -77,23 +79,21 @@
         </MudNavMenu>
     </MudDrawer>
 
-    <MudMainContent Class="pt-16 d-flex flex-column" Style="min-height: 100vh;">
-        <div class="flex-grow-1">
+    <MudMainContent Style="@ContentStyle">
+        <div class="pt-6">
             <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
                 @Body
             </CascadingValue>
         </div>
 
-        <MudPaper Elevation="0" Class="pa-4 mt-auto">
-            <MudStack Spacing="2" AlignItems="AlignItems.Center">
-                <MudText Typo="Typo.body2" Align="Align.Center">
-                    Copyright 2024 Project KONGOR. Contact: support@example.com
-                </MudText>
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
-                    Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
-                </MudText>
-            </MudStack>
-        </MudPaper>
+        <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="pa-4 mt-6" Style="@FooterStyle">
+            <MudText Typo="Typo.caption" Align="Align.Center">
+                Copyright 2024 Project KONGOR. Contact: support@example.com
+            </MudText>
+            <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
+                Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
+            </MudText>
+        </MudStack>
     </MudMainContent>
 </MudLayout>
 
@@ -123,6 +123,14 @@
     private bool DrawerOpen { get; set; }
 
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+
+    private string ContentStyle => IsDarkMode
+        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.95)), url('img/caldavar.jpg') center/cover no-repeat fixed;"
+        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(245, 245, 250, 0.85), rgba(245, 245, 250, 0.95)), url('img/caldavar.jpg') center/cover no-repeat fixed;";
+
+    private string FooterStyle => IsDarkMode
+        ? "background: rgba(0, 0, 0, 0);"
+        : "background: rgba(255, 255, 255, 0);";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

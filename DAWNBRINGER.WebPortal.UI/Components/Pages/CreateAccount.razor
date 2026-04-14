@@ -6,12 +6,14 @@
 
 <PageTitle>Create Account - Project KONGOR</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="py-8">
-    <MudCard Elevation="2" Class="pa-6">
+<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Style="min-height: calc(100vh - 120px);">
+    <MudCard Outlined="true" Class="pa-6" Style="width: 100%; max-width: 640px;">
         <MudCardContent>
             <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
-                <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Large" Color="Color.Primary" />
-                <MudText Typo="Typo.h5">Create Account</MudText>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Large" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5">Create Account</MudText>
+                </MudStack>
                 <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
                     Choose an account name and password to complete your registration.
                 </MudText>
@@ -71,7 +73,7 @@
             </EditForm>
         </MudCardContent>
     </MudCard>
-</MudContainer>
+</MudStack>
 
 @code {
 

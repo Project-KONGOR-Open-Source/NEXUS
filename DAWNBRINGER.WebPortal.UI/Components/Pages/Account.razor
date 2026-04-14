@@ -26,7 +26,7 @@
             else
             {
                 @* Account Header *@
-                <MudPaper Elevation="2" Class="pa-6 mb-6">
+                <MudCard Outlined="true" Class="pa-6 mb-6">
                     <MudStack Spacing="2">
                         <MudText Typo="Typo.overline" Color="Color.Secondary">Current Account</MudText>
                         <MudText Typo="Typo.h4" Class="font-scurlock">@DisplayName</MudText>
@@ -58,10 +58,10 @@
                             </MudItem>
                         </MudGrid>
                     </MudStack>
-                </MudPaper>
+                </MudCard>
 
                 @* Sibling Accounts Table *@
-                <MudPaper Elevation="2" Class="pa-6 mb-6">
+                <MudCard Outlined="true" Class="pa-6 mb-6">
                     <MudStack Spacing="2" Class="mb-4">
                         <MudText Typo="Typo.h6">Sibling Accounts</MudText>
                         <MudText Typo="Typo.body2" Color="Color.Secondary">
@@ -92,13 +92,13 @@
                             <MudTd DataLabel="Clan Tag">@GetDisplayValue(context.ClanTag)</MudTd>
                         </RowTemplate>
                     </MudTable>
-                </MudPaper>
+                </MudCard>
 
                 @* Update Forms Row *@
                 <MudGrid Spacing="4">
                     @* Update Email Form *@
                     <MudItem xs="12" md="6">
-                        <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                        <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
                             <MudCardContent>
                                 <MudStack Spacing="2" Class="mb-4">
                                     <MudText Typo="Typo.h6">Update Email Address</MudText>
@@ -164,7 +164,7 @@
 
                     @* Update Password Form *@
                     <MudItem xs="12" md="6">
-                        <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+                        <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
                             <MudCardContent>
                                 <MudStack Spacing="2" Class="mb-4">
                                     <MudText Typo="Typo.h6">Update Password</MudText>

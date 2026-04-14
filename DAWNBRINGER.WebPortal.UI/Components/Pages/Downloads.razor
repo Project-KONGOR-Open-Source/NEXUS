@@ -5,9 +5,11 @@
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-8">
 
     @* Page Header *@
-    <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-8">
-        <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Large" Color="Color.Primary" />
-        <MudText Typo="Typo.h4" Align="Align.Center">Downloads</MudText>
+    <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-6">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Large" Color="Color.Primary" />
+            <MudText Typo="Typo.h4">Downloads</MudText>
+        </MudStack>
         <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary" Style="max-width: 600px;">
             Everything you need to play Heroes Of Newerth or host your own match servers.
             Choose the tools and distributions for your platform.
@@ -15,7 +17,7 @@
     </MudStack>
 
     @* Launcher Section *@
-    <MudCard Elevation="2" Class="pa-6 mb-6">
+    <MudCard Outlined="true" Class="pa-6 mb-6">
         <MudCardContent>
             <MudStack Spacing="2">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -42,7 +44,7 @@
     <MudGrid Spacing="4">
         @* Game Client Distribution *@
         <MudItem xs="12" md="6">
-            <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+            <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
                 <MudCardContent>
                     <MudStack Spacing="2">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -71,7 +73,7 @@
 
         @* Match Server Distribution *@
         <MudItem xs="12" md="6">
-            <MudCard Elevation="2" Class="pa-4" Style="height: 100%;">
+            <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
                 <MudCardContent>
                     <MudStack Spacing="2">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
