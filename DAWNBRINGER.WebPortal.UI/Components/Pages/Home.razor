@@ -60,19 +60,21 @@
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Href="https://example.com/discord" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Discord">
-                        Discord
-                    </MudButton>
-                    <MudButton Href="https://example.com/reddit" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Reddit">
-                        Reddit
-                    </MudButton>
+                    <MudStack Row="true" Spacing="2">
+                        <MudButton Href="https://example.com/discord" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Discord">
+                            Discord
+                        </MudButton>
+                        <MudButton Href="https://example.com/reddit" Target="_blank" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Reddit">
+                            Reddit
+                        </MudButton>
+                    </MudStack>
                 </MudCardActions>
             </MudCard>
         </MudItem>
     </MudGrid>
 
     @* Source Code Section *@
-    <MudPaper Class="pa-6 mb-6" Elevation="0">
+    <MudCard Class="pa-6 mb-6" Elevation="2">
         <MudStack AlignItems="AlignItems.Center" Spacing="4">
             <MudIcon Icon="@Icons.Custom.Brands.GitHub" Size="Size.Large" Color="Color.Primary" />
             <MudText Typo="Typo.h5" Align="Align.Center">Source Code</MudText>
@@ -138,7 +140,7 @@
                 </MudCard>
             </MudItem>
         </MudGrid>
-    </MudPaper>
+    </MudCard>
 
     @* Knowledge Base Section *@
     <MudCard Elevation="2" Class="pa-6 mb-6">
@@ -160,7 +162,7 @@
     </MudCard>
 
     @* Timeline Section *@
-    <MudPaper Class="pa-6" Elevation="0">
+    <MudCard Class="pa-6" Elevation="2">
         <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
             <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large" Color="Color.Primary" />
             <MudText Typo="Typo.h5" Align="Align.Center">Timeline</MudText>
@@ -173,7 +175,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Elevation="1" Class="pa-3">
+                    <MudCard Elevation="3" Class="pa-3">
                         <MudText Typo="Typo.h6">TODO #1</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -185,7 +187,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Elevation="1" Class="pa-3">
+                    <MudCard Elevation="3" Class="pa-3">
                         <MudText Typo="Typo.h6">TODO #2</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -197,7 +199,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Elevation="1" Class="pa-3">
+                    <MudCard Elevation="3" Class="pa-3">
                         <MudText Typo="Typo.h6">TODO #3</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -209,7 +211,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Elevation="1" Class="pa-3">
+                    <MudCard Elevation="3" Class="pa-3">
                         <MudText Typo="Typo.h6">TODO #4</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -221,14 +223,14 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Elevation="1" Class="pa-3">
+                    <MudCard Elevation="3" Class="pa-3">
                         <MudText Typo="Typo.h6">TODO #5</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
                 </ItemContent>
             </MudTimelineItem>
         </MudTimeline>
-    </MudPaper>
+    </MudCard>
 
 </MudContainer>
 
@@ -238,6 +240,6 @@
     private bool IsDarkMode { get; set; }
 
     private string HeroStyle => IsDarkMode
-        ? "background: linear-gradient(rgba(13, 22, 16, 0.85), rgba(13, 22, 16, 0.95)), url('img/caldavar.jpg') center/cover no-repeat;"
-        : "background: linear-gradient(rgba(245, 242, 230, 0.85), rgba(245, 242, 230, 0.95)), url('img/caldavar.jpg') center/cover no-repeat;";
+        ? "background: linear-gradient(rgba(30, 30, 30, 0.85), rgba(30, 30, 30, 0.95)), url('img/caldavar.jpg') center/cover no-repeat;"
+        : "background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.95)), url('img/caldavar.jpg') center/cover no-repeat;";
 }
