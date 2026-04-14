@@ -7,8 +7,10 @@
 
 <MudLayout>
     <MudAppBar Elevation="1" Fixed="true">
-        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="d-flex align-center pa-0">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" Class="d-flex d-md-none" />
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="d-flex align-center px-4 px-sm-6 py-0">
+            <MudHidden Breakpoint="Breakpoint.LgAndUp">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+            </MudHidden>
 
             <a href="/" class="d-flex align-center text-decoration-none mud-inherit-text">
                 <MudImage Src="images/logo.svg" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
@@ -17,43 +19,47 @@
 
             <MudSpacer />
 
-            <MudStack Row="true" Spacing="1" Class="d-none d-md-flex align-center">
-                <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">Home</MudButton>
+            <MudHidden Breakpoint="Breakpoint.MdAndDown">
+                <MudStack Row="true" Spacing="1" Class="align-center">
+                    <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">Home</MudButton>
 
-                <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
-                    <MudMenuItem Href="https://example.com/discord">Discord</MudMenuItem>
-                    <MudMenuItem Href="https://example.com/reddit">Reddit</MudMenuItem>
-                </MudMenu>
+                    <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <MudMenuItem Href="https://example.com/discord">Discord</MudMenuItem>
+                        <MudMenuItem Href="https://example.com/reddit">Reddit</MudMenuItem>
+                    </MudMenu>
 
-                <MudButton Href="/downloads" Color="Color.Inherit" Variant="Variant.Text">Downloads</MudButton>
+                    <MudButton Href="/downloads" Color="Color.Inherit" Variant="Variant.Text">Downloads</MudButton>
 
-                <MudButton Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Source Code</MudButton>
+                    <MudButton Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Source Code</MudButton>
 
-                <MudButton Href="https://codex.kongor.net" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Knowledge Base</MudButton>
-            </MudStack>
+                    <MudButton Href="https://codex.kongor.net" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Knowledge Base</MudButton>
+                </MudStack>
+            </MudHidden>
 
             <MudSpacer />
 
-            <MudStack Row="true" Spacing="1" Class="align-center">
-                <AuthorizeView>
-                    <NotAuthorized>
-                        <MudButton Href="/register" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Register Account</MudButton>
-                        <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text" Class="d-none d-md-flex">Log In</MudButton>
-                    </NotAuthorized>
-                    <Authorized>
-                        <MudButton Href="/account" Color="Color.Primary" Variant="Variant.Filled" Class="d-none d-md-flex">Manage Account</MudButton>
-                        <MudButton Color="Color.Inherit" Variant="Variant.Text" OnClick="HandleLogOut" Class="d-none d-md-flex">Log Out</MudButton>
-                    </Authorized>
-                </AuthorizeView>
+            <MudHidden Breakpoint="Breakpoint.MdAndDown">
+                <MudStack Row="true" Spacing="1" Class="align-center">
+                    <AuthorizeView>
+                        <NotAuthorized>
+                            <MudButton Href="/register" Color="Color.Primary" Variant="Variant.Filled">Register Account</MudButton>
+                            <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">Log In</MudButton>
+                        </NotAuthorized>
+                        <Authorized>
+                            <MudButton Href="/account" Color="Color.Primary" Variant="Variant.Filled">Manage Account</MudButton>
+                            <MudButton Color="Color.Inherit" Variant="Variant.Text" OnClick="HandleLogOut">Log Out</MudButton>
+                        </Authorized>
+                    </AuthorizeView>
 
-                <MudDivider Vertical="true" FlexItem="true" Class="mx-2 my-4 d-none d-md-flex" />
+                    <MudDivider Vertical="true" FlexItem="true" Class="mx-2 my-4" />
 
-                <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" OnClick="ToggleTheme" />
-            </MudStack>
+                    <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" OnClick="ToggleTheme" />
+                </MudStack>
+            </MudHidden>
         </MudContainer>
     </MudAppBar>
 
-    <MudDrawer @bind-Open="DrawerOpen" Elevation="1" Variant="DrawerVariant.Temporary" Breakpoint="Breakpoint.Md">
+    <MudDrawer @bind-Open="DrawerOpen" Elevation="1" Variant="DrawerVariant.Temporary">
         <MudNavMenu>
             <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
             <MudNavGroup Title="Community" Icon="@Icons.Material.Filled.People" Expanded="false">
@@ -76,6 +82,10 @@
                     <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogOut">Log Out</MudNavLink>
                 </Authorized>
             </AuthorizeView>
+
+            <MudDivider Class="my-2" />
+
+            <MudNavLink Icon="@ThemeIcon" OnClick="ToggleTheme">@(IsDarkMode ? "Light Mode" : "Dark Mode")</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
 
