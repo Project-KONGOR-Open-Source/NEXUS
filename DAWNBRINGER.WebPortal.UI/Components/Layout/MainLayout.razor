@@ -12,9 +12,9 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
             </MudHidden>
 
-            <a href="/" class="d-flex align-center text-decoration-none mud-inherit-text">
-                <MudImage Src="images/logo.svg" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
-                <MudText Typo="Typo.h6" Class="font-scurlock">Project KONGOR</MudText>
+            <a href="/" class="d-flex align-center text-decoration-none mud-inherit-text ml-3">
+                <MudImage Src="images/portal-key.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
+                <MudText Typo="Typo.h5" Class="font-scurlock">Project KONGOR</MudText>
             </a>
 
             <MudSpacer />
@@ -135,8 +135,8 @@
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
 
     private string ContentStyle => IsDarkMode
-        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.95)), url('img/caldavar.jpg') center/cover no-repeat fixed;"
-        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(245, 245, 250, 0.85), rgba(245, 245, 250, 0.95)), url('img/caldavar.jpg') center/cover no-repeat fixed;";
+        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
+        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(245, 245, 250, 0.85), rgba(245, 245, 250, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;";
 
     private string FooterStyle => IsDarkMode
         ? "background: rgba(0, 0, 0, 0);"
