@@ -77,12 +77,14 @@
         </MudNavMenu>
     </MudDrawer>
 
-    <MudMainContent Class="pt-16">
-        <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
-            @Body
-        </CascadingValue>
+    <MudMainContent Class="pt-16 d-flex flex-column" Style="min-height: 100vh;">
+        <div class="flex-grow-1">
+            <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
+                @Body
+            </CascadingValue>
+        </div>
 
-        <MudPaper Elevation="0" Class="pa-4 mt-8">
+        <MudPaper Elevation="0" Class="pa-4 mt-auto">
             <MudStack Spacing="2" AlignItems="AlignItems.Center">
                 <MudText Typo="Typo.body2" Align="Align.Center">
                     Copyright 2024 Project KONGOR. Contact: support@example.com
