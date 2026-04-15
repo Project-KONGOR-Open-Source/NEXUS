@@ -40,11 +40,11 @@
                 <MudStack Row="true" Class="align-center gap-2">
                     <AuthorizeView>
                         <NotAuthorized>
-                            <MudButton Href="/register" Color="AppBarButtonColour" Variant="Variant.Outlined">Register Account</MudButton>
+                            <MudButton Href="/register" Color="AppBarButtonColour" Variant="Variant.Outlined">Register</MudButton>
                             <MudButton Href="/login" Color="AppBarButtonColour" Variant="Variant.Outlined">Log In</MudButton>
                         </NotAuthorized>
                         <Authorized>
-                            <MudButton Href="/account" Color="AppBarButtonColour" Variant="Variant.Outlined">Manage Account</MudButton>
+                            <MudButton Href="/account" Color="AppBarButtonColour" Variant="Variant.Outlined">Account</MudButton>
                             <MudButton Color="AppBarButtonColour" Variant="Variant.Outlined" OnClick="HandleLogOut">Log Out</MudButton>
                         </Authorized>
                     </AuthorizeView>
@@ -71,11 +71,11 @@
 
             <AuthorizeView>
                 <NotAuthorized>
-                    <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">Register Account</MudNavLink>
+                    <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
                     <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">Log In</MudNavLink>
                 </NotAuthorized>
                 <Authorized>
-                    <MudNavLink Href="/account" Icon="@Icons.Material.Filled.ManageAccounts">Manage Account</MudNavLink>
+                    <MudNavLink Href="/account" Icon="@Icons.Material.Filled.ManageAccounts">Account</MudNavLink>
                     <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogOut">Log Out</MudNavLink>
                 </Authorized>
             </AuthorizeView>
