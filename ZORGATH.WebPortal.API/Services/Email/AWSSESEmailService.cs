@@ -11,7 +11,7 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
     public async Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token)
     {
-        string link = "https://portal.kongor.net/register/" + token;
+        string link = "https://portal.kongor.net/account/register/" + token;
 
         const string subject = "Verify Email Address";
 
@@ -40,7 +40,7 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
     public async Task<bool> SendAccountPasswordResetLink(string emailAddress, string token, string generatedPassword, List<string> accountNames)
     {
-        string link = "https://portal.kongor.net/recover/" + token;
+        string link = "https://portal.kongor.net/password/recover/" + token;
 
         const string subject = "Reset Forgotten Password";
 

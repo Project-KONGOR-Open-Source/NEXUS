@@ -12,7 +12,7 @@ public class MailPitEmailService(IOptions<OperationalConfiguration> configuratio
 
     public async Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token)
     {
-        string link = "https://localhost:5557/register/" + token;
+        string link = "https://localhost:5557/account/register/" + token;
 
         const string subject = "Verify Email Address";
 
@@ -41,7 +41,7 @@ public class MailPitEmailService(IOptions<OperationalConfiguration> configuratio
 
     public async Task<bool> SendAccountPasswordResetLink(string emailAddress, string token, string generatedPassword, List<string> accountNames)
     {
-        string link = "https://localhost:5557/recover/" + token;
+        string link = "https://localhost:5557/password/recover/" + token;
 
         const string subject = "Reset Forgotten Password";
 

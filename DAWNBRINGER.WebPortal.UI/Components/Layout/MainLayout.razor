@@ -40,7 +40,7 @@
                 <MudStack Row="true" Class="align-center gap-2">
                     <AuthorizeView>
                         <NotAuthorized>
-                            <MudButton Href="/register" Color="AppBarButtonColour" Variant="Variant.Outlined">Register</MudButton>
+                            <MudButton Href="/email/register" Color="AppBarButtonColour" Variant="Variant.Outlined">Register</MudButton>
                             <MudButton Href="/login" Color="AppBarButtonColour" Variant="Variant.Outlined">Log In</MudButton>
                         </NotAuthorized>
                         <Authorized>
@@ -71,7 +71,7 @@
 
             <AuthorizeView>
                 <NotAuthorized>
-                    <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
+                    <MudNavLink Href="/email/register" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
                     <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">Log In</MudNavLink>
                 </NotAuthorized>
                 <Authorized>
