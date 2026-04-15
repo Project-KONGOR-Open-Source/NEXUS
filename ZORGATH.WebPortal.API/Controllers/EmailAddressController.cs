@@ -58,6 +58,7 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
             if (sent.Equals(false))
             {
                 MerrickContext.Tokens.Remove(token);
+
                 await MerrickContext.SaveChangesAsync();
 
                 return StatusCode(StatusCodes.Status503ServiceUnavailable, "Failed To Send Email Address Verification Email");
@@ -196,10 +197,8 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
 
         // A User's Email Address Is Verified If A Consumed Email Address Verification Token Exists For It
         // In The Current Architecture, A User Can Only Exist If They Verified Their Email Address During Registration
-        bool emailAddressIsVerified = await MerrickContext.Tokens.AnyAsync(token =>
-            token.Data.Equals(userEmailAddress)
-            && token.Purpose.Equals(TokenPurpose.EmailAddressVerification)
-            && token.TimestampConsumed != null);
+        bool emailAddressIsVerified = await MerrickContext.Tokens
+            .AnyAsync(token => token.Data.Equals(userEmailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification) && token.TimestampConsumed != null);
 
         return Ok(emailAddressIsVerified);
     }
