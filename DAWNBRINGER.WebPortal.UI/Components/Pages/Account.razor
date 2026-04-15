@@ -358,9 +358,10 @@
 
             if (response.StatusCode is HttpStatusCode.OK)
             {
+                string newEmailAddress = EmailUpdateFormModel.EmailAddress;
                 EmailUpdateFormModel = new RequestEmailAddressUpdateFormModel();
                 Snackbar.Add("Email update requested successfully.", Severity.Success);
-                Snackbar.Add("Check your inbox for the verification link.", Severity.Info);
+                Snackbar.Add($"A verification link has been sent to {newEmailAddress}.", Severity.Info);
             }
             else
             {
@@ -394,7 +395,7 @@
             {
                 PasswordUpdateFormModel = new RequestAccountPasswordUpdateFormModel();
                 Snackbar.Add("Password update requested successfully.", Severity.Success);
-                Snackbar.Add("Check your inbox for the confirmation link.", Severity.Info);
+                Snackbar.Add($"A confirmation link has been sent to {AccountOverview!.EmailAddress}.", Severity.Info);
             }
             else
             {

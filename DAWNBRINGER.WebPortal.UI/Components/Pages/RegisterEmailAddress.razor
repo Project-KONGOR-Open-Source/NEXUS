@@ -86,9 +86,10 @@
 
             if (response.StatusCode is HttpStatusCode.OK)
             {
+                string emailAddress = FormModel.EmailAddress;
                 FormModel = new RegisterEmailAddressFormModel();
                 Snackbar.Add("Email address registered successfully.", Severity.Success);
-                Snackbar.Add("Check your inbox for the verification link.", Severity.Info);
+                Snackbar.Add($"A verification link has been sent to {emailAddress}.", Severity.Info);
             }
             else
             {
