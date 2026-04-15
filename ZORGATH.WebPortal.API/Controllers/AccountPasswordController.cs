@@ -173,40 +173,33 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
 
         AccountPasswordTokenData tokenData = new(userEmailAddress, salt, srpHash, pbkdf2Hash);
 
-        Token? existingToken = await MerrickContext.Tokens.SingleOrDefaultAsync(token =>
-            token.Purpose.Equals(TokenPurpose.AccountPasswordUpdate)
-            && token.EmailAddress.Equals(userEmailAddress)
-            && token.TimestampConsumed == null);
+        Token? existingToken = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Purpose.Equals(TokenPurpose.AccountPasswordUpdate) && token.EmailAddress.Equals(userEmailAddress) && token.TimestampConsumed == null);
 
-        if (existingToken is not null)
+        if (existingToken is not null) // Invalidate Any Pending Token So Old Confirmation Links Cannot Be Used To Confirm A Stale Or Different Target Account Password
         {
-            // Update The Existing Token's Data With The New Password Hashes
-            existingToken.Data = JsonSerializer.Serialize(tokenData);
+            MerrickContext.Tokens.Remove(existingToken);
+
             await MerrickContext.SaveChangesAsync();
         }
-        else
+
+        Token token = new ()
         {
-            Token token = new()
-            {
-                Purpose = TokenPurpose.AccountPasswordUpdate,
-                EmailAddress = userEmailAddress,
-                Value = Guid.CreateVersion7(),
-                Data = JsonSerializer.Serialize(tokenData)
-            };
+            Purpose = TokenPurpose.AccountPasswordUpdate,
+            EmailAddress = userEmailAddress,
+            Value = Guid.CreateVersion7(),
+            Data = JsonSerializer.Serialize(tokenData)
+        };
 
-            await MerrickContext.Tokens.AddAsync(token);
-            await MerrickContext.SaveChangesAsync();
-
-            existingToken = token;
-        }
+        await MerrickContext.Tokens.AddAsync(token);
+        await MerrickContext.SaveChangesAsync();
 
         List<string> accountNames = user.Accounts.Select(account => account.Name).ToList();
 
-        bool sent = await EmailService.SendAccountPasswordUpdateLink(userEmailAddress, existingToken.Value.ToString(), accountNames);
+        bool sent = await EmailService.SendAccountPasswordUpdateLink(userEmailAddress, token.Value.ToString(), accountNames);
 
         if (sent.Equals(false))
         {
-            MerrickContext.Tokens.Remove(existingToken);
+            MerrickContext.Tokens.Remove(token);
             await MerrickContext.SaveChangesAsync();
 
             return StatusCode(StatusCodes.Status503ServiceUnavailable, "Failed To Send Account Password Update Confirmation Email");

@@ -118,21 +118,25 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
         if (await MerrickContext.Users.AnyAsync(existingUser => existingUser.EmailAddress.Equals(sanitizedEmailAddress)))
             return Conflict($@"Email Address ""{payload.EmailAddress}"" Is Already In Use");
 
-        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(user.EmailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressUpdate) && token.TimestampConsumed == null);
+        Token? existingToken = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(user.EmailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressUpdate) && token.TimestampConsumed == null);
 
-        if (token is null)
+        if (existingToken is not null) // Invalidate Any Pending Token So Old Confirmation Links Cannot Be Used To Confirm A Stale Or Different Target Email Address
         {
-            token = new Token()
-            {
-                Purpose = TokenPurpose.EmailAddressUpdate,
-                EmailAddress = user.EmailAddress,
-                Value = Guid.CreateVersion7(),
-                Data = sanitizedEmailAddress
-            };
+            MerrickContext.Tokens.Remove(existingToken);
 
-            await MerrickContext.Tokens.AddAsync(token);
             await MerrickContext.SaveChangesAsync();
         }
+
+        Token token = new ()
+        {
+            Purpose = TokenPurpose.EmailAddressUpdate,
+            EmailAddress = user.EmailAddress,
+            Value = Guid.CreateVersion7(),
+            Data = sanitizedEmailAddress
+        };
+
+        await MerrickContext.Tokens.AddAsync(token);
+        await MerrickContext.SaveChangesAsync();
 
         bool sent = await EmailService.SendEmailAddressUpdateLink(sanitizedEmailAddress, token.Value.ToString());
 
