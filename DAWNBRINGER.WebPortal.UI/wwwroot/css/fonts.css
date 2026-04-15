@@ -90,4 +90,9 @@
 .font-scurlock {
     font-family: "Scurlock", sans-serif;
     text-transform: lowercase;
+    transition: text-shadow 0.2s ease-in-out;
+}
+
+.font-scurlock:hover {
+    text-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
 }

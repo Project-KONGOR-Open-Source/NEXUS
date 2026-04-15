@@ -12,7 +12,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
             </MudHidden>
 
-            <a href="/" class="d-flex align-center text-decoration-none mud-inherit-text">
+            <a href="/" class="d-flex align-center text-decoration-none" style="@LogoStyle">
                 <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
                 <MudText Typo="Typo.h5" Class="font-scurlock">Project KONGOR</MudText>
             </a>
@@ -229,6 +229,9 @@
 
     private Color AppBarButtonColour => IsDarkMode ? Color.Primary : Color.Secondary;
 
+    private string LogoStyle => IsDarkMode
+        ? "color: var(--mud-palette-primary);"
+        : "color: var(--mud-palette-secondary);";
 
     private string ContentStyle => IsDarkMode
         ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
