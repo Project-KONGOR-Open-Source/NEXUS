@@ -7,6 +7,10 @@ public class DAWNBRINGER
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(arguments);
 
+        // Enable Static Web Assets, When Running From Source (e.g. Using The Aspire Orchestrator) In Non-Development Environments
+        // In Development This Is Automatic; In Published Output The Physical Files Are Present; This Covers Everything In Between
+        builder.WebHost.UseStaticWebAssets();
+
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
