@@ -6,7 +6,7 @@ public class User
     [Key]
     public int ID { get; set; }
 
-    [MaxLength(30)]
+    [MaxLength(128)]
     public required string EmailAddress { get; set; }
 
     public required Role Role { get; set; }
