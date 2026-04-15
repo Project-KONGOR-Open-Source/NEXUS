@@ -65,7 +65,7 @@
             if (response.StatusCode is HttpStatusCode.OK)
             {
                 Snackbar.Add("Email address updated successfully.", Severity.Success);
-                NavigationManager.NavigateTo("/login", forceLoad: true);
+                NavigationManager.NavigateTo("/login");
             }
             else
             {

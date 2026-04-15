@@ -259,6 +259,6 @@
     private async Task HandleLogOut()
     {
         await AuthenticationService.ClearToken();
-        NavigationManager.NavigateTo("/", forceLoad: true);
+        NavigationManager.NavigateTo("/");
     }
 }
