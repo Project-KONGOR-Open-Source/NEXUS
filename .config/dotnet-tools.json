@@ -10,14 +10,14 @@
       "rollForward": false
     },
     "aspire.cli": {
-      "version": "13.1.2",
+      "version": "13.2.2",
       "commands": [
         "aspire"
       ],
       "rollForward": false
     },
     "powershell": {
-      "version": "7.5.5",
+      "version": "7.6.0",
       "commands": [
         "pwsh"
       ],

@@ -1,0 +1,35 @@
+<Router AppAssembly="typeof(global::DAWNBRINGER.WebPortal.UI.Components.App).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <section class="portal-utility-state">
+                    <div class="portal-state-panel">
+                        <div class="portal-section-kicker">Authorisation Required</div>
+                        <h1>Sign in to reach this part of the portal.</h1>
+                        <p>The new shell is public, but this route still requires an authenticated account.</p>
+                        <div class="portal-hero-actions portal-hero-actions-centred">
+                            <a href="/login" class="portal-call-to-action">Go To Log In</a>
+                            <a href="/" class="portal-secondary-action">Return Home</a>
+                        </div>
+                    </div>
+                </section>
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector=".portal-site-main" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not Found</PageTitle>
+        <LayoutView Layout="typeof(Layout.MainLayout)">
+            <section class="portal-utility-state">
+                <div class="portal-state-panel">
+                    <div class="portal-section-kicker">Page Not Found</div>
+                    <h1>There is nothing at this address.</h1>
+                    <p>The redesigned portal does not have a route mapped here yet.</p>
+                    <div class="portal-hero-actions portal-hero-actions-centred">
+                        <a href="/" class="portal-call-to-action">Return Home</a>
+                    </div>
+                </div>
+            </section>
+        </LayoutView>
+    </NotFound>
+</Router>

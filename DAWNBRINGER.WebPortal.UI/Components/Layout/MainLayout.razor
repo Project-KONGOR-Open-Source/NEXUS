@@ -1,0 +1,264 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider @ref="ThemeProvider" Theme="Theme" IsDarkMode="IsDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Fixed="true">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-center px-4 px-sm-6 py-0">
+            <MudHidden Breakpoint="Breakpoint.LgAndUp">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+            </MudHidden>
+
+            <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">
+                <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
+                Home
+            </MudButton>
+
+            <MudSpacer />
+
+            <MudHidden Breakpoint="Breakpoint.MdAndDown">
+                <MudStack Row="true" Class="align-center gap-2">
+                    <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <MudMenuItem Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank">Discord</MudMenuItem>
+                        <MudMenuItem Href="https://www.reddit.com/r/newerth/" Target="_blank">Reddit</MudMenuItem>
+                    </MudMenu>
+
+                    <MudButton Href="/downloads" Color="Color.Inherit" Variant="Variant.Text">Downloads</MudButton>
+
+                    <MudButton Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Source Code</MudButton>
+
+                    <MudButton Href="https://codex.kongor.net" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Knowledge Base</MudButton>
+                </MudStack>
+            </MudHidden>
+
+            <MudSpacer />
+
+            <MudHidden Breakpoint="Breakpoint.MdAndDown">
+                <MudStack Row="true" Class="align-center gap-2">
+                    <AuthorizeView>
+                        <NotAuthorized>
+                            <MudButton Href="/register" Color="AppBarButtonColour" Variant="Variant.Outlined">Register</MudButton>
+                            <MudButton Href="/login" Color="AppBarButtonColour" Variant="Variant.Outlined">Log In</MudButton>
+                        </NotAuthorized>
+                        <Authorized>
+                            <MudButton Href="/account" Color="AppBarButtonColour" Variant="Variant.Outlined">Account</MudButton>
+                            <MudButton Color="AppBarButtonColour" Variant="Variant.Outlined" OnClick="HandleLogOut">Log Out</MudButton>
+                        </Authorized>
+                    </AuthorizeView>
+                </MudStack>
+            </MudHidden>
+
+            <MudSpacer />
+
+            <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" OnClick="ToggleTheme" />
+        </MudContainer>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="DrawerOpen" Elevation="1" Variant="DrawerVariant.Temporary">
+        <MudNavMenu>
+            <MudNavGroup Title="Community" Icon="@Icons.Material.Filled.People" Expanded="false">
+                <MudNavLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank">Discord</MudNavLink>
+                <MudNavLink Href="https://www.reddit.com/r/newerth/" Target="_blank">Reddit</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/downloads" Icon="@Icons.Material.Filled.Download">Downloads</MudNavLink>
+            <MudNavLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Icon="@Icons.Material.Filled.Code">Source Code</MudNavLink>
+            <MudNavLink Href="https://codex.kongor.net" Target="_blank" Icon="@Icons.Material.Filled.MenuBook">Knowledge Base</MudNavLink>
+
+            <MudDivider Class="my-2" />
+
+            <AuthorizeView>
+                <NotAuthorized>
+                    <MudNavLink Href="/register" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
+                    <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">Log In</MudNavLink>
+                </NotAuthorized>
+                <Authorized>
+                    <MudNavLink Href="/account" Icon="@Icons.Material.Filled.ManageAccounts">Account</MudNavLink>
+                    <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogOut">Log Out</MudNavLink>
+                </Authorized>
+            </AuthorizeView>
+
+            <MudDivider Class="my-2" />
+
+            <MudNavLink Icon="@ThemeIcon" OnClick="ToggleTheme">@(IsDarkMode ? "Light Mode" : "Dark Mode")</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Style="@ContentStyle">
+        <div class="d-flex flex-column" style="min-height: calc(100vh - 64px);">
+            <div class="pt-6 flex-grow-1">
+                <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
+                    @Body
+                </CascadingValue>
+            </div>
+
+            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="px-4 pt-4 pb-8 mt-6" Style="@FooterStyle">
+                <MudText Typo="Typo.caption" Align="Align.Center">
+                    Copyright 2024 Project KONGOR. Contact: support@example.com
+                </MudText>
+                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
+                    Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
+                </MudText>
+            </MudStack>
+        </div>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = null!;
+
+    [Inject]
+    private PortalAuthenticationService AuthenticationService { get; set; } = null!;
+
+    private static readonly MudTheme Theme = new()
+    {
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1rem",
+                LineHeight = "1.65"
+            },
+            H1 = new H1Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "3rem",
+                FontWeight = "500",
+                LineHeight = "1.25"
+            },
+            H2 = new H2Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "2.5rem",
+                FontWeight = "500",
+                LineHeight = "1.25"
+            },
+            H3 = new H3Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "2rem",
+                FontWeight = "500",
+                LineHeight = "1.35"
+            },
+            H4 = new H4Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.75rem",
+                FontWeight = "500",
+                LineHeight = "1.35"
+            },
+            H5 = new H5Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.5rem",
+                FontWeight = "500",
+                LineHeight = "1.45"
+            },
+            H6 = new H6Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.25rem",
+                FontWeight = "500",
+                LineHeight = "1.45"
+            },
+            Subtitle1 = new Subtitle1Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.125rem",
+                FontWeight = "400",
+                LineHeight = "1.5"
+            },
+            Subtitle2 = new Subtitle2Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1rem",
+                FontWeight = "500",
+                LineHeight = "1.5"
+            },
+            Body1 = new Body1Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1rem",
+                FontWeight = "400",
+                LineHeight = "1.65"
+            },
+            Body2 = new Body2Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.9375rem",
+                FontWeight = "400",
+                LineHeight = "1.65"
+            },
+            Button = new ButtonTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.9375rem",
+                FontWeight = "500",
+                LineHeight = "1.5"
+            },
+            Caption = new CaptionTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.875rem",
+                FontWeight = "400",
+                LineHeight = "1.5"
+            },
+            Overline = new OverlineTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.875rem",
+                FontWeight = "500",
+                LineHeight = "1.5",
+                LetterSpacing = "0.05em"
+            }
+        }
+    };
+
+    private MudThemeProvider ThemeProvider { get; set; } = null!;
+
+    private bool IsDarkMode { get; set; } = true;
+
+    private bool DrawerOpen { get; set; }
+
+    private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+
+    private Color AppBarButtonColour => IsDarkMode ? Color.Primary : Color.Secondary;
+
+    private string ContentStyle => IsDarkMode
+        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
+        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(245, 245, 250, 0.85), rgba(245, 245, 250, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;";
+
+    private string FooterStyle => IsDarkMode
+        ? "background: rgba(0, 0, 0, 0);"
+        : "background: rgba(255, 255, 255, 0);";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            IsDarkMode = await ThemeProvider.GetSystemDarkModeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleTheme()
+    {
+        IsDarkMode = !IsDarkMode;
+    }
+
+    private void ToggleDrawer()
+    {
+        DrawerOpen = !DrawerOpen;
+    }
+
+    private async Task HandleLogOut()
+    {
+        await AuthenticationService.ClearToken();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}

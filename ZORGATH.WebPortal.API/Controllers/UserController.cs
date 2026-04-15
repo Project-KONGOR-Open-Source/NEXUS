@@ -21,15 +21,22 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
     {
+        // Validate Account Name In All Environments
+        ValidationResult accountNameValidationResult = await new AccountNameValidator(HostEnvironment.IsDevelopment()).ValidateAsync(payload.Name);
+
+        if (accountNameValidationResult.IsValid is false)
+            return BadRequest(accountNameValidationResult.Errors.Select(error => error.ErrorMessage));
+
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
 
+        // Validate Password Strength In Non-Development Environments
         if (HostEnvironment.IsDevelopment() is false)
         {
-            ValidationResult result = await new PasswordValidator().ValidateAsync(payload.Password);
+            ValidationResult passwordValidationResult = await new PasswordValidator().ValidateAsync(payload.Password);
 
-            if (result.IsValid is false)
-                return BadRequest(result.Errors.Select(error => error.ErrorMessage));
+            if (passwordValidationResult.IsValid is false)
+                return BadRequest(passwordValidationResult.Errors.Select(error => error.ErrorMessage));
         }
 
         Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Value.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
@@ -172,7 +179,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
     [HttpGet("{id}", Name = "Get User")]
     [Authorize(UserRoles.AllRoles)]
-    [ProducesResponseType(typeof(GetBasicUserDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetUserDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
@@ -189,23 +196,56 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         // TODO: [OutputCache] On Get Requests
 
-        string role = User.Claims.GetUserRole();
+        string role = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.UserRole))?.Value ?? string.Empty;
 
-        if (role.Equals(UserRoles.Administrator))
+        if (role.Equals(UserRoles.Administrator).Equals(false) && role.Equals(UserRoles.User).Equals(false))
         {
-            return Ok(new GetBasicUserDTO(user.ID, user.EmailAddress,
-                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+            Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);
+
+            return BadRequest($@"Unknown User Role ""{role}""");
         }
 
         if (role.Equals(UserRoles.User))
         {
-            return Ok(new GetBasicUserDTO(user.ID,
-                new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToArray()),
-                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+            string? userIDClaimValue = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.UserID))?.Value;
+
+            if (int.TryParse(userIDClaimValue, out int authenticatedUserID).Equals(false))
+                return Unauthorized(@"The authenticated user identifier is missing or invalid");
+
+            if (authenticatedUserID.Equals(id).Equals(false))
+                return Forbid();
         }
 
-        Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);
+        string? currentAccountIDClaimValue = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.AccountID))?.Value;
+        int? currentAccountID = int.TryParse(currentAccountIDClaimValue, out int parsedCurrentAccountID) ? parsedCurrentAccountID : null;
 
-        return BadRequest($@"Unknown User Role ""{role}""");
+        Account currentAccount = ResolveCurrentAccount(user, currentAccountID);
+
+        GetUserDTO response = new(
+            user.ID,
+            user.EmailAddress,
+            user.Role.Name,
+            currentAccount.Name,
+            currentAccount.Clan?.Name ?? string.Empty,
+            currentAccount.Clan?.Tag ?? string.Empty,
+            user.TimestampCreated,
+            user.TotalLevel,
+            currentAccount.AscensionLevel,
+            user.Accounts
+                .OrderByDescending(account => account.IsMain)
+                .ThenBy(account => account.Name)
+                .Select(account => new GetUserAccountDTO(account.ID, account.Name, account.IsMain, account.Type.ToString(), account.Clan?.Name ?? string.Empty, account.Clan?.Tag ?? string.Empty))
+                .ToList());
+
+        return Ok(response);
+    }
+
+    private static Account ResolveCurrentAccount(User user, int? currentAccountID)
+    {
+        Account? currentAccount = currentAccountID is not null
+            ? user.Accounts.SingleOrDefault(account => account.ID.Equals(currentAccountID.Value))
+            : null;
+
+        return currentAccount ?? user.Accounts.Single(account => account.IsMain);
     }
 }

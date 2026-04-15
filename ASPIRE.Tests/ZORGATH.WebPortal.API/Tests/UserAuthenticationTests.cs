@@ -34,18 +34,18 @@ public sealed class UserAuthenticationTests
 
         tokenHandler.ValidateToken(authenticationResult.AuthenticationToken, tokenValidationParameters, out SecurityToken validatedToken);
 
-        if (validatedToken is not JwtSecurityToken jwtToken)
+        if (validatedToken is not JwtSecurityToken jwt)
             throw new InvalidOperationException($"Expected Token To Be A JWT Security Token, But Was {validatedToken.GetType().Name}");
 
         using (Assert.Multiple())
         {
-            await Assert.That(jwtToken.Subject).IsEqualTo(accountName);
-            await Assert.That(jwtToken.Claims.GetUserEmailAddress()).IsEqualTo(emailAddress);
-            await Assert.That(jwtToken.Issuer).IsEqualTo(configuration.Value.JWT.Issuer);
-            await Assert.That(jwtToken.Audiences.First()).IsEqualTo(configuration.Value.JWT.Audience);
+            await Assert.That(jwt.Subject).IsEqualTo(accountName);
+            await Assert.That(jwt.Claims.GetUserEmailAddress()).IsEqualTo(emailAddress);
+            await Assert.That(jwt.Issuer).IsEqualTo(configuration.Value.JWT.Issuer);
+            await Assert.That(jwt.Audiences.First()).IsEqualTo(configuration.Value.JWT.Audience);
         }
 
-        string userIDClaim = jwtToken.Claims.Single(claim => claim.Type.Equals(Claims.UserID)).Value;
+        string userIDClaim = jwt.Claims.Single(claim => claim.Type.Equals(Claims.UserID)).Value;
 
         await Assert.That(userIDClaim).IsEqualTo(authenticationResult.UserID.ToString());
     }
@@ -108,20 +108,20 @@ public sealed class UserAuthenticationTests
         JWTAuthenticationData authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         JwtSecurityTokenHandler tokenHandler = new ();
-        JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
+        JwtSecurityToken jwt = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
 
         using (Assert.Multiple())
         {
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Sub))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Email))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Iat))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.AuthTime))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Jti))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Nonce))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Sub))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Email))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Iat))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.AuthTime))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Jti))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Nonce))).IsTrue();
 
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(Claims.UserID))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(Claims.AccountID))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(Claims.AccountIsMain))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(Claims.UserID))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(Claims.AccountID))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(Claims.AccountIsMain))).IsTrue();
         }
     }
 
@@ -156,7 +156,7 @@ public sealed class UserAuthenticationTests
         using (Assert.Multiple())
         {
             await Assert.That(user.EmailAddress).IsEqualTo(emailAddress);
-            await Assert.That(user.Accounts).HasCount().GreaterThanOrEqualTo(1);
+            await Assert.That(user.Accounts).Count().IsGreaterThanOrEqualTo(1);
             await Assert.That(user.Accounts.Any(account => account.Name.Equals(accountName))).IsTrue();
             await Assert.That(user.Role.Name).IsEqualTo(UserRoles.User);
         }
@@ -224,18 +224,18 @@ public sealed class UserAuthenticationTests
         JWTAuthenticationData authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         JwtSecurityTokenHandler tokenHandler = new ();
-        JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
+        JwtSecurityToken jwt = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
 
         using (Assert.Multiple())
         {
             // Verify Expiration Claim Exists
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Exp))).IsTrue();
+            await Assert.That(jwt.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Exp))).IsTrue();
 
             // Verify Token Has A Valid Expiration Time In The Future
-            await Assert.That(jwtToken.ValidTo).IsGreaterThan(DateTime.UtcNow);
+            await Assert.That(jwt.ValidTo).IsGreaterThan(DateTime.UtcNow);
 
             // Verify Token Was Issued In The Past Or Now (5 Second Grace For Clock Skew)
-            await Assert.That(jwtToken.ValidFrom).IsLessThanOrEqualTo(DateTime.UtcNow.AddSeconds(5));
+            await Assert.That(jwt.ValidFrom).IsLessThanOrEqualTo(DateTime.UtcNow.AddSeconds(5));
         }
     }
 }

@@ -1,0 +1,98 @@
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-light.ttf") format("truetype");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-light-italic.ttf") format("truetype");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-italic.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-medium.ttf") format("truetype");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-medium-italic.ttf") format("truetype");
+    font-weight: 500;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    src: url("../fonts/ubuntu-bold-italic.ttf") format("truetype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Scurlock";
+    src: url("../fonts/scurlock.ttf") format("truetype");
+    font-display: swap;
+}
+
+.font-ubuntu {
+    font-family: "Ubuntu", sans-serif;
+}
+
+.font-ubuntu-light {
+    font-family: "Ubuntu", sans-serif;
+    font-weight: 300;
+}
+
+.font-ubuntu-medium {
+    font-family: "Ubuntu", sans-serif;
+    font-weight: 500;
+}
+
+.font-ubuntu-bold {
+    font-family: "Ubuntu", sans-serif;
+    font-weight: 700;
+}
+
+.font-scurlock {
+    font-family: "Scurlock", sans-serif;
+    text-transform: lowercase;
+    transition: text-shadow 0.25s ease-in-out;
+}
+
+.font-scurlock:hover {
+    text-shadow: 0 0 10px currentColor, 0 0 25px currentColor;
+}

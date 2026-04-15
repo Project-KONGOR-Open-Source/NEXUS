@@ -2,10 +2,10 @@ namespace ASPIRE.ApplicationHost;
 
 public class ASPIRE
 {
-    public static void Main(string[] args)
+    public static void Main(string[] arguments)
     {
         // Create Distributed Application Builder
-        IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
+        IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(arguments);
 
         // Get Configuration From Environment Variables And User Secrets
         IConfiguration configuration = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build();
@@ -119,8 +119,92 @@ public class ASPIRE
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Web Portal API Project
-        builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
+        IResourceBuilder<ProjectResource> webPortalAPI = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+
+        // Add Local STMP Server In Development
+        if (builder.Environment.IsDevelopment())
+        {
+            IResourceBuilder<ContainerResource> smtpServer = builder.AddContainer("smtp-server", "axllent/mailpit")
+                .WithImageTag("latest") // Latest MailPit Image: https://github.com/axllent/mailpit/releases/latest
+                .WithLifetime(ContainerLifetime.Persistent)
+                .WithEndpoint(port: 1025, targetPort: 1025, name: "smtp", scheme: "tcp") // Default SMTP Port
+                .WithHttpEndpoint(port: 8025, targetPort: 8025, name: "http"); // Default Web UI Port
+
+            webPortalAPI.WaitFor(smtpServer);
+        }
+
+        // Populate AWS SES Configuration In Staging/Production/etc.
+        else
+        {
+            // Set SMTP Host Parameter Name And Environment Variable Name
+            const string smtpHostParameterName = "smtp-host";
+            const string smtpHostEnvironmentVariableName = "SMTP_HOST";
+
+            // Attempt To Resolve SMTP Host From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+            string? resolvedSMTPHost = configuration[$"Parameters:{smtpHostParameterName}"] ?? configuration[smtpHostEnvironmentVariableName];
+
+            // Populate SMTP Host If Available In User Secrets Or Environment Variables
+            IResourceBuilder<ParameterResource> smtpHost = resolvedSMTPHost is not null
+                ? builder.AddParameter(smtpHostParameterName, resolvedSMTPHost)
+                : builder.AddParameter(smtpHostParameterName);
+
+            // Set SMTP Port Parameter Name And Environment Variable Name
+            const string smtpPortParameterName = "smtp-port";
+            const string smtpPortEnvironmentVariableName = "SMTP_PORT";
+
+            // Attempt To Resolve SMTP Port From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+            string? resolvedSMTPPort = configuration[$"Parameters:{smtpPortParameterName}"] ?? configuration[smtpPortEnvironmentVariableName];
+
+            // Populate SMTP Port If Available In User Secrets Or Environment Variables
+            IResourceBuilder<ParameterResource> smtpPort = resolvedSMTPPort is not null
+                ? builder.AddParameter(smtpPortParameterName, resolvedSMTPPort)
+                : builder.AddParameter(smtpPortParameterName);
+
+            // Set SMTP Username Parameter Name And Environment Variable Name
+            const string smtpUsernameParameterName = "smtp-username";
+            const string smtpUsernameEnvironmentVariableName = "SMTP_USERNAME";
+
+            // Attempt To Resolve SMTP Username From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+            string? resolvedSMTPUsername = configuration[$"Parameters:{smtpUsernameParameterName}"] ?? configuration[smtpUsernameEnvironmentVariableName];
+
+            // Populate SMTP Username If Available In User Secrets Or Environment Variables
+            IResourceBuilder<ParameterResource> smtpUsername = resolvedSMTPUsername is not null
+                ? builder.AddParameter(smtpUsernameParameterName, resolvedSMTPUsername, secret: true)
+                : builder.AddParameter(smtpUsernameParameterName, secret: true);
+
+            // Set SMTP Password Parameter Name And Environment Variable Name
+            const string smtpPasswordParameterName = "smtp-password";
+            const string smtpPasswordEnvironmentVariableName = "SMTP_PASSWORD";
+
+            // Attempt To Resolve SMTP Password From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+            string? resolvedSMTPPassword = configuration[$"Parameters:{smtpPasswordParameterName}"] ?? configuration[smtpPasswordEnvironmentVariableName];
+
+            // Populate SMTP Password If Available In User Secrets Or Environment Variables
+            IResourceBuilder<ParameterResource> smtpPassword = resolvedSMTPPassword is not null
+                ? builder.AddParameter(smtpPasswordParameterName, resolvedSMTPPassword, secret: true)
+                : builder.AddParameter(smtpPasswordParameterName, secret: true);
+
+            // Pass SMTP Configuration To Web Portal API As Environment Variables That Override The "Operational:SMTP" Configuration Section
+            // The "__" Separator In Environment Variable Names Maps To ":" In ASP.NET Core's Configuration System (e.g. "Operational__SMTP__Host" Resolves To "Operational:SMTP:Host")
+            // These Environment Variables Are Set On The Child Process Before It Starts, So They Are Available During Configuration Building And Before IOptions<T> Is Bound
+            webPortalAPI
+                .WithEnvironment("Operational__SMTP__Host", smtpHost)
+                .WithEnvironment("Operational__SMTP__Port", smtpPort)
+                .WithEnvironment("Operational__SMTP__Username", smtpUsername)
+                .WithEnvironment("Operational__SMTP__Password", smtpPassword);
+
+            // Create Resource Relationships After Parent Resource Is Defined
+            smtpHost.WithDescription("SMTP Host").WithParentRelationship(webPortalAPI);
+            smtpPort.WithDescription("SMTP Port").WithParentRelationship(webPortalAPI);
+            smtpUsername.WithDescription("SMTP Username").WithParentRelationship(webPortalAPI);
+            smtpPassword.WithDescription("SMTP Password").WithParentRelationship(webPortalAPI);
+        }
+
+        // Add Web Portal UI Project
+        builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
+            .WithReference(webPortalAPI).WaitFor(webPortalAPI) // Connect To Web Portal API And Wait For It To Start
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Start Orchestrating Distributed Application

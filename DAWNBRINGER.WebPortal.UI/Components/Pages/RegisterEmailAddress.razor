@@ -1,0 +1,108 @@
+@page "/register"
+
+@inject PortalAuthenticationService AuthenticationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Register - Project KONGOR</PageTitle>
+
+<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6" Style="min-height: calc(100vh - 200px);">
+    <MudCard Outlined="true" Class="pa-6" Style="width: 100%; max-width: 640px;">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Large" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5">Register Email Address</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                    Enter your email address to begin registration. A verification link will be sent to your inbox.
+                </MudText>
+            </MudStack>
+
+            <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+
+                <MudStack Spacing="3">
+                    <MudTextField @bind-Value="FormModel.EmailAddress"
+                                  For="@(() => FormModel.EmailAddress)"
+                                  Label="Email Address"
+                                  HelperText="A valid email address you have access to."
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Email"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Email" />
+
+                    <MudTextField @bind-Value="FormModel.ConfirmEmailAddress"
+                                  For="@(() => FormModel.ConfirmEmailAddress)"
+                                  Label="Confirm Email Address"
+                                  HelperText="Enter the same email address again for confirmation."
+                                  Variant="Variant.Outlined"
+                                  InputType="InputType.Email"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Email" />
+
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-2">
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Disabled="Processing">
+                            @if (Processing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Registering...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Register Email Address</MudText>
+                            }
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            </EditForm>
+        </MudCardContent>
+    </MudCard>
+
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+        Already have an account? <MudLink Href="/login">Log in here</MudLink>
+    </MudText>
+</MudStack>
+
+@code {
+
+    private RegisterEmailAddressFormModel FormModel { get; set; } = new();
+
+    private bool Processing { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        Processing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAnonymousClient();
+
+            RegisterEmailAddressRequest request = new(FormModel.EmailAddress, FormModel.ConfirmEmailAddress);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Email/Register", request);
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                FormModel = new RegisterEmailAddressFormModel();
+                Snackbar.Add("Email address registered successfully.", Severity.Success);
+                Snackbar.Add("Check your inbox for the verification link.", Severity.Info);
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            Processing = false;
+        }
+    }
+}
