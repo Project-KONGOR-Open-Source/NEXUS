@@ -14,6 +14,12 @@ public class DAWNBRINGER
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
+        // Add Response Compression For Smaller Payloads
+        builder.Services.AddResponseCompression(options =>
+        {
+            options.EnableForHttps = true;
+        });
+
         // Add MudBlazor Component Library Services
         builder.Services.AddMudServices(configuration =>
         {
@@ -68,6 +74,10 @@ public class DAWNBRINGER
 
         // Automatically Redirect HTTP Requests To HTTPS
         application.UseHttpsRedirection();
+
+        // Compress Responses To Reduce Payload Sizes
+        application.UseResponseCompression();
+
         application.UseAntiforgery();
         application.MapStaticAssets();
 
