@@ -40,12 +40,12 @@
                 <MudStack Row="true" Class="align-center gap-2">
                     <AuthorizeView>
                         <NotAuthorized>
-                            <MudButton Href="/register" Color="Color.Primary" Variant="Variant.Filled">Register Account</MudButton>
-                            <MudButton Href="/login" Color="Color.Inherit" Variant="Variant.Text">Log In</MudButton>
+                            <MudButton Href="/register" Color="AppBarButtonColour" Variant="Variant.Outlined">Register Account</MudButton>
+                            <MudButton Href="/login" Color="AppBarButtonColour" Variant="Variant.Outlined">Log In</MudButton>
                         </NotAuthorized>
                         <Authorized>
-                            <MudButton Href="/account" Color="Color.Primary" Variant="Variant.Filled">Manage Account</MudButton>
-                            <MudButton Color="Color.Inherit" Variant="Variant.Text" OnClick="HandleLogOut">Log Out</MudButton>
+                            <MudButton Href="/account" Color="AppBarButtonColour" Variant="Variant.Outlined">Manage Account</MudButton>
+                            <MudButton Color="AppBarButtonColour" Variant="Variant.Outlined" OnClick="HandleLogOut">Log Out</MudButton>
                         </Authorized>
                     </AuthorizeView>
 
@@ -226,6 +226,9 @@
     private bool DrawerOpen { get; set; }
 
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+
+    private Color AppBarButtonColour => IsDarkMode ? Color.Primary : Color.Secondary;
+
 
     private string ContentStyle => IsDarkMode
         ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
