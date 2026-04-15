@@ -234,7 +234,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             user.Accounts
                 .OrderByDescending(account => account.IsMain)
                 .ThenBy(account => account.Name)
-                .Select(account => new GetUserAccountDTO(account.ID, account.Name, account.IsMain, account.Clan?.Name ?? string.Empty, account.Clan?.Tag ?? string.Empty))
+                .Select(account => new GetUserAccountDTO(account.ID, account.Name, account.IsMain, account.Type.ToString(), account.Clan?.Name ?? string.Empty, account.Clan?.Tag ?? string.Empty))
                 .ToList());
 
         return Ok(response);

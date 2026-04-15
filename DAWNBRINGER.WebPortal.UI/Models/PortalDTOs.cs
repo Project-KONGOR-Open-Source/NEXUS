@@ -122,4 +122,4 @@ public record BasicAccountResponse(int ID, string Name);
 
 public record UserResponse(int ID, string EmailAddress, string Role, string CurrentAccountName, string CurrentClanName, string CurrentClanTag, DateTimeOffset TimestampCreated, int TotalLevel, int CurrentAccountLevel, List<UserAccountResponse> Accounts);
 
-public record UserAccountResponse(int ID, string Name, bool IsMain, string ClanName, string ClanTag);
+public record UserAccountResponse(int ID, string Name, bool IsMain, string AccountType, string ClanName, string ClanTag);

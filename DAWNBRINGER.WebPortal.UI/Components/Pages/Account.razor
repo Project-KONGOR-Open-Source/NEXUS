@@ -72,12 +72,14 @@
                     <MudTable Items="@AccountOverview.Accounts" Hover="true" Elevation="0">
                         <HeaderContent>
                             <MudTh>Account Name</MudTh>
+                            <MudTh>Account Type</MudTh>
                             <MudTh>Main Account</MudTh>
                             <MudTh>Clan</MudTh>
                             <MudTh>Clan Tag</MudTh>
                         </HeaderContent>
                         <RowTemplate>
                             <MudTd DataLabel="Account Name">@context.Name</MudTd>
+                            <MudTd DataLabel="Account Type">@context.AccountType.ToUpperInvariant()</MudTd>
                             <MudTd DataLabel="Main Account">
                                 @if (context.IsMain)
                                 {
