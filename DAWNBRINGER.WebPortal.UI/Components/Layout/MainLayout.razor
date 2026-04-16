@@ -97,56 +97,16 @@
 
             <footer class="kongor-footer">
                 <MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6">
-                    <MudGrid Spacing="4" Class="py-8">
-                        <MudItem xs="12" sm="4">
-                            <MudStack Spacing="2">
-                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                                    <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="32" Height="32" Class="logo-glow" />
-                                    <MudText Typo="Typo.h6" Class="font-scurlock" Color="Color.Primary">Project KONGOR</MudText>
-                                </MudStack>
-                                <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                    A community-driven revival of Heroes Of Newerth.
-                                </MudText>
-                            </MudStack>
-                        </MudItem>
+                    <MudStack Row="true" Justify="Justify.Center" Class="pt-6 pb-2 flex-wrap gap-6">
+                        <MudLink Href="/" Typo="Typo.body2" Color="Color.Inherit">Home</MudLink>
+                        <MudLink Href="/downloads" Typo="Typo.body2" Color="Color.Inherit">Downloads</MudLink>
+                        <MudLink Href="https://codex.kongor.net" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Knowledge Base</MudLink>
+                        <MudLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Discord</MudLink>
+                        <MudLink Href="https://www.reddit.com/r/newerth/" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Reddit</MudLink>
+                        <MudLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">GitHub</MudLink>
+                    </MudStack>
 
-                        <MudItem xs="6" sm="2">
-                            <MudStack Spacing="1">
-                                <MudText Typo="Typo.overline">Quick Links</MudText>
-                                <MudLink Href="/" Typo="Typo.body2" Color="Color.Inherit">Home</MudLink>
-                                <MudLink Href="/downloads" Typo="Typo.body2" Color="Color.Inherit">Downloads</MudLink>
-                                <MudLink Href="https://codex.kongor.net" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Knowledge Base</MudLink>
-                            </MudStack>
-                        </MudItem>
-
-                        <MudItem xs="6" sm="2">
-                            <MudStack Spacing="1">
-                                <MudText Typo="Typo.overline">Community</MudText>
-                                <MudLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Discord</MudLink>
-                                <MudLink Href="https://www.reddit.com/r/newerth/" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Reddit</MudLink>
-                                <MudLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">GitHub</MudLink>
-                            </MudStack>
-                        </MudItem>
-
-                        <MudItem xs="12" sm="4">
-                            <MudStack Spacing="1">
-                                <MudText Typo="Typo.overline">Account</MudText>
-                                <AuthorizeView>
-                                    <NotAuthorized>
-                                        <MudLink Href="/email/register" Typo="Typo.body2" Color="Color.Inherit">Register</MudLink>
-                                        <MudLink Href="/login" Typo="Typo.body2" Color="Color.Inherit">Log In</MudLink>
-                                    </NotAuthorized>
-                                    <Authorized>
-                                        <MudLink Href="/account" Typo="Typo.body2" Color="Color.Inherit">My Account</MudLink>
-                                    </Authorized>
-                                </AuthorizeView>
-                            </MudStack>
-                        </MudItem>
-                    </MudGrid>
-
-                    <MudDivider Class="mb-4" />
-
-                    <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="pb-6">
+                    <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="pt-4 pb-6">
                         <MudText Typo="Typo.caption" Align="Align.Center">
                             Copyright 2024 Project KONGOR. Contact: support@kongor.net
                         </MudText>

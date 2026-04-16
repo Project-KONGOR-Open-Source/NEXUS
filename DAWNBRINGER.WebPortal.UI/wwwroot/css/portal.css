@@ -22,10 +22,10 @@
     --kongor-border-glass-inner: rgba(0, 230, 118, 0.1);
 
     --kongor-blur-amount: 16px;
-    --kongor-transition-speed: 0.3s;
+    --kongor-transition-speed: 0.45s;
 
     --kongor-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-    --kongor-card-shadow-hover: 0 8px 40px rgba(0, 230, 118, 0.15), 0 4px 24px rgba(0, 0, 0, 0.5);
+    --kongor-card-shadow-hover: 0 8px 48px rgba(0, 230, 118, 0.2), 0 4px 32px rgba(0, 0, 0, 0.5);
 }
 
 /* --- Glassmorphism Cards ----------------------------------- */
@@ -69,6 +69,15 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(0, 230, 118, 0.12) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.glass-card-form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 48px rgba(0, 230, 118, 0.15), 0 8px 32px rgba(0, 0, 0, 0.5);
+    border-color: rgba(0, 230, 118, 0.25) !important;
 }
 
 /* --- AppBar & Navigation ----------------------------------- */
@@ -78,6 +87,21 @@
     backdrop-filter: blur(20px) saturate(1.5);
     -webkit-backdrop-filter: blur(20px) saturate(1.5);
     border-bottom: 1px solid rgba(0, 230, 118, 0.1);
+}
+
+/* Fix #3: Prevent Logo Glow From Being Clipped By Button Overflow */
+.kongor-appbar .mud-button-root {
+    overflow: visible;
+}
+
+/* Fix #4: Community Dropdown Highlight Coverage */
+.mud-menu .mud-list {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.mud-menu .mud-list-item {
+    border-radius: 0;
 }
 
 /* --- Hero Section ------------------------------------------ */
@@ -114,7 +138,7 @@
 }
 
 .hero-title:hover {
-    text-shadow: 0 0 20px rgba(0, 230, 118, 0.6), 0 0 60px rgba(0, 230, 118, 0.3), 0 0 100px rgba(0, 230, 118, 0.15);
+    text-shadow: 0 0 30px rgba(0, 230, 118, 0.6), 0 0 80px rgba(0, 230, 118, 0.3), 0 0 120px rgba(0, 230, 118, 0.15);
 }
 
 /* --- Section Dividers & Headers ---------------------------- */
@@ -158,7 +182,7 @@
 }
 
 .glow-button:hover {
-    box-shadow: 0 0 20px rgba(0, 230, 118, 0.3), 0 0 40px rgba(0, 230, 118, 0.1);
+    box-shadow: 0 0 28px rgba(0, 230, 118, 0.35), 0 0 56px rgba(0, 230, 118, 0.15), 0 0 84px rgba(0, 230, 118, 0.05);
 }
 
 /* --- Logo Glow Animation ----------------------------------- */
@@ -170,6 +194,39 @@
 
 .logo-glow {
     animation: kongor-pulse-glow 3s ease-in-out infinite;
+}
+
+/* --- Account Name Pulsing Glow ----------------------------- */
+
+@keyframes kongor-text-pulse {
+    0%, 100% { text-shadow: 0 0 8px rgba(0, 230, 118, 0.3), 0 0 24px rgba(0, 230, 118, 0.1); }
+    50% { text-shadow: 0 0 16px rgba(0, 230, 118, 0.5), 0 0 40px rgba(0, 230, 118, 0.2), 0 0 64px rgba(0, 230, 118, 0.1); }
+}
+
+.account-name-glow {
+    animation: kongor-text-pulse 3s ease-in-out infinite;
+}
+
+/* --- Timeline Arrow Borders -------------------------------- */
+
+.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::before {
+    border-right-color: var(--kongor-border-glass-inner) !important;
+    border-left-color: var(--kongor-border-glass-inner) !important;
+}
+
+.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::after {
+    border-right-color: var(--kongor-surface-glass-inner) !important;
+    border-left-color: var(--kongor-surface-glass-inner) !important;
+}
+
+.light-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::before {
+    border-right-color: rgba(46, 125, 50, 0.1) !important;
+    border-left-color: rgba(46, 125, 50, 0.1) !important;
+}
+
+.light-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::after {
+    border-right-color: rgba(255, 255, 255, 0.5) !important;
+    border-left-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* --- Footer ------------------------------------------------ */
@@ -221,7 +278,7 @@
 }
 
 .light-mode .glass-card:hover {
-    box-shadow: 0 8px 40px rgba(46, 125, 50, 0.1);
+    box-shadow: 0 8px 48px rgba(46, 125, 50, 0.12);
     border-color: rgba(46, 125, 50, 0.25) !important;
 }
 
@@ -241,9 +298,25 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
+.light-mode .glass-card-form:hover {
+    box-shadow: 0 12px 48px rgba(46, 125, 50, 0.1), 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-color: rgba(46, 125, 50, 0.2) !important;
+}
+
 .light-mode .kongor-appbar {
     background: rgba(27, 94, 32, 0.95) !important;
     border-bottom-color: rgba(46, 125, 50, 0.3);
+}
+
+/* Fix #10: Light Mode AppBar Buttons Must Be Readable On Dark Green Background */
+.light-mode .kongor-appbar .mud-button-outlined {
+    color: #FFFFFF !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.light-mode .kongor-appbar .mud-button-outlined:hover {
+    border-color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 .light-mode .hero-title {
@@ -251,7 +324,7 @@
 }
 
 .light-mode .hero-title:hover {
-    text-shadow: 0 0 20px rgba(46, 125, 50, 0.5), 0 0 60px rgba(46, 125, 50, 0.2);
+    text-shadow: 0 0 30px rgba(46, 125, 50, 0.5), 0 0 80px rgba(46, 125, 50, 0.2);
 }
 
 .light-mode .section-divider {
@@ -267,10 +340,19 @@
 }
 
 .light-mode .glow-button:hover {
-    box-shadow: 0 0 20px rgba(46, 125, 50, 0.2), 0 0 40px rgba(46, 125, 50, 0.08);
+    box-shadow: 0 0 28px rgba(46, 125, 50, 0.25), 0 0 56px rgba(46, 125, 50, 0.1);
 }
 
 .light-mode .kongor-footer {
     background: linear-gradient(180deg, transparent, rgba(241, 248, 233, 0.6));
     border-top-color: rgba(46, 125, 50, 0.1);
+}
+
+.light-mode .account-name-glow {
+    animation-name: kongor-text-pulse-light;
+}
+
+@keyframes kongor-text-pulse-light {
+    0%, 100% { text-shadow: 0 0 8px rgba(46, 125, 50, 0.2), 0 0 24px rgba(46, 125, 50, 0.08); }
+    50% { text-shadow: 0 0 16px rgba(46, 125, 50, 0.35), 0 0 40px rgba(46, 125, 50, 0.15); }
 }
