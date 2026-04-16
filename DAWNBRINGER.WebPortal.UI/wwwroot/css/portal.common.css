@@ -251,7 +251,7 @@ h1:focus {
     transform: translateX(-50%);
     width: 60px;
     height: 2px;
-    background: linear-gradient(90deg, var(--kongor-primary), var(--kongor-secondary));
+    background: var(--kongor-secondary);
     border-radius: 1px;
     transition: width var(--kongor-transition-speed) ease;
 }
