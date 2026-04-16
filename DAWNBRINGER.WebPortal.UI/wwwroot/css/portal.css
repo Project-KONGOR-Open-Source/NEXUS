@@ -26,6 +26,9 @@
 
     --kongor-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
     --kongor-card-shadow-hover: 0 8px 48px rgba(0, 230, 118, 0.2), 0 4px 32px rgba(0, 0, 0, 0.5);
+
+    --kongor-timeline-surface: #0F1A12;
+    --kongor-timeline-border: rgba(0, 230, 118, 0.15);
 }
 
 /* --- Glassmorphism Cards ----------------------------------- */
@@ -80,6 +83,32 @@
     border-color: rgba(0, 230, 118, 0.25) !important;
 }
 
+/* --- Timeline Cards (Solid Background For Seamless Arrow) -- */
+
+.timeline-card {
+    background: var(--kongor-timeline-surface) !important;
+    border: 1px solid var(--kongor-timeline-border) !important;
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.timeline-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(0, 230, 118, 0.12);
+    border-color: rgba(0, 230, 118, 0.25) !important;
+}
+
+.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
+    border-right-color: var(--kongor-timeline-border) !important;
+    border-left-color: var(--kongor-timeline-border) !important;
+}
+
+.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
+    border-right-color: var(--kongor-timeline-surface) !important;
+    border-left-color: var(--kongor-timeline-surface) !important;
+}
+
 /* --- AppBar & Navigation ----------------------------------- */
 
 .kongor-appbar {
@@ -89,19 +118,22 @@
     border-bottom: 1px solid rgba(0, 230, 118, 0.1);
 }
 
-/* Fix #3: Prevent Logo Glow From Being Clipped By Button Overflow */
-.kongor-appbar .mud-button-root {
-    overflow: visible;
+/* Fix Logo Glow Clipping: Allow Glow To Overflow Button Boundaries */
+.kongor-appbar button,
+.kongor-appbar a,
+.kongor-appbar .mud-button-root,
+.kongor-appbar .mud-icon-button {
+    overflow: visible !important;
 }
 
-/* Fix #4: Community Dropdown Highlight Coverage */
-.mud-menu .mud-list {
-    padding-top: 0;
-    padding-bottom: 0;
+/* Fix Community Dropdown Highlight: Full-Width Coverage */
+.mud-popover .mud-list {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 }
 
-.mud-menu .mud-list-item {
-    border-radius: 0;
+.mud-popover .mud-list-item {
+    border-radius: 0 !important;
 }
 
 /* --- Hero Section ------------------------------------------ */
@@ -111,6 +143,7 @@
     padding: 5rem 2rem 4rem;
     text-align: center;
     overflow: hidden;
+    margin-bottom: 2.5rem;
 }
 
 .hero-section::before {
@@ -199,34 +232,12 @@
 /* --- Account Name Pulsing Glow ----------------------------- */
 
 @keyframes kongor-text-pulse {
-    0%, 100% { text-shadow: 0 0 8px rgba(0, 230, 118, 0.3), 0 0 24px rgba(0, 230, 118, 0.1); }
-    50% { text-shadow: 0 0 16px rgba(0, 230, 118, 0.5), 0 0 40px rgba(0, 230, 118, 0.2), 0 0 64px rgba(0, 230, 118, 0.1); }
+    0%, 100% { text-shadow: 0 0 10px rgba(0, 230, 118, 0.4), 0 0 30px rgba(0, 230, 118, 0.15); }
+    50% { text-shadow: 0 0 20px rgba(0, 230, 118, 0.6), 0 0 48px rgba(0, 230, 118, 0.25), 0 0 72px rgba(0, 230, 118, 0.1); }
 }
 
 .account-name-glow {
     animation: kongor-text-pulse 3s ease-in-out infinite;
-}
-
-/* --- Timeline Arrow Borders -------------------------------- */
-
-.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::before {
-    border-right-color: var(--kongor-border-glass-inner) !important;
-    border-left-color: var(--kongor-border-glass-inner) !important;
-}
-
-.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::after {
-    border-right-color: var(--kongor-surface-glass-inner) !important;
-    border-left-color: var(--kongor-surface-glass-inner) !important;
-}
-
-.light-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::before {
-    border-right-color: rgba(46, 125, 50, 0.1) !important;
-    border-left-color: rgba(46, 125, 50, 0.1) !important;
-}
-
-.light-mode .mud-timeline-modifiers .mud-timeline-item-content .glass-card-inner::after {
-    border-right-color: rgba(255, 255, 255, 0.5) !important;
-    border-left-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* --- Footer ------------------------------------------------ */
@@ -278,7 +289,7 @@
 }
 
 .light-mode .glass-card:hover {
-    box-shadow: 0 8px 48px rgba(46, 125, 50, 0.12);
+    box-shadow: 0 8px 48px rgba(46, 125, 50, 0.12), 0 4px 24px rgba(0, 0, 0, 0.1);
     border-color: rgba(46, 125, 50, 0.25) !important;
 }
 
@@ -299,8 +310,29 @@
 }
 
 .light-mode .glass-card-form:hover {
-    box-shadow: 0 12px 48px rgba(46, 125, 50, 0.1), 0 8px 32px rgba(0, 0, 0, 0.1);
-    border-color: rgba(46, 125, 50, 0.2) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 0 24px rgba(46, 125, 50, 0.08);
+    border-color: rgba(46, 125, 50, 0.3) !important;
+}
+
+.light-mode .timeline-card {
+    background: #F5FAF5 !important;
+    border-color: rgba(46, 125, 50, 0.15) !important;
+}
+
+.light-mode .timeline-card:hover {
+    box-shadow: 0 6px 24px rgba(46, 125, 50, 0.08);
+    border-color: rgba(46, 125, 50, 0.25) !important;
+}
+
+.light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
+    border-right-color: rgba(46, 125, 50, 0.15) !important;
+    border-left-color: rgba(46, 125, 50, 0.15) !important;
+}
+
+.light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
+    border-right-color: #F5FAF5 !important;
+    border-left-color: #F5FAF5 !important;
 }
 
 .light-mode .kongor-appbar {
@@ -308,15 +340,14 @@
     border-bottom-color: rgba(46, 125, 50, 0.3);
 }
 
-/* Fix #10: Light Mode AppBar Buttons Must Be Readable On Dark Green Background */
+/* Light Mode AppBar Buttons: Use Gold For Visibility On Dark Green */
 .light-mode .kongor-appbar .mud-button-outlined {
-    color: #FFFFFF !important;
-    border-color: rgba(255, 255, 255, 0.6) !important;
+    color: var(--kongor-glow-secondary) !important;
+    border-color: var(--kongor-glow-secondary) !important;
 }
 
 .light-mode .kongor-appbar .mud-button-outlined:hover {
-    border-color: #FFFFFF !important;
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 215, 64, 0.1) !important;
 }
 
 .light-mode .hero-title {
@@ -348,11 +379,12 @@
     border-top-color: rgba(46, 125, 50, 0.1);
 }
 
+/* Light Mode Account Name: Gold Glow So It's Visible On Green */
 .light-mode .account-name-glow {
     animation-name: kongor-text-pulse-light;
 }
 
 @keyframes kongor-text-pulse-light {
-    0%, 100% { text-shadow: 0 0 8px rgba(46, 125, 50, 0.2), 0 0 24px rgba(46, 125, 50, 0.08); }
-    50% { text-shadow: 0 0 16px rgba(46, 125, 50, 0.35), 0 0 40px rgba(46, 125, 50, 0.15); }
+    0%, 100% { text-shadow: 0 0 10px rgba(245, 127, 23, 0.3), 0 0 30px rgba(245, 127, 23, 0.1); }
+    50% { text-shadow: 0 0 20px rgba(245, 127, 23, 0.5), 0 0 48px rgba(245, 127, 23, 0.2); }
 }
