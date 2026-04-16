@@ -335,110 +335,114 @@
 .animate-fade-in-delay-3 { animation: kongor-fade-in 0.5s ease-out 0.3s both; }
 .animate-fade-in-delay-4 { animation: kongor-fade-in 0.5s ease-out 0.4s both; }
 
-/* --- Light Mode Overrides ---------------------------------- */
+/* --- Light Mode Overrides (Azure & Fuchsia) ---------------- */
 
 .light-mode .glass-card {
-    background: rgba(255, 255, 255, 0.7) !important;
-    border-color: rgba(184, 134, 11, 0.12) !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-color: rgba(25, 118, 210, 0.2) !important;
+    box-shadow: 0 4px 24px rgba(25, 118, 210, 0.12);
 }
 
 .light-mode .glass-card:hover {
-    box-shadow: 0 8px 48px rgba(184, 134, 11, 0.12), 0 4px 24px rgba(0, 0, 0, 0.1);
-    border-color: rgba(184, 134, 11, 0.25) !important;
+    box-shadow: 0 8px 48px rgba(25, 118, 210, 0.28), 0 4px 24px rgba(10, 25, 41, 0.12);
+    border-color: rgba(25, 118, 210, 0.45) !important;
 }
 
 .light-mode .glass-card-inner {
-    background: rgba(255, 255, 255, 0.5) !important;
-    border-color: rgba(184, 134, 11, 0.08) !important;
+    background: rgba(255, 255, 255, 0.65) !important;
+    border-color: rgba(25, 118, 210, 0.15) !important;
 }
 
 .light-mode .glass-card-inner:hover {
-    box-shadow: 0 6px 24px rgba(184, 134, 11, 0.08);
-    border-color: rgba(184, 134, 11, 0.18) !important;
+    box-shadow: 0 6px 24px rgba(25, 118, 210, 0.2);
+    border-color: rgba(25, 118, 210, 0.3) !important;
 }
 
 .light-mode .glass-card-form {
-    background: rgba(255, 255, 255, 0.8) !important;
-    border-color: rgba(184, 134, 11, 0.1) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(25, 118, 210, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(25, 118, 210, 0.15);
 }
 
 .light-mode .glass-card-form:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 48px rgba(184, 134, 11, 0.15), 0 8px 32px rgba(0, 0, 0, 0.12);
-    border-color: rgba(184, 134, 11, 0.3) !important;
+    box-shadow: 0 12px 48px rgba(25, 118, 210, 0.28), 0 8px 32px rgba(10, 25, 41, 0.15);
+    border-color: rgba(25, 118, 210, 0.45) !important;
 }
 
 .light-mode .timeline-card {
-    background: #FFFCF5 !important;
-    border-color: rgba(184, 134, 11, 0.12) !important;
+    background: #FFFFFF !important;
+    border-color: rgba(25, 118, 210, 0.22) !important;
 }
 
 .light-mode .timeline-card:hover {
-    box-shadow: 0 6px 24px rgba(184, 134, 11, 0.08);
-    border-color: rgba(184, 134, 11, 0.25) !important;
+    box-shadow: 0 6px 24px rgba(25, 118, 210, 0.22);
+    border-color: rgba(25, 118, 210, 0.45) !important;
 }
 
 .light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
-    border-right-color: rgba(184, 134, 11, 0.12) !important;
+    border-right-color: rgba(25, 118, 210, 0.22) !important;
 }
 
 .light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
-    border-right: 17px solid #FFFCF5 !important;
+    border-right: 17px solid #FFFFFF !important;
 }
 
+/* Translucent Light Appbar: Mirrors Dark Mode's Translucent Dark Appbar */
 .light-mode .kongor-appbar {
-    background: rgba(27, 94, 32, 0.95) !important;
-    border-bottom-color: rgba(46, 125, 50, 0.3);
+    background: rgba(248, 250, 252, 0.8) !important;
+    border-bottom-color: rgba(25, 118, 210, 0.2);
 }
 
 .light-mode .kongor-appbar .mud-button-outlined {
-    color: #DAA520 !important;
-    border-color: #DAA520 !important;
+    color: #1976D2 !important;
+    border-color: #1976D2 !important;
 }
 
 .light-mode .kongor-appbar .mud-button-outlined:hover {
-    background: rgba(218, 165, 32, 0.15) !important;
+    background: rgba(25, 118, 210, 0.1) !important;
 }
 
-/* Light Mode Text Glow */
+/* Light Mode Text Glow: Azure */
 @keyframes kongor-text-pulse-light {
-    0%, 100% { text-shadow: 0 0 12px rgba(184, 134, 11, 0.35), 0 0 36px rgba(184, 134, 11, 0.12); }
-    50% { text-shadow: 0 0 24px rgba(184, 134, 11, 0.55), 0 0 56px rgba(184, 134, 11, 0.25), 0 0 84px rgba(184, 134, 11, 0.1); }
+    0%, 100% { text-shadow: 0 0 12px rgba(25, 118, 210, 0.55), 0 0 36px rgba(25, 118, 210, 0.25); }
+    50% { text-shadow: 0 0 24px rgba(25, 118, 210, 0.75), 0 0 56px rgba(25, 118, 210, 0.4), 0 0 84px rgba(25, 118, 210, 0.18); }
 }
 
 .light-mode .hero-title { animation-name: kongor-text-pulse-light; }
 .light-mode .account-name-glow { animation-name: kongor-text-pulse-light; }
 
 .light-mode .hero-section::before {
-    background: radial-gradient(ellipse at center, rgba(184, 134, 11, 0.06) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center, rgba(25, 118, 210, 0.12) 0%, transparent 70%);
 }
 
 .light-mode .hero-section::after {
-    background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.35), transparent);
 }
 
-/* Fix 20: Light Mode Section Dividers Stay Green For Visibility */
 .light-mode .section-divider {
-    background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.3), transparent);
 }
 
 .light-mode .section-header::after {
-    background: var(--kongor-glow-secondary-light) !important;
+    background: linear-gradient(90deg, #1976D2, #C2185B) !important;
 }
 
 .light-mode .glow-button:hover {
-    box-shadow: 0 0 28px rgba(184, 134, 11, 0.25), 0 0 56px rgba(184, 134, 11, 0.1);
+    box-shadow: 0 0 28px rgba(25, 118, 210, 0.5), 0 0 56px rgba(25, 118, 210, 0.22), 0 0 84px rgba(25, 118, 210, 0.08);
 }
 
 .light-mode .kongor-footer {
-    background: linear-gradient(180deg, transparent, rgba(241, 248, 233, 0.6));
+    background: linear-gradient(180deg, transparent, rgba(227, 242, 253, 0.7));
 }
 
 @keyframes kongor-pulse-glow-light {
-    0%, 100% { filter: drop-shadow(0 0 4px rgba(184, 134, 11, 0.3)); }
-    50% { filter: drop-shadow(0 0 12px rgba(184, 134, 11, 0.5)); }
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(25, 118, 210, 0.5)); }
+    50% { filter: drop-shadow(0 0 12px rgba(25, 118, 210, 0.7)); }
 }
 
 .light-mode .logo-glow { animation-name: kongor-pulse-glow-light; }
+
+.light-mode .mud-ripple-effect {
+    background: radial-gradient(circle, rgba(25, 118, 210, 0.12) 0%, transparent 65%) !important;
+}
