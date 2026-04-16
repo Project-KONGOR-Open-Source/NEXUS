@@ -144,6 +144,13 @@ public class MailPitEmailService(IOptions<OperationalConfiguration> configuratio
 
         using SmtpClient client = new();
 
+        if (string.IsNullOrWhiteSpace(SMTPConfiguration.Host))
+        {
+            Logger.LogError("Failed To Send Email To {EmailAddress} Using MailPit: SMTP Host Is Not Configured", emailAddress);
+
+            return false;
+        }
+
         if (SMTPConfiguration.Port is null)
         {
             Logger.LogError("Failed To Send Email To {EmailAddress} Using MailPit: SMTP Port Is Not Configured", emailAddress);

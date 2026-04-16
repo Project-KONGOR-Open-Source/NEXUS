@@ -143,9 +143,23 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
         using SmtpClient client = new();
 
+        if (string.IsNullOrWhiteSpace(SMTPConfiguration.Host))
+        {
+            Logger.LogError("Failed To Send Email To {EmailAddress} Using AWS SES: SMTP Host Is Not Configured", emailAddress);
+
+            return false;
+        }
+
         if (SMTPConfiguration.Port is null)
         {
             Logger.LogError("Failed To Send Email To {EmailAddress} Using AWS SES: SMTP Port Is Not Configured", emailAddress);
+
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(SMTPConfiguration.Username) || string.IsNullOrWhiteSpace(SMTPConfiguration.Password))
+        {
+            Logger.LogError("Failed To Send Email To {EmailAddress} Using AWS SES: SMTP Credentials Are Not Configured", emailAddress);
 
             return false;
         }
