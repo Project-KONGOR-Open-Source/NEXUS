@@ -1,0 +1,319 @@
+/* ==================================================================================
+   PROJECT KONGOR PORTAL — COMMON STYLES
+
+   All structural and functional CSS rules live here.
+   Each theme (dark, light, etc.) provides its own palette via custom CSS properties.
+   ================================================================================== */
+
+/* --- Structural Constants ---------------------------------- */
+
+:root {
+    --kongor-blur-amount: 16px;
+    --kongor-transition-speed: 0.45s;
+}
+
+/* --- Glassmorphism Cards ----------------------------------- */
+
+.glass-card {
+    background: rgba(var(--kongor-surface-rgb), 0.6) !important;
+    backdrop-filter: blur(var(--kongor-blur-amount));
+    -webkit-backdrop-filter: blur(var(--kongor-blur-amount));
+    border: 1px solid rgba(var(--kongor-primary-rgb), 0.15) !important;
+    box-shadow: 0 4px 24px rgba(var(--kongor-shadow-rgb), 0.4);
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 48px rgba(var(--kongor-primary-rgb), 0.2), 0 4px 32px rgba(var(--kongor-shadow-rgb), 0.5);
+    border-color: rgba(var(--kongor-primary-rgb), 0.3) !important;
+}
+
+.glass-card-inner {
+    background: rgba(var(--kongor-surface-rgb), 0.4) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(var(--kongor-primary-rgb), 0.1) !important;
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.glass-card-inner:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(var(--kongor-primary-rgb), 0.12);
+    border-color: rgba(var(--kongor-primary-rgb), 0.25) !important;
+}
+
+.glass-card-form {
+    background: rgba(var(--kongor-surface-rgb), 0.7) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(var(--kongor-primary-rgb), 0.12) !important;
+    box-shadow: 0 8px 32px rgba(var(--kongor-shadow-rgb), 0.5);
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.glass-card-form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 48px rgba(var(--kongor-primary-rgb), 0.15), 0 8px 32px rgba(var(--kongor-shadow-rgb), 0.5);
+    border-color: rgba(var(--kongor-primary-rgb), 0.25) !important;
+}
+
+/* --- Timeline Cards ---------------------------------------- */
+
+.timeline-card {
+    background: var(--kongor-timeline-surface) !important;
+    border: 1px solid rgba(var(--kongor-primary-rgb), 0.15) !important;
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.timeline-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(var(--kongor-primary-rgb), 0.12);
+    border-color: rgba(var(--kongor-primary-rgb), 0.25) !important;
+}
+
+.mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
+    top: calc(50% - 17px) !important;
+    border-top: 17px solid transparent !important;
+    border-bottom: 17px solid transparent !important;
+    border-right: 17px solid rgba(var(--kongor-primary-rgb), 0.15) !important;
+}
+
+.mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
+    border-right: 17px solid var(--kongor-timeline-surface) !important;
+}
+
+.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n+1):not(.mud-timeline-item-start) .timeline-card::before {
+    left: -17px !important;
+}
+
+.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n):not(.mud-timeline-item-end) .timeline-card::before {
+    right: -17px !important;
+}
+
+/* --- AppBar & Navigation ----------------------------------- */
+
+.kongor-appbar {
+    background: rgba(var(--kongor-bg-rgb), 0.8) !important;
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-bottom: 1px solid rgba(var(--kongor-primary-rgb), 0.1);
+}
+
+.kongor-appbar button,
+.kongor-appbar a,
+.kongor-appbar .mud-button-root,
+.kongor-appbar .mud-icon-button {
+    overflow: visible !important;
+}
+
+.kongor-appbar .mud-button-outlined {
+    color: var(--kongor-primary) !important;
+    border-color: var(--kongor-primary) !important;
+}
+
+.kongor-appbar .mud-button-outlined:hover {
+    background: rgba(var(--kongor-primary-rgb), 0.1) !important;
+}
+
+/* Home Button: Scared Jitter On Hover */
+@keyframes kongor-scared {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-1px, -1px) rotate(-1deg); }
+    20% { transform: translate(1px, 0px) rotate(1deg); }
+    30% { transform: translate(0px, 1px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 1px) rotate(-1deg); }
+    60% { transform: translate(1px, 0px) rotate(0deg); }
+    70% { transform: translate(-1px, -1px) rotate(1deg); }
+    80% { transform: translate(0px, 1px) rotate(-1deg); }
+    90% { transform: translate(1px, 0px) rotate(0deg); }
+}
+
+.kongor-home-button {
+    background: transparent !important;
+    transition: none;
+}
+
+.kongor-home-button:hover {
+    background: transparent !important;
+    animation: kongor-scared 0.4s ease-in-out infinite;
+}
+
+.kongor-home-button::before {
+    display: none !important;
+}
+
+/* Theme Toggler: Scale On Hover Instead Of Circle Background */
+.kongor-appbar .mud-icon-button {
+    background: transparent !important;
+    transition: transform 0.2s ease;
+}
+
+.kongor-appbar .mud-icon-button:hover {
+    background: transparent !important;
+    transform: scale(1.15);
+}
+
+.kongor-appbar .mud-icon-button::before {
+    display: none !important;
+}
+
+/* --- Dropdown Menu ----------------------------------------- */
+
+.mud-popover.mud-popover-anchor-bottom-center {
+    border-radius: 0 !important;
+}
+
+.mud-popover .mud-list {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* --- Hero Section ------------------------------------------ */
+
+.hero-section {
+    position: relative;
+    padding: 3rem 2rem 4rem;
+    text-align: center;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(var(--kongor-primary-rgb), 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--kongor-primary-rgb), 0.3), transparent);
+}
+
+/* --- Pulsing Text Glow ------------------------------------- */
+
+@keyframes kongor-text-pulse {
+    0%, 100% { text-shadow: 0 0 12px rgba(var(--kongor-primary-rgb), 0.4), 0 0 36px rgba(var(--kongor-primary-rgb), 0.15); }
+    50% { text-shadow: 0 0 24px rgba(var(--kongor-primary-rgb), 0.65), 0 0 56px rgba(var(--kongor-primary-rgb), 0.3), 0 0 84px rgba(var(--kongor-primary-rgb), 0.12); }
+}
+
+.hero-title {
+    letter-spacing: 0.05em;
+    animation: kongor-text-pulse 3s ease-in-out infinite;
+}
+
+.account-name-glow {
+    animation: kongor-text-pulse 3s ease-in-out infinite;
+}
+
+/* --- Section Dividers & Headers ---------------------------- */
+
+.section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--kongor-primary-rgb), 0.25), transparent);
+    margin: 2.5rem 0;
+    border: none;
+}
+
+.section-header {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--kongor-primary), var(--kongor-secondary));
+    border-radius: 1px;
+    transition: width var(--kongor-transition-speed) ease;
+}
+
+.section-header:hover::after {
+    width: 100px;
+}
+
+/* --- Button Glow Effects ----------------------------------- */
+
+.glow-button {
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow var(--kongor-transition-speed) ease;
+}
+
+.glow-button:hover {
+    box-shadow: 0 0 28px rgba(var(--kongor-primary-rgb), 0.35), 0 0 56px rgba(var(--kongor-primary-rgb), 0.15), 0 0 84px rgba(var(--kongor-primary-rgb), 0.05);
+}
+
+/* --- Logo Glow Animation ----------------------------------- */
+
+@keyframes kongor-pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(var(--kongor-primary-rgb), 0.3)); }
+    50% { filter: drop-shadow(0 0 12px rgba(var(--kongor-primary-rgb), 0.5)); }
+}
+
+.logo-glow {
+    animation: kongor-pulse-glow 3s ease-in-out infinite;
+}
+
+/* --- Footer ------------------------------------------------ */
+
+.kongor-footer {
+    background: linear-gradient(180deg, transparent, rgba(var(--kongor-footer-fade-rgb), 0.6));
+}
+
+.kongor-footer .section-divider {
+    margin-bottom: 1.5rem;
+}
+
+/* --- Ripple Effect Override -------------------------------- */
+
+.mud-ripple-effect {
+    background: radial-gradient(circle, rgba(var(--kongor-primary-rgb), 0.08) 0%, transparent 65%) !important;
+    transform: scale(0) !important;
+}
+
+.mud-ripple-effect-expanding {
+    transform: scale(0.4) !important;
+    opacity: 1 !important;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s linear !important;
+}
+
+.mud-ripple-effect-fading {
+    opacity: 0 !important;
+    transition: opacity 0.8s ease-out !important;
+}
+
+/* --- Fade-In Animations ------------------------------------ */
+
+@keyframes kongor-fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: kongor-fade-in 0.5s ease-out both; }
+.animate-fade-in-delay-1 { animation: kongor-fade-in 0.5s ease-out 0.1s both; }
+.animate-fade-in-delay-2 { animation: kongor-fade-in 0.5s ease-out 0.2s both; }
+.animate-fade-in-delay-3 { animation: kongor-fade-in 0.5s ease-out 0.3s both; }
+.animate-fade-in-delay-4 { animation: kongor-fade-in 0.5s ease-out 0.4s both; }

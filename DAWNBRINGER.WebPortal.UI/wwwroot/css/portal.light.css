@@ -1,0 +1,17 @@
+/* ==================================================================================================
+   PROJECT KONGOR PORTAL — LIGHT THEME PALETTE
+
+   Defines the CSS custom properties consumed by the rules in portal.common.css.
+   The palette is the light-mode counterpart to portal.dark.css and mirrors it variable-for-variable.
+   ================================================================================================== */
+
+.light-mode {
+    --kongor-primary:              #1976D2;
+    --kongor-primary-rgb:          25, 118, 210;
+    --kongor-secondary:            #C2185B;
+    --kongor-surface-rgb:          255, 255, 255;
+    --kongor-bg-rgb:               248, 250, 252;
+    --kongor-shadow-rgb:           10, 25, 41;
+    --kongor-timeline-surface:     #FFFFFF;
+    --kongor-footer-fade-rgb:      227, 242, 253;
+}
