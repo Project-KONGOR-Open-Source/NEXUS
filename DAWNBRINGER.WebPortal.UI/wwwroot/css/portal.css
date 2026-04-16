@@ -1,7 +1,7 @@
 /* ============================================================
    PROJECT KONGOR PORTAL STYLES
    Visual overhaul inspired by the HoN aesthetic: dark forest
-   greens, emerald magic glow, golden artifacts, teal water.
+   greens, emerald magic glow, golden accents, teal water.
    ============================================================ */
 
 /* --- CSS Custom Properties --------------------------------- */
@@ -9,6 +9,7 @@
 :root {
     --kongor-glow-primary: #00E676;
     --kongor-glow-secondary: #FFD740;
+    --kongor-glow-secondary-light: #B8860B;
     --kongor-glow-tertiary: #7C4DFF;
     --kongor-glow-info: #26C6DA;
 
@@ -83,7 +84,7 @@
     border-color: rgba(0, 230, 118, 0.25) !important;
 }
 
-/* --- Timeline Cards (Solid Background For Seamless Arrow) -- */
+/* --- Timeline Cards ---------------------------------------- */
 
 .timeline-card {
     background: var(--kongor-timeline-surface) !important;
@@ -99,14 +100,19 @@
     border-color: rgba(0, 230, 118, 0.25) !important;
 }
 
-.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
-    border-right-color: var(--kongor-timeline-border) !important;
-    border-left-color: var(--kongor-timeline-border) !important;
+/* Remove Card Border On The Side That Connects To The Arrow */
+.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n+1):not(.mud-timeline-item-start) .timeline-card {
+    border-left: none !important;
 }
 
-.dark-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
+.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n):not(.mud-timeline-item-end) .timeline-card {
+    border-right: none !important;
+}
+
+/* Both Arrow Pseudo-Elements Use Fill Colour For A Clean Seamless Arrow */
+.mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before,
+.mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
     border-right-color: var(--kongor-timeline-surface) !important;
-    border-left-color: var(--kongor-timeline-surface) !important;
 }
 
 /* --- AppBar & Navigation ----------------------------------- */
@@ -118,7 +124,6 @@
     border-bottom: 1px solid rgba(0, 230, 118, 0.1);
 }
 
-/* Fix Logo Glow Clipping: Allow Glow To Overflow Button Boundaries */
 .kongor-appbar button,
 .kongor-appbar a,
 .kongor-appbar .mud-button-root,
@@ -126,14 +131,14 @@
     overflow: visible !important;
 }
 
-/* Fix Community Dropdown Highlight: Full-Width Coverage */
+/* Dropdown: Remove Border-Radius So Item Highlights Fill Cleanly */
+.mud-popover.mud-popover-anchor-bottom-center {
+    border-radius: 0 !important;
+}
+
 .mud-popover .mud-list {
     padding-top: 0 !important;
     padding-bottom: 0 !important;
-}
-
-.mud-popover .mud-list-item {
-    border-radius: 0 !important;
 }
 
 /* --- Hero Section ------------------------------------------ */
@@ -164,14 +169,20 @@
     background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.3), transparent);
 }
 
-.hero-title {
-    text-shadow: 0 0 20px rgba(0, 230, 118, 0.4), 0 0 60px rgba(0, 230, 118, 0.15);
-    letter-spacing: 0.05em;
-    transition: text-shadow var(--kongor-transition-speed) ease;
+/* --- Pulsing Text Glow ------------------------------------- */
+
+@keyframes kongor-text-pulse-gold {
+    0%, 100% { text-shadow: 0 0 12px rgba(255, 215, 64, 0.4), 0 0 36px rgba(255, 215, 64, 0.15); }
+    50% { text-shadow: 0 0 24px rgba(255, 215, 64, 0.65), 0 0 56px rgba(255, 215, 64, 0.3), 0 0 84px rgba(255, 215, 64, 0.12); }
 }
 
-.hero-title:hover {
-    text-shadow: 0 0 30px rgba(0, 230, 118, 0.6), 0 0 80px rgba(0, 230, 118, 0.3), 0 0 120px rgba(0, 230, 118, 0.15);
+.hero-title {
+    letter-spacing: 0.05em;
+    animation: kongor-text-pulse-gold 3s ease-in-out infinite;
+}
+
+.account-name-glow {
+    animation: kongor-text-pulse-gold 3s ease-in-out infinite;
 }
 
 /* --- Section Dividers & Headers ---------------------------- */
@@ -197,7 +208,7 @@
     transform: translateX(-50%);
     width: 60px;
     height: 2px;
-    background: linear-gradient(90deg, var(--kongor-glow-primary), var(--kongor-glow-info));
+    background: var(--kongor-glow-secondary);
     border-radius: 1px;
     transition: width var(--kongor-transition-speed) ease;
 }
@@ -229,110 +240,77 @@
     animation: kongor-pulse-glow 3s ease-in-out infinite;
 }
 
-/* --- Account Name Pulsing Glow ----------------------------- */
-
-@keyframes kongor-text-pulse {
-    0%, 100% { text-shadow: 0 0 10px rgba(0, 230, 118, 0.4), 0 0 30px rgba(0, 230, 118, 0.15); }
-    50% { text-shadow: 0 0 20px rgba(0, 230, 118, 0.6), 0 0 48px rgba(0, 230, 118, 0.25), 0 0 72px rgba(0, 230, 118, 0.1); }
-}
-
-.account-name-glow {
-    animation: kongor-text-pulse 3s ease-in-out infinite;
-}
-
 /* --- Footer ------------------------------------------------ */
 
 .kongor-footer {
     background: linear-gradient(180deg, transparent, rgba(10, 15, 13, 0.6));
-    border-top: 1px solid rgba(0, 230, 118, 0.1);
+}
+
+.kongor-footer .section-divider {
+    margin-bottom: 1.5rem;
 }
 
 /* --- Fade-In Animations ------------------------------------ */
 
 @keyframes kongor-fade-in {
-    from {
-        opacity: 0;
-        transform: translateY(12px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fade-in {
-    animation: kongor-fade-in 0.5s ease-out both;
-}
-
-.animate-fade-in-delay-1 {
-    animation: kongor-fade-in 0.5s ease-out 0.1s both;
-}
-
-.animate-fade-in-delay-2 {
-    animation: kongor-fade-in 0.5s ease-out 0.2s both;
-}
-
-.animate-fade-in-delay-3 {
-    animation: kongor-fade-in 0.5s ease-out 0.3s both;
-}
-
-.animate-fade-in-delay-4 {
-    animation: kongor-fade-in 0.5s ease-out 0.4s both;
-}
+.animate-fade-in { animation: kongor-fade-in 0.5s ease-out both; }
+.animate-fade-in-delay-1 { animation: kongor-fade-in 0.5s ease-out 0.1s both; }
+.animate-fade-in-delay-2 { animation: kongor-fade-in 0.5s ease-out 0.2s both; }
+.animate-fade-in-delay-3 { animation: kongor-fade-in 0.5s ease-out 0.3s both; }
+.animate-fade-in-delay-4 { animation: kongor-fade-in 0.5s ease-out 0.4s both; }
 
 /* --- Light Mode Overrides ---------------------------------- */
 
 .light-mode .glass-card {
     background: rgba(255, 255, 255, 0.7) !important;
-    border-color: rgba(46, 125, 50, 0.15) !important;
+    border-color: rgba(184, 134, 11, 0.12) !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .light-mode .glass-card:hover {
-    box-shadow: 0 8px 48px rgba(46, 125, 50, 0.12), 0 4px 24px rgba(0, 0, 0, 0.1);
-    border-color: rgba(46, 125, 50, 0.25) !important;
+    box-shadow: 0 8px 48px rgba(184, 134, 11, 0.12), 0 4px 24px rgba(0, 0, 0, 0.1);
+    border-color: rgba(184, 134, 11, 0.25) !important;
 }
 
 .light-mode .glass-card-inner {
     background: rgba(255, 255, 255, 0.5) !important;
-    border-color: rgba(46, 125, 50, 0.1) !important;
+    border-color: rgba(184, 134, 11, 0.08) !important;
 }
 
 .light-mode .glass-card-inner:hover {
-    box-shadow: 0 6px 24px rgba(46, 125, 50, 0.08);
-    border-color: rgba(46, 125, 50, 0.2) !important;
+    box-shadow: 0 6px 24px rgba(184, 134, 11, 0.08);
+    border-color: rgba(184, 134, 11, 0.18) !important;
 }
 
 .light-mode .glass-card-form {
     background: rgba(255, 255, 255, 0.8) !important;
-    border-color: rgba(46, 125, 50, 0.12) !important;
+    border-color: rgba(184, 134, 11, 0.1) !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .light-mode .glass-card-form:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15), 0 0 24px rgba(46, 125, 50, 0.08);
-    border-color: rgba(46, 125, 50, 0.3) !important;
+    box-shadow: 0 12px 48px rgba(184, 134, 11, 0.15), 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-color: rgba(184, 134, 11, 0.3) !important;
 }
 
 .light-mode .timeline-card {
-    background: #F5FAF5 !important;
-    border-color: rgba(46, 125, 50, 0.15) !important;
+    background: #FFFCF5 !important;
+    border-color: rgba(184, 134, 11, 0.12) !important;
 }
 
 .light-mode .timeline-card:hover {
-    box-shadow: 0 6px 24px rgba(46, 125, 50, 0.08);
-    border-color: rgba(46, 125, 50, 0.25) !important;
+    box-shadow: 0 6px 24px rgba(184, 134, 11, 0.08);
+    border-color: rgba(184, 134, 11, 0.25) !important;
 }
 
-.light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
-    border-right-color: rgba(46, 125, 50, 0.15) !important;
-    border-left-color: rgba(46, 125, 50, 0.15) !important;
-}
-
+.light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before,
 .light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
-    border-right-color: #F5FAF5 !important;
-    border-left-color: #F5FAF5 !important;
+    border-right-color: #FFFCF5 !important;
 }
 
 .light-mode .kongor-appbar {
@@ -340,51 +318,52 @@
     border-bottom-color: rgba(46, 125, 50, 0.3);
 }
 
-/* Light Mode AppBar Buttons: Use Gold For Visibility On Dark Green */
 .light-mode .kongor-appbar .mud-button-outlined {
-    color: var(--kongor-glow-secondary) !important;
-    border-color: var(--kongor-glow-secondary) !important;
+    color: #DAA520 !important;
+    border-color: #DAA520 !important;
 }
 
 .light-mode .kongor-appbar .mud-button-outlined:hover {
-    background: rgba(255, 215, 64, 0.1) !important;
+    background: rgba(218, 165, 32, 0.15) !important;
 }
 
-.light-mode .hero-title {
-    text-shadow: 0 0 20px rgba(46, 125, 50, 0.3), 0 0 60px rgba(46, 125, 50, 0.1);
+/* Light Mode Text Glow: Dark Gold */
+@keyframes kongor-text-pulse-dark-gold {
+    0%, 100% { text-shadow: 0 0 12px rgba(184, 134, 11, 0.35), 0 0 36px rgba(184, 134, 11, 0.12); }
+    50% { text-shadow: 0 0 24px rgba(184, 134, 11, 0.55), 0 0 56px rgba(184, 134, 11, 0.25), 0 0 84px rgba(184, 134, 11, 0.1); }
 }
 
-.light-mode .hero-title:hover {
-    text-shadow: 0 0 30px rgba(46, 125, 50, 0.5), 0 0 80px rgba(46, 125, 50, 0.2);
+.light-mode .hero-title { animation-name: kongor-text-pulse-dark-gold; }
+.light-mode .account-name-glow { animation-name: kongor-text-pulse-dark-gold; }
+
+.light-mode .hero-section::before {
+    background: radial-gradient(ellipse at center, rgba(184, 134, 11, 0.06) 0%, transparent 70%);
 }
 
+.light-mode .hero-section::after {
+    background: linear-gradient(90deg, transparent, rgba(184, 134, 11, 0.2), transparent);
+}
+
+/* Fix 20: Light Mode Section Dividers Stay Green For Visibility */
 .light-mode .section-divider {
     background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.2), transparent);
 }
 
-.light-mode .hero-section::before {
-    background: radial-gradient(ellipse at center, rgba(46, 125, 50, 0.06) 0%, transparent 70%);
-}
-
-.light-mode .hero-section::after {
-    background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.2), transparent);
+.light-mode .section-header::after {
+    background: var(--kongor-glow-secondary-light) !important;
 }
 
 .light-mode .glow-button:hover {
-    box-shadow: 0 0 28px rgba(46, 125, 50, 0.25), 0 0 56px rgba(46, 125, 50, 0.1);
+    box-shadow: 0 0 28px rgba(184, 134, 11, 0.25), 0 0 56px rgba(184, 134, 11, 0.1);
 }
 
 .light-mode .kongor-footer {
     background: linear-gradient(180deg, transparent, rgba(241, 248, 233, 0.6));
-    border-top-color: rgba(46, 125, 50, 0.1);
 }
 
-/* Light Mode Account Name: Gold Glow So It's Visible On Green */
-.light-mode .account-name-glow {
-    animation-name: kongor-text-pulse-light;
+@keyframes kongor-pulse-glow-light {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(184, 134, 11, 0.3)); }
+    50% { filter: drop-shadow(0 0 12px rgba(184, 134, 11, 0.5)); }
 }
 
-@keyframes kongor-text-pulse-light {
-    0%, 100% { text-shadow: 0 0 10px rgba(245, 127, 23, 0.3), 0 0 30px rgba(245, 127, 23, 0.1); }
-    50% { text-shadow: 0 0 20px rgba(245, 127, 23, 0.5), 0 0 48px rgba(245, 127, 23, 0.2); }
-}
+.light-mode .logo-glow { animation-name: kongor-pulse-glow-light; }
