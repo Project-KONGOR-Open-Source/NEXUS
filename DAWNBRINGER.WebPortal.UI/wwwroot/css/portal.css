@@ -100,16 +100,7 @@
     border-color: rgba(0, 230, 118, 0.25) !important;
 }
 
-/* Remove Card Border On The Side That Connects To The Arrow */
-.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n+1):not(.mud-timeline-item-start) .timeline-card {
-    border-left: none !important;
-}
-
-.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n):not(.mud-timeline-item-end) .timeline-card {
-    border-right: none !important;
-}
-
-/* Arrow Border: ::before Is 1px Bigger On All Exposed Sides */
+/* Arrow Border: ::before 1px Bigger On All Exposed Sides */
 .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
     top: calc(50% - 17px) !important;
     border-top: 17px solid transparent !important;
@@ -117,12 +108,12 @@
     border-right: 17px solid var(--kongor-timeline-border) !important;
 }
 
-/* Arrow Fill: Default Size, Covers ::before Interior */
+/* Arrow Fill: 1px Wider To Cover Card Border At Connection Point */
 .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
-    border-right-color: var(--kongor-timeline-surface) !important;
+    border-right: 17px solid var(--kongor-timeline-surface) !important;
 }
 
-/* Position ::before 1px Further Out At The Tip For Each Side */
+/* Position ::before 1px Further Out At The Tip */
 .mud-timeline-position-alternate .mud-timeline-item:nth-child(2n+1):not(.mud-timeline-item-start) .timeline-card::before {
     left: -17px !important;
 }
@@ -351,7 +342,7 @@
 }
 
 .light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
-    border-right-color: #FFFCF5 !important;
+    border-right: 17px solid #FFFCF5 !important;
 }
 
 .light-mode .kongor-appbar {
