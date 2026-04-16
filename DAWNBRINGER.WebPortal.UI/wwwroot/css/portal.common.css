@@ -178,6 +178,12 @@
     padding-bottom: 0 !important;
 }
 
+/* --- Programmatic Focus (FocusOnNavigate) ------------------ */
+
+h1:focus {
+    outline: none;
+}
+
 /* --- Hero Section ------------------------------------------ */
 
 .hero-section {
