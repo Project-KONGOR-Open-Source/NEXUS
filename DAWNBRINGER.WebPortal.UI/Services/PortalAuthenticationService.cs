@@ -68,8 +68,8 @@ public class PortalAuthenticationService : AuthenticationStateProvider
             }
         }
 
-        ClaimsIdentity identity = new(claims, "JWT");
-        ClaimsPrincipal principal = new(identity);
+        ClaimsIdentity identity = new (claims, "JWT");
+        ClaimsPrincipal principal = new (identity);
 
         return new AuthenticationState(principal);
     }
@@ -139,7 +139,7 @@ public class PortalAuthenticationService : AuthenticationStateProvider
 
     private static IEnumerable<Claim> ParseClaimsFromJWT(string token)
     {
-        JwtSecurityTokenHandler handler = new();
+        JwtSecurityTokenHandler handler = new ();
 
         if (handler.CanReadToken(token).Equals(false))
         {

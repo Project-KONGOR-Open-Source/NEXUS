@@ -135,14 +135,14 @@ public class MailPitEmailService(IOptions<OperationalConfiguration> configuratio
 
     private async Task<bool> SendEmail(string emailAddress, string subject, string body)
     {
-        MimeMessage message = new();
+        MimeMessage message = new ();
 
         message.From.Add(new MailboxAddress(SMTPConfiguration.SenderName, SMTPConfiguration.SenderAddress));
         message.To.Add(InternetAddress.Parse(emailAddress));
         message.Subject = subject;
         message.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = body };
 
-        using SmtpClient client = new();
+        using SmtpClient client = new ();
 
         if (string.IsNullOrWhiteSpace(SMTPConfiguration.Host))
         {

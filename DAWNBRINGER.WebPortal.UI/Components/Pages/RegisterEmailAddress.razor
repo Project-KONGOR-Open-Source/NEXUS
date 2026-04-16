@@ -69,7 +69,7 @@
 
 @code {
 
-    private RegisterEmailAddressFormModel FormModel { get; set; } = new();
+    private RegisterEmailAddressFormModel FormModel { get; set; } = new ();
 
     private bool Processing { get; set; }
 
@@ -81,7 +81,7 @@
         {
             HttpClient client = AuthenticationService.CreateAnonymousClient();
 
-            RegisterEmailAddressRequest request = new(FormModel.EmailAddress, FormModel.ConfirmEmailAddress);
+            RegisterEmailAddressRequest request = new (FormModel.EmailAddress, FormModel.ConfirmEmailAddress);
 
             HttpResponseMessage response = await client.PostAsJsonAsync("/Email/Register", request);
 

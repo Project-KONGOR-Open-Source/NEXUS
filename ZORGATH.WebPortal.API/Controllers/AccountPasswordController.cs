@@ -60,9 +60,9 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
         string srpHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(generatedPassword, salt);
         string pbkdf2Hash = new PasswordHasher<User>().HashPassword(null!, generatedPassword);
 
-        AccountPasswordTokenData tokenData = new(sanitizedEmailAddress, salt, srpHash, pbkdf2Hash);
+        AccountPasswordTokenData tokenData = new (sanitizedEmailAddress, salt, srpHash, pbkdf2Hash);
 
-        Token token = new()
+        Token token = new ()
         {
             Purpose = TokenPurpose.AccountPasswordReset,
             EmailAddress = payload.EmailAddress,
@@ -171,7 +171,7 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
         string srpHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt);
         string pbkdf2Hash = new PasswordHasher<User>().HashPassword(user, payload.Password);
 
-        AccountPasswordTokenData tokenData = new(userEmailAddress, salt, srpHash, pbkdf2Hash);
+        AccountPasswordTokenData tokenData = new (userEmailAddress, salt, srpHash, pbkdf2Hash);
 
         Token? existingToken = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Purpose.Equals(TokenPurpose.AccountPasswordUpdate) && token.EmailAddress.Equals(userEmailAddress) && token.TimestampConsumed == null);
 

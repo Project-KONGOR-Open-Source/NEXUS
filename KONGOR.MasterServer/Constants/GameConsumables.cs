@@ -42,7 +42,7 @@
 //        .Concat(MasteryBoostProducts)
 //        .Concat(Coupons.Select(coupon => coupon.Code));
 
-//    public static Dictionary<string, IEnumerable<string>> AllConsumablesGroupedByType => new()
+//    public static Dictionary<string, IEnumerable<string>> AllConsumablesGroupedByType => new ()
 //    {
 //        {"Mastery Boost Products", MasteryBoostProducts},
 //        {"Mastery Coupons", Coupons.Select(coupon => coupon.Code)}
@@ -105,7 +105,7 @@
 
 //    private static IEnumerable<string> GetOwnedConsumables(IEnumerable<string> ownedUpgradesAndConsumables)
 //    {
-//        Regex pattern = new(@"^(?<type>ma|cp){1}\.(?<name>.+) \* (?<amount>\d+)$");
+//        Regex pattern = new (@"^(?<type>ma|cp){1}\.(?<name>.+) \* (?<amount>\d+)$");
 
 //        return from upgrade in ownedUpgradesAndConsumables let match = pattern.Match(upgrade) where match.Success select upgrade;
 //    }

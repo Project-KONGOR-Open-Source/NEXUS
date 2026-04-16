@@ -221,7 +221,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         Account currentAccount = ResolveCurrentAccount(user, currentAccountID);
 
-        GetUserDTO response = new(
+        GetUserDTO response = new (
             user.ID,
             user.EmailAddress,
             user.Role.Name,

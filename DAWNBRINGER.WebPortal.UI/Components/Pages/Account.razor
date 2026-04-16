@@ -246,8 +246,8 @@
     [CascadingParameter]
     private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
-    private RequestEmailAddressUpdateFormModel EmailUpdateFormModel { get; set; } = new();
-    private RequestAccountPasswordUpdateFormModel PasswordUpdateFormModel { get; set; } = new();
+    private RequestEmailAddressUpdateFormModel EmailUpdateFormModel { get; set; } = new ();
+    private RequestAccountPasswordUpdateFormModel PasswordUpdateFormModel { get; set; } = new ();
 
     private UserResponse? AccountOverview { get; set; }
 
@@ -354,7 +354,7 @@
         {
             HttpClient client = AuthenticationService.CreateAuthenticatedClient();
 
-            RequestEmailAddressUpdateRequest request = new(EmailUpdateFormModel.EmailAddress, EmailUpdateFormModel.Password);
+            RequestEmailAddressUpdateRequest request = new (EmailUpdateFormModel.EmailAddress, EmailUpdateFormModel.Password);
 
             HttpResponseMessage response = await client.PostAsJsonAsync("/Email/Update/Request", request);
 
@@ -389,7 +389,7 @@
         {
             HttpClient client = AuthenticationService.CreateAuthenticatedClient();
 
-            RequestAccountPasswordUpdateRequest request = new(PasswordUpdateFormModel.CurrentPassword, PasswordUpdateFormModel.Password, PasswordUpdateFormModel.ConfirmPassword);
+            RequestAccountPasswordUpdateRequest request = new (PasswordUpdateFormModel.CurrentPassword, PasswordUpdateFormModel.Password, PasswordUpdateFormModel.ConfirmPassword);
 
             HttpResponseMessage response = await client.PostAsJsonAsync("/Password/Update/Request", request);
 

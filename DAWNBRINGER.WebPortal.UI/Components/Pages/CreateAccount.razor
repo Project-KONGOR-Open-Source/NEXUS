@@ -81,7 +81,7 @@
     [Parameter]
     public string? Token { get; set; }
 
-    private CreateAccountFormModel FormModel { get; set; } = new();
+    private CreateAccountFormModel FormModel { get; set; } = new ();
 
     private bool Processing { get; set; }
 
@@ -115,7 +115,7 @@
         {
             HttpClient client = AuthenticationService.CreateAnonymousClient();
 
-            RegisterUserAndMainAccountRequest request = new(Token ?? string.Empty, FormModel.Name, FormModel.Password, FormModel.ConfirmPassword);
+            RegisterUserAndMainAccountRequest request = new (Token ?? string.Empty, FormModel.Name, FormModel.Password, FormModel.ConfirmPassword);
 
             HttpResponseMessage response = await client.PostAsJsonAsync("/User/Register", request);
 

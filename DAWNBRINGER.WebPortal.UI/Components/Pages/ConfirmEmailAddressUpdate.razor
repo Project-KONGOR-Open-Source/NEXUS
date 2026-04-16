@@ -59,7 +59,7 @@
         {
             HttpClient client = AuthenticationService.CreateAnonymousClient();
 
-            ConfirmEmailAddressUpdateRequest request = new(Token ?? string.Empty);
+            ConfirmEmailAddressUpdateRequest request = new (Token ?? string.Empty);
 
             HttpResponseMessage response = await client.PostAsJsonAsync("/Email/Update/Confirm", request);
 

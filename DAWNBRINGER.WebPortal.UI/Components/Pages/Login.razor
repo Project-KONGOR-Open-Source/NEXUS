@@ -72,7 +72,7 @@
 
 @code {
 
-    private LogInFormModel FormModel { get; set; } = new();
+    private LogInFormModel FormModel { get; set; } = new ();
 
     private bool Processing { get; set; }
 
@@ -95,7 +95,7 @@
         {
             HttpClient client = AuthenticationService.CreateAnonymousClient();
 
-            LogInUserRequest request = new(FormModel.Name, FormModel.Password);
+            LogInUserRequest request = new (FormModel.Name, FormModel.Password);
 
             HttpResponseMessage response = await client.PostAsJsonAsync("/User/LogIn", request);
 
