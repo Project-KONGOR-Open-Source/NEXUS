@@ -5,18 +5,18 @@
 <MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6 py-0">
 
     @* Hero Section *@
-    <MudCard Outlined="true" Class="px-8 py-12 mb-4">
+    <div class="hero-section animate-fade-in">
         <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="4">
-            <MudText Typo="Typo.h2" Align="Align.Center" Class="font-scurlock" Color="Color.Primary">Project KONGOR</MudText>
-            <MudText Typo="Typo.h5" Align="Align.Center">A community-driven revival of Heroes Of Newerth</MudText>
-            <MudText Typo="Typo.subtitle1" Align="Align.Center" Color="Color.Secondary">By the community, for the community.</MudText>
+            <MudText Typo="Typo.h1" Align="Align.Center" Class="font-scurlock hero-title" Color="Color.Primary">Project KONGOR</MudText>
+            <MudText Typo="Typo.h5" Align="Align.Center">keeping the real Heroes Of Newerth alive since 2022</MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Color="Color.Secondary">passionately, by the community for the community</MudText>
         </MudStack>
-    </MudCard>
+    </div>
 
     @* Downloads & Community Section *@
-    <MudGrid Spacing="4" Class="mb-6">
+    <MudGrid Spacing="4" Class="mb-6 animate-fade-in-delay-1">
         <MudItem xs="12" md="6">
-            <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
+            <MudCard Class="glass-card pa-4" Elevation="0" Style="height: 100%;">
                 <MudCardContent>
                     <MudStack Spacing="2">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -30,7 +30,7 @@
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton Href="/downloads" Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward">
+                    <MudButton Href="/downloads" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" EndIcon="@Icons.Material.Filled.ArrowForward">
                         Browse Downloads
                     </MudButton>
                 </MudCardActions>
@@ -38,7 +38,7 @@
         </MudItem>
 
         <MudItem xs="12" md="6">
-            <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
+            <MudCard Class="glass-card pa-4" Elevation="0" Style="height: 100%;">
                 <MudCardContent>
                     <MudStack Spacing="2">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -52,10 +52,10 @@
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions Class="gap-2">
-                    <MudButton Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Discord">
+                    <MudButton Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Custom.Brands.Discord">
                         Discord
                     </MudButton>
-                    <MudButton Href="https://www.reddit.com/r/newerth/" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Reddit">
+                    <MudButton Href="https://www.reddit.com/r/newerth/" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Custom.Brands.Reddit">
                         Reddit
                     </MudButton>
                 </MudCardActions>
@@ -63,12 +63,14 @@
         </MudItem>
     </MudGrid>
 
+    <hr class="section-divider" />
+
     @* Source Code Section *@
-    <MudCard Class="pa-6 mb-6" Outlined="true">
+    <MudCard Class="glass-card pa-6 mb-6 animate-fade-in-delay-2" Elevation="0">
         <MudStack AlignItems="AlignItems.Center" Spacing="4">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                 <MudIcon Icon="@Icons.Custom.Brands.GitHub" Size="Size.Large" Color="Color.Primary" />
-                <MudText Typo="Typo.h5" Align="Align.Center">Source Code</MudText>
+                <MudText Typo="Typo.h5" Align="Align.Center" Class="section-header">Source Code</MudText>
             </MudStack>
             <MudText Typo="Typo.body1" Align="Align.Center" Style="max-width: 600px;">
                 Project KONGOR is open source. Explore our repositories, contribute code, report issues, or fork the projects to run your own services.
@@ -77,7 +79,7 @@
 
         <MudGrid Spacing="3" Class="mt-4" Justify="Justify.Center">
             <MudItem xs="12" sm="6" md="3">
-                <MudCard Outlined="true" Class="pa-3" Style="height: 100%;">
+                <MudCard Class="glass-card-inner pa-3" Elevation="0" Style="height: 100%;">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">NEXUS</MudText>
                         <MudText Typo="Typo.body2" Color="Color.Secondary">Open-Source Project KONGOR Re-Write</MudText>
@@ -91,7 +93,7 @@
             </MudItem>
 
             <MudItem xs="12" sm="6" md="3">
-                <MudCard Outlined="true" Class="pa-3" Style="height: 100%;">
+                <MudCard Class="glass-card-inner pa-3" Elevation="0" Style="height: 100%;">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">WILLOWMAKER</MudText>
                         <MudText Typo="Typo.body2" Color="Color.Secondary">Heroes Of Newerth Client Launcher</MudText>
@@ -105,7 +107,7 @@
             </MudItem>
 
             <MudItem xs="12" sm="6" md="3">
-                <MudCard Outlined="true" Class="pa-3" Style="height: 100%;">
+                <MudCard Class="glass-card-inner pa-3" Elevation="0" Style="height: 100%;">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">COMPEL</MudText>
                         <MudText Typo="Typo.body2" Color="Color.Secondary">Heroes Of Newerth Match Server Launcher</MudText>
@@ -119,7 +121,7 @@
             </MudItem>
 
             <MudItem xs="12" sm="6" md="3">
-                <MudCard Outlined="true" Class="pa-3" Style="height: 100%;">
+                <MudCard Class="glass-card-inner pa-3" Elevation="0" Style="height: 100%;">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">CODEX</MudText>
                         <MudText Typo="Typo.body2" Color="Color.Secondary">Project KONGOR Knowledge Base</MudText>
@@ -134,13 +136,15 @@
         </MudGrid>
     </MudCard>
 
+    <hr class="section-divider" />
+
     @* Knowledge Base Section *@
-    <MudCard Outlined="true" Class="pa-6 mb-6">
+    <MudCard Class="glass-card pa-6 mb-6 animate-fade-in-delay-3" Elevation="0">
         <MudCardContent>
             <MudStack AlignItems="AlignItems.Center" Spacing="2">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                     <MudIcon Icon="@Icons.Material.Filled.MenuBook" Size="Size.Large" Color="Color.Primary" />
-                    <MudText Typo="Typo.h5" Align="Align.Center">Knowledge Base</MudText>
+                    <MudText Typo="Typo.h5" Align="Align.Center" Class="section-header">Knowledge Base</MudText>
                 </MudStack>
                 <MudText Typo="Typo.body1" Align="Align.Center" Style="max-width: 600px;">
                     Find comprehensive documentation on all aspects of Project KONGOR. From self-hosting guides for technical users
@@ -149,20 +153,22 @@
             </MudStack>
         </MudCardContent>
         <MudCardActions Class="justify-center">
-            <MudButton Href="https://codex.kongor.net" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Material.Filled.OpenInNew">
+            <MudButton Href="https://codex.kongor.net" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" EndIcon="@Icons.Material.Filled.OpenInNew">
                 Visit Knowledge Base
             </MudButton>
         </MudCardActions>
     </MudCard>
 
+    <hr class="section-divider" />
+
     @* Timeline Section *@
-    <MudCard Class="pa-6" Outlined="true">
+    <MudCard Class="glass-card pa-6 animate-fade-in-delay-4" Elevation="0">
         <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                 <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large" Color="Color.Primary" />
-                <MudText Typo="Typo.h5" Align="Align.Center">Timeline</MudText>
+                <MudText Typo="Typo.h5" Align="Align.Center" Class="section-header">Timeline</MudText>
             </MudStack>
-            <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary">Key milestones in Project KONGOR's journey</MudText>
+            <MudText Typo="Typo.body1" Align="Align.Center">Key milestones in Project KONGOR's journey</MudText>
         </MudStack>
 
         <MudTimeline TimelinePosition="TimelinePosition.Alternate">
@@ -171,7 +177,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Outlined="true" Class="pa-3">
+                    <MudCard Class="timeline-card pa-3" Elevation="0">
                         <MudText Typo="Typo.h6">TODO #1</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -183,7 +189,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Outlined="true" Class="pa-3">
+                    <MudCard Class="timeline-card pa-3" Elevation="0">
                         <MudText Typo="Typo.h6">TODO #2</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -195,7 +201,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Outlined="true" Class="pa-3">
+                    <MudCard Class="timeline-card pa-3" Elevation="0">
                         <MudText Typo="Typo.h6">TODO #3</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -207,7 +213,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Outlined="true" Class="pa-3">
+                    <MudCard Class="timeline-card pa-3" Elevation="0">
                         <MudText Typo="Typo.h6">TODO #4</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -219,7 +225,7 @@
                     <MudText Typo="Typo.subtitle2" Color="Color.Secondary">TODO Date</MudText>
                 </ItemOpposite>
                 <ItemContent>
-                    <MudCard Outlined="true" Class="pa-3">
+                    <MudCard Class="timeline-card pa-3" Elevation="0">
                         <MudText Typo="Typo.h6">TODO #5</MudText>
                         <MudText Typo="Typo.body2">Placeholder event description. Replace with actual milestone.</MudText>
                     </MudCard>
@@ -229,4 +235,3 @@
     </MudCard>
 
 </MudContainer>
-

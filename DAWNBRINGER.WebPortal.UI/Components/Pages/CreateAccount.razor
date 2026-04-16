@@ -6,8 +6,8 @@
 
 <PageTitle>Create Account - Project KONGOR</PageTitle>
 
-<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6" Style="min-height: calc(100vh - 200px);">
-    <MudCard Outlined="true" Class="pa-6" Style="width: 100%; max-width: 640px;">
+<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6" >
+    <MudCard Class="glass-card-form animate-fade-in pa-6" Elevation="0" Style="width: 100%; max-width: 640px;">
         <MudCardContent>
             <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -57,6 +57,7 @@
                         <MudButton ButtonType="ButtonType.Submit"
                                    Variant="Variant.Filled"
                                    Color="Color.Primary"
+                                   Class="glow-button"
                                    Disabled="Processing">
                             @if (Processing)
                             {

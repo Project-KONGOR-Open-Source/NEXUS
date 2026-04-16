@@ -2,13 +2,13 @@
 
 <PageTitle>Downloads - Project KONGOR</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6 py-8">
+<MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6 pt-8">
 
     @* Page Header *@
-    <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-6">
+    <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-6 animate-fade-in">
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
             <MudIcon Icon="@Icons.Material.Filled.Download" Size="Size.Large" Color="Color.Primary" />
-            <MudText Typo="Typo.h4">Downloads</MudText>
+            <MudText Typo="Typo.h4" Class="section-header">Downloads</MudText>
         </MudStack>
         <MudText Typo="Typo.body1" Align="Align.Center" Color="Color.Secondary" Style="max-width: 600px;">
             Everything you need to play Heroes Of Newerth or host your own match servers.
@@ -17,7 +17,7 @@
     </MudStack>
 
     @* Launcher Section *@
-    <MudCard Outlined="true" Class="pa-6 mb-6">
+    <MudCard Class="glass-card pa-6 mb-6 animate-fade-in-delay-1" Elevation="0">
         <MudCardContent>
             <MudStack Spacing="2">
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -31,20 +31,22 @@
             </MudStack>
         </MudCardContent>
         <MudCardActions Class="gap-2">
-            <MudButton Href="https://github.com/Project-KONGOR-Open-Source/WILLOWMAKER/releases/latest" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SportsEsports">
+            <MudButton Href="https://github.com/Project-KONGOR-Open-Source/WILLOWMAKER/releases/latest" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Material.Filled.SportsEsports">
                 Game Client Launcher
             </MudButton>
-            <MudButton Href="https://github.com/Project-KONGOR-Open-Source/COMPEL/releases/latest" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Dns">
+            <MudButton Href="https://github.com/Project-KONGOR-Open-Source/COMPEL/releases/latest" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Material.Filled.Dns">
                 Match Server Launcher
             </MudButton>
         </MudCardActions>
     </MudCard>
 
+    <hr class="section-divider" />
+
     @* Distributions Row *@
-    <MudGrid Spacing="4">
+    <MudGrid Spacing="4" Class="animate-fade-in-delay-2">
         @* Game Client Distribution *@
         <MudItem xs="12" md="6">
-            <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
+            <MudCard Class="glass-card pa-4" Elevation="0" Style="height: 100%;">
                 <MudCardContent>
                     <MudStack Spacing="2">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -58,13 +60,13 @@
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions Class="flex-wrap gap-2">
-                    <MudButton Href="https://drive.proton.me/urls/TGJHBP4QV0#EZhpvXMk2YFB" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.MicrosoftWindows" Size="Size.Small">
+                    <MudButton Href="https://drive.proton.me/urls/TGJHBP4QV0#EZhpvXMk2YFB" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Custom.Brands.MicrosoftWindows" Size="Size.Small">
                         Windows
                     </MudButton>
-                    <MudButton Href="https://drive.proton.me/urls/WF9BS2PCHC#55DTLzEbSM7b" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Linux" Size="Size.Small">
+                    <MudButton Href="https://drive.proton.me/urls/WF9BS2PCHC#55DTLzEbSM7b" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Custom.Brands.Linux" Size="Size.Small">
                         Linux
                     </MudButton>
-                    <MudButton Href="https://drive.proton.me/urls/95EWAJN9HW#IQnQkLNEmPwu" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Apple" Size="Size.Small">
+                    <MudButton Href="https://drive.proton.me/urls/95EWAJN9HW#IQnQkLNEmPwu" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Custom.Brands.Apple" Size="Size.Small">
                         macOS
                     </MudButton>
                 </MudCardActions>
@@ -73,7 +75,7 @@
 
         @* Match Server Distribution *@
         <MudItem xs="12" md="6">
-            <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
+            <MudCard Class="glass-card pa-4" Elevation="0" Style="height: 100%;">
                 <MudCardContent>
                     <MudStack Spacing="2">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
@@ -87,10 +89,10 @@
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions Class="flex-wrap gap-2">
-                    <MudButton Href="https://drive.proton.me/urls/YRDWW35GDG#1SiknIwCH7rn" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.MicrosoftWindows" Size="Size.Small">
+                    <MudButton Href="https://drive.proton.me/urls/YRDWW35GDG#1SiknIwCH7rn" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Custom.Brands.MicrosoftWindows" Size="Size.Small">
                         Windows
                     </MudButton>
-                    <MudButton Href="https://drive.proton.me/urls/46F7CDK4J8#4W1x0JYEvtBG" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Custom.Brands.Linux" Size="Size.Small">
+                    <MudButton Href="https://drive.proton.me/urls/46F7CDK4J8#4W1x0JYEvtBG" Target="_blank" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Custom.Brands.Linux" Size="Size.Small">
                         Linux
                     </MudButton>
                 </MudCardActions>

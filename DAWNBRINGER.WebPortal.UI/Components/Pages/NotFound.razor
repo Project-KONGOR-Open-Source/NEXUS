@@ -1,0 +1,31 @@
+@page "/{**Path:nonfile}"
+
+<PageTitle>Not Found - Project KONGOR</PageTitle>
+
+<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6">
+    <MudCard Class="glass-card-form animate-fade-in pa-6" Elevation="0" Style="width: 100%; max-width: 640px;">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5">Page Not Found</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                    The portal has no route mapped to this address.
+                </MudText>
+            </MudStack>
+
+            <MudStack Row="true" Justify="Justify.Center" Class="mt-4">
+                <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button">
+                    Return Home
+                </MudButton>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
+
+@code {
+
+    [Parameter]
+    public string? Path { get; set; }
+}

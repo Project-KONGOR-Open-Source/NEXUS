@@ -2,34 +2,32 @@
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <section class="portal-utility-state">
-                    <div class="portal-state-panel">
-                        <div class="portal-section-kicker">Authorisation Required</div>
-                        <h1>Sign in to reach this part of the portal.</h1>
-                        <p>The new shell is public, but this route still requires an authenticated account.</p>
-                        <div class="portal-hero-actions portal-hero-actions-centred">
-                            <a href="/login" class="portal-call-to-action">Go To Log In</a>
-                            <a href="/" class="portal-secondary-action">Return Home</a>
-                        </div>
-                    </div>
-                </section>
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6">
+                    <MudCard Class="glass-card-form animate-fade-in pa-6" Elevation="0" Style="width: 100%; max-width: 640px;">
+                        <MudCardContent>
+                            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Primary" />
+                                    <MudText Typo="Typo.h5">Authorisation Required</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                                    You need to be logged in to access this part of the portal.
+                                </MudText>
+                            </MudStack>
+
+                            <MudStack Row="true" Justify="Justify.Center" Spacing="2" Class="mt-4">
+                                <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button">
+                                    Log In
+                                </MudButton>
+                                <MudButton Href="/" Variant="Variant.Outlined" Color="Color.Primary">
+                                    Return Home
+                                </MudButton>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudStack>
             </NotAuthorized>
         </AuthorizeRouteView>
-        <FocusOnNavigate RouteData="routeData" Selector=".portal-site-main" />
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
-    <NotFound>
-        <PageTitle>Not Found</PageTitle>
-        <LayoutView Layout="typeof(Layout.MainLayout)">
-            <section class="portal-utility-state">
-                <div class="portal-state-panel">
-                    <div class="portal-section-kicker">Page Not Found</div>
-                    <h1>There is nothing at this address.</h1>
-                    <p>The redesigned portal does not have a route mapped here yet.</p>
-                    <div class="portal-hero-actions portal-hero-actions-centred">
-                        <a href="/" class="portal-call-to-action">Return Home</a>
-                    </div>
-                </div>
-            </section>
-        </LayoutView>
-    </NotFound>
 </Router>
