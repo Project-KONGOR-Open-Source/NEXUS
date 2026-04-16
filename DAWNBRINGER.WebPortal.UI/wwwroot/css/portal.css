@@ -221,18 +221,18 @@
 
 /* --- Pulsing Text Glow ------------------------------------- */
 
-@keyframes kongor-text-pulse-gold {
+@keyframes kongor-text-pulse {
     0%, 100% { text-shadow: 0 0 12px rgba(0, 230, 118, 0.4), 0 0 36px rgba(0, 230, 118, 0.15); }
     50% { text-shadow: 0 0 24px rgba(0, 230, 118, 0.65), 0 0 56px rgba(0, 230, 118, 0.3), 0 0 84px rgba(0, 230, 118, 0.12); }
 }
 
 .hero-title {
     letter-spacing: 0.05em;
-    animation: kongor-text-pulse-gold 3s ease-in-out infinite;
+    animation: kongor-text-pulse 3s ease-in-out infinite;
 }
 
 .account-name-glow {
-    animation: kongor-text-pulse-gold 3s ease-in-out infinite;
+    animation: kongor-text-pulse 3s ease-in-out infinite;
 }
 
 /* --- Section Dividers & Headers ---------------------------- */
@@ -402,14 +402,14 @@
     background: rgba(218, 165, 32, 0.15) !important;
 }
 
-/* Light Mode Text Glow: Dark Gold */
-@keyframes kongor-text-pulse-dark-gold {
+/* Light Mode Text Glow */
+@keyframes kongor-text-pulse-light {
     0%, 100% { text-shadow: 0 0 12px rgba(184, 134, 11, 0.35), 0 0 36px rgba(184, 134, 11, 0.12); }
     50% { text-shadow: 0 0 24px rgba(184, 134, 11, 0.55), 0 0 56px rgba(184, 134, 11, 0.25), 0 0 84px rgba(184, 134, 11, 0.1); }
 }
 
-.light-mode .hero-title { animation-name: kongor-text-pulse-dark-gold; }
-.light-mode .account-name-glow { animation-name: kongor-text-pulse-dark-gold; }
+.light-mode .hero-title { animation-name: kongor-text-pulse-light; }
+.light-mode .account-name-glow { animation-name: kongor-text-pulse-light; }
 
 .light-mode .hero-section::before {
     background: radial-gradient(ellipse at center, rgba(184, 134, 11, 0.06) 0%, transparent 70%);
