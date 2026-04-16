@@ -138,6 +138,21 @@
     overflow: visible !important;
 }
 
+/* Theme Toggler: Scale On Hover Instead Of Circle Background */
+.kongor-appbar .mud-icon-button {
+    background: transparent !important;
+    transition: transform 0.2s ease;
+}
+
+.kongor-appbar .mud-icon-button:hover {
+    background: transparent !important;
+    transform: scale(1.1);
+}
+
+.kongor-appbar .mud-icon-button::before {
+    display: none !important;
+}
+
 /* Dropdown: Remove Border-Radius So Item Highlights Fill Cleanly */
 .mud-popover.mud-popover-anchor-bottom-center {
     border-radius: 0 !important;
