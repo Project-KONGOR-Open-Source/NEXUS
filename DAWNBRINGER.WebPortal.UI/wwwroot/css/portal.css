@@ -250,6 +250,28 @@
     margin-bottom: 1.5rem;
 }
 
+/* --- Ripple Effect Override -------------------------------- */
+
+.mud-ripple-effect {
+    background: radial-gradient(circle, rgba(0, 230, 118, 0.08) 0%, transparent 65%) !important;
+    transform: scale(0) !important;
+}
+
+.mud-ripple-effect-expanding {
+    transform: scale(0.4) !important;
+    opacity: 1 !important;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.1s linear !important;
+}
+
+.mud-ripple-effect-fading {
+    opacity: 0 !important;
+    transition: opacity 0.8s ease-out !important;
+}
+
+.light-mode .mud-ripple-effect {
+    background: radial-gradient(circle, rgba(46, 125, 50, 0.06) 0%, transparent 65%) !important;
+}
+
 /* --- Fade-In Animations ------------------------------------ */
 
 @keyframes kongor-fade-in {
