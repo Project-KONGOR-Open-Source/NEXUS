@@ -26,10 +26,10 @@
             else
             {
                 @* Account Header *@
-                <MudCard Outlined="true" Class="pa-6 mb-6">
+                <MudCard Class="glass-card pa-6 mb-6 animate-fade-in" Elevation="0">
                     <MudStack Spacing="2">
                         <MudText Typo="Typo.caption" Color="Color.Secondary">Current Account</MudText>
-                        <MudText Typo="Typo.h4">@DisplayName</MudText>
+                        <MudText Typo="Typo.h4" Class="font-scurlock" Color="Color.Primary">@DisplayName</MudText>
 
                         <MudGrid Spacing="3" Class="mt-4">
                             <MudItem xs="6" sm="3">
@@ -61,7 +61,7 @@
                 </MudCard>
 
                 @* Sibling Accounts Table *@
-                <MudCard Outlined="true" Class="pa-6 mb-6">
+                <MudCard Class="glass-card pa-6 mb-6 animate-fade-in-delay-1" Elevation="0">
                     <MudStack Spacing="2" Class="mb-4">
                         <MudText Typo="Typo.h6">Sibling Accounts</MudText>
                         <MudText Typo="Typo.body2" Color="Color.Secondary">
@@ -100,7 +100,7 @@
                 <MudGrid Spacing="4">
                     @* Update Email Form *@
                     <MudItem xs="12" md="6">
-                        <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
+                        <MudCard Class="glass-card pa-4 animate-fade-in-delay-2" Elevation="0" Style="height: 100%;">
                             <MudCardContent>
                                 <MudStack Spacing="2" Class="mb-4">
                                     <MudText Typo="Typo.h6">Update Email Address</MudText>
@@ -146,6 +146,7 @@
                                             <MudButton ButtonType="ButtonType.Submit"
                                                        Variant="Variant.Filled"
                                                        Color="Color.Primary"
+                                                       Class="glow-button"
                                                        Disabled="EmailUpdateProcessing">
                                                 @if (EmailUpdateProcessing)
                                                 {
@@ -166,7 +167,7 @@
 
                     @* Update Password Form *@
                     <MudItem xs="12" md="6">
-                        <MudCard Outlined="true" Class="pa-4" Style="height: 100%;">
+                        <MudCard Class="glass-card pa-4 animate-fade-in-delay-2" Elevation="0" Style="height: 100%;">
                             <MudCardContent>
                                 <MudStack Spacing="2" Class="mb-4">
                                     <MudText Typo="Typo.h6">Update Password</MudText>
@@ -216,6 +217,7 @@
                                             <MudButton ButtonType="ButtonType.Submit"
                                                        Variant="Variant.Filled"
                                                        Color="Color.Primary"
+                                                       Class="glow-button"
                                                        Disabled="PasswordUpdateProcessing">
                                                 @if (PasswordUpdateProcessing)
                                                 {

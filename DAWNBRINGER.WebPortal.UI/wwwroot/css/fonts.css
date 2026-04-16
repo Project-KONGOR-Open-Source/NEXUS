@@ -94,5 +94,5 @@
 }
 
 .font-scurlock:hover {
-    text-shadow: 0 0 10px currentColor, 0 0 25px currentColor;
+    text-shadow: 0 0 10px #00E676, 0 0 25px #00E676;
 }

@@ -5,15 +5,16 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
+<div class="@ThemeClass">
 <MudLayout>
-    <MudAppBar Elevation="1" Fixed="true">
+    <MudAppBar Elevation="0" Fixed="true" Class="kongor-appbar">
         <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-center px-4 px-sm-6 py-0">
             <MudHidden Breakpoint="Breakpoint.LgAndUp">
                 <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
             </MudHidden>
 
             <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text">
-                <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2" />
+                <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2 logo-glow" />
                 Home
             </MudButton>
 
@@ -94,17 +95,71 @@
                 </CascadingValue>
             </div>
 
-            <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="px-4 pt-4 pb-8 mt-6" Style="@FooterStyle">
-                <MudText Typo="Typo.caption" Align="Align.Center">
-                    Copyright 2024 Project KONGOR. Contact: support@example.com
-                </MudText>
-                <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
-                    Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
-                </MudText>
-            </MudStack>
+            <footer class="kongor-footer">
+                <MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6">
+                    <MudGrid Spacing="4" Class="py-8">
+                        <MudItem xs="12" sm="4">
+                            <MudStack Spacing="2">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="32" Height="32" Class="logo-glow" />
+                                    <MudText Typo="Typo.h6" Class="font-scurlock" Color="Color.Primary">Project KONGOR</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                    A community-driven revival of Heroes Of Newerth.
+                                </MudText>
+                            </MudStack>
+                        </MudItem>
+
+                        <MudItem xs="6" sm="2">
+                            <MudStack Spacing="1">
+                                <MudText Typo="Typo.overline">Quick Links</MudText>
+                                <MudLink Href="/" Typo="Typo.body2" Color="Color.Inherit">Home</MudLink>
+                                <MudLink Href="/downloads" Typo="Typo.body2" Color="Color.Inherit">Downloads</MudLink>
+                                <MudLink Href="https://codex.kongor.net" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Knowledge Base</MudLink>
+                            </MudStack>
+                        </MudItem>
+
+                        <MudItem xs="6" sm="2">
+                            <MudStack Spacing="1">
+                                <MudText Typo="Typo.overline">Community</MudText>
+                                <MudLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Discord</MudLink>
+                                <MudLink Href="https://www.reddit.com/r/newerth/" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Reddit</MudLink>
+                                <MudLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">GitHub</MudLink>
+                            </MudStack>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="4">
+                            <MudStack Spacing="1">
+                                <MudText Typo="Typo.overline">Account</MudText>
+                                <AuthorizeView>
+                                    <NotAuthorized>
+                                        <MudLink Href="/email/register" Typo="Typo.body2" Color="Color.Inherit">Register</MudLink>
+                                        <MudLink Href="/login" Typo="Typo.body2" Color="Color.Inherit">Log In</MudLink>
+                                    </NotAuthorized>
+                                    <Authorized>
+                                        <MudLink Href="/account" Typo="Typo.body2" Color="Color.Inherit">My Account</MudLink>
+                                    </Authorized>
+                                </AuthorizeView>
+                            </MudStack>
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudDivider Class="mb-4" />
+
+                    <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="pb-6">
+                        <MudText Typo="Typo.caption" Align="Align.Center">
+                            Copyright 2024 Project KONGOR. Contact: support@kongor.net
+                        </MudText>
+                        <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
+                            Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
+                        </MudText>
+                    </MudStack>
+                </MudContainer>
+            </footer>
         </div>
     </MudMainContent>
 </MudLayout>
+</div>
 
 @code {
 
@@ -116,6 +171,96 @@
 
     private static readonly MudTheme Theme = new()
     {
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#00E676",
+            PrimaryContrastText = "#0A0F0D",
+            PrimaryDarken = "#00C853",
+            PrimaryLighten = "#69F0AE",
+            Secondary = "#FFD740",
+            SecondaryContrastText = "#1A1A1A",
+            SecondaryDarken = "#FFC400",
+            SecondaryLighten = "#FFE57F",
+            Tertiary = "#7C4DFF",
+            TertiaryContrastText = "#FFFFFF",
+            Info = "#26C6DA",
+            InfoContrastText = "#0A0F0D",
+            Success = "#66BB6A",
+            SuccessContrastText = "#0A0F0D",
+            Warning = "#FFA726",
+            WarningContrastText = "#1A1A1A",
+            Error = "#EF5350",
+            ErrorContrastText = "#FFFFFF",
+            Dark = "#1A2E1A",
+            Background = "#0A0F0D",
+            BackgroundGray = "#0D1610",
+            Surface = "#111C14",
+            DrawerBackground = "#0D1610",
+            DrawerText = "#C8E6C9",
+            DrawerIcon = "#00E676",
+            AppbarBackground = "#0A0F0D",
+            AppbarText = "#E0F2E0",
+            TextPrimary = "#E8F5E9",
+            TextSecondary = "#81C784",
+            TextDisabled = "#2E5E2E",
+            ActionDefault = "#A5D6A7",
+            ActionDisabled = "#2E5E2E80",
+            ActionDisabledBackground = "#1A2E1A40",
+            LinesDefault = "#1B5E2040",
+            LinesInputs = "#2E7D3260",
+            TableLines = "#1B5E2030",
+            TableStriped = "#00E67608",
+            TableHover = "#00E67615",
+            Divider = "#1B5E2040",
+            DividerLight = "#1B5E2025",
+            HoverOpacity = 0.08,
+            RippleOpacity = 0.15,
+            OverlayDark = "rgba(10, 15, 13, 0.7)",
+            OverlayLight = "rgba(10, 15, 13, 0.4)",
+            GrayDefault = "#2E5E2E",
+            GrayLight = "#4A7C4A",
+            GrayLighter = "#6B9E6B",
+            GrayDark = "#1A3D1A",
+            GrayDarker = "#0F260F"
+        },
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#2E7D32",
+            PrimaryContrastText = "#FFFFFF",
+            PrimaryDarken = "#1B5E20",
+            PrimaryLighten = "#4CAF50",
+            Secondary = "#F57F17",
+            SecondaryContrastText = "#FFFFFF",
+            SecondaryDarken = "#E65100",
+            SecondaryLighten = "#FFB300",
+            Tertiary = "#6200EA",
+            TertiaryContrastText = "#FFFFFF",
+            Info = "#00838F",
+            Success = "#2E7D32",
+            Warning = "#E65100",
+            Error = "#C62828",
+            Dark = "#1A2E1A",
+            Background = "#F1F8E9",
+            BackgroundGray = "#E8F5E9",
+            Surface = "#FFFFFF",
+            DrawerBackground = "#F1F8E9",
+            DrawerText = "#1A2E1A",
+            DrawerIcon = "#2E7D32",
+            AppbarBackground = "#1B5E20",
+            AppbarText = "#FFFFFF",
+            TextPrimary = "#1A2E1A",
+            TextSecondary = "#4A7C4A",
+            TextDisabled = "#A5D6A780",
+            ActionDefault = "#4A7C4A",
+            Divider = "#C8E6C950",
+            DividerLight = "#C8E6C930",
+            LinesDefault = "#A5D6A760",
+            LinesInputs = "#4A7C4A60"
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "8px"
+        },
         Typography = new Typography
         {
             Default = new DefaultTypography
@@ -227,15 +372,13 @@
 
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
 
-    private Color AppBarButtonColour => IsDarkMode ? Color.Primary : Color.Secondary;
+    private Color AppBarButtonColour => Color.Primary;
+
+    private string ThemeClass => IsDarkMode ? "dark-mode" : "light-mode";
 
     private string ContentStyle => IsDarkMode
-        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(20, 20, 30, 0.85), rgba(20, 20, 30, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
-        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(245, 245, 250, 0.85), rgba(245, 245, 250, 0.95)), url('images/caldavar.jpg') center/cover no-repeat fixed;";
-
-    private string FooterStyle => IsDarkMode
-        ? "background: rgba(0, 0, 0, 0);"
-        : "background: rgba(255, 255, 255, 0);";
+        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(10, 15, 13, 0.82), rgba(10, 15, 13, 0.92)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
+        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(241, 248, 233, 0.88), rgba(241, 248, 233, 0.94)), url('images/caldavar.jpg') center/cover no-repeat fixed;";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

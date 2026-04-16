@@ -1,0 +1,276 @@
+/* ============================================================
+   PROJECT KONGOR PORTAL STYLES
+   Visual overhaul inspired by the HoN aesthetic: dark forest
+   greens, emerald magic glow, golden artifacts, teal water.
+   ============================================================ */
+
+/* --- CSS Custom Properties --------------------------------- */
+
+:root {
+    --kongor-glow-primary: #00E676;
+    --kongor-glow-secondary: #FFD740;
+    --kongor-glow-tertiary: #7C4DFF;
+    --kongor-glow-info: #26C6DA;
+
+    --kongor-surface-glass: rgba(17, 28, 20, 0.6);
+    --kongor-surface-glass-hover: rgba(17, 28, 20, 0.75);
+    --kongor-surface-glass-form: rgba(17, 28, 20, 0.7);
+    --kongor-surface-glass-inner: rgba(17, 28, 20, 0.4);
+
+    --kongor-border-glass: rgba(0, 230, 118, 0.15);
+    --kongor-border-glass-hover: rgba(0, 230, 118, 0.3);
+    --kongor-border-glass-inner: rgba(0, 230, 118, 0.1);
+
+    --kongor-blur-amount: 16px;
+    --kongor-transition-speed: 0.3s;
+
+    --kongor-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    --kongor-card-shadow-hover: 0 8px 40px rgba(0, 230, 118, 0.15), 0 4px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Glassmorphism Cards ----------------------------------- */
+
+.glass-card {
+    background: var(--kongor-surface-glass) !important;
+    backdrop-filter: blur(var(--kongor-blur-amount));
+    -webkit-backdrop-filter: blur(var(--kongor-blur-amount));
+    border: 1px solid var(--kongor-border-glass) !important;
+    box-shadow: var(--kongor-card-shadow);
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--kongor-card-shadow-hover);
+    border-color: var(--kongor-border-glass-hover) !important;
+}
+
+.glass-card-inner {
+    background: var(--kongor-surface-glass-inner) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--kongor-border-glass-inner) !important;
+    transition: transform var(--kongor-transition-speed) ease,
+                box-shadow var(--kongor-transition-speed) ease,
+                border-color var(--kongor-transition-speed) ease;
+}
+
+.glass-card-inner:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 24px rgba(0, 230, 118, 0.12);
+    border-color: rgba(0, 230, 118, 0.25) !important;
+}
+
+.glass-card-form {
+    background: var(--kongor-surface-glass-form) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 230, 118, 0.12) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* --- AppBar & Navigation ----------------------------------- */
+
+.kongor-appbar {
+    background: rgba(10, 15, 13, 0.8) !important;
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-bottom: 1px solid rgba(0, 230, 118, 0.1);
+}
+
+/* --- Hero Section ------------------------------------------ */
+
+.hero-section {
+    position: relative;
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0, 230, 118, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.3), transparent);
+}
+
+.hero-title {
+    text-shadow: 0 0 20px rgba(0, 230, 118, 0.4), 0 0 60px rgba(0, 230, 118, 0.15);
+    letter-spacing: 0.05em;
+    transition: text-shadow var(--kongor-transition-speed) ease;
+}
+
+.hero-title:hover {
+    text-shadow: 0 0 20px rgba(0, 230, 118, 0.6), 0 0 60px rgba(0, 230, 118, 0.3), 0 0 100px rgba(0, 230, 118, 0.15);
+}
+
+/* --- Section Dividers & Headers ---------------------------- */
+
+.section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 230, 118, 0.25), transparent);
+    margin: 2.5rem 0;
+    border: none;
+}
+
+.section-header {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--kongor-glow-primary), var(--kongor-glow-info));
+    border-radius: 1px;
+    transition: width var(--kongor-transition-speed) ease;
+}
+
+.section-header:hover::after {
+    width: 100px;
+}
+
+/* --- Button Glow Effects ----------------------------------- */
+
+.glow-button {
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow var(--kongor-transition-speed) ease;
+}
+
+.glow-button:hover {
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.3), 0 0 40px rgba(0, 230, 118, 0.1);
+}
+
+/* --- Logo Glow Animation ----------------------------------- */
+
+@keyframes kongor-pulse-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(0, 230, 118, 0.3)); }
+    50% { filter: drop-shadow(0 0 12px rgba(0, 230, 118, 0.5)); }
+}
+
+.logo-glow {
+    animation: kongor-pulse-glow 3s ease-in-out infinite;
+}
+
+/* --- Footer ------------------------------------------------ */
+
+.kongor-footer {
+    background: linear-gradient(180deg, transparent, rgba(10, 15, 13, 0.6));
+    border-top: 1px solid rgba(0, 230, 118, 0.1);
+}
+
+/* --- Fade-In Animations ------------------------------------ */
+
+@keyframes kongor-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: kongor-fade-in 0.5s ease-out both;
+}
+
+.animate-fade-in-delay-1 {
+    animation: kongor-fade-in 0.5s ease-out 0.1s both;
+}
+
+.animate-fade-in-delay-2 {
+    animation: kongor-fade-in 0.5s ease-out 0.2s both;
+}
+
+.animate-fade-in-delay-3 {
+    animation: kongor-fade-in 0.5s ease-out 0.3s both;
+}
+
+.animate-fade-in-delay-4 {
+    animation: kongor-fade-in 0.5s ease-out 0.4s both;
+}
+
+/* --- Light Mode Overrides ---------------------------------- */
+
+.light-mode .glass-card {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border-color: rgba(46, 125, 50, 0.15) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.light-mode .glass-card:hover {
+    box-shadow: 0 8px 40px rgba(46, 125, 50, 0.1);
+    border-color: rgba(46, 125, 50, 0.25) !important;
+}
+
+.light-mode .glass-card-inner {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border-color: rgba(46, 125, 50, 0.1) !important;
+}
+
+.light-mode .glass-card-inner:hover {
+    box-shadow: 0 6px 24px rgba(46, 125, 50, 0.08);
+    border-color: rgba(46, 125, 50, 0.2) !important;
+}
+
+.light-mode .glass-card-form {
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-color: rgba(46, 125, 50, 0.12) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.light-mode .kongor-appbar {
+    background: rgba(27, 94, 32, 0.95) !important;
+    border-bottom-color: rgba(46, 125, 50, 0.3);
+}
+
+.light-mode .hero-title {
+    text-shadow: 0 0 20px rgba(46, 125, 50, 0.3), 0 0 60px rgba(46, 125, 50, 0.1);
+}
+
+.light-mode .hero-title:hover {
+    text-shadow: 0 0 20px rgba(46, 125, 50, 0.5), 0 0 60px rgba(46, 125, 50, 0.2);
+}
+
+.light-mode .section-divider {
+    background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.2), transparent);
+}
+
+.light-mode .hero-section::before {
+    background: radial-gradient(ellipse at center, rgba(46, 125, 50, 0.06) 0%, transparent 70%);
+}
+
+.light-mode .hero-section::after {
+    background: linear-gradient(90deg, transparent, rgba(46, 125, 50, 0.2), transparent);
+}
+
+.light-mode .glow-button:hover {
+    box-shadow: 0 0 20px rgba(46, 125, 50, 0.2), 0 0 40px rgba(46, 125, 50, 0.08);
+}
+
+.light-mode .kongor-footer {
+    background: linear-gradient(180deg, transparent, rgba(241, 248, 233, 0.6));
+    border-top-color: rgba(46, 125, 50, 0.1);
+}
