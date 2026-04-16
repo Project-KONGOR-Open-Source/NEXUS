@@ -109,10 +109,26 @@
     border-right: none !important;
 }
 
-/* Both Arrow Pseudo-Elements Use Fill Colour For A Clean Seamless Arrow */
-.mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before,
+/* Arrow Border: ::before Is 1px Bigger On All Exposed Sides */
+.mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
+    top: calc(50% - 17px) !important;
+    border-top: 17px solid transparent !important;
+    border-bottom: 17px solid transparent !important;
+    border-right: 17px solid var(--kongor-timeline-border) !important;
+}
+
+/* Arrow Fill: Default Size, Covers ::before Interior */
 .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
     border-right-color: var(--kongor-timeline-surface) !important;
+}
+
+/* Position ::before 1px Further Out At The Tip For Each Side */
+.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n+1):not(.mud-timeline-item-start) .timeline-card::before {
+    left: -17px !important;
+}
+
+.mud-timeline-position-alternate .mud-timeline-item:nth-child(2n):not(.mud-timeline-item-end) .timeline-card::before {
+    right: -17px !important;
 }
 
 /* --- AppBar & Navigation ----------------------------------- */
@@ -330,7 +346,10 @@
     border-color: rgba(184, 134, 11, 0.25) !important;
 }
 
-.light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before,
+.light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::before {
+    border-right-color: rgba(184, 134, 11, 0.12) !important;
+}
+
 .light-mode .mud-timeline-modifiers .mud-timeline-item-content .timeline-card::after {
     border-right-color: #FFFCF5 !important;
 }
