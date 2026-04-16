@@ -147,7 +147,7 @@ public class MatchmakingGroup
     ///     Based on the original compatibility check algorithm.
     /// </summary>
     /// <param name="other">The other group to check compatibility with.</param>
-    /// <returns>TRUE if the groups are compatible, FALSE otherwise.</returns>
+    /// <returns><see langword="true"/> if the groups are compatible, <see langword="false"/> otherwise.</returns>
     public bool IsCompatibleWith(MatchmakingGroup other)
     {
         // Must Have Matching Game Type
@@ -231,17 +231,6 @@ public class MatchmakingGroup
 
         MatchmakingGroup group = new () { Members = [member], Information = information };
 
-        // Create Group Chat Channel (Uses RESERVED | UNJOINABLE | HIDDEN Flags)
-        group.ChatChannel = ChatChannel.GetOrCreateGroupChannel(group.GUID.GetHashCode());
-
-        // Join Group Chat Channel (Silent Join For Leader)
-        if (group.ChatChannel.Members.ContainsKey(session.Account.Name) is false)
-        {
-            ChatChannelMember channelMember = new (session, group.ChatChannel);
-            group.ChatChannel.Members.TryAdd(session.Account.Name, channelMember);
-            session.CurrentChannels.Add(group.ChatChannel.ID);
-        }
-
         if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
         {
             if (MatchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
@@ -255,15 +244,6 @@ public class MatchmakingGroup
         }
 
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
-
-        // Solo Co-Op Groups Bypass The Readiness And Loading Flow Because There Are No Other Players To Wait For
-        if (information.GroupType == ChatProtocol.TMMType.TMM_TYPE_COOP && group.Members.Count == 1)
-        {
-            member.IsReady = true;
-            member.LoadingPercent = 100;
-
-            group.JoinQueue();
-        }
 
         return group;
     }
@@ -366,8 +346,25 @@ public class MatchmakingGroup
             return this;
         }
 
-        // Join Group Chat Channel (Uses RESERVED | UNJOINABLE | HIDDEN Flags)
-        if (ChatChannel is not null && ChatChannel.Members.ContainsKey(session.Account.Name) is false)
+        // Create The Group Chat Channel When The Second Member Joins
+        // For Subsequent Members, The Channel Already Exists And They Are Simply Added To It
+        if (ChatChannel is null)
+        {
+            ChatChannel = ChatChannel.GetOrCreateGroupChannel(GUID.GetHashCode());
+
+            // Add All Existing Members To The Newly-Created Channel
+            foreach (MatchmakingGroupMember existingMember in Members)
+            {
+                if (ChatChannel.Members.ContainsKey(existingMember.Account.Name) is false)
+                {
+                    ChatChannelMember existingChannelMember = new (existingMember.Session, ChatChannel);
+                    ChatChannel.Members.TryAdd(existingMember.Account.Name, existingChannelMember);
+                    existingMember.Session.CurrentChannels.Add(ChatChannel.ID);
+                }
+            }
+        }
+
+        else if (ChatChannel.Members.ContainsKey(session.Account.Name) is false)
         {
             ChatChannelMember channelMember = new (session, ChatChannel);
             ChatChannel.Members.TryAdd(session.Account.Name, channelMember);
@@ -632,6 +629,24 @@ public class MatchmakingGroup
         // Remove Member From Group
         Members.Remove(memberToRemove);
 
+        // Dispose The Group Chat Channel When The Group Drops To One Or Fewer Members
+        if (Members.Count <= 1 && ChatChannel is not null)
+        {
+            foreach (MatchmakingGroupMember remainingMember in Members)
+            {
+                ChatChannel.Members.TryRemove(remainingMember.Account.Name, out _);
+
+                remainingMember.Session.CurrentChannels.Remove(ChatChannel.ID);
+            }
+
+            if (ChatChannel.Members.IsEmpty)
+            {
+                Context.ChatChannels.TryRemove(ChatChannel.Name, out _);
+            }
+
+            ChatChannel = null;
+        }
+
         // If Group Is Now Empty, Disband It
         if (Members.Count is 0)
         {
@@ -811,7 +826,7 @@ public class MatchmakingGroup
     ///     This prevents boosting/smurfing by rejecting groups where the highest-rated player is significantly above the average of the remaining members.
     /// </summary>
     /// <returns>
-    ///     TRUE if disparity exceeds the threshold, FALSE otherwise.
+    ///     <see langword="true"/> if disparity exceeds the threshold, <see langword="false"/> otherwise.
     /// </returns>
     private bool HasExcessiveTMRDisparity()
     {

@@ -197,7 +197,7 @@ public class TCPClient : IDisposable
     ///     <br/>
     ///     You Should Use The Receive() Or ReceiveAsync() Method Manually After A Successful Connection
     /// </remarks>
-    /// <returns>TRUE If The Client Was Successfully Connected, Or FALSE If The Client Failed To Connect</returns>
+    /// <returns><see langword="true"/> If The Client Was Successfully Connected, Or <see langword="false"/> If The Client Failed To Connect</returns>
     public virtual bool Connect()
     {
         if (IsConnected || IsConnecting)
@@ -306,7 +306,7 @@ public class TCPClient : IDisposable
     /// <summary>
     ///     Disconnect The Client (Synchronous)
     /// </summary>
-    /// <returns> TRUE If The Client Was Successfully Disconnected, Or FALSE If The Client Is Already Disconnected</returns>
+    /// <returns><see langword="true"/> If The Client Was Successfully Disconnected, Or <see langword="false"/> If The Client Is Already Disconnected</returns>
     public virtual bool Disconnect()
     {
         if (!IsConnected && !IsConnecting)
@@ -370,7 +370,7 @@ public class TCPClient : IDisposable
     /// <summary>
     ///     Reconnect The Client (Synchronous)
     /// </summary>
-    /// <returns>TRUE If The Client Was Successfully Reconnected, Or FALSE If The Client Is Already Reconnected</returns>
+    /// <returns><see langword="true"/> If The Client Was Successfully Reconnected, Or <see langword="false"/> If The Client Is Already Reconnected</returns>
     public virtual bool Reconnect()
     {
         if (!Disconnect())
@@ -382,7 +382,7 @@ public class TCPClient : IDisposable
     /// <summary>
     ///     Connect The Client (Asynchronous)
     /// </summary>
-    /// <returns>TRUE If The Client Was Successfully Connected, Or FALSE If The Client Failed To Connect</returns>
+    /// <returns><see langword="true"/> If The Client Was Successfully Connected, Or <see langword="false"/> If The Client Failed To Connect</returns>
     public virtual bool ConnectAsync()
     {
         if (IsConnected || IsConnecting)
@@ -428,13 +428,13 @@ public class TCPClient : IDisposable
     /// <summary>
     ///     Disconnect The Client (Asynchronous)
     /// </summary>
-    /// <returns>TRUE If The Client Was Successfully Disconnected, Or FALSE If The Client Is Already Disconnected</returns>
+    /// <returns><see langword="true"/> If The Client Was Successfully Disconnected, Or <see langword="false"/> If The Client Is Already Disconnected</returns>
     public virtual bool DisconnectAsync() => Disconnect();
 
     /// <summary>
     ///     Reconnect The Client (Asynchronous)
     /// </summary>
-    /// <returns>TRUE If The Client Was Successfully Reconnected, Or FALSE If The Client Is Already Reconnected</returns>
+    /// <returns><see langword="true"/> If The Client Was Successfully Reconnected, Or <see langword="false"/> If The Client Is Already Reconnected</returns>
     public virtual bool ReconnectAsync()
     {
         if (!DisconnectAsync())
@@ -531,7 +531,7 @@ public class TCPClient : IDisposable
     ///     Send Data To The Server (Asynchronous)
     /// </summary>
     /// <param name="buffer">Buffer To Send</param>
-    /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Sent, Or <see langword="false"/> If The Client Is Not Connected</returns>
     public virtual bool SendAsync(byte[] buffer) => SendAsync(buffer.AsSpan());
 
     /// <summary>
@@ -540,14 +540,14 @@ public class TCPClient : IDisposable
     /// <param name="buffer">Buffer To Send</param>
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
-    /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Sent, Or <see langword="false"/> If The Client Is Not Connected</returns>
     public virtual bool SendAsync(byte[] buffer, long offset, long size) => SendAsync(buffer.AsSpan((int)offset, (int)size));
 
     /// <summary>
     ///     Send Data To The Server (Asynchronous)
     /// </summary>
     /// <param name="buffer">Buffer To Send As A Span Of Bytes</param>
-    /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Sent, Or <see langword="false"/> If The Client Is Not Connected</returns>
     public virtual bool SendAsync(ReadOnlySpan<byte> buffer)
     {
         if (!IsConnected)
@@ -588,14 +588,14 @@ public class TCPClient : IDisposable
     ///     Send Text To The Server (Asynchronous)
     /// </summary>
     /// <param name="text">Text String To Send</param>
-    /// <returns>TRUE If The Text Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Text Was Successfully Sent, Or <see langword="false"/> If The Client Is Not Connected</returns>
     public virtual bool SendAsync(string text) => SendAsync(Encoding.UTF8.GetBytes(text));
 
     /// <summary>
     ///     Send Text To The Server (Asynchronous)
     /// </summary>
     /// <param name="text">Text To Send As A Span Of Characters</param>
-    /// <returns>TRUE If The Text Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Text Was Successfully Sent, Or <see langword="false"/> If The Client Is Not Connected</returns>
     public virtual bool SendAsync(ReadOnlySpan<char> text) => SendAsync(Encoding.UTF8.GetBytes(text.ToArray()));
 
     /// <summary>

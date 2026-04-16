@@ -5,10 +5,10 @@ public class KONGOR
     // The Count Of Seconds Since The UNIX Epoch (Epochalypse = 19.01.2038 @ 03:14:07 UTC)
     public static long ServerStartEpochTime { get; private set; } = default;
 
-    public static async Task Main(string[] args)
+    public static async Task Main(string[] arguments)
     {
         // Create The Application Builder
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(arguments);
 
         // Set Static ServerStartEpochTime Property
         ServerStartEpochTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();

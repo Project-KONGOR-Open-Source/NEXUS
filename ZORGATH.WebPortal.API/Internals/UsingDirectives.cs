@@ -4,6 +4,8 @@ global using ASPIRE.Common.ServiceDefaults;
 global using FluentValidation;
 global using FluentValidation.Results;
 
+global using MailKit.Net.Smtp;
+
 global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Utility;
@@ -24,6 +26,8 @@ global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OpenApi;
 
+global using MimeKit;
+
 global using SecureRemotePassword;
 
 global using System.IdentityModel.Tokens.Jwt;
@@ -33,6 +37,7 @@ global using System.Runtime.CompilerServices;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Text;
+global using System.Text.Json;
 global using System.Text.RegularExpressions;
 global using System.Threading.RateLimiting;
 
@@ -41,6 +46,7 @@ global using ZORGATH.WebPortal.API.Contracts;
 global using ZORGATH.WebPortal.API.Extensions;
 global using ZORGATH.WebPortal.API.Handlers;
 global using ZORGATH.WebPortal.API.Helpers;
+global using ZORGATH.WebPortal.API.Models;
 global using ZORGATH.WebPortal.API.Models.Configuration;
 global using ZORGATH.WebPortal.API.Services.Email;
 global using ZORGATH.WebPortal.API.Validators;

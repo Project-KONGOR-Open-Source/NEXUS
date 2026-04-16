@@ -212,7 +212,7 @@ public class SimpleSeasonStats
 
     /// <summary>
     ///     Whether the account needs to play placement matches or not.
-    ///     A value of "1" means TRUE, and a value of "0" means FALSE.
+    ///     A value of "1" means <see langword="true"/>, and a value of "0" means <see langword="false"/>.
     /// </summary>
     [PHPProperty("is_placement")]
     public required int InPlacementPhase { get; set; }

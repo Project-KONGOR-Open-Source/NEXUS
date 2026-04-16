@@ -1,0 +1,143 @@
+@page "/account/register/{Token}"
+
+@inject PortalAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Create Account - Project KONGOR</PageTitle>
+
+<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6" >
+    <MudCard Class="glass-card-form animate-fade-in pa-6" Elevation="0" Style="width: 100%; max-width: 640px;">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Large" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5">Create Account</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                    Choose an account name and password to complete your registration.
+                </MudText>
+            </MudStack>
+
+            <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+
+                <MudStack Spacing="3">
+                    <MudTextField @bind-Value="FormModel.Name"
+                                  For="@(() => FormModel.Name)"
+                                  Label="Account Name"
+                                  HelperText="Between 4 and 12 characters. Letters, numbers, underscores, and hyphens only."
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Person" />
+
+                    <MudTextField @bind-Value="FormModel.Password"
+                                  For="@(() => FormModel.Password)"
+                                  Label="Password"
+                                  HelperText="At least 8 characters long."
+                                  Variant="Variant.Outlined"
+                                  InputType="@PasswordInputType"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@PasswordVisibilityIcon"
+                                  OnAdornmentClick="TogglePasswordVisibility"
+                                  AdornmentAriaLabel="Toggle password visibility" />
+
+                    <MudTextField @bind-Value="FormModel.ConfirmPassword"
+                                  For="@(() => FormModel.ConfirmPassword)"
+                                  Label="Confirm Password"
+                                  HelperText="Enter the same password again for confirmation."
+                                  Variant="Variant.Outlined"
+                                  InputType="@ConfirmPasswordInputType"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@ConfirmPasswordVisibilityIcon"
+                                  OnAdornmentClick="ToggleConfirmPasswordVisibility"
+                                  AdornmentAriaLabel="Toggle password visibility" />
+
+                    <MudStack Row="true" Justify="Justify.FlexEnd" Class="mt-2">
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Class="glow-button"
+                                   Disabled="Processing">
+                            @if (Processing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Creating account...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Create Account</MudText>
+                            }
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            </EditForm>
+        </MudCardContent>
+    </MudCard>
+</MudStack>
+
+@code {
+
+    [Parameter]
+    public string? Token { get; set; }
+
+    private CreateAccountFormModel FormModel { get; set; } = new ();
+
+    private bool Processing { get; set; }
+
+    private bool PasswordVisible { get; set; }
+
+    private bool ConfirmPasswordVisible { get; set; }
+
+    private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
+
+    private InputType ConfirmPasswordInputType => ConfirmPasswordVisible ? InputType.Text : InputType.Password;
+
+    private string PasswordVisibilityIcon => PasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
+    private string ConfirmPasswordVisibilityIcon => ConfirmPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
+    private void TogglePasswordVisibility()
+    {
+        PasswordVisible = !PasswordVisible;
+    }
+
+    private void ToggleConfirmPasswordVisibility()
+    {
+        ConfirmPasswordVisible = !ConfirmPasswordVisible;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Processing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAnonymousClient();
+
+            RegisterUserAndMainAccountRequest request = new (Token ?? string.Empty, FormModel.Name, FormModel.Password, FormModel.ConfirmPassword);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/User/Register", request);
+
+            if (response.StatusCode is HttpStatusCode.Created)
+            {
+                FormModel = new CreateAccountFormModel();
+                Snackbar.Add("Account created successfully.", Severity.Success);
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            Processing = false;
+        }
+    }
+}

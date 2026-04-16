@@ -159,24 +159,45 @@ public partial class ClientRequesterController
             if (account.IPAddressCollection.Contains(remoteIPAddress).Equals(false))
                 account.IPAddressCollection.Add(remoteIPAddress);
 
-            string[] systemInformationDataPoints = [.. systemInformation.Split('|', StringSplitOptions.RemoveEmptyEntries)];
+            /*
+                Stage One (pre_auth) System Information Format:
+                  - Windows: "MAC|OS|Processor|Video|RAM" (five pipe-separated data points)
+                  - Linux/macOS: "not running on windows" (plain string)
+            */
+            bool isNonWindowsClient = systemInformation.Equals("not running on windows", StringComparison.Ordinal);
 
-            if (systemInformationDataPoints.Length is not 5 /* the expected count of data points */)
+            if (isNonWindowsClient)
             {
-                Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
-
-                return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectSystemInformationFormat)));
+                if (account.SystemInformationCollection.Contains(systemInformation).Equals(false))
+                    account.SystemInformationCollection.Add(systemInformation);
             }
 
-            if (account.MACAddressCollection.Contains(systemInformationDataPoints.First()).Equals(false))
-                account.MACAddressCollection.Add(systemInformationDataPoints.First());
+            else
+            {
+                string[] systemInformationDataPoints = [.. systemInformation.Split('|', StringSplitOptions.RemoveEmptyEntries)];
 
-            if (account.SystemInformationCollection.Contains(string.Join('|', systemInformationDataPoints.Skip(1))).Equals(false))
-                account.SystemInformationCollection.Add(string.Join('|', systemInformationDataPoints.Skip(1)));
+                if (systemInformationDataPoints.Length is not 5 /* the expected count of data points */)
+                {
+                    Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
 
-            // The set of system information hashes is most likely bugged.
-            // The intention probably was for each of the five data points to be hashed separately, but instead the entire system information is hashed five times.
-            // NOTE: The value of Request.Form["SysInfo"] for Linux and macOS clients is "not running on windows".
+                    return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectSystemInformationFormat)));
+                }
+
+                if (account.MACAddressCollection.Contains(systemInformationDataPoints.First()).Equals(false))
+                    account.MACAddressCollection.Add(systemInformationDataPoints.First());
+
+                if (account.SystemInformationCollection.Contains(string.Join('|', systemInformationDataPoints.Skip(1))).Equals(false))
+                    account.SystemInformationCollection.Add(string.Join('|', systemInformationDataPoints.Skip(1)));
+            }
+
+            /*
+                The HWID hash implementation appears to be bugged in the client.
+                The intention was probably for each of the five system information data points to be hashed separately, but instead the same HWID hash is repeated five times.
+
+                Stage Two (srpAuth) System Information Hashes Format:
+                  - All Platforms (HWID obtained): "hash|hash|hash|hash|hash" (same HWID hash repeated 5 times, likely a bug)
+                  - All Platforms (HWID not obtained): "not obtainable" (plain string)
+            */
             string? systemInformationHash = systemInformationHashes.Split('|', StringSplitOptions.RemoveEmptyEntries).Distinct().SingleOrDefault();
 
             if (systemInformationHash is null)

@@ -119,7 +119,7 @@ internal static class DiscriminatedUnionUnwrapper
     /// <summary>
     ///     This method is used via reflection to create delegates for the <see cref="OneOf{T1, T2}.Match"/> method.
     ///     Each possible type in the discriminated union needs a <c>Func&lt;T, object&gt;</c> delegate that converts it to object.
-    ///     This method simply returns the input value cast to object, preserving NULL values.
+    ///     This method simply returns the input value cast to object, preserving <see langword="null"/> values.
     /// </summary>
     /// <remarks>
     ///     EXAMPLE: For <c>OneOf&lt;int, string&gt;</c>, we create <c>Identity&lt;int&gt;</c> and <c>Identity&lt;string&gt;</c> delegates.

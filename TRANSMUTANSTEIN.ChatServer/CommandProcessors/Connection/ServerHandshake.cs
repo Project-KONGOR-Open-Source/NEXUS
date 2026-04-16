@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_CONNECT)]
-public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext) : IAsynchronousCommandProcessor<MatchServerChatSession>
+public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext, IOptions<MatchServerSettings> matchServerSettings) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
     public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
@@ -134,14 +134,35 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
 
         string uniqueServerName = Random.Shared.Next().ToString("X8"); // TODO: Use The Original Name As Identifier, To Verify Server Binaries Checksum
 
-        string[] remoteCommands =
+        MatchServerSettings settings = matchServerSettings.Value;
+
+        List<string> remoteCommands =
         [
-            "svr_submitMatchStatItems true",
-            "svr_submitMatchStatAbilities true",
-            "svr_submitMatchStatFrags true",
-            $"svr_name {uniqueServerName}",
-            "echo Project KONGOR Remote Configuration Was Injected Successfully"
+            // Tick Rate (svr_gameFPS: Range 1–60, Default 20)
+            $"svr_gameFPS {settings.TickRate}",
+
+            // Match Statistics Submission
+            $"svr_submitMatchStatItems {BooleanToString(settings.SubmitMatchStatisticsItems)}",
+            $"svr_submitMatchStatAbilities {BooleanToString(settings.SubmitMatchStatisticsAbilities)}",
+            $"svr_submitMatchStatFrags {BooleanToString(settings.SubmitMatchStatisticsFrags)}",
+
+            // Network Visibility
+            $"svr_broadcast {BooleanToString(settings.Broadcast)}",
+
+            // Server Identity
+            $"svr_name {uniqueServerName}"
         ];
+
+        // Maximum Outgoing Bandwidth Per Client (0 Uses Game Server Default)
+        if (settings.MaxBytesPerSecond > 0)
+            remoteCommands.Add($"svr_maxbps {settings.MaxBytesPerSecond}");
+
+        // Long Frame Warning Time In Milliseconds (0 Disables The Warning)
+        if (settings.LongFrameWarnTime > 0)
+            remoteCommands.Add($"svr_longFrameWarnTime {settings.LongFrameWarnTime}");
+
+        // Confirmation Echo Is Always Last So That It Only Appears After All Commands Have Been Processed
+        remoteCommands.Add("echo Project KONGOR Remote Configuration Was Injected Successfully");
 
         // Accept Connection And Send Configuration
         session
@@ -153,6 +174,11 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         // Update The Match Server Name In The Distributed Cache
         await distributedCacheStore.SetMatchServer(server.HostAccountName, server);
     }
+
+    /// <summary>
+    ///     Converts a boolean value to the HON console variable string representation.
+    /// </summary>
+    private static string BooleanToString(bool value) => value ? "true" : "false";
 }
 
 file class ServerHandshakeRequestData

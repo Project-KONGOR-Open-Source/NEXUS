@@ -45,7 +45,7 @@ public static class GameUpgrades
         .Concat(Bundles)
         .Concat(Heroes);
 
-    public static Dictionary<string, string[]> AllUpgradesGroupedByType => new()
+    public static Dictionary<string, string[]> AllUpgradesGroupedByType => new ()
     {
         {"Fixed Upgrades", FixedUpgrades},
         {"Chat Name Colours", ChatNameColours},

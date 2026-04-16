@@ -12,7 +12,8 @@ public partial class StatsRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
 
-        // Snapshot The Match Information From Redis Before It Can Be Evicted
+        // Snapshot The Match Information From Redis Before Removing It
+        // From This Point Forward, The Database Snapshot Is The Single Source Of Truth
         MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(form.MatchStats.MatchID);
 
         string? matchInformationSnapshot = matchInformation is not null
@@ -61,10 +62,10 @@ public partial class StatsRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        // Evict The Match Information From Redis Now That It Has Been Persisted To The Database
+        // Remove The Match Information From Redis Now That The Database Snapshot Is The Single Source Of Truth
         await DistributedCache.RemoveMatchInformation(form.MatchStats.MatchID);
 
-        return Ok();
+        return Ok(PhpSerialization.Serialize(new StatisticsSubmissionResponse()));
     }
 
     private async Task<IActionResult> HandleStatsResubmission(StatsForSubmissionRequestForm form)
@@ -147,6 +148,6 @@ public partial class StatsRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        return Ok();
+        return Ok(PhpSerialization.Serialize(new StatisticsResubmissionResponse(form.MatchStats.MatchID)));
     }
 }

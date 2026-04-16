@@ -507,11 +507,9 @@ public partial class ClientRequesterController
         if (account is null)
             return new NotFoundObjectResult("Account Not Found");
 
-        MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(matchStatistics.MatchID);
-
-        // Fall Back To The Database Snapshot If The Redis Cache Entry Has Been Evicted
-        if (matchInformation is null && matchStatistics.MatchInformationSnapshot is not null)
-            matchInformation = JsonSerializer.Deserialize<MatchInformation>(matchStatistics.MatchInformationSnapshot);
+        // The Database Snapshot Is The Single Source Of Truth For Match Information Once Stats Have Been Submitted
+        MatchInformation? matchInformation = matchStatistics.MatchInformationSnapshot is not null
+            ? JsonSerializer.Deserialize<MatchInformation>(matchStatistics.MatchInformationSnapshot) : null;
 
         if (matchInformation is null)
             return new NotFoundObjectResult("Match Information Not Found");

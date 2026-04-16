@@ -39,7 +39,7 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
             // TODO: Notify The Sender That Their Message Was Truncated
         }
 
-        // Broadcast The Message To All Channel Members
+        // Broadcast The Message To All Channel Members Except The Sender
         ChatBuffer broadcast = new ();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_MSG);
@@ -47,7 +47,7 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
         broadcast.WriteInt32(requestData.ChannelID); // Channel ID
         broadcast.WriteString(messageContent);       // Message Content (Potentially Truncated)
 
-        channel.BroadcastMessage(broadcast);
+        channel.BroadcastMessage(broadcast, excludeAccountID: session.Account.ID);
     }
 }
 

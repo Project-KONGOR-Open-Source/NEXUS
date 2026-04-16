@@ -2,16 +2,19 @@
 
 public class TRANSMUTANSTEIN
 {
-    public static void Main(string[] args)
+    public static void Main(string[] arguments)
     {
         // Create The Application Builder
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(arguments);
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
         // Configure Matchmaking Settings
         builder.Services.Configure<MatchmakingSettings>(builder.Configuration.GetSection(MatchmakingSettings.SectionName));
+
+        // Configure Match Server Settings
+        builder.Services.Configure<MatchServerSettings>(builder.Configuration.GetSection(MatchServerSettings.SectionName));
 
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>

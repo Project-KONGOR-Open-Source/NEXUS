@@ -25,7 +25,7 @@ public class GetProductsResponse
     /// </summary>
     public GetProductsResponse(StoreItemsConfiguration storeItemsConfiguration)
     {
-        Dictionary<string, Dictionary<int, GetProductsResponseEntry>> products = new();
+        Dictionary<string, Dictionary<int, GetProductsResponseEntry>> products = new ();
 
         AddProducts(products, storeItemsConfiguration, "Alt Avatar", StoreItemType.AlternativeAvatar);
         AddProducts(products, storeItemsConfiguration, "Taunt", StoreItemType.Taunt);
@@ -48,7 +48,7 @@ public class GetProductsResponse
 
     private static void AddProducts(Dictionary<string, Dictionary<int, GetProductsResponseEntry>> products, StoreItemsConfiguration storeItemsConfiguration, string categoryName, StoreItemType type)
     {
-        Dictionary<int, GetProductsResponseEntry> entries = new();
+        Dictionary<int, GetProductsResponseEntry> entries = new ();
 
         foreach (StoreItem item in storeItemsConfiguration.GetEnabledItemsByType(type))
         {

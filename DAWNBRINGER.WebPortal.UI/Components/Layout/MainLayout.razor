@@ -1,0 +1,367 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider @ref="ThemeProvider" Theme="Theme" IsDarkMode="IsDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="@ThemeClass">
+<MudLayout>
+    <MudAppBar Elevation="0" Fixed="true" Class="kongor-appbar">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex align-center px-4 px-sm-6 py-0">
+            <MudHidden Breakpoint="Breakpoint.LgAndUp">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+            </MudHidden>
+
+            <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text" Class="kongor-home-button">
+                <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2 logo-glow" />
+                Home
+            </MudButton>
+
+            <MudSpacer />
+
+            <MudHidden Breakpoint="Breakpoint.MdAndDown">
+                <MudStack Row="true" Class="align-center gap-2">
+                    <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                        <MudMenuItem Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank">Discord</MudMenuItem>
+                        <MudMenuItem Href="https://www.reddit.com/r/newerth/" Target="_blank">Reddit</MudMenuItem>
+                    </MudMenu>
+
+                    <MudButton Href="/downloads" Color="Color.Inherit" Variant="Variant.Text">Downloads</MudButton>
+
+                    <MudButton Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Source Code</MudButton>
+
+                    <MudButton Href="https://codex.kongor.net" Target="_blank" Color="Color.Inherit" Variant="Variant.Text">Knowledge Base</MudButton>
+                </MudStack>
+            </MudHidden>
+
+            <MudSpacer />
+
+            <MudHidden Breakpoint="Breakpoint.MdAndDown">
+                <MudStack Row="true" Class="align-center gap-2">
+                    <AuthorizeView>
+                        <NotAuthorized>
+                            <MudButton Href="/email/register" Color="AppBarButtonColour" Variant="Variant.Outlined">Register</MudButton>
+                            <MudButton Href="/login" Color="AppBarButtonColour" Variant="Variant.Outlined">Log In</MudButton>
+                        </NotAuthorized>
+                        <Authorized>
+                            <MudButton Href="/account" Color="AppBarButtonColour" Variant="Variant.Outlined">Account</MudButton>
+                            <MudButton Color="AppBarButtonColour" Variant="Variant.Outlined" OnClick="HandleLogOut">Log Out</MudButton>
+                        </Authorized>
+                    </AuthorizeView>
+                </MudStack>
+            </MudHidden>
+
+            <MudSpacer />
+
+            <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" OnClick="ToggleTheme" />
+        </MudContainer>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="DrawerOpen" Elevation="1" Variant="DrawerVariant.Temporary">
+        <MudNavMenu>
+            <MudNavGroup Title="Community" Icon="@Icons.Material.Filled.People" Expanded="false">
+                <MudNavLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank">Discord</MudNavLink>
+                <MudNavLink Href="https://www.reddit.com/r/newerth/" Target="_blank">Reddit</MudNavLink>
+            </MudNavGroup>
+            <MudNavLink Href="/downloads" Icon="@Icons.Material.Filled.Download">Downloads</MudNavLink>
+            <MudNavLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Icon="@Icons.Material.Filled.Code">Source Code</MudNavLink>
+            <MudNavLink Href="https://codex.kongor.net" Target="_blank" Icon="@Icons.Material.Filled.MenuBook">Knowledge Base</MudNavLink>
+
+            <MudDivider Class="my-2" />
+
+            <AuthorizeView>
+                <NotAuthorized>
+                    <MudNavLink Href="/email/register" Icon="@Icons.Material.Filled.PersonAdd">Register</MudNavLink>
+                    <MudNavLink Href="/login" Icon="@Icons.Material.Filled.Login">Log In</MudNavLink>
+                </NotAuthorized>
+                <Authorized>
+                    <MudNavLink Href="/account" Icon="@Icons.Material.Filled.ManageAccounts">Account</MudNavLink>
+                    <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="HandleLogOut">Log Out</MudNavLink>
+                </Authorized>
+            </AuthorizeView>
+
+            <MudDivider Class="my-2" />
+
+            <MudNavLink Icon="@ThemeIcon" OnClick="ToggleTheme">@(IsDarkMode ? "Light Mode" : "Dark Mode")</MudNavLink>
+        </MudNavMenu>
+    </MudDrawer>
+
+    <MudMainContent Style="@ContentStyle">
+        <div class="d-flex flex-column" style="min-height: calc(100vh - 64px);">
+            <div class="pt-6 flex-grow-1 d-flex flex-column justify-center">
+                <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
+                    @Body
+                </CascadingValue>
+            </div>
+
+            <footer class="kongor-footer">
+                <MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6">
+                    <hr class="section-divider" />
+                    <MudStack Row="true" Justify="Justify.Center" Class="pb-2 flex-wrap gap-6">
+                        <MudLink Href="/" Typo="Typo.body2" Color="Color.Inherit">Home</MudLink>
+                        <MudLink Href="/downloads" Typo="Typo.body2" Color="Color.Inherit">Downloads</MudLink>
+                        <MudLink Href="https://codex.kongor.net" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Knowledge Base</MudLink>
+                        <MudLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Discord</MudLink>
+                        <MudLink Href="https://www.reddit.com/r/newerth/" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Reddit</MudLink>
+                        <MudLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">GitHub</MudLink>
+                    </MudStack>
+
+                    <MudStack Spacing="0" AlignItems="AlignItems.Center" Class="pt-4 pb-6">
+                        <MudText Typo="Typo.caption" Align="Align.Center">
+                            Copyright: 2022-@DateTime.UtcNow.Year Project KONGOR | Contact: project.kongor@proton.me
+                        </MudText>
+                        <MudText Typo="Typo.caption" Align="Align.Center" Color="Color.Secondary">
+                            Any and all of the Heroes Of Newerth intellectual property is owned exclusively by Garena.
+                        </MudText>
+                    </MudStack>
+                </MudContainer>
+            </footer>
+        </div>
+    </MudMainContent>
+</MudLayout>
+</div>
+
+@code {
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = null!;
+
+    [Inject]
+    private PortalAuthenticationService AuthenticationService { get; set; } = null!;
+
+    private static readonly MudTheme Theme = new ()
+    {
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#00E676",
+            PrimaryContrastText = "#0A0F0D",
+            PrimaryDarken = "#00C853",
+            PrimaryLighten = "#69F0AE",
+            Secondary = "#FFD740",
+            SecondaryContrastText = "#1A1A1A",
+            SecondaryDarken = "#FFC400",
+            SecondaryLighten = "#FFE57F",
+            Tertiary = "#7C4DFF",
+            TertiaryContrastText = "#FFFFFF",
+            Info = "#26C6DA",
+            InfoContrastText = "#0A0F0D",
+            Success = "#66BB6A",
+            SuccessContrastText = "#0A0F0D",
+            Warning = "#FFA726",
+            WarningContrastText = "#1A1A1A",
+            Error = "#EF5350",
+            ErrorContrastText = "#FFFFFF",
+            Dark = "#1A2E1A",
+            Background = "#0A0F0D",
+            BackgroundGray = "#0D1610",
+            Surface = "#111C14",
+            DrawerBackground = "#0D1610",
+            DrawerText = "#C8E6C9",
+            DrawerIcon = "#00E676",
+            AppbarBackground = "#0A0F0D",
+            AppbarText = "#E0F2E0",
+            TextPrimary = "#E8F5E9",
+            TextSecondary = "#81C784",
+            TextDisabled = "#2E5E2E",
+            ActionDefault = "#A5D6A7",
+            ActionDisabled = "#2E5E2E80",
+            ActionDisabledBackground = "#1A2E1A40",
+            LinesDefault = "#1B5E2040",
+            LinesInputs = "#2E7D3260",
+            TableLines = "#1B5E2030",
+            TableStriped = "#00E67608",
+            TableHover = "#00E67615",
+            Divider = "#1B5E2040",
+            DividerLight = "#1B5E2025",
+            HoverOpacity = 0.08,
+            RippleOpacity = 0.15,
+            OverlayDark = "rgba(10, 15, 13, 0.7)",
+            OverlayLight = "rgba(10, 15, 13, 0.4)",
+            GrayDefault = "#2E5E2E",
+            GrayLight = "#4A7C4A",
+            GrayLighter = "#6B9E6B",
+            GrayDark = "#1A3D1A",
+            GrayDarker = "#0F260F"
+        },
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#1976D2",
+            PrimaryContrastText = "#FFFFFF",
+            PrimaryDarken = "#1565C0",
+            PrimaryLighten = "#2196F3",
+            Secondary = "#C2185B",
+            SecondaryContrastText = "#FFFFFF",
+            SecondaryDarken = "#AD1457",
+            SecondaryLighten = "#E91E63",
+            Tertiary = "#6200EA",
+            TertiaryContrastText = "#FFFFFF",
+            Info = "#0277BD",
+            Success = "#2E7D32",
+            Warning = "#E65100",
+            Error = "#C62828",
+            Dark = "#0A1929",
+            Background = "#F8FAFC",
+            BackgroundGray = "#E3F2FD",
+            Surface = "#FFFFFF",
+            DrawerBackground = "#F8FAFC",
+            DrawerText = "#0A1929",
+            DrawerIcon = "#1976D2",
+            AppbarBackground = "#F8FAFC",
+            AppbarText = "#0A1929",
+            TextPrimary = "#0A1929",
+            TextSecondary = "#37474F",
+            TextDisabled = "#90A4AE80",
+            ActionDefault = "#37474F",
+            Divider = "#0A192933",
+            DividerLight = "#0A192922",
+            LinesDefault = "#37474F60",
+            LinesInputs = "#0A192960"
+        },
+        LayoutProperties = new LayoutProperties
+        {
+            DefaultBorderRadius = "8px"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1rem",
+                LineHeight = "1.65"
+            },
+            H1 = new H1Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "3rem",
+                FontWeight = "500",
+                LineHeight = "1.25"
+            },
+            H2 = new H2Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "2.5rem",
+                FontWeight = "500",
+                LineHeight = "1.25"
+            },
+            H3 = new H3Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "2rem",
+                FontWeight = "500",
+                LineHeight = "1.35"
+            },
+            H4 = new H4Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.75rem",
+                FontWeight = "500",
+                LineHeight = "1.35"
+            },
+            H5 = new H5Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.5rem",
+                FontWeight = "500",
+                LineHeight = "1.45"
+            },
+            H6 = new H6Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.25rem",
+                FontWeight = "500",
+                LineHeight = "1.45"
+            },
+            Subtitle1 = new Subtitle1Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1.125rem",
+                FontWeight = "400",
+                LineHeight = "1.5"
+            },
+            Subtitle2 = new Subtitle2Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1rem",
+                FontWeight = "500",
+                LineHeight = "1.5"
+            },
+            Body1 = new Body1Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "1rem",
+                FontWeight = "400",
+                LineHeight = "1.65"
+            },
+            Body2 = new Body2Typography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.9375rem",
+                FontWeight = "400",
+                LineHeight = "1.65"
+            },
+            Button = new ButtonTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.9375rem",
+                FontWeight = "500",
+                LineHeight = "1.5"
+            },
+            Caption = new CaptionTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.875rem",
+                FontWeight = "400",
+                LineHeight = "1.5"
+            },
+            Overline = new OverlineTypography
+            {
+                FontFamily = ["Ubuntu", "sans-serif"],
+                FontSize = "0.875rem",
+                FontWeight = "500",
+                LineHeight = "1.5",
+                LetterSpacing = "0.05em"
+            }
+        }
+    };
+
+    private MudThemeProvider ThemeProvider { get; set; } = null!;
+
+    private bool IsDarkMode { get; set; } = true;
+
+    private bool DrawerOpen { get; set; }
+
+    private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+
+    private Color AppBarButtonColour => Color.Primary;
+
+    private string ThemeClass => IsDarkMode ? "dark-mode" : "light-mode";
+
+    private string ContentStyle => IsDarkMode
+        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(10, 15, 13, 0.82), rgba(10, 15, 13, 0.92)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
+        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.94)), url('images/caldavar.jpg') center/cover no-repeat fixed;";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            IsDarkMode = await ThemeProvider.GetSystemDarkModeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleTheme()
+    {
+        IsDarkMode = !IsDarkMode;
+    }
+
+    private void ToggleDrawer()
+    {
+        DrawerOpen = !DrawerOpen;
+    }
+
+    private async Task HandleLogOut()
+    {
+        await AuthenticationService.ClearToken();
+        NavigationManager.NavigateTo("/");
+    }
+}

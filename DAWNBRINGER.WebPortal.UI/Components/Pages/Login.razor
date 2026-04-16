@@ -1,0 +1,128 @@
+@page "/login"
+
+@inject PortalAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Log In - Project KONGOR</PageTitle>
+
+<MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6" >
+    <MudCard Class="glass-card-form animate-fade-in pa-6" Elevation="0" Style="width: 100%; max-width: 640px;">
+        <MudCardContent>
+            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.Login" Size="Size.Large" Color="Color.Primary" />
+                    <MudText Typo="Typo.h5">Log In</MudText>
+                </MudStack>
+                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                    Enter your account credentials to access the portal.
+                </MudText>
+            </MudStack>
+
+            <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+
+                <MudStack Spacing="3">
+                    <MudTextField @bind-Value="FormModel.Name"
+                                  For="@(() => FormModel.Name)"
+                                  Label="Account Name"
+                                  HelperText="Your account name, between 4 and 12 characters."
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Person" />
+
+                    <MudTextField @bind-Value="FormModel.Password"
+                                  For="@(() => FormModel.Password)"
+                                  Label="Password"
+                                  HelperText="Your account password."
+                                  Variant="Variant.Outlined"
+                                  InputType="@PasswordInputType"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@PasswordVisibilityIcon"
+                                  OnAdornmentClick="TogglePasswordVisibility"
+                                  AdornmentAriaLabel="Toggle password visibility" />
+
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mt-2">
+                        <MudLink Href="/password/recover" Typo="Typo.body2">Forgotten your password?</MudLink>
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Class="glow-button"
+                                   Disabled="Processing">
+                            @if (Processing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Logging in...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Log In</MudText>
+                            }
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            </EditForm>
+        </MudCardContent>
+    </MudCard>
+
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+        Do not have an account? <MudLink Href="/email/register">Register here</MudLink>
+    </MudText>
+</MudStack>
+
+@code {
+
+    private LogInFormModel FormModel { get; set; } = new ();
+
+    private bool Processing { get; set; }
+
+    private bool PasswordVisible { get; set; }
+
+    private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
+
+    private string PasswordVisibilityIcon => PasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
+    private void TogglePasswordVisibility()
+    {
+        PasswordVisible = !PasswordVisible;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Processing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAnonymousClient();
+
+            LogInUserRequest request = new (FormModel.Name, FormModel.Password);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/User/LogIn", request);
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                AuthenticationTokenResponse? tokenResponse = await response.Content.ReadFromJsonAsync<AuthenticationTokenResponse>();
+
+                if (tokenResponse is not null)
+                {
+                    await AuthenticationService.SetToken(tokenResponse.Token);
+                    Snackbar.Add("Logged in successfully.", Severity.Success);
+                    NavigationManager.NavigateTo("/account");
+                }
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            Processing = false;
+        }
+    }
+}

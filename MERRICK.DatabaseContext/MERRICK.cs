@@ -5,10 +5,10 @@
 /// </summary>
 public class MERRICK
 {
-    public static async Task Main(string[] args)
+    public static async Task Main(string[] arguments)
     {
         // Create The Application Builder
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(arguments);
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();

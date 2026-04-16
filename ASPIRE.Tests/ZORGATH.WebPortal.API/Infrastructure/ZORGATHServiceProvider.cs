@@ -13,8 +13,16 @@ public static class ZORGATHServiceProvider
         string databaseName = identifier ?? Guid.CreateVersion7().ToString();
 
         // Replace Database Context And Distributed Cache With In-Memory Implementations
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder =>
         {
+            // Set The Infrastructure Gateway Environment Variable Required By The Forwarded Headers Configuration
+            builder.UseSetting("INFRASTRUCTURE_GATEWAY", "localhost");
+            Environment.SetEnvironmentVariable("INFRASTRUCTURE_GATEWAY", "localhost");
+
+            builder.ConfigureServices(services =>
+        {
+            // TODO: Use SQL Server TestContainer
+
             Func<ServiceDescriptor, bool> databaseContextPredicate = descriptor =>
                 descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
 
@@ -26,6 +34,8 @@ public static class ZORGATHServiceProvider
             services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(databaseName).EnableServiceProviderCaching(false),
                 ServiceLifetime.Singleton, ServiceLifetime.Singleton);
 
+            // TODO: Use Redis TestContainer
+
             Func<ServiceDescriptor, bool> distributedCachePredicate = descriptor =>
                 descriptor.ServiceType == typeof(IConnectionMultiplexer) || descriptor.ServiceType == typeof(IDatabase);
 
@@ -35,7 +45,20 @@ public static class ZORGATHServiceProvider
 
             // Register In-Process Distributed Cache Database
             services.AddSingleton<IDatabase, InProcess.InProcessDistributedCacheStore>();
-        }));
+
+            // TODO: Use SMTP TestContainer
+
+            Func<ServiceDescriptor, bool> emailServicePredicate = descriptor =>
+                descriptor.ServiceType == typeof(IEmailService);
+
+            // Remove Email Service Registration
+            foreach (ServiceDescriptor? descriptor in services.Where(emailServicePredicate).ToList())
+                services.Remove(descriptor);
+
+            // Register Stub Email Service For Test Environments
+            services.AddSingleton<IEmailService, StubEmailService>();
+            });
+        });
 
         // Ensure That OnModelCreating From MerrickContext Has Been Called
         webApplicationFactory.Services.GetRequiredService<MerrickContext>().Database.EnsureCreated();

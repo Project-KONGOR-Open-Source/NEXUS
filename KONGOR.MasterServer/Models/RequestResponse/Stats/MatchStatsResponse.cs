@@ -879,15 +879,15 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public int MasteryExperienceEventBonus { get; init; } = 0;
 
     /// <summary>
-    ///     Setting this value to FALSE disables using or purchasing regular mastery boosts.
-    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
+    ///     Setting this value to <see langword="false"/> disables using or purchasing regular mastery boosts.
+    ///     Some use cases for <see langword="false"/> would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
     /// </summary>
     [PHPProperty("mastery_canboost")]
     public bool MasteryExperienceCanBoost { get; init; } = true;
 
     /// <summary>
-    ///     Setting this value to FALSE disables using or purchasing super mastery boosts.
-    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
+    ///     Setting this value to <see langword="false"/> disables using or purchasing super mastery boosts.
+    ///     Some use cases for <see langword="false"/> would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
     /// </summary>
     [PHPProperty("mastery_super_canboost")]
     public bool MasteryExperienceCanSuperBoost { get; init; } = true;
@@ -1780,37 +1780,37 @@ public class MatchPlayerInventory
     public required int MatchID { get; init; }
 
     /// <summary>
-    ///     Item in slot 1 (Top Left), or NULL if the slot is empty.
+    ///     Item in slot 1 (Top Left), or <see langword="null"/> if the slot is empty.
     /// </summary>
     [PHPProperty("slot_1")]
     public required string? Slot1 { get; init; }
 
     /// <summary>
-    ///     Item in slot 2 (Top Center), or NULL if the slot is empty.
+    ///     Item in slot 2 (Top Center), or <see langword="null"/> if the slot is empty.
     /// </summary>
     [PHPProperty("slot_2")]
     public required string? Slot2 { get; init; }
 
     /// <summary>
-    ///     Item in slot 3 (Top Right), or NULL if the slot is empty.
+    ///     Item in slot 3 (Top Right), or <see langword="null"/> if the slot is empty.
     /// </summary>
     [PHPProperty("slot_3")]
     public required string? Slot3 { get; init; }
 
     /// <summary>
-    ///     Item in slot 4 (Bottom Left), or NULL if the slot is empty.
+    ///     Item in slot 4 (Bottom Left), or <see langword="null"/> if the slot is empty.
     /// </summary>
     [PHPProperty("slot_4")]
     public required string? Slot4 { get; init; }
 
     /// <summary>
-    ///     Item in slot 5 (Bottom Center), or NULL if the slot is empty.
+    ///     Item in slot 5 (Bottom Center), or <see langword="null"/> if the slot is empty.
     /// </summary>
     [PHPProperty("slot_5")]
     public required string? Slot5 { get; init; }
 
     /// <summary>
-    ///     Item in slot 6 (Bottom Right), or NULL if the slot is empty.
+    ///     Item in slot 6 (Bottom Right), or <see langword="null"/> if the slot is empty.
     /// </summary>
     [PHPProperty("slot_6")]
     public required string? Slot6 { get; init; }

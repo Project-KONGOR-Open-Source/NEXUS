@@ -1,0 +1,33 @@
+<Router AppAssembly="typeof(global::DAWNBRINGER.WebPortal.UI.Components.App).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <MudStack Justify="Justify.Center" AlignItems="AlignItems.Center" Class="px-4 px-sm-6">
+                    <MudCard Class="glass-card-form animate-fade-in pa-6" Elevation="0" Style="width: 100%; max-width: 640px;">
+                        <MudCardContent>
+                            <MudStack AlignItems="AlignItems.Center" Spacing="2" Class="mb-4">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Primary" />
+                                    <MudText Typo="Typo.h5">Authorisation Required</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                                    You need to be logged in to access this part of the portal.
+                                </MudText>
+                            </MudStack>
+
+                            <MudStack Row="true" Justify="Justify.Center" Spacing="2" Class="mt-4">
+                                <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" Class="glow-button">
+                                    Log In
+                                </MudButton>
+                                <MudButton Href="/" Variant="Variant.Outlined" Color="Color.Primary">
+                                    Return Home
+                                </MudButton>
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                </MudStack>
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+</Router>

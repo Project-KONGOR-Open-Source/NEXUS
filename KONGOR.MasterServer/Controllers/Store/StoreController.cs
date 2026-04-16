@@ -71,7 +71,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
                 return ListSelectedUpgrades(account);
 
             case StoreRequestCode.BUY_PRODUCT_GAME_LOBBY_REQUEST:
-                return await PurchaseProductInGame(account);
+                return await PurchaseProductInMatchLobby(account);
 
             case StoreRequestCode.REDEEM_CODE_REQUEST:
                 return RedeemCode();
@@ -230,9 +230,9 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     }
 
     /// <summary>
-    ///     Processes a purchase request from within the game lobby.
+    ///     Processes a purchase request from within the match lobby.
     /// </summary>
-    private async Task<IActionResult> PurchaseProductInGame(Account account)
+    private async Task<IActionResult> PurchaseProductInMatchLobby(Account account)
     {
         string? heroName = Request.Form["hero_name"];
 
@@ -257,6 +257,11 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
         if (success)
             await MerrickContext.SaveChangesAsync();
+
+        // The Client Expects The Response Code To Match The Request Code
+        response["responseCode"] = (int) StoreRequestCode.BUY_PRODUCT_GAME_LOBBY_REQUEST;
+        response["totalPoints"] = account.User.GoldCoins;
+        response["totalMMPoints"] = account.User.SilverCoins;
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -366,10 +371,78 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
         user.OwnedStoreItems.Add(storeItem.PrefixedCode);
 
+        // If The Purchased Item Is A Featured Bundle, Also Grant The Individual Products It Contains
+        GrantFeaturedBundleContents(user, storeItem);
+
+        // Mark Any Featured Bundles As Owned If All Their Individual Products Are Now Owned
+        MarkCompletedFeaturedBundlesAsOwned(user);
+
         response["popupCode"] = (int) StorePopupCode.POP_UP_PRODUCT_PURCHASE_SUCCESS;
         response["errorCode"] = 0;
 
         return (response, true);
+    }
+
+    /// <summary>
+    ///     Grants the individual products contained within a featured bundle to the user.
+    ///     If the purchased item is not a featured bundle, this method does nothing.
+    /// </summary>
+    private static void GrantFeaturedBundleContents(User user, StoreItem purchasedItem)
+    {
+        FeaturedItemsConfiguration featuredConfiguration = JSONConfiguration.FeaturedItemsConfiguration;
+
+        FeaturedBundle? bundle = featuredConfiguration.Bundles
+            .SingleOrDefault(featuredBundle => featuredBundle.StoreItemID == purchasedItem.ID);
+
+        if (bundle is null)
+            return;
+
+        foreach (int productIndex in bundle.IncludedProductIndices)
+        {
+            if (productIndex < 0 || productIndex > featuredConfiguration.FeaturedItemIDs.Count - 1)
+                continue;
+
+            int itemID = featuredConfiguration.FeaturedItemIDs[productIndex];
+            StoreItem? includedItem = StoreItems.GetByID(itemID);
+
+            if (includedItem is not null && user.OwnedStoreItems.Contains(includedItem.PrefixedCode).Equals(false))
+                user.OwnedStoreItems.Add(includedItem.PrefixedCode);
+        }
+    }
+
+    /// <summary>
+    ///     Marks any featured bundles as owned when all of their included products are already owned.
+    ///     This prevents the user from purchasing a bundle whose individual products were acquired separately.
+    /// </summary>
+    private static void MarkCompletedFeaturedBundlesAsOwned(User user)
+    {
+        FeaturedItemsConfiguration featuredConfiguration = JSONConfiguration.FeaturedItemsConfiguration;
+
+        foreach (FeaturedBundle bundle in featuredConfiguration.Bundles)
+        {
+            StoreItem? bundleItem = StoreItems.GetByID(bundle.StoreItemID);
+
+            if (bundleItem is null)
+                continue;
+
+            if (user.OwnedStoreItems.Contains(bundleItem.PrefixedCode))
+                continue;
+
+            bool allIncludedProductsOwned = bundle.IncludedProductIndices.All(productIndex =>
+            {
+                if (productIndex < 0 || productIndex > featuredConfiguration.FeaturedItemIDs.Count - 1)
+                    return false;
+
+                int itemID = featuredConfiguration.FeaturedItemIDs[productIndex];
+
+                StoreItem? includedItem = StoreItems.GetByID(itemID);
+
+                return includedItem is not null && user.OwnedStoreItems.Contains(includedItem.PrefixedCode);
+            });
+
+            if (allIncludedProductsOwned)
+                user.OwnedStoreItems.Add(bundleItem.PrefixedCode);
+        }
     }
 
     /// <summary>
@@ -552,7 +625,15 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
             bundleIDs.Add(bundleItem.ID.ToString());
             bundleAlreadyOwned.Add(user.OwnedStoreItems.Contains(bundleItem.PrefixedCode) ? "1" : "0");
-            bundleIncludedProducts.Add(string.Join("~", bundle.IncludedProductIndices));
+
+            HashSet<int> includedIndices = [.. bundle.IncludedProductIndices];
+
+            // The Client Interprets Each Tilde-Separated Value As A Boolean Flag Per Product Position
+            // So We Convert The Zero-Based Indices Into A Positional Mask (e.g. Indices [0, 1] With 2 Products → "1~1")
+            string inclusionMask = string.Join("~", Enumerable.Range(0, featuredConfiguration.FeaturedItemIDs.Count)
+                .Select(index => includedIndices.Contains(index) ? "1" : "0"));
+
+            bundleIncludedProducts.Add(inclusionMask);
             bundleNames.Add(bundleItem.Name);
             bundleLocalPaths.Add(bundleItem.Resource);
             bundleCosts.Add(bundleItem.GoldCost.ToString());

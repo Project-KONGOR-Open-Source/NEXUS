@@ -28,7 +28,7 @@ public sealed class MatchHistoryOverviewResponse
     /// <summary>
     ///     Unknown.
     ///     <br/>
-    ///     Seems to be set to TRUE on a successful response, or to FALSE if an error occurs.
+    ///     Seems to be set to <see langword="true"/> on a successful response, or to <see langword="false"/> if an error occurs.
     /// </summary>
     public bool Zero => true;
 

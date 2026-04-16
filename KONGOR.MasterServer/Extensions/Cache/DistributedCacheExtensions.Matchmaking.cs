@@ -218,19 +218,19 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Stores match information in the cache.
-    ///     This data will be used to populate match statistics when the match ends.
+    ///     This data is used for creating tentative matches and is removed once the associated tentative match is confirmed and materialises into a real match.
     /// </summary>
     public static async Task SetMatchInformation(this IDatabase distributedCacheStore, MatchInformation matchInformation)
     {
         string serializedMatchInformation = JsonSerializer.Serialize(matchInformation);
 
-        // Store For A Duration Of Time Longer Than Any Match Is Expected To Last
-        await distributedCacheStore.StringSetAsync(ConstructMatchInformationKey(matchInformation.MatchID), serializedMatchInformation, TimeSpan.FromHours(6));
+        // One Hour Is More Than Sufficient For Any Tentative Match To Materialise Into A Real Match; This Time Span Should Essentially Always Be Longer Than Any Possible/Realistic Queue Time
+        await distributedCacheStore.StringSetAsync(ConstructMatchInformationKey(matchInformation.MatchID), serializedMatchInformation, TimeSpan.FromHours(1));
     }
 
     /// <summary>
     ///     Retrieves match information from the cache by match ID.
-    ///     Returns NULL if no match information is found for the given match ID.
+    ///     Returns <see langword="null"/> if no match information is found for the given match ID.
     /// </summary>
     public static async Task<MatchInformation?> GetMatchInformation(this IDatabase distributedCacheStore, int matchID)
     {
@@ -241,6 +241,7 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Retrieves the match information associated with the specified match server ID from the distributed cache.
+    ///     If multiple match entries exist for the same server ID (e.g. due to cache entries for previous matches on the same server which have not yet expired), the most recently started match is returned.
     /// </summary>
     public static async Task<MatchInformation?> GetMatchInformationByMatchServerID(this IDatabase distributedCacheStore, int serverID)
     {
@@ -265,7 +266,7 @@ public static partial class DistributedCacheExtensions
             }
         }
 
-        return matches.SingleOrDefault();
+        return matches.OrderByDescending(match => match.TimestampStarted).FirstOrDefault();
     }
 
     public static async Task<MatchInformation?> GetMatchInformationByMatchServerSessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
@@ -279,7 +280,8 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Removes match information from the cache.
-    ///     This should be called after full match statistics have been created.
+    ///     Called after match statistics have been submitted and the match information snapshot has been persisted to the database.
+    ///     From this point forward, the database snapshot is the single source of truth for match information.
     /// </summary>
     public static async Task RemoveMatchInformation(this IDatabase distributedCacheStore, int matchID)
         => await distributedCacheStore.KeyDeleteAsync(ConstructMatchInformationKey(matchID));

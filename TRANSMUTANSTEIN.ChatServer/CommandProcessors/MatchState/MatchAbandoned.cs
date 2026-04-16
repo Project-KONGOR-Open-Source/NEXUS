@@ -39,7 +39,7 @@ file class MatchAbandonedRequestData
 
     /// <summary>
     ///     Whether the match failed to start.
-    ///     This is a boolean (not an enum); TRUE means the game failed to start, FALSE means a normal game reset.
+    ///     This is a boolean (not an enum); <see langword="true"/> means the game failed to start, <see langword="false"/> means a normal game reset.
     /// </summary>
     public bool Failed { get; init; }
 

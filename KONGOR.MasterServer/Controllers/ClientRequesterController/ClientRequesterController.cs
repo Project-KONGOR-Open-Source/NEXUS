@@ -62,11 +62,17 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "get_initStats"                 => await GetInitialStatistics(),
             "show_simple_stats"             => await GetSimpleStatistics(),
 
+            // upgrades
+            "selected_upgrades"             => await SetSelectedUpgrades(),
+
             // servers
             "server_list"                   => await GetServerList(),
 
             // friends
             "remove_buddy2"                 => await RemoveFriend(),
+
+            // session
+            "logout"                        => await HandleLogout(),
 
             // fallback
             null                            => await HandleClientRequestWithNoQueryString(),
@@ -81,6 +87,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         return Request.Form["f"].SingleOrDefault() switch
         {
             // statistics
+            "get_account_mastery"           => await GetAccountMastery(),
             "get_player_award_summ"         => await GetPlayerAwardSummary(),
             "get_seasons"                   => await GetSeasons(),
             "match_history_overview"        => await GetMatchHistoryOverview(),

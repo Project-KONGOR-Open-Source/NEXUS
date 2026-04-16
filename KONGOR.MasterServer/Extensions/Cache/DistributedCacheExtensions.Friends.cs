@@ -17,7 +17,7 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Retrieves a pending friend request from the distributed cache store.
-    ///     Returns a tuple containing the requester's and target's notification IDs, or NULL if the request doesn't exist or has expired.
+    ///     Returns a tuple containing the requester's and target's notification IDs, or <see langword="null"/> if the request doesn't exist or has expired.
     /// </summary>
     public static async Task<(int RequesterNotificationID, int TargetNotificationID)?> GetFriendRequest(this IDatabase distributedCacheStore, int requesterID, int targetID)
     {
