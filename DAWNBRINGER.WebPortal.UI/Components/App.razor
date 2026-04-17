@@ -19,12 +19,14 @@
         <link href="@Assets["css/portal.common.css"]" rel="stylesheet" />
         <link href="@Assets["css/portal.dark.css"]" rel="stylesheet" />
         <link href="@Assets["css/portal.light.css"]" rel="stylesheet" />
+        <link href="@Assets["css/cursor.css"]" rel="stylesheet" />
     </head>
 
     <body>
         <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
         <script src="_framework/blazor.web.js"></script>
         <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+        <script src="@Assets["js/cursor.js"]" defer></script>
     </body>
 
 </html>
