@@ -47,6 +47,8 @@
    - RIGHT: <see cref="CalculateTotal"/>
    - WRONG: <see cref="CalculateTotal(int, int)"/>
 
+ - when writing comments or XML documentation, never split sentences across multiple lines; it is OK to have multiple sentences per line, but it is not OK to have a sentence spanning multiple lines
+
  - never use the null-forgiving operator (!) to suppress null handling; then only times where this is acceptable are the following:
    - when using Include or ThenInclude in Entity Framework queries to reference navigation properties that are known to be not null according to the data model, but are reference types or marked as nullable in the code
    - when assigning "null!" to a nullable variable, field, or property is unavoidable without making the code overly-complex, and it is absolutely certain that the value will not be null at runtime
@@ -60,6 +62,8 @@
    - WRONG: config, admin, impl
 
  - in comments, use "TRUE", "FALSE", and "NULL" when referring to the boolean and null literals, to clearly distinguish them from their natural-language meanings
+
+ - in XML documentation, use <see langword="true"/>, <see langword="false"/>, <see langword="null"/>, to refer to language keywords
 
 ### Code Generation
 
