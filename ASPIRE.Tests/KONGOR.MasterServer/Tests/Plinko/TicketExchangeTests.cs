@@ -38,9 +38,9 @@ public sealed class TicketExchangeTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        (string cookie, _) = await CasinoTestsHelper.SeedAuthenticatedSession(factory, "exchange.list@kongor.com", "ExchangeList", goldCoins: 0, plinkoTickets: 1300);
+        (string cookie, _) = await PlinkoTestsHelper.SeedAuthenticatedSession(factory, "exchange.list@kongor.com", "ExchangeList", goldCoins: 0, plinkoTickets: 1300);
 
-        HttpResponseMessage response = await CasinoTestsHelper.PostForm(factory, ListRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PlinkoTestsHelper.PostForm(factory, ListRoute, new Dictionary<string, string>
         {
             ["cookie"] = cookie
         });
@@ -61,9 +61,9 @@ public sealed class TicketExchangeTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        (string cookie, int userID) = await CasinoTestsHelper.SeedAuthenticatedSession(factory, "exchange.buy@kongor.com", "ExchangeBuy", goldCoins: 0, plinkoTickets: 1300);
+        (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(factory, "exchange.buy@kongor.com", "ExchangeBuy", goldCoins: 0, plinkoTickets: 1300);
 
-        HttpResponseMessage response = await CasinoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PlinkoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
         {
             ["cookie"]  = cookie,
             ["id"]      = "1792"
@@ -85,7 +85,7 @@ public sealed class TicketExchangeTests
             await Assert.That(body).ContainsKey("grabBagProductNames");
         }
 
-        User user = await CasinoTestsHelper.LoadUser(factory, userID);
+        User user = await PlinkoTestsHelper.LoadUser(factory, userID);
 
         using (Assert.Multiple())
         {
@@ -99,9 +99,9 @@ public sealed class TicketExchangeTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        (string cookie, int userID) = await CasinoTestsHelper.SeedAuthenticatedSession(factory, "exchange.cheap@kongor.com", "ExchangeCheap", goldCoins: 0, plinkoTickets: 10);
+        (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(factory, "exchange.cheap@kongor.com", "ExchangeCheap", goldCoins: 0, plinkoTickets: 10);
 
-        HttpResponseMessage response = await CasinoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PlinkoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
         {
             ["cookie"]  = cookie,
             ["id"]      = "1792"
@@ -111,7 +111,7 @@ public sealed class TicketExchangeTests
 
         await Assert.That(Convert.ToInt32(body["status_code"])).IsEqualTo(StatusInsufficientTickets);
 
-        User user = await CasinoTestsHelper.LoadUser(factory, userID);
+        User user = await PlinkoTestsHelper.LoadUser(factory, userID);
 
         using (Assert.Multiple())
         {
@@ -125,7 +125,7 @@ public sealed class TicketExchangeTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        (string cookie, int userID) = await CasinoTestsHelper.SeedAuthenticatedSession(factory, "exchange.dupe@kongor.com", "ExchangeDupe", goldCoins: 0, plinkoTickets: 5000);
+        (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(factory, "exchange.dupe@kongor.com", "ExchangeDupe", goldCoins: 0, plinkoTickets: 5000);
 
         // Pre-Grant The Super-Taunt So The Second Purchase Is A Duplicate
         MerrickContext databaseContext = factory.Services.GetRequiredService<MerrickContext>();
@@ -138,7 +138,7 @@ public sealed class TicketExchangeTests
         preSeededUser.OwnedStoreItems.Add(superTaunt.PrefixedCode);
         await databaseContext.SaveChangesAsync();
 
-        HttpResponseMessage response = await CasinoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PlinkoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
         {
             ["cookie"]  = cookie,
             ["id"]      = "1792"
@@ -148,7 +148,7 @@ public sealed class TicketExchangeTests
 
         await Assert.That(Convert.ToInt32(body["status_code"])).IsEqualTo(StatusAlreadyOwned);
 
-        User user = await CasinoTestsHelper.LoadUser(factory, userID);
+        User user = await PlinkoTestsHelper.LoadUser(factory, userID);
 
         await Assert.That(user.PlinkoTickets).IsEqualTo(5000);
     }
@@ -158,9 +158,9 @@ public sealed class TicketExchangeTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        (string cookie, int userID) = await CasinoTestsHelper.SeedAuthenticatedSession(factory, "exchange.unknown@kongor.com", "ExchangeUnknown", goldCoins: 0, plinkoTickets: 5000);
+        (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(factory, "exchange.unknown@kongor.com", "ExchangeUnknown", goldCoins: 0, plinkoTickets: 5000);
 
-        HttpResponseMessage response = await CasinoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PlinkoTestsHelper.PostForm(factory, PurchaseRoute, new Dictionary<string, string>
         {
             ["cookie"]  = cookie,
             ["id"]      = "99999999"
@@ -170,7 +170,7 @@ public sealed class TicketExchangeTests
 
         await Assert.That(Convert.ToInt32(body["status_code"])).IsEqualTo(StatusInvalidItem);
 
-        User user = await CasinoTestsHelper.LoadUser(factory, userID);
+        User user = await PlinkoTestsHelper.LoadUser(factory, userID);
 
         await Assert.That(user.PlinkoTickets).IsEqualTo(5000);
     }
@@ -187,7 +187,7 @@ public sealed class TicketExchangeTests
 /// <summary>
 ///     Shared helpers between Plinko test classes for seeding authenticated sessions and HTTP plumbing.
 /// </summary>
-internal static class CasinoTestsHelper
+internal static class PlinkoTestsHelper
 {
     public static async Task<(string Cookie, int UserID)> SeedAuthenticatedSession(WebApplicationFactory<KONGORAssemblyMarker> factory, string emailAddress, string accountName, int goldCoins, int plinkoTickets)
     {

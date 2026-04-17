@@ -1,7 +1,7 @@
 namespace KONGOR.MasterServer.Configuration.Plinko;
 
 /// <summary>
-///     Configuration for the Plinko casino feature.
+///     Configuration for the Plinko mini-game.
 ///     Defines the costs to play a drop, the per-tier probabilities, the visual bucket order sent to the client, and the ticket rewards paid out when a chest tier is exhausted or a ticket tier is rolled.
 /// </summary>
 public class PlinkoConfiguration

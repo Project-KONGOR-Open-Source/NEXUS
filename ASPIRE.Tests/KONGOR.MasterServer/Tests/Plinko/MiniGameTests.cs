@@ -1,13 +1,13 @@
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Plinko;
 
 /// <summary>
-///     Integration tests for the Plinko casino endpoints: <c>/master/casino/</c>, <c>/master/casino/drop/</c>, and <c>/master/casino/viewchest/</c>.
+///     Integration tests for the Plinko mini-game endpoints: <c>/master/casino/</c>, <c>/master/casino/drop/</c>, and <c>/master/casino/viewchest/</c>.
 /// </summary>
 public sealed class MiniGameTests
 {
-    private const string CasinoIndexRoute     = "/master/casino/";
-    private const string CasinoDropRoute      = "/master/casino/drop/";
-    private const string CasinoViewChestRoute = "/master/casino/viewchest/";
+    private const string PlinkoIndexRoute     = "/master/casino/";
+    private const string PlinkoDropRoute      = "/master/casino/drop/";
+    private const string PlinkoViewChestRoute = "/master/casino/viewchest/";
 
     [Test]
     public async Task Index_WithInvalidCookie_ReturnsStatusZero()
@@ -21,7 +21,7 @@ public sealed class MiniGameTests
             ["cookie"] = "not-a-real-cookie"
         });
 
-        HttpResponseMessage response = await client.PostAsync(CasinoIndexRoute, form);
+        HttpResponseMessage response = await client.PostAsync(PlinkoIndexRoute, form);
 
         IDictionary<object, object> body = await DeserialisePhpResponse(response);
 
@@ -35,7 +35,7 @@ public sealed class MiniGameTests
 
         (string cookie, _) = await SeedAuthenticatedSession(factory, "plinko.index@kongor.com", "PlinkoIndex", goldCoins: 500, plinkoTickets: 100);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoIndexRoute, new Dictionary<string, string> { ["cookie"] = cookie });
+        HttpResponseMessage response = await PostForm(factory, PlinkoIndexRoute, new Dictionary<string, string> { ["cookie"] = cookie });
 
         IDictionary<object, object> body = await DeserialisePhpResponse(response);
 
@@ -63,7 +63,7 @@ public sealed class MiniGameTests
 
         (string cookie, int userID) = await SeedAuthenticatedSession(factory, "plinko.poor.gold@kongor.com", "PoorGold", goldCoins: 10, plinkoTickets: 0);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoDropRoute, new Dictionary<string, string>
         {
             ["cookie"]      = cookie,
             ["currency"]    = "gold"
@@ -89,7 +89,7 @@ public sealed class MiniGameTests
 
         (string cookie, int userID) = await SeedAuthenticatedSession(factory, "plinko.poor.ticket@kongor.com", "PoorTicket", goldCoins: 0, plinkoTickets: 5);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoDropRoute, new Dictionary<string, string>
         {
             ["cookie"]      = cookie,
             ["currency"]    = "tickets"
@@ -118,7 +118,7 @@ public sealed class MiniGameTests
 
         (string cookie, int userID) = await SeedAuthenticatedSession(factory, $"plinko.bad.{Guid.NewGuid():N}@kongor.com", $"Bad{Guid.NewGuid().ToString("N")[..8]}", goldCoins: 1000, plinkoTickets: 1000);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoDropRoute, new Dictionary<string, string>
         {
             ["cookie"]      = cookie,
             ["currency"]    = currency
@@ -144,7 +144,7 @@ public sealed class MiniGameTests
 
         (string cookie, int userID) = await SeedAuthenticatedSession(factory, "plinko.drop.gold@kongor.com", "DropGold", goldCoins: 1000, plinkoTickets: 0);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoDropRoute, new Dictionary<string, string>
         {
             ["cookie"]      = cookie,
             ["currency"]    = "gold"
@@ -181,7 +181,7 @@ public sealed class MiniGameTests
 
         (string cookie, int userID) = await SeedAuthenticatedSession(factory, "plinko.drop.ticket@kongor.com", "DropTicket", goldCoins: 0, plinkoTickets: 500);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoDropRoute, new Dictionary<string, string>
         {
             ["cookie"]      = cookie,
             ["currency"]    = "tickets"
@@ -222,7 +222,7 @@ public sealed class MiniGameTests
 
         int ownedCountBeforeDrop = (await LoadUser(factory, userID)).OwnedStoreItems.Count;
 
-        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoDropRoute, new Dictionary<string, string>
         {
             ["cookie"]      = cookie,
             ["currency"]    = "gold"
@@ -275,7 +275,7 @@ public sealed class MiniGameTests
 
         int ownedCountBeforeDrop = (await LoadUser(factory, userID)).OwnedStoreItems.Count;
 
-        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoDropRoute, new Dictionary<string, string>
         {
             ["cookie"]      = cookie,
             ["currency"]    = "gold"
@@ -313,7 +313,7 @@ public sealed class MiniGameTests
 
         (string cookie, _) = await SeedAuthenticatedSession(factory, $"viewchest{tierID}@kongor.com", $"ViewChest{tierID}", goldCoins: 0, plinkoTickets: 0);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoViewChestRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoViewChestRoute, new Dictionary<string, string>
         {
             ["cookie"]          = cookie,
             ["tier_id"]         = tierID.ToString(),
@@ -350,7 +350,7 @@ public sealed class MiniGameTests
 
         (string cookie, _) = await SeedAuthenticatedSession(factory, $"badtier{tierID}@kongor.com", $"BadTier{tierID}", goldCoins: 0, plinkoTickets: 0);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoViewChestRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoViewChestRoute, new Dictionary<string, string>
         {
             ["cookie"]          = cookie,
             ["tier_id"]         = tierID.ToString(),
@@ -369,7 +369,7 @@ public sealed class MiniGameTests
 
         (string cookie, _) = await SeedAuthenticatedSession(factory, "clamp@kongor.com", "Clamp", goldCoins: 0, plinkoTickets: 0);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoViewChestRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoViewChestRoute, new Dictionary<string, string>
         {
             ["cookie"]          = cookie,
             ["tier_id"]         = "1",
@@ -390,7 +390,7 @@ public sealed class MiniGameTests
 
         (string cookie, _) = await SeedAuthenticatedSession(factory, "beyond@kongor.com", "Beyond", goldCoins: 0, plinkoTickets: 0);
 
-        HttpResponseMessage response = await PostForm(factory, CasinoViewChestRoute, new Dictionary<string, string>
+        HttpResponseMessage response = await PostForm(factory, PlinkoViewChestRoute, new Dictionary<string, string>
         {
             ["cookie"]          = cookie,
             ["tier_id"]         = "1",

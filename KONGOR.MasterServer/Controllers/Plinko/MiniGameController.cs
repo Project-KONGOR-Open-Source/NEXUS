@@ -1,7 +1,7 @@
 namespace KONGOR.MasterServer.Controllers.Plinko;
 
 /// <summary>
-///     Handles the three Plinko casino endpoints: the panel index (<c>/master/casino/</c>), a single drop (<c>/master/casino/drop/</c>), and the paginated chest-browsing view (<c>/master/casino/viewchest/</c>).
+///     Handles the three Plinko mini-game endpoints: the panel index (<c>/master/casino/</c>), a single drop (<c>/master/casino/drop/</c>), and the paginated chest-browsing view (<c>/master/casino/viewchest/</c>).
 /// </summary>
 [ApiController]
 [Consumes("application/x-www-form-urlencoded")]
@@ -21,7 +21,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
     /// <summary>
     ///     Returns the Plinko panel's initial state: costs, the player's balances, the tier bucket layout, and the per-bucket product counts used by the UI.
     /// </summary>
-    [HttpPost("master/casino/", Name = "Plinko Casino Index Requester")]
+    [HttpPost("master/casino/", Name = "Plinko Index Requester")]
     public async Task<IActionResult> Index()
     {
         Account? account = await LoadAccountFromCookie();
@@ -59,7 +59,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
     /// <summary>
     ///     Executes a single Plinko drop, consuming either gold or tickets, rolling a weighted tier, and granting either a cosmetic product from that tier's pool or a consolation ticket payout.
     /// </summary>
-    [HttpPost("master/casino/drop/", Name = "Plinko Casino Drop Requester")]
+    [HttpPost("master/casino/drop/", Name = "Plinko Drop Requester")]
     public async Task<IActionResult> Drop()
     {
         Account? account = await LoadAccountFromCookie();
@@ -145,7 +145,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
     ///     Returns a paginated slice of the products available in a chest tier.
     ///     Used by the client's "browse chest contents" UI. Tiers 5 and 6 are ticket-only and are rejected.
     /// </summary>
-    [HttpPost("master/casino/viewchest/", Name = "Plinko Casino View Chest Requester")]
+    [HttpPost("master/casino/viewchest/", Name = "Plinko View Chest Requester")]
     public async Task<IActionResult> ViewChest()
     {
         Account? account = await LoadAccountFromCookie();
