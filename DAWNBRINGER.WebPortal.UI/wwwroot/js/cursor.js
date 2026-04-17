@@ -2,11 +2,16 @@
    PROJECT KONGOR PORTAL — MYSTICAL CURSOR TRAIL (WebGL Fluid)
 
    Adds a mystical smoky trail effect to the cursor.
-   Disabled by default. Toggled via window.CursorTrail.
    JS counterpart to ../css/cursor.css.
    =========================================================== */
 
-const STORAGE_KEY = 'kongor.cursor-trail';
+// when TRUE, each dye splat is a random shade of a single theme-appropriate base colour
+// when FALSE (default), splats cycle through full-spectrum random hues for a "rainbow" effect
+const USE_MONOCHROME = true;
+
+// monochrome base colours; applied only when USE_MONOCHROME is TRUE
+const MONOCHROME_BASE_DARK_MODE = { r: 0x00 / 255, g: 0xE6 / 255, b: 0x76 / 255 }; // vivid-green base for the dark theme (theme primary)
+const MONOCHROME_BASE_LIGHT_MODE = { r: 0x19 / 255, g: 0x76 / 255, b: 0xD2 / 255 }; // portal-blue base for the light theme (theme primary)
 
 let trailActive = false;
 let trailInitialised = false;
@@ -15,7 +20,6 @@ function setTrailActive(active) {
     trailActive = active;
     const canvas = document.getElementById('fluid');
     if (canvas !== null) canvas.style.visibility = active ? 'visible' : 'hidden';
-    try { localStorage.setItem(STORAGE_KEY, active ? 'on' : 'off'); } catch (error) { /* localStorage unavailable */ }
     if (active && !trailInitialised) {
         trailInitialised = true;
         initFluid();
@@ -27,12 +31,6 @@ window.CursorTrail = {
     disable() { setTrailActive(false); },
     isEnabled() { return trailActive; }
 };
-
-window.addEventListener('load', () => {
-    let saved = 'off';
-    try { saved = localStorage.getItem(STORAGE_KEY) || 'off'; } catch (error) { /* localStorage unavailable */ }
-    if (saved === 'on') setTrailActive(true);
-});
 
 const initFluid = () => {
 
@@ -1074,31 +1072,17 @@ const initFluid = () => {
         return delta;
     }
 
-//     function generateColor() {
-//         // Base color #c5fcfc in RGB
-//         const baseR = 0xc5 / 255;
-//         const baseG = 0xfc / 255;
-//         const baseB = 0xfc / 255;
-
-//         // Generate a random shade (0 to 1)
-//         const shade = Math.random();
-
-//         // Apply the shade to the base color
-//         let r = baseR * shade;
-//         let g = baseG * shade;
-//         let b = baseB * shade;
-
-//         // Adjust the brightness
-//         r *= 0.15;
-//         g *= 0.15;
-//         b *= 0.15;
-
-//         return { r, g, b };
-//     }
-
-    // to generate multicolor
-
     function generateColor () {
+        if (USE_MONOCHROME) {
+            const isDarkMode = document.querySelector('.dark-mode') !== null;
+            const base = isDarkMode ? MONOCHROME_BASE_DARK_MODE : MONOCHROME_BASE_LIGHT_MODE;
+            const shade = Math.random();
+            return {
+                r: base.r * shade * 0.15,
+                g: base.g * shade * 0.15,
+                b: base.b * shade * 0.15
+            };
+        }
         let c = HSVtoRGB(Math.random(), 1.0, 1.0);
         c.r *= 0.15;
         c.g *= 0.15;
