@@ -3,7 +3,7 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Plinko;
 /// <summary>
 ///     Integration tests for the Plinko casino endpoints: <c>/master/casino/</c>, <c>/master/casino/drop/</c>, and <c>/master/casino/viewchest/</c>.
 /// </summary>
-public sealed class CasinoTests
+public sealed class MiniGameTests
 {
     private const string CasinoIndexRoute     = "/master/casino/";
     private const string CasinoDropRoute      = "/master/casino/drop/";
@@ -50,8 +50,8 @@ public sealed class CasinoTests
             await Assert.That(body).ContainsKey("last_update_time");
 
             await Assert.That(Convert.ToInt32(body["status_code"])).IsEqualTo(1);
-            await Assert.That(Convert.ToInt32(body["gold_cost"])).IsEqualTo(54);
-            await Assert.That(Convert.ToInt32(body["ticket_cost"])).IsEqualTo(66);
+            await Assert.That(Convert.ToInt32(body["gold_cost"])).IsEqualTo(JSONConfiguration.PlinkoConfiguration.GoldCost);
+            await Assert.That(Convert.ToInt32(body["ticket_cost"])).IsEqualTo(JSONConfiguration.PlinkoConfiguration.TicketCost);
             await Assert.That(Convert.ToInt32(body["user_tickets"])).IsEqualTo(100);
         }
     }
@@ -166,12 +166,12 @@ public sealed class CasinoTests
             await Assert.That(body).ContainsKey("products_exhausted");
 
             await Assert.That(Convert.ToInt32(body["status_code"])).IsEqualTo(1);
-            await Assert.That(Convert.ToInt32(body["user_gold"])).IsEqualTo(1000 - 54);
+            await Assert.That(Convert.ToInt32(body["user_gold"])).IsEqualTo(1000 - JSONConfiguration.PlinkoConfiguration.GoldCost);
         }
 
         User user = await LoadUser(factory, userID);
 
-        await Assert.That(user.GoldCoins).IsEqualTo(1000 - 54);
+        await Assert.That(user.GoldCoins).IsEqualTo(1000 - JSONConfiguration.PlinkoConfiguration.GoldCost);
     }
 
     [Test]
@@ -193,10 +193,10 @@ public sealed class CasinoTests
 
         User user = await LoadUser(factory, userID);
 
-        // The Player Paid 66 Tickets Up-Front, But May Have Won Additional Tickets Back.
-        // A Chest Tier Win That Grants A Product Means A Net Delta Of -66.
-        // A Ticket Tier Or Exhausted Chest Tier Means A Non-Negative Net Delta, So The Balance Cannot Increase Above Its Configured Reward.
-        await Assert.That(user.PlinkoTickets).IsGreaterThanOrEqualTo(500 - 66);
+        // The Player Paid TicketCost Up-Front, But May Have Won Additional Tickets Back.
+        // A Chest Tier Win That Grants A Product Means A Net Delta Of -TicketCost.
+        // A Ticket Tier Or Exhausted Chest Tier Means A Non-Negative Net Delta, So The Balance Cannot Fall Below The Starting Balance Less The Cost.
+        await Assert.That(user.PlinkoTickets).IsGreaterThanOrEqualTo(500 - JSONConfiguration.PlinkoConfiguration.TicketCost);
     }
 
     [Test]
