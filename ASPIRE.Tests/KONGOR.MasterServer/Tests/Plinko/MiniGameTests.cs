@@ -296,9 +296,9 @@ public sealed class MiniGameTests
             await Assert.That(user.OwnedStoreItems).Contains(target.PrefixedCode);
             await Assert.That(user.OwnedStoreItems.Count).IsEqualTo(ownedCountBeforeDrop + 1);
 
-            // The Response's "product_type" + "." + "product_name" Must Reconstruct The Same PrefixedCode The Server Has Persisted, Otherwise The Client And Server Disagree On The Identity Of The Won Item
-            string clientReconstructedPrefixedCode = $@"{body["product_type"]}.{body["product_name"]}";
-            await Assert.That(clientReconstructedPrefixedCode).IsEqualTo(target.PrefixedCode);
+            // The Response Must Contain The Dropped Product's Details Under The Declared Keys
+            await Assert.That(body["product_name"].ToString()).IsEqualTo(target.Code);
+            await Assert.That(body["product_type"].ToString()).IsEqualTo(StoreItem.GetClientCategoryName(target.StoreItemType));
         }
     }
 

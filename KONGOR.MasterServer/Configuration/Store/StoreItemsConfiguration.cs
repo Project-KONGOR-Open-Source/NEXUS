@@ -120,6 +120,27 @@ public class StoreItem
         StoreItemType.Bundle             => string.Empty,
         _                                => string.Empty
     };
+
+    /// <summary>
+    ///     Returns the human-readable category name for the given store item type (e.g. "Hero", "Announcer Voice", "Chat Symbol").
+    /// </summary>
+    public static string GetClientCategoryName(StoreItemType type) => type switch
+    {
+        StoreItemType.ChatNameColour     => "Chat Name Colour",
+        StoreItemType.ChatSymbol         => "Chat Symbol",
+        StoreItemType.AccountIcon        => "Account Icon",
+        StoreItemType.AlternativeAvatar  => "Alternative Avatar",
+        StoreItemType.AnnouncerVoice     => "Announcer Voice",
+        StoreItemType.Taunt              => "Taunt",
+        StoreItemType.Courier            => "Courier",
+        StoreItemType.Hero               => "Hero",
+        StoreItemType.EarlyAccessProduct => "Early-Access Product",
+        StoreItemType.Status             => "Status",
+        StoreItemType.Miscellaneous      => "Miscellaneous",
+        StoreItemType.Ward               => "Ward",
+        StoreItemType.Enhancement        => "Enhancement",
+        _                                => string.Empty
+    };
 }
 
 /// <summary>

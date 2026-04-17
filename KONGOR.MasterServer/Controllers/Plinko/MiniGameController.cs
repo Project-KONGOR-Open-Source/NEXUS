@@ -266,7 +266,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
             ProductID           = winner.ID,
             ProductName         = winner.Code,
             ProductPath         = winner.Resource,
-            ProductType         = TrimTrailingDot(winner.Prefix),
+            ProductType         = StoreItem.GetClientCategoryName(winner.StoreItemType),
             TicketReward        = 0,
             ProductsExhausted   = false
         };
