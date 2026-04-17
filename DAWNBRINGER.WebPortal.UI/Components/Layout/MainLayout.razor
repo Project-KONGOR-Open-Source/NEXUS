@@ -54,6 +54,7 @@
 
             <MudSpacer />
 
+            <MudIconButton Icon="@CursorTrailIcon" Color="Color.Inherit" Size="Size.Large" OnClick="ToggleCursorTrail" />
             <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" OnClick="ToggleTheme" />
         </MudContainer>
     </MudAppBar>
@@ -83,6 +84,7 @@
 
             <MudDivider Class="my-2" />
 
+            <MudNavLink Icon="@CursorTrailIcon" OnClick="ToggleCursorTrail">@(CursorTrailEnabled ? "Disable Trail" : "Enable Trail")</MudNavLink>
             <MudNavLink Icon="@ThemeIcon" OnClick="ToggleTheme">@(IsDarkMode ? "Light Mode" : "Dark Mode")</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
@@ -128,6 +130,9 @@
 
     [Inject]
     private PortalAuthenticationService AuthenticationService { get; set; } = null!;
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = null!;
 
     private static readonly MudTheme Theme = new ()
     {
@@ -330,7 +335,11 @@
 
     private bool DrawerOpen { get; set; }
 
+    private bool CursorTrailEnabled { get; set; }
+
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+
+    private string CursorTrailIcon => CursorTrailEnabled ? Icons.Material.Filled.AutoFixHigh : Icons.Material.Filled.AutoFixOff;
 
     private Color AppBarButtonColour => Color.Primary;
 
@@ -345,6 +354,7 @@
         if (firstRender)
         {
             IsDarkMode = await ThemeProvider.GetSystemDarkModeAsync();
+            CursorTrailEnabled = await JSRuntime.InvokeAsync<bool>("CursorTrail.isEnabled");
             StateHasChanged();
         }
     }
@@ -352,6 +362,12 @@
     private void ToggleTheme()
     {
         IsDarkMode = !IsDarkMode;
+    }
+
+    private async Task ToggleCursorTrail()
+    {
+        CursorTrailEnabled = !CursorTrailEnabled;
+        await JSRuntime.InvokeVoidAsync(CursorTrailEnabled ? "CursorTrail.enable" : "CursorTrail.disable");
     }
 
     private void ToggleDrawer()

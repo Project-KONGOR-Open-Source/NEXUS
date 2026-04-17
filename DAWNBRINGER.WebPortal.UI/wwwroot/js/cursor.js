@@ -2,11 +2,36 @@
    PROJECT KONGOR PORTAL — MYSTICAL CURSOR TRAIL (WebGL Fluid)
 
    Adds a mystical smoky trail effect to the cursor.
+   Disabled by default. Toggled via window.CursorTrail.
    JS counterpart to ../css/cursor.css.
    =========================================================== */
 
+const STORAGE_KEY = 'kongor.cursor-trail';
+
+let trailActive = false;
+let trailInitialised = false;
+
+function setTrailActive(active) {
+    trailActive = active;
+    const canvas = document.getElementById('fluid');
+    if (canvas !== null) canvas.style.visibility = active ? 'visible' : 'hidden';
+    try { localStorage.setItem(STORAGE_KEY, active ? 'on' : 'off'); } catch (error) { /* localStorage unavailable */ }
+    if (active && !trailInitialised) {
+        trailInitialised = true;
+        initFluid();
+    }
+}
+
+window.CursorTrail = {
+    enable() { setTrailActive(true); },
+    disable() { setTrailActive(false); },
+    isEnabled() { return trailActive; }
+};
+
 window.addEventListener('load', () => {
-    initFluid();
+    let saved = 'off';
+    try { saved = localStorage.getItem(STORAGE_KEY) || 'off'; } catch (error) { /* localStorage unavailable */ }
+    if (saved === 'on') setTrailActive(true);
 });
 
 const initFluid = () => {
@@ -761,6 +786,11 @@ const initFluid = () => {
     let colorUpdateTimer = 0.0;
 
     function update() {
+        if (!trailActive) {
+            lastUpdateTime = Date.now();
+            requestAnimationFrame(update);
+            return;
+        }
         const dt = calcDeltaTime();
         // console.log(dt)
         if (resizeCanvas())
@@ -933,6 +963,7 @@ const initFluid = () => {
     }
 
     window.addEventListener('mousedown', e => {
+        if (!trailActive) return;
         let pointer = pointers[0];
         let posX = scaleByPixelRatio(e.clientX);
         let posY = scaleByPixelRatio(e.clientY);
@@ -950,6 +981,7 @@ const initFluid = () => {
     }, { once: true });
 
     window.addEventListener('mousemove', e => {
+        if (!trailActive) return;
         let pointer = pointers[0];
         let posX = scaleByPixelRatio(e.clientX);
         let posY = scaleByPixelRatio(e.clientY);
@@ -970,6 +1002,7 @@ const initFluid = () => {
     }, { once: true });
 
     window.addEventListener('touchstart', e => {
+        if (!trailActive) return;
         const touches = e.targetTouches;
         let pointer = pointers[0];
         for (let i = 0; i < touches.length; i++) {
@@ -980,6 +1013,7 @@ const initFluid = () => {
     });
 
     window.addEventListener('touchmove', e => {
+        if (!trailActive) return;
         const touches = e.targetTouches;
         let pointer = pointers[0];
         for (let i = 0; i < touches.length; i++) {
@@ -990,6 +1024,7 @@ const initFluid = () => {
     }, false);
 
     window.addEventListener('touchend', e => {
+        if (!trailActive) return;
         const touches = e.changedTouches;
         let pointer = pointers[0];
 
