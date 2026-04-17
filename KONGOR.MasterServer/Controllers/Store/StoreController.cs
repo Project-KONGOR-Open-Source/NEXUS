@@ -74,7 +74,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
                 return await PurchaseProductInMatchLobby(account);
 
             case StoreRequestCode.REDEEM_CODE_REQUEST:
-                return RedeemCode();
+                return await RedeemCode(account);
 
             default:
                 return Ok(PhpSerialization.Serialize(new Dictionary<string, object>
@@ -279,20 +279,104 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     }
 
     /// <summary>
-    ///     Processes a code redemption request. Not yet implemented.
+    ///     Processes a promotional code redemption request.
+    ///     Looks up the supplied code case-insensitively, validates that it has not already been consumed, grants the configured currency and optional store product, and returns a response matching the client contract declared by <c>store_form_redeemcode.package</c>.
     /// </summary>
-    private IActionResult RedeemCode()
+    /// <remarks>
+    ///     The client UI in <c>store.lua</c> recognises success only when <c>responseCode = 0</c> and <c>popupCode = 6</c>, and parses the <c>redeemed</c> field as a three-part comma-separated string of the form <c>"gold,silver,productID~productPath"</c>.
+    ///     Empty segments are tolerated by the parser, so currency-only or product-only rewards are both valid.
+    /// </remarks>
+    private async Task<IActionResult> RedeemCode(Account account)
     {
-        // TODO: Implement Code Redemption
+        string? codeInput = Request.Form["code"];
+        string? hostTime = Request.Form["hostTime"];
+
+        if (string.IsNullOrWhiteSpace(codeInput))
+            return Ok(PhpSerialization.Serialize(CreateRedeemErrorResponse((int) StoreErrorCode.STORE_PURCHASE_CODE_INVALID_ERROR, hostTime)));
+
+        string normalisedCode = codeInput.Trim().ToUpperInvariant();
+
+        RedeemableCode? code = await MerrickContext.RedeemableCodes
+            .SingleOrDefaultAsync(redeemableCode => redeemableCode.Code.Equals(normalisedCode));
+
+        if (code is null)
+            return Ok(PhpSerialization.Serialize(CreateRedeemErrorResponse((int) StoreErrorCode.STORE_PURCHASE_CODE_INVALID_ERROR, hostTime)));
+
+        if (code.TimestampRedeemed is not null || code.RedeemedByAccountID is not null)
+            return Ok(PhpSerialization.Serialize(CreateRedeemErrorResponse((int) StoreErrorCode.STORE_PURCHASE_CODE_USED_ERROR, hostTime)));
+
+        User user = account.User;
+
+        StoreItem? grantedProduct = null;
+
+        if (code.ProductID is int productID)
+        {
+            grantedProduct = StoreItems.GetByID(productID);
+
+            if (grantedProduct is null)
+            {
+                Logger.LogWarning(@"Redeemable Code ""{Code}"" References Unknown Product ID ""{ProductID}""", code.Code, productID);
+
+                return Ok(PhpSerialization.Serialize(CreateRedeemErrorResponse((int) StoreErrorCode.STORE_PURCHASE_ITEM_MISSING_ERROR, hostTime)));
+            }
+
+            // If The Player Already Owns The Granted Product, Still Consume The Code But Do Not Duplicate The Ownership Entry
+            if (user.OwnedStoreItems.Contains(grantedProduct.PrefixedCode).Equals(false))
+                user.OwnedStoreItems.Add(grantedProduct.PrefixedCode);
+        }
+
+        user.GoldCoins += code.GoldCoinsReward;
+        user.SilverCoins += code.SilverCoinsReward;
+        user.PlinkoTickets += code.PlinkoTicketsReward;
+
+        code.RedeemedByAccountID = account.ID;
+        code.TimestampRedeemed = DateTimeOffset.UtcNow;
+
+        await MerrickContext.SaveChangesAsync();
+
+        Logger.LogInformation(@"Account ""{AccountID}"" Redeemed Code ""{Code}"" (Gold ""{Gold}"", Silver ""{Silver}"", Tickets ""{Tickets}"", Product ""{ProductID}"")",
+            account.ID, code.Code, code.GoldCoinsReward, code.SilverCoinsReward, code.PlinkoTicketsReward, code.ProductID);
+
+        string redeemedField = FormatRedeemedField(code.GoldCoinsReward, code.SilverCoinsReward, grantedProduct);
 
         Dictionary<string, object> response = new ()
         {
-            ["popupCode"] = (int) StorePopupCode.POP_UP_ERROR_MESSAGE,
-            ["errorCode"] = (int) StoreErrorCode.STORE_PURCHASE_CODE_INVALID_ERROR
+            ["responseCode"]        = (int) StoreResponseCode.NO_RESPONSE,
+            ["popupCode"]           = (int) StorePopupCode.POP_UP_COIN_REDEEM_SUCCESS,
+            ["errorCode"]           = 0,
+            ["redeemed"]            = redeemedField,
+            ["totalPoints"]         = user.GoldCoins,
+            ["totalMMPoints"]       = user.SilverCoins,
+            ["requestHostTime"]     = hostTime ?? string.Empty
         };
 
         return Ok(PhpSerialization.Serialize(response));
     }
+
+    /// <summary>
+    ///     Formats the <c>redeemed</c> response field as the comma-separated three-part string the client UI expects.
+    ///     Empty segments are emitted for absent rewards so the client's <c>explode(',', redeemed)</c> always produces three table entries.
+    /// </summary>
+    private static string FormatRedeemedField(int goldReward, int silverReward, StoreItem? product)
+    {
+        string goldSegment = goldReward > 0 ? goldReward.ToString() : string.Empty;
+        string silverSegment = silverReward > 0 ? silverReward.ToString() : string.Empty;
+        string productSegment = product is null ? string.Empty : $"{product.ID}~{product.Resource}";
+
+        return $"{goldSegment},{silverSegment},{productSegment}";
+    }
+
+    /// <summary>
+    ///     Builds the failure response for a redemption attempt with every field the client form declaration expects, so the client UI can reliably render the localised error message.
+    /// </summary>
+    private static Dictionary<string, object> CreateRedeemErrorResponse(int errorCode, string? hostTime) => new ()
+    {
+        ["responseCode"]        = (int) StoreResponseCode.NO_RESPONSE,
+        ["popupCode"]           = (int) StorePopupCode.POP_UP_ERROR_MESSAGE,
+        ["errorCode"]           = errorCode,
+        ["redeemed"]            = string.Empty,
+        ["requestHostTime"]     = hostTime ?? string.Empty
+    };
 
     /// <summary>
     ///     Executes a purchase transaction, deducting the appropriate currency and adding the item to the user's owned items.
