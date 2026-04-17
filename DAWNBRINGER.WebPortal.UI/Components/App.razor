@@ -24,6 +24,7 @@
 
     <body>
         <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
+        <canvas id="fluid" aria-hidden="true"></canvas>
         <script src="_framework/blazor.web.js"></script>
         <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
         <script src="@Assets["js/cursor.js"]" defer></script>
