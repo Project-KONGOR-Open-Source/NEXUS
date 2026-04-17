@@ -5,10 +5,11 @@ namespace KONGOR.MasterServer.Controllers.Plinko;
 /// </summary>
 [ApiController]
 [Consumes("application/x-www-form-urlencoded")]
-public class MiniGameController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<MiniGameController> logger) : ControllerBase
+public class MiniGameController(MerrickContext databaseContext, IDatabase distributedCache, Random random, ILogger<MiniGameController> logger) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
+    private Random Random { get; } = random;
     private ILogger Logger { get; } = logger;
 
     private const int ViewChestPageSize = 56;
@@ -186,11 +187,11 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
     }
 
     /// <summary>
-    ///     Rolls a weighted tier using <see cref="Random.Shared"/>, matching the legacy probability distribution.
+    ///     Rolls a weighted tier using the injected random source, matching the legacy probability distribution.
     /// </summary>
-    private static int GetRandomPlinkoTier()
+    private int GetRandomPlinkoTier()
     {
-        double roll = Random.Shared.NextDouble() * 100.0;
+        double roll = Random.NextDouble() * 100.0;
 
         double cumulative = PlinkoConfig.DropProbabilities.Tier1;
         if (roll < cumulative)
@@ -256,7 +257,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
             };
         }
 
-        StoreItem winner = eligible[Random.Shared.Next(eligible.Count)];
+        StoreItem winner = eligible[Random.Next(eligible.Count)];
 
         user.OwnedStoreItems.Add(winner.PrefixedCode);
 

@@ -46,6 +46,9 @@ public class KONGOR
         // Register IDatabase From IConnectionMultiplexer
         builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
+        // Register The Shared Thread-Safe Random Source So That Controllers Which Depend On Randomness Can Be Tested Deterministically By Overriding The Registration
+        builder.Services.AddSingleton<Random>(Random.Shared);
+
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
 

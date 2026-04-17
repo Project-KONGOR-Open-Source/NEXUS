@@ -8,7 +8,7 @@ public static class KONGORServiceProvider
     /// <summary>
     ///     Creates An Instance Of The KONGOR Master Server With In-Memory Dependencies
     /// </summary>
-    public static WebApplicationFactory<KONGORAssemblyMarker> CreateOrchestratedInstance(string? identifier = null)
+    public static WebApplicationFactory<KONGORAssemblyMarker> CreateOrchestratedInstance(string? identifier = null, Random? random = null)
     {
         string databaseName = identifier ?? Guid.CreateVersion7().ToString();
 
@@ -46,6 +46,15 @@ public static class KONGORServiceProvider
 
             // Add Middleware To Set Fake Remote IP Address
             services.AddSingleton<IStartupFilter>(new RemoteIPAddressStartupFilter());
+
+            // Replace The Random Source If The Caller Supplied One, So That Controllers Depending On "Random" Can Be Driven Deterministically
+            if (random is not null)
+            {
+                foreach (ServiceDescriptor descriptor in services.Where(descriptor => descriptor.ServiceType == typeof(Random)).ToList())
+                    services.Remove(descriptor);
+
+                services.AddSingleton<Random>(random);
+            }
         }));
 
         // Ensure That OnModelCreating From MerrickContext Has Been Called

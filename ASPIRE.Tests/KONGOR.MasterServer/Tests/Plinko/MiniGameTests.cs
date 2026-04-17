@@ -245,6 +245,64 @@ public sealed class MiniGameTests
     }
 
     [Test]
+    public async Task Drop_SuccessfulChestDrop_AppendsWinningProductToOwnedItems()
+    {
+        // The Stubbed Random Always Rolls Tier 1 (NextDouble = 0.0 Satisfies "roll < Tier1Probability") And Always Picks The First Eligible Item (Next(N) = 0), Making The Drop Fully Deterministic Without Relying On Retry Attempts
+        FixedRandom random = new (nextDouble: 0.0, nextInteger: 0);
+
+        await using WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance(random: random);
+
+        // The Deterministic Winner Is The First Enabled And Purchasable Product In Tier 1, Since The Controller Iterates The Tier's Product List In Declared Order And Our Stubbed Next(N) Returns Index 0
+        StoreItem target = FirstEligibleProductInTier(tierID: 1)
+            ?? throw new InvalidOperationException(@"Plinko Tier 1 Has No Enabled And Purchasable Products; The Test Setup Is Incompatible With The Current Configuration");
+
+        (string cookie, int userID) = await SeedAuthenticatedSession(factory, "plinko.drop.owned@kongor.com", "DropOwned", goldCoins: JSONConfiguration.PlinkoConfiguration.GoldCost, plinkoTickets: 0);
+
+        // Pre-Own Every Enabled And Purchasable Chest-Tier Product Except The Deterministic Target, So That Exactly One Eligible Product Remains When Tier 1 Is Rolled, Guaranteeing That Next(1) Returns 0 (Target Wins)
+        HashSet<string> everyChestTierCode = CollectEveryChestTierPrefixedCode();
+
+        await MutateUser(factory, userID, user =>
+        {
+            foreach (string code in everyChestTierCode)
+            {
+                if (code.Equals(target.PrefixedCode))
+                    continue;
+
+                if (user.OwnedStoreItems.Contains(code).Equals(false))
+                    user.OwnedStoreItems.Add(code);
+            }
+        });
+
+        int ownedCountBeforeDrop = (await LoadUser(factory, userID)).OwnedStoreItems.Count;
+
+        HttpResponseMessage response = await PostForm(factory, CasinoDropRoute, new Dictionary<string, string>
+        {
+            ["cookie"]      = cookie,
+            ["currency"]    = "gold"
+        });
+
+        IDictionary<object, object> body = await DeserialisePhpResponse(response);
+
+        User user = await LoadUser(factory, userID);
+
+        using (Assert.Multiple())
+        {
+            // The Stubbed Random Must Produce A Tier 1 Chest Roll Granting The Deterministic Target
+            await Assert.That(Convert.ToInt32(body["random_tier"])).IsEqualTo(1);
+            await Assert.That(Convert.ToInt32(body["products_exhausted"])).IsEqualTo(0);
+            await Assert.That(Convert.ToInt32(body["product_id"])).IsEqualTo(target.ID);
+
+            // The Won Item Must Be Appended To OwnedStoreItems Under The Exact PrefixedCode The Store Controller Uses For Its Ownership Check
+            await Assert.That(user.OwnedStoreItems).Contains(target.PrefixedCode);
+            await Assert.That(user.OwnedStoreItems.Count).IsEqualTo(ownedCountBeforeDrop + 1);
+
+            // The Response's "product_type" + "." + "product_name" Must Reconstruct The Same PrefixedCode The Server Has Persisted, Otherwise The Client And Server Disagree On The Identity Of The Won Item
+            string clientReconstructedPrefixedCode = $@"{body["product_type"]}.{body["product_name"]}";
+            await Assert.That(clientReconstructedPrefixedCode).IsEqualTo(target.PrefixedCode);
+        }
+    }
+
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
@@ -386,6 +444,22 @@ public sealed class MiniGameTests
         await databaseContext.SaveChangesAsync();
     }
 
+    private static StoreItem? FirstEligibleProductInTier(int tierID)
+    {
+        PlinkoTierProductsConfiguration tierProducts = JSONConfiguration.PlinkoTierProductsConfiguration;
+        StoreItemsConfiguration storeItems = JSONConfiguration.StoreItemsConfiguration;
+
+        foreach (int productID in tierProducts.GetProductIDs(tierID))
+        {
+            StoreItem? storeItem = storeItems.GetByID(productID);
+
+            if (storeItem is not null && storeItem.IsEnabled && storeItem.Purchasable)
+                return storeItem;
+        }
+
+        return null;
+    }
+
     private static HashSet<string> CollectEveryChestTierPrefixedCode()
     {
         PlinkoTierProductsConfiguration tierProducts = JSONConfiguration.PlinkoTierProductsConfiguration;
@@ -428,4 +502,15 @@ public sealed class MiniGameTests
         return PhpSerialization.Deserialize(body) as IDictionary<object, object>
             ?? throw new InvalidOperationException($@"Response Body Was Not A PHP Array: ""{body}""");
     }
+}
+
+/// <summary>
+///     A <see cref="Random"/> subclass whose <see cref="NextDouble"/> and <see cref="Next(int)"/> return fixed, caller-supplied values.
+///     Used by tests that need to drive randomness-dependent code paths deterministically via dependency injection.
+/// </summary>
+file sealed class FixedRandom(double nextDouble, int nextInteger) : Random
+{
+    public override double NextDouble() => nextDouble;
+
+    public override int Next(int maxValue) => nextInteger;
 }
