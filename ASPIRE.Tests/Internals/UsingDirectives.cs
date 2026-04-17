@@ -12,6 +12,10 @@ global using ASPIRE.Tests.ZORGATH.WebPortal.API.Models;
 global using ASPIRE.Tests.ZORGATH.WebPortal.API.Services;
 
 global using KONGOR.MasterServer.Attributes.Serialisation;
+global using KONGOR.MasterServer.Configuration;
+global using KONGOR.MasterServer.Configuration.Plinko;
+global using KONGOR.MasterServer.Configuration.Store;
+global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Internals;
 global using KONGOR.MasterServer.Models.RequestResponse.SRP;

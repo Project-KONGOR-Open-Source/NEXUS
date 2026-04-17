@@ -18,6 +18,12 @@ public static class JSONConfiguration
 
     private static readonly string AnnouncementsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Announcements", "AnnouncementsConfiguration.json"));
 
+    private static readonly string PlinkoConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Plinko", "PlinkoConfiguration.json"));
+
+    private static readonly string PlinkoTierProductsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Plinko", "PlinkoTierProducts.json"));
+
+    private static readonly string TicketExchangeConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Plinko", "TicketExchangeConfiguration.json"));
+
     public static readonly EconomyConfiguration EconomyConfiguration = JsonSerializer.Deserialize<EconomyConfiguration>(EconomyConfigurationJSON)
         ?? throw new NullReferenceException("Economy Configuration Is NULL");
 
@@ -38,4 +44,42 @@ public static class JSONConfiguration
 
     public static readonly AnnouncementsConfiguration AnnouncementsConfiguration = JsonSerializer.Deserialize<AnnouncementsConfiguration>(AnnouncementsConfigurationJSON)
         ?? throw new NullReferenceException("Announcements Configuration Is NULL");
+
+    public static readonly PlinkoConfiguration PlinkoConfiguration = LoadPlinkoConfiguration();
+
+    public static readonly PlinkoTierProductsConfiguration PlinkoTierProductsConfiguration = LoadPlinkoTierProductsConfiguration();
+
+    public static readonly TicketExchangeConfiguration TicketExchangeConfiguration = LoadTicketExchangeConfiguration();
+
+    private static PlinkoConfiguration LoadPlinkoConfiguration()
+    {
+        PlinkoConfiguration configuration = JsonSerializer.Deserialize<PlinkoConfiguration>(PlinkoConfigurationJSON)
+            ?? throw new NullReferenceException("Plinko Configuration Is NULL");
+
+        configuration.Validate();
+
+        return configuration;
+    }
+
+    private static PlinkoTierProductsConfiguration LoadPlinkoTierProductsConfiguration()
+    {
+        List<PlinkoTierProducts> tiers = JsonSerializer.Deserialize<List<PlinkoTierProducts>>(PlinkoTierProductsConfigurationJSON)
+            ?? throw new NullReferenceException("Plinko Tier Products Configuration Is NULL");
+
+        PlinkoTierProductsConfiguration configuration = new () { Tiers = tiers };
+
+        configuration.Initialise();
+
+        return configuration;
+    }
+
+    private static TicketExchangeConfiguration LoadTicketExchangeConfiguration()
+    {
+        TicketExchangeConfiguration configuration = JsonSerializer.Deserialize<TicketExchangeConfiguration>(TicketExchangeConfigurationJSON)
+            ?? throw new NullReferenceException("Ticket Exchange Configuration Is NULL");
+
+        configuration.Initialise();
+
+        return configuration;
+    }
 }

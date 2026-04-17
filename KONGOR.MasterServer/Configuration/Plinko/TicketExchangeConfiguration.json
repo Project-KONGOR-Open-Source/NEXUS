@@ -1,0 +1,12 @@
+{
+    "Items": [
+        {
+            "ID": 1,
+            "TicketCost": 1300,
+            "ProductID": 1792,
+            "Name": "Super-Taunt",
+            "Type": "Misc",
+            "LocalPath": "/ui/fe2/store/icons/taunt_super.tga"
+        }
+    ]
+}

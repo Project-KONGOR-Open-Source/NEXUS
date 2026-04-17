@@ -12,6 +12,7 @@ global using KONGOR.MasterServer.Configuration.Announcements;
 global using KONGOR.MasterServer.Configuration.Economy;
 global using KONGOR.MasterServer.Configuration.Mastery;
 global using KONGOR.MasterServer.Configuration.Matchmaking;
+global using KONGOR.MasterServer.Configuration.Plinko;
 global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
