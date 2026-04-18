@@ -268,12 +268,23 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
     /// <summary>
     ///     Returns the selected upgrade product IDs for the account.
+    ///     Emits <c>responseCode = <see cref="StoreResponseCode.UPDATE_SELECTED_RESPONSE"/></c> so that the client's <c>Store2ReceiveVaultData</c> dispatcher in <c>store.lua</c> routes to <c>Store2ReceiveVaultData_UpdateSelected</c>, which re-draws the vault with fresh <c>-Selected-</c> markers against the returned <c>selectedUpgrades</c> list.
+    ///     Omitting the response code leaves the vault's cached selection state stale, so the just-selected item never shows as selected until the player navigates away and back.
     /// </summary>
     private IActionResult ListSelectedUpgrades(Account account)
     {
+        string? hostTime = Request.Form["hostTime"];
+
+        if (hostTime is null)
+            return BadRequest(@"Missing Value For Form Parameter ""hostTime""");
+
         Dictionary<string, object> response = new ();
 
         PopulateSelectedUpgrades(account, response);
+
+        response["responseCode"] = (int) StoreResponseCode.UPDATE_SELECTED_RESPONSE;
+        response["popupCode"] = -1;
+        response["requestHostTime"] = hostTime;
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -1028,7 +1039,10 @@ file enum StoreResponseCode
     POINT_PACKAGE_RESPONSE              = 5,
 
     // Vault Avatar List
-    VAULT_AVATAR_LIST_RESPONSE          = 6
+    VAULT_AVATAR_LIST_RESPONSE          = 6,
+
+    // Signals The Vault UI To Refresh Its Cached "-Selected-" Markers Against The Fresh "selectedUpgrades" Field
+    UPDATE_SELECTED_RESPONSE            = 7
 }
 
 file enum StoreErrorCode
