@@ -269,10 +269,10 @@
     private InputType NewPasswordInputType => NewPasswordVisible ? InputType.Text : InputType.Password;
     private InputType ConfirmPasswordInputType => ConfirmPasswordVisible ? InputType.Text : InputType.Password;
 
-    private string EmailPasswordVisibilityIcon => EmailPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
-    private string CurrentPasswordVisibilityIcon => CurrentPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
-    private string NewPasswordVisibilityIcon => NewPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
-    private string ConfirmPasswordVisibilityIcon => ConfirmPasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+    private string EmailPasswordVisibilityIcon => EmailPasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+    private string CurrentPasswordVisibilityIcon => CurrentPasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+    private string NewPasswordVisibilityIcon => NewPasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
+    private string ConfirmPasswordVisibilityIcon => ConfirmPasswordVisible ? Icons.Material.Filled.Visibility : Icons.Material.Filled.VisibilityOff;
 
     private void ToggleEmailPasswordVisibility() => EmailPasswordVisible = !EmailPasswordVisible;
     private void ToggleCurrentPasswordVisibility() => CurrentPasswordVisible = !CurrentPasswordVisible;
