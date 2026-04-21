@@ -20,4 +20,10 @@
         <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Configuration\**\*.json">
+            <CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>

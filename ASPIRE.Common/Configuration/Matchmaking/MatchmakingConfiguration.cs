@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Configuration.Matchmaking;
+﻿namespace ASPIRE.Common.Configuration.Matchmaking;
 
 /// <summary>
 ///     Root matchmaking configuration loaded from "MatchmakingConfiguration.json".

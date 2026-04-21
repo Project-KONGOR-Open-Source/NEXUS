@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Configuration.Store;
+namespace ASPIRE.Common.Configuration.Store;
 
 /// <summary>
 ///     Configuration for the featured heroes section of the in-game store (category 68).

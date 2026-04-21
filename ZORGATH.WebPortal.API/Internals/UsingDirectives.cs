@@ -1,4 +1,6 @@
-﻿global using ASPIRE.Common.Constants;
+﻿global using ASPIRE.Common.Configuration;
+global using ASPIRE.Common.Configuration.Economy;
+global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.ServiceDefaults;
 
 global using FluentValidation;

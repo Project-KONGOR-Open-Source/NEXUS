@@ -72,12 +72,17 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         string salt = SRPRegistrationHandlers.GenerateSRPPasswordSalt();
 
+        SignupRewards signupRewards = JSONConfiguration.EconomyConfiguration.SignupRewards;
+
         User user = new ()
         {
             EmailAddress = sanitizedEmailAddress,
             Role = role,
             SRPPasswordSalt = salt,
-            SRPPasswordHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt)
+            SRPPasswordHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt),
+            GoldCoins = signupRewards.GoldCoins,
+            SilverCoins = signupRewards.SilverCoins,
+            PlinkoTickets = signupRewards.PlinkoTickets
         };
 
         user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, payload.Password);

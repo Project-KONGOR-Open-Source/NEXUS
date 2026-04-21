@@ -58,11 +58,16 @@ public sealed class UserRegistrationTests
 
         await Assert.That(user).IsNotNull();
 
+        SignupRewards signupRewards = JSONConfiguration.EconomyConfiguration.SignupRewards;
+
         using (Assert.Multiple())
         {
             await Assert.That(user.Accounts).Count().IsEqualTo(1);
             await Assert.That(user.Accounts.First().Name).IsEqualTo(accountName);
             await Assert.That(user.Accounts.First().IsMain).IsTrue();
+            await Assert.That(user.GoldCoins).IsEqualTo(signupRewards.GoldCoins);
+            await Assert.That(user.SilverCoins).IsEqualTo(signupRewards.SilverCoins);
+            await Assert.That(user.PlinkoTickets).IsEqualTo(signupRewards.PlinkoTickets);
         }
 
         Token? consumedToken = await databaseContext.Tokens.FindAsync(registrationToken.ID);

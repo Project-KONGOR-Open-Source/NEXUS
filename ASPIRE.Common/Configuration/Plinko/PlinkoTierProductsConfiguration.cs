@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Configuration.Plinko;
+namespace ASPIRE.Common.Configuration.Plinko;
 
 /// <summary>
 ///     The per-tier product catalogue for Plinko drops.

@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Configuration.Announcements;
+namespace ASPIRE.Common.Configuration.Announcements;
 
 /// <summary>
 ///     Configuration for in-game announcements displayed to players via the special messages system.

@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Configuration.Plinko;
+namespace ASPIRE.Common.Configuration.Plinko;
 
 /// <summary>
 ///     The catalogue of items that players can buy directly with Plinko tickets from the ticket exchange panel.

@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Configuration.Store;
+namespace ASPIRE.Common.Configuration.Store;
 
 /// <summary>
 ///     Configuration for the daily specials panel in the in-game store.
