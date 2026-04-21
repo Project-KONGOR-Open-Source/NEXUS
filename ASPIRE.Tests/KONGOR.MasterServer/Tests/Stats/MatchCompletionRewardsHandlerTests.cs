@@ -1,5 +1,3 @@
-using MatchType = ASPIRE.Common.Enumerations.Match.MatchType;
-
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Stats;
 
 /// <summary>
