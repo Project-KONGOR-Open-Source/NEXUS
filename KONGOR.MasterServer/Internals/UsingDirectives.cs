@@ -1,11 +1,4 @@
 ﻿global using ASPIRE.Common.Communication;
-global using ASPIRE.Common.Configuration;
-global using ASPIRE.Common.Configuration.Announcements;
-global using ASPIRE.Common.Configuration.Economy;
-global using ASPIRE.Common.Configuration.Mastery;
-global using ASPIRE.Common.Configuration.Matchmaking;
-global using ASPIRE.Common.Configuration.Plinko;
-global using ASPIRE.Common.Configuration.Store;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Enumerations.Statistics;
@@ -14,6 +7,13 @@ global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.ServiceDefaults;
 
 global using KONGOR.MasterServer.Attributes.Serialisation;
+global using KONGOR.MasterServer.Configuration;
+global using KONGOR.MasterServer.Configuration.Announcements;
+global using KONGOR.MasterServer.Configuration.Economy;
+global using KONGOR.MasterServer.Configuration.Mastery;
+global using KONGOR.MasterServer.Configuration.Matchmaking;
+global using KONGOR.MasterServer.Configuration.Plinko;
+global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.Patch;

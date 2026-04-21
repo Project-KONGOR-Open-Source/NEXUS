@@ -1,4 +1,4 @@
-﻿namespace ASPIRE.Common.Configuration.Mastery;
+﻿namespace KONGOR.MasterServer.Configuration.Mastery;
 
 public class MasteryRewardsConfiguration
 {

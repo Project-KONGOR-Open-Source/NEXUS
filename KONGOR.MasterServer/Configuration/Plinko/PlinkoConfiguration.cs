@@ -1,4 +1,4 @@
-namespace ASPIRE.Common.Configuration.Plinko;
+namespace KONGOR.MasterServer.Configuration.Plinko;
 
 /// <summary>
 ///     Configuration for the Plinko mini-game.

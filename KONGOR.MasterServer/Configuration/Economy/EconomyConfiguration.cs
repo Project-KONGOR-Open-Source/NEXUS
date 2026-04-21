@@ -1,4 +1,4 @@
-﻿namespace ASPIRE.Common.Configuration.Economy;
+﻿namespace KONGOR.MasterServer.Configuration.Economy;
 
 public class EconomyConfiguration
 {

@@ -1,7 +1,9 @@
-﻿global using ASPIRE.Common.Configuration;
-global using ASPIRE.Common.Configuration.Economy;
-global using ASPIRE.Common.Constants;
+﻿global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.ServiceDefaults;
+
+// TODO: Replace This Direct Reference With A Service Bus For Private Inter-Service Communication At The Server Level
+global using KONGOR.MasterServer.Configuration;
+global using KONGOR.MasterServer.Configuration.Economy;
 
 global using FluentValidation;
 global using FluentValidation.Results;

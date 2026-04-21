@@ -17,4 +17,9 @@
         <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
+        <!-- TODO: Replace This Direct Project Reference With A Service Bus For Private Inter-Service Communication At The Server Level -->
+    </ItemGroup>
+
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace ASPIRE.Common.Configuration.Store;
+﻿namespace KONGOR.MasterServer.Configuration.Store;
 
 public class StoreItemsConfiguration
 {

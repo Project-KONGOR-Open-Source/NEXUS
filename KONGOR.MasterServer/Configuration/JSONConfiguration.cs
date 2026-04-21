@@ -1,4 +1,4 @@
-﻿namespace ASPIRE.Common.Configuration;
+﻿namespace KONGOR.MasterServer.Configuration;
 
 public static class JSONConfiguration
 {
