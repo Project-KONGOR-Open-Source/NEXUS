@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.2.1" />
+        <PackageReference Include="TUnit" Version="1.35.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../ASPIRE.Tests/ASPIRE.Tests.csproj" />
+        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
+        <ProjectReference Include="../TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
+    </ItemGroup>
+
+</Project>

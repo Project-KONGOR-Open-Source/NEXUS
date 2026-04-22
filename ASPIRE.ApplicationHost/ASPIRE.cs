@@ -38,6 +38,9 @@ public class ASPIRE
             .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
 
+        // TODO: Consider Migrating To Valkey For Field-Level TTL Support And Native Namespace Scoping
+        // INFO: Valkey Namespaces Would Let ASPIRE.Tests Drop The Per-Factory Key-Prefix Wrapper Around IDatabase In Favour Of Real Keyspace Isolation
+
         // Create Resource Relationship After Parent Resource Is Defined
         distributedCachePassword
             .WithDescription("Distributed Cache Password") // Add Description To Parameter Resource
