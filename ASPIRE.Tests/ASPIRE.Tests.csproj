@@ -1,29 +1,27 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>exe</OutputType>
         <IsPackable>false</IsPackable>
-        <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.Testing" Version="13.2.2" />
+        <!-- Docker.DotNet.Enhanced is the fork that Testcontainers 4.x pulls in transitively. Referencing it explicitly lets DockerImageManager drive the Docker daemon directly rather than shelling out to the docker CLI. -->
+        <PackageReference Include="Docker.DotNet.Enhanced" Version="3.131.1" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.6" />
-        <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.2.1" />
-        <PackageReference Include="TUnit" Version="1.35.2" />
+        <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
+        <PackageReference Include="StackExchange.Redis" Version="2.9.38" />
+        <PackageReference Include="Testcontainers" Version="4.11.0" />
+        <PackageReference Include="Testcontainers.MsSql" Version="4.11.0" />
+        <PackageReference Include="Testcontainers.Redis" Version="4.11.0" />
+        <!-- The base library only needs the IClassConstructor / TestContext / ITestEndEventReceiver abstractions. TUnit.Core is the runner-less sub-package, which avoids pulling in the MSBuild targets that would otherwise mark this library as an MTP test application and trigger a spurious ZeroTests error at solution level. -->
+        <PackageReference Include="TUnit.Core" Version="1.35.2" />
+        <PackageReference Include="WireMock.Net" Version="1.25.0" />
+        <PackageReference Include="WireMock.Net.RestClient" Version="1.25.0" />
+        <PackageReference Include="WireMock.Net.Testcontainers" Version="1.25.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.ApplicationHost/ASPIRE.ApplicationHost.csproj" />
-        <ProjectReference Include="../DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" />
-        <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
         <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
-        <ProjectReference Include="../TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
-        <ProjectReference Include="../ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="../ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     </ItemGroup>
 
 </Project>
