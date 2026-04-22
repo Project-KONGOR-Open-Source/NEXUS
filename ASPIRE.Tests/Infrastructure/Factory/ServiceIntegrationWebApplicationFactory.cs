@@ -61,9 +61,9 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
     /// <summary>
     ///     The scoped WireMock URL for this factory instance.
-    ///     Includes a unique path prefix derived from <see cref="GUID"/> so that mappings from different tests never collide.
+    ///     Includes the same <see cref="WireMockPathPrefix"/> that <see cref="ScopedWireMockClient"/> prepends to mapping paths, so HTTP clients that target this URL hit the isolated pathspace owned by the calling test.
     /// </summary>
-    public string WireMockURL => containerContext.WireMock.GetScopedURL(GUID);
+    public string WireMockURL => $"{containerContext.WireMock.PublicURL.TrimEnd('/')}/{WireMockPathPrefix}/";
 
     /// <summary>
     ///     The scoped WireMock URI for this factory instance.

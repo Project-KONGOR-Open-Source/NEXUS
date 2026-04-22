@@ -24,17 +24,10 @@ public sealed class WireMockContainer : IAsyncDisposable
 
     /// <summary>
     ///     The public URL of the running WireMock container (e.g. <c>http://localhost:32768/</c>).
+    ///     Per-test path scoping is composed by the consuming factory rather than this container so that both the mapping prefix and the client base URL have a single source of truth.
     /// </summary>
     public string PublicURL
         => Self?.GetPublicUrl() ?? throw new NullReferenceException($"{DisplayName} Container Public URL Is NULL");
-
-    /// <summary>
-    ///     Returns a scoped URL that includes a unique path segment derived from the supplied identifier.
-    ///     Callers that point outbound HTTP clients at this URL will have their requests routed to the isolated pathspace owned by the calling test.
-    /// </summary>
-    /// <param name="identifier">A unique identifier (typically the factory GUID).</param>
-    public string GetScopedURL(Guid identifier)
-        => $"{PublicURL.TrimEnd('/')}/{identifier:N}/";
 
     /// <summary>
     ///     The administrative client used for registering, reading, and removing WireMock mappings.
