@@ -6,6 +6,7 @@ global using ASPIRE.Tests.Infrastructure.DependencyInversion;
 global using ASPIRE.Tests.Infrastructure.Factory;
 global using ASPIRE.Tests.Infrastructure.Hooks;
 
+global using ASPIRE.Tests.KONGOR.MasterServer.Helpers;
 global using ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 global using ASPIRE.Tests.KONGOR.MasterServer.Models;
 global using ASPIRE.Tests.KONGOR.MasterServer.Services;

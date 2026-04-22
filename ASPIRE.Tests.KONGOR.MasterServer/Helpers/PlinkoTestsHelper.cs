@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Plinko;
+namespace ASPIRE.Tests.KONGOR.MasterServer.Helpers;
 
 /// <summary>
 ///     Shared helpers between the Plinko test classes for seeding authenticated sessions and issuing HTTP requests.

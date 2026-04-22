@@ -1,7 +1,7 @@
-namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Store;
+namespace ASPIRE.Tests.KONGOR.MasterServer.Helpers;
 
 /// <summary>
-///     Helpers for building authenticated sessions, seeding redeemable codes, and posting store requests from <see cref="RedeemCodeTests"/>.
+///     Helpers for building authenticated sessions, seeding redeemable codes, and posting store requests from <see cref="Tests.Store.RedeemCodeTests"/>.
 /// </summary>
 internal static class RedeemCodeTestsHelper
 {
