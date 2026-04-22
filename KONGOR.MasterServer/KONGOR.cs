@@ -46,8 +46,16 @@ public class KONGOR
         // Register IDatabase From IConnectionMultiplexer
         builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
-        // Register The Shared Thread-Safe Random Source So That Controllers Which Depend On Randomness Can Be Tested Deterministically By Overriding The Registration
-        builder.Services.AddSingleton<Random>(Random.Shared);
+        // Bind Chat Server Status Settings
+        builder.Services.Configure<ChatServerStatusSettings>(builder.Configuration.GetSection(ChatServerStatusSettings.SectionName));
+
+        // Register The Typed HTTP Client That Probes The Chat Server's Health Endpoint
+        builder.Services.AddHttpClient<IChatServerStatusClient, ChatServerStatusClient>((serviceProvider, httpClient) =>
+        {
+            ChatServerStatusSettings settings = serviceProvider.GetRequiredService<IOptionsMonitor<ChatServerStatusSettings>>().CurrentValue;
+
+            httpClient.BaseAddress = new Uri(settings.BaseURL);
+        });
 
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
