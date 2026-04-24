@@ -86,8 +86,7 @@ public class DAWNBRINGER
         application.MapStaticAssets();
 
         // Map Razor Components With Interactive Server Render Mode
-        application.MapRazorComponents<Components.App>()
-            .AddInteractiveServerRenderMode();
+        application.MapRazorComponents<Components.Application>().AddInteractiveServerRenderMode();
 
         // Map Aspire Default Health Check Endpoints
         application.MapDefaultEndpoints();
