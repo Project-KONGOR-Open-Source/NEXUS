@@ -4,13 +4,15 @@ namespace DAWNBRINGER.WebPortal.UI.Models;
 
 public class RegisterEmailAddressFormModel
 {
-    [Required(ErrorMessage = "Email address is required")]
-    [EmailAddress(ErrorMessage = "The email address is invalid")]
+    [Required(ErrorMessage = "Email Address Is Required")]
+    [EmailAddress(ErrorMessage = "The Email Address Is Invalid")]
+    [StringLength(128, ErrorMessage = "The Email Address Must Not Exceed 128 Characters")]
     public string EmailAddress { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Email address confirmation is required")]
-    [EmailAddress(ErrorMessage = "The email address is invalid")]
-    [Compare(nameof(EmailAddress), ErrorMessage = "The email addresses do not match")]
+    [Required(ErrorMessage = "Email Address Confirmation Is Required")]
+    [EmailAddress(ErrorMessage = "The Email Address Confirmation Is Invalid")]
+    [StringLength(128, ErrorMessage = "The Email Address Confirmation Must Not Exceed 128 Characters")]
+    [Compare(nameof(EmailAddress), ErrorMessage = "The Email Addresses Do Not Match")]
     public string ConfirmEmailAddress { get; set; } = string.Empty;
 }
 
@@ -18,18 +20,17 @@ public class RegisterEmailAddressFormModel
 
 public class CreateAccountFormModel
 {
-    [Required(ErrorMessage = "Account name is required")]
-    // The Server Allows Up To 16 Characters In Development; Use Swagger UI To Bypass This Limit
-    [StringLength(12, ErrorMessage = "The account name must be between 4 and 12 characters long", MinimumLength = 4)]
-    [RegularExpression(@"^[a-zA-Z0-9_\-]+$", ErrorMessage = "The account name may only contain letters, numbers, underscores, and hyphens")]
+    [Required(ErrorMessage = "Account Name Is Required")]
+    [StringLength(15, ErrorMessage = "The Account Name Must Be Between 4 And 15 Characters Long", MinimumLength = 4)]
+    [RegularExpression(@"^[a-zA-Z0-9_\-]+$", ErrorMessage = "The Account Name May Only Contain Letters, Numbers, Underscores, And Hyphens")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required")]
-    [StringLength(128, ErrorMessage = "The password must be at least 8 characters long", MinimumLength = 8)]
+    [Required(ErrorMessage = "Password Is Required")]
+    [StringLength(128, ErrorMessage = "The Password Must Be At Least 8 Characters Long", MinimumLength = 8)]
     public string Password { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password confirmation is required")]
-    [Compare(nameof(Password), ErrorMessage = "The passwords do not match")]
+    [Required(ErrorMessage = "Password Confirmation Is Required")]
+    [Compare(nameof(Password), ErrorMessage = "The Passwords Do Not Match")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
@@ -37,11 +38,11 @@ public class CreateAccountFormModel
 
 public class LogInFormModel
 {
-    [Required(ErrorMessage = "Account name is required")]
-    [StringLength(12, ErrorMessage = "The account name must be between 4 and 12 characters long", MinimumLength = 4)]
+    [Required(ErrorMessage = "Account Name Is Required")]
+    [StringLength(15, ErrorMessage = "The Account Name Must Be Between 4 And 15 Characters Long", MinimumLength = 4)]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required")]
+    [Required(ErrorMessage = "Password Is Required")]
     public string Password { get; set; } = string.Empty;
 }
 
@@ -49,13 +50,15 @@ public class LogInFormModel
 
 public class RequestPasswordResetFormModel
 {
-    [Required(ErrorMessage = "Email address is required")]
-    [EmailAddress(ErrorMessage = "The email address is invalid")]
+    [Required(ErrorMessage = "Email Address Is Required")]
+    [EmailAddress(ErrorMessage = "The Email Address Is Invalid")]
+    [StringLength(128, ErrorMessage = "The Email Address Must Not Exceed 128 Characters")]
     public string EmailAddress { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Email address confirmation is required")]
-    [EmailAddress(ErrorMessage = "The email address is invalid")]
-    [Compare(nameof(EmailAddress), ErrorMessage = "The email addresses do not match")]
+    [Required(ErrorMessage = "Email Address Confirmation Is Required")]
+    [EmailAddress(ErrorMessage = "The Email Address Confirmation Is Invalid")]
+    [StringLength(128, ErrorMessage = "The Email Address Confirmation Must Not Exceed 128 Characters")]
+    [Compare(nameof(EmailAddress), ErrorMessage = "The Email Addresses Do Not Match")]
     public string ConfirmEmailAddress { get; set; } = string.Empty;
 }
 
@@ -63,15 +66,15 @@ public class RequestPasswordResetFormModel
 
 public class RequestAccountPasswordUpdateFormModel
 {
-    [Required(ErrorMessage = "Current password is required")]
+    [Required(ErrorMessage = "Current Password Is Required")]
     public string CurrentPassword { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "New password is required")]
-    [StringLength(128, ErrorMessage = "The password must be at least 8 characters long", MinimumLength = 8)]
+    [Required(ErrorMessage = "New Password Is Required")]
+    [StringLength(128, ErrorMessage = "The New Password Must Be At Least 8 Characters Long", MinimumLength = 8)]
     public string Password { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password confirmation is required")]
-    [Compare(nameof(Password), ErrorMessage = "The passwords do not match")]
+    [Required(ErrorMessage = "Password Confirmation Is Required")]
+    [Compare(nameof(Password), ErrorMessage = "The Passwords Do Not Match")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
@@ -79,16 +82,18 @@ public class RequestAccountPasswordUpdateFormModel
 
 public class RequestEmailAddressUpdateFormModel
 {
-    [Required(ErrorMessage = "Email address is required")]
-    [EmailAddress(ErrorMessage = "The email address is invalid")]
+    [Required(ErrorMessage = "Email Address Is Required")]
+    [EmailAddress(ErrorMessage = "The Email Address Is Invalid")]
+    [StringLength(128, ErrorMessage = "The Email Address Must Not Exceed 128 Characters")]
     public string EmailAddress { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Email address confirmation is required")]
-    [EmailAddress(ErrorMessage = "The email address is invalid")]
-    [Compare(nameof(EmailAddress), ErrorMessage = "The email addresses do not match")]
+    [Required(ErrorMessage = "Email Address Confirmation Is Required")]
+    [EmailAddress(ErrorMessage = "The Email Address Confirmation Is Invalid")]
+    [StringLength(128, ErrorMessage = "The Email Address Confirmation Must Not Exceed 128 Characters")]
+    [Compare(nameof(EmailAddress), ErrorMessage = "The Email Addresses Do Not Match")]
     public string ConfirmEmailAddress { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required")]
+    [Required(ErrorMessage = "Password Is Required")]
     public string Password { get; set; } = string.Empty;
 }
 
