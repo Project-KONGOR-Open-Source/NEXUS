@@ -8,10 +8,13 @@
         <meta name="color-scheme" content="dark light" />
         <meta name="description" content="Project KONGOR user portal for accounts, downloads, documentation, security, and community." />
         <meta name="theme-color" content="#0d1610" />
+
         <base href="/" />
+
         <link rel="icon" type="image/png" href="images/logo.png" />
 
         <PageTitle>Project KONGOR</PageTitle>
+
         <HeadOutlet @rendermode="RenderMode.InteractiveServer" />
 
         <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
@@ -24,7 +27,9 @@
 
     <body>
         <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
+
         <canvas id="fluid" aria-hidden="true"></canvas>
+
         <script src="_framework/blazor.web.js"></script>
         <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
         <script src="@Assets["js/cursor.js"]" defer></script>
