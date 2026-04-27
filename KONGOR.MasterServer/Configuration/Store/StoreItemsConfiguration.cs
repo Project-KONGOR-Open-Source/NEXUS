@@ -159,6 +159,7 @@ public class StoreItem
         StoreItemType.Miscellaneous      => "Misc",
         StoreItemType.Ward               => "Ward",
         StoreItemType.Enhancement        => "Enhancement",
+        StoreItemType.Bundle             => "Bundle",
         _                                => string.Empty
     };
 }

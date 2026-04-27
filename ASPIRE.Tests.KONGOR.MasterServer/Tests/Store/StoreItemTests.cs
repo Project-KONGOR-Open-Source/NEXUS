@@ -62,7 +62,8 @@ public sealed class StoreItemTests
 
     /// <summary>
     ///     The values asserted here must match the keys of the <c>ProductTypeToPrefix</c> table in <c>global_main.lua</c> exactly; the chest reward UI feeds the response's <c>"product_type"</c> through that table to build the <c>general_product_type_&lt;code&gt;</c> localisation key.
-    ///     Types without an entry in the LUA table (<see cref="StoreItemType.Coupon"/>, <see cref="StoreItemType.Mastery"/>, <see cref="StoreItemType.Creep"/>, <see cref="StoreItemType.Building"/>, <see cref="StoreItemType.TauntBadge"/>, <see cref="StoreItemType.TeleportEffect"/>, <see cref="StoreItemType.SelectionCircle"/>, <see cref="StoreItemType.Bundle"/>) intentionally return an empty string; none of them are currently configured as Plinko-droppable.
+    ///     <see cref="StoreItemType.Bundle"/> is special-cased in the chest handler in <c>plinko.lua</c>: when the response's <c>"product_type"</c> equals the literal string <c>"Bundle"</c>, the client uses the <c>general_bundle</c> localisation directly instead of routing through <c>ProductTypeToPrefix</c>.
+    ///     Types without an entry in the LUA table (<see cref="StoreItemType.Coupon"/>, <see cref="StoreItemType.Mastery"/>, <see cref="StoreItemType.Creep"/>, <see cref="StoreItemType.Building"/>, <see cref="StoreItemType.TauntBadge"/>, <see cref="StoreItemType.TeleportEffect"/>, <see cref="StoreItemType.SelectionCircle"/>) intentionally return an empty string; none of them are currently configured as Plinko-droppable.
     /// </summary>
     [Test]
     [Arguments(StoreItemType.ChatNameColour,     "Chat Color")]
@@ -78,6 +79,7 @@ public sealed class StoreItemTests
     [Arguments(StoreItemType.Miscellaneous,      "Misc")]
     [Arguments(StoreItemType.Ward,               "Ward")]
     [Arguments(StoreItemType.Enhancement,        "Enhancement")]
+    [Arguments(StoreItemType.Bundle,             "Bundle")]
     [Arguments(StoreItemType.Coupon,             "")]
     [Arguments(StoreItemType.Mastery,            "")]
     [Arguments(StoreItemType.Creep,              "")]
@@ -85,7 +87,6 @@ public sealed class StoreItemTests
     [Arguments(StoreItemType.TauntBadge,         "")]
     [Arguments(StoreItemType.TeleportEffect,     "")]
     [Arguments(StoreItemType.SelectionCircle,    "")]
-    [Arguments(StoreItemType.Bundle,             "")]
     public async Task GetTypeName_ReturnsExpectedValueForEveryStoreItemType(StoreItemType type, string expected)
     {
         await Assert.That(StoreItem.GetTypeName(type)).IsEqualTo(expected);
