@@ -4,9 +4,6 @@ global using ASPIRE.Tests.Infrastructure.Factory;
 global using ASPIRE.Tests.Utilities.Concurrency;
 global using ASPIRE.Tests.Utilities.Container;
 
-global using Docker.DotNet;
-global using Docker.DotNet.Models;
-
 global using DotNet.Testcontainers.Builders;
 global using DotNet.Testcontainers.Containers;
 
@@ -29,6 +26,10 @@ global using StackExchange.Redis.KeyspaceIsolation;
 global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Diagnostics.CodeAnalysis;
+global using System.IO.Pipes;
+global using System.Net;
+global using System.Net.Http;
+global using System.Net.Sockets;
 global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 

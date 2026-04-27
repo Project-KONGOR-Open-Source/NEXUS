@@ -5,8 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- Docker.DotNet.Enhanced is the fork that Testcontainers 4.x pulls in transitively. Referencing it explicitly lets DockerImageManager drive the Docker daemon directly rather than shelling out to the docker CLI. -->
-        <PackageReference Include="Docker.DotNet.Enhanced" Version="4.2.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.7" />
         <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
         <PackageReference Include="StackExchange.Redis" Version="2.12.14" />
