@@ -177,7 +177,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
             ["first_item_index"]    = targetIndex,
             ["items_amount"]        = page.Count,
             ["product_names"]       = string.Join(",", page.Select(storeItem => storeItem.Code)),
-            ["product_types"]       = string.Join(",", page.Select(storeItem => TrimTrailingDot(storeItem.Prefix))),
+            ["product_types"]       = string.Join(",", page.Select(storeItem => storeItem.TypeCode)),
             ["product_paths"]       = string.Join(",", page.Select(storeItem => storeItem.Resource)),
             ["product_ids"]         = string.Join(",", page.Select(storeItem => storeItem.ID.ToString()))
         };
@@ -265,7 +265,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
             ProductID           = winner.ID,
             ProductName         = winner.Code,
             ProductPath         = winner.Resource,
-            ProductType         = StoreItem.GetClientCategoryName(winner.StoreItemType),
+            ProductType         = StoreItem.GetTypeName(winner.StoreItemType),
             TicketReward        = 0,
             ProductsExhausted   = false
         };
@@ -308,11 +308,6 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
             .Include(account => account.User)
             .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
     }
-
-    /// <summary>
-    ///     Strips the trailing dot from a store item prefix to produce the bare type code the client expects (e.g. <c>"aa."</c> becomes <c>"aa"</c>).
-    /// </summary>
-    private static string TrimTrailingDot(string prefix) => prefix.EndsWith('.') ? prefix[..^1] : prefix;
 }
 
 /// <summary>

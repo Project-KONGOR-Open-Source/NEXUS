@@ -83,6 +83,11 @@ public class StoreItem
     public StoreItemType StoreItemType => (StoreItemType) Type;
 
     /// <summary>
+    ///     The type code used to construct type prefixes (e.g. "aa", "cc", "t").
+    /// </summary>
+    public string TypeCode => GetTypeCode(StoreItemType);
+
+    /// <summary>
     ///     The type prefix used to construct prefixed codes (e.g. "aa.", "cc.", "t.").
     /// </summary>
     public string Prefix => GetPrefix(StoreItemType);
@@ -93,50 +98,65 @@ public class StoreItem
     public string PrefixedCode => Prefix + Code;
 
     /// <summary>
-    ///     Returns the type prefix for the given store item type.
+    ///     Returns the type code (e.g. "aa", "cc", "t") for the given store item type.
     /// </summary>
-    public static string GetPrefix(StoreItemType type) => type switch
+    public static string GetTypeCode(StoreItemType type) => type switch
     {
-        StoreItemType.ChatNameColour     => "cc.",
-        StoreItemType.ChatSymbol         => "cs.",
-        StoreItemType.AccountIcon        => "ai.",
-        StoreItemType.AlternativeAvatar  => "aa.",
-        StoreItemType.AnnouncerVoice     => "av.",
-        StoreItemType.Taunt              => "t.",
-        StoreItemType.Courier            => "c.",
-        StoreItemType.Hero               => "h.",
-        StoreItemType.EarlyAccessProduct => "eap.",
-        StoreItemType.Status             => "s.",
-        StoreItemType.Miscellaneous      => "m.",
-        StoreItemType.Ward               => "w.",
-        StoreItemType.Enhancement        => "en.",
-        StoreItemType.Coupon             => "cp.",
-        StoreItemType.Mastery            => "ma.",
-        StoreItemType.Creep              => "cr.",
-        StoreItemType.Building           => "bu.",
-        StoreItemType.TauntBadge         => "tb.",
-        StoreItemType.TeleportEffect     => "te.",
-        StoreItemType.SelectionCircle    => "sc.",
+        StoreItemType.ChatNameColour     => "cc",
+        StoreItemType.ChatSymbol         => "cs",
+        StoreItemType.AccountIcon        => "ai",
+        StoreItemType.AlternativeAvatar  => "aa",
+        StoreItemType.AnnouncerVoice     => "av",
+        StoreItemType.Taunt              => "t",
+        StoreItemType.Courier            => "c",
+        StoreItemType.Hero               => "h",
+        StoreItemType.EarlyAccessProduct => "eap",
+        StoreItemType.Status             => "s",
+        StoreItemType.Miscellaneous      => "m",
+        StoreItemType.Ward               => "w",
+        StoreItemType.Enhancement        => "en",
+        StoreItemType.Coupon             => "cp",
+        StoreItemType.Mastery            => "ma",
+        StoreItemType.Creep              => "cr",
+        StoreItemType.Building           => "bu",
+        StoreItemType.TauntBadge         => "tb",
+        StoreItemType.TeleportEffect     => "te",
+        StoreItemType.SelectionCircle    => "sc",
         StoreItemType.Bundle             => string.Empty,
         _                                => string.Empty
     };
 
     /// <summary>
-    ///     Returns the human-readable category name for the given store item type (e.g. "Hero", "Announcer Voice", "Chat Symbol").
+    ///     Returns the type prefix (e.g. "aa.", "cc.", "t.") for the given store item type.
     /// </summary>
-    public static string GetClientCategoryName(StoreItemType type) => type switch
+    public static string GetPrefix(StoreItemType type)
     {
-        StoreItemType.ChatNameColour     => "Chat Name Colour",
+        string code = GetTypeCode(type);
+
+        return code == string.Empty ? code : code + ".";
+    }
+
+    /// <summary>
+    ///     Returns the long-form type name (e.g. "Alternative Avatar", "Chat Name Colour", "Taunt") for the given store item type.
+    /// </summary>
+    public static string GetTypeName(StoreItemType type) => type switch
+    {
+        // TODO: Update These Values To Match The Values Of The StoreItemType Enumeration (e.g. "Announcer Voice" Instead Of "Alt Announcement")
+        // INFO: These Values Must Match The Keys Of The "ProductTypeToPrefix" Table In "global_main.lua" Exactly, Because They Are Verbatim Client-Side Dictionary Keys
+        // INFO: A Mismatch Causes The Chest Reward UI To Render The Unresolved "general_product_type_" Localisation Key As Raw Text
+        // INFO: So Updating These Values Should Be Done Alongside A Corresponding Update To The "ProductTypeToPrefix" Table In "global_main.lua" In The Client/Server Resource Files
+
+        StoreItemType.ChatNameColour     => "Chat Color",
         StoreItemType.ChatSymbol         => "Chat Symbol",
         StoreItemType.AccountIcon        => "Account Icon",
-        StoreItemType.AlternativeAvatar  => "Alternative Avatar",
-        StoreItemType.AnnouncerVoice     => "Announcer Voice",
+        StoreItemType.AlternativeAvatar  => "Alt Avatar",
+        StoreItemType.AnnouncerVoice     => "Alt Announcement",
         StoreItemType.Taunt              => "Taunt",
-        StoreItemType.Courier            => "Courier",
+        StoreItemType.Courier            => "Couriers",
         StoreItemType.Hero               => "Hero",
-        StoreItemType.EarlyAccessProduct => "Early-Access Product",
+        StoreItemType.EarlyAccessProduct => "EAP",
         StoreItemType.Status             => "Status",
-        StoreItemType.Miscellaneous      => "Miscellaneous",
+        StoreItemType.Miscellaneous      => "Misc",
         StoreItemType.Ward               => "Ward",
         StoreItemType.Enhancement        => "Enhancement",
         _                                => string.Empty
