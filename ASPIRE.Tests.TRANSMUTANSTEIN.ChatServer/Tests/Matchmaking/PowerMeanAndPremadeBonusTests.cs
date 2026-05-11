@@ -31,13 +31,6 @@ public sealed class PowerMeanAndPremadeBonusTests
     /// </summary>
     private const double EffectiveRatingFullStackAtBaseline = PowerMeanFiveAtBaseline + FullStackPremadeBonus / 5.0;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task PowerMean_OfFiveEqualRatings_HardcodedExpectedValue()
     {

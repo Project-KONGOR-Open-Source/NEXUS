@@ -16,14 +16,6 @@ public sealed class PlusZeroMinusOneTests
     /// </summary>
     private const double JustAboveThresholdTMR = ThresholdTMR + 1; // 152.0
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task FullTeam_BalancedRatings_DoesNotProducePlusZeroMinusOne()
     {

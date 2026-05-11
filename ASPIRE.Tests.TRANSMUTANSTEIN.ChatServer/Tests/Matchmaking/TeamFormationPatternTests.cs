@@ -13,14 +13,6 @@ public sealed class TeamFormationPatternTests
     private const double NearLowTMR = 1505.0;
     private const double FarHighTMR = 1900.0;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task TwoFiveStacks_FormTwoFullTeams()
     {

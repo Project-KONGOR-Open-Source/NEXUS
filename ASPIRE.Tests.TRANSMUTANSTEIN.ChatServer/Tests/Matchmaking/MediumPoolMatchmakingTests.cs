@@ -25,13 +25,6 @@ public sealed class MediumPoolMatchmakingTests
     /// </summary>
     private const double SufficientQueueMinutesForMediumExpansion = 3.0;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task TmrSpread_AfterMediumDelay_ExpandsAtConfiguredRate()
     {

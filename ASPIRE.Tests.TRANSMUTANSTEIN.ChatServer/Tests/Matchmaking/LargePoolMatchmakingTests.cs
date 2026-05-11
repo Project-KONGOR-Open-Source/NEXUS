@@ -30,14 +30,6 @@ public sealed class LargePoolMatchmakingTests
     /// </summary>
     private const double VeryLongQueueMinutes = 30.0;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task TmrSpread_BeyondLargeCap_PreventsMatchEvenWithLongQueue()
     {

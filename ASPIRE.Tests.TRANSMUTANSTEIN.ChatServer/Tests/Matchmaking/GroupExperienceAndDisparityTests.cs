@@ -27,14 +27,6 @@ public sealed class GroupExperienceAndDisparityTests
     private const double AdaptiveSpreadDelayMinutes = 2.0;
     private const double AdaptiveSpreadRatePerMinute = 50.0;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     [Arguments(0,                                  1500.0, false, "Fresh Account, Mid-Tier TMR")]
     [Arguments(0,                                  1624.0, false, "Fresh Account, One Below TMR Cutoff")]

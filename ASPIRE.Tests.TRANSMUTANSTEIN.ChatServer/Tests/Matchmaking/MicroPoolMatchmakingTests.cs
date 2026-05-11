@@ -15,14 +15,6 @@ public sealed class MicroPoolMatchmakingTests
     /// </summary>
     private const double SufficientQueueMinutesForMicroExpansion = 2.0;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task TenSolosAllAtSameRating_FormOneFiveVersusFiveMatch()
     {

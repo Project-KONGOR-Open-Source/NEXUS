@@ -9,14 +9,6 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 /// </summary>
 public sealed class GroupCompatibilityTests
 {
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task QueuePreferences_SameModeSameRegionSameRanked_AreCompatible()
     {

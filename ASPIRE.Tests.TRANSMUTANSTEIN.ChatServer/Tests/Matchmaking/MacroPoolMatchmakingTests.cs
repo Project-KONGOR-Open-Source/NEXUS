@@ -40,14 +40,6 @@ public sealed class MacroPoolMatchmakingTests
     /// </summary>
     private const int MicroTolerance = 20;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task FreshTeams100ApartCannotMatchAtMacroBaseSpread()
     {

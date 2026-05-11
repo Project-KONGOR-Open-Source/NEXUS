@@ -15,14 +15,6 @@ public sealed class SmallPoolMatchmakingTests
     /// </summary>
     private const double FarPaddingTMR = 2500.0;
 
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task TwoFiveStacks_AreMatchedAgainstEachOther()
     {

@@ -16,18 +16,13 @@ internal static class MatchmakingTestBuilder
     /// </summary>
     public const double OutlierHighTMR = 2200.0;
 
-    private static int _nextAccountID = 1;
+    private static int _nextAccountID = 0;
 
     static MatchmakingTestBuilder()
     {
         // The Algorithm Calls Into "TRANSMUTANSTEIN.ChatServer.Utilities.Log", Which Throws Until Initialised By The Production Host; Tests Construct The Algorithm Directly, So We Wire In A No-Op Logger Here
         Log.Initialise(NullLogger.Instance);
     }
-
-    /// <summary>
-    ///     Resets the auto-incrementing account ID counter. Tests that rely on stable IDs should call this in their <c>[Before(HookType.Test)]</c> hook.
-    /// </summary>
-    public static void ResetAccountIDCounter() => _nextAccountID = 1;
 
     /// <summary>
     ///     Default group information for a normal-mode, AP, NEWERTH-region, ranked, PVP queue.

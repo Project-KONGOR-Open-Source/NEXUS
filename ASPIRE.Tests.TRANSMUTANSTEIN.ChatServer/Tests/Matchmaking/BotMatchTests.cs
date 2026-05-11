@@ -6,14 +6,6 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 /// </summary>
 public sealed class BotMatchTests
 {
-    [Before(HookType.Test)]
-    public Task Before_Each_Test()
-    {
-        MatchmakingTestBuilder.ResetAccountIDCounter();
-
-        return Task.CompletedTask;
-    }
-
     [Test]
     public async Task BotMatch_HasNoHellbourneTeam()
     {
