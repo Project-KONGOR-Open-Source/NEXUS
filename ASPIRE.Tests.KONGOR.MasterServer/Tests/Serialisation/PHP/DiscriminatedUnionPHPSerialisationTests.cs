@@ -9,7 +9,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts That <see cref="SRPAuthenticationResponseStageTwo.ClanMembershipData"/> Serialises To <see cref="ClanMemberData"/>
     /// </summary>
     [Test]
-    public async Task ClanMembershipData_Serialises_To_ClanMemberData()
+    public async Task Clan_Membership_Data_Serialises_To_Clan_Member_Data()
     {
         ClanMemberData clanData = new ()
         {
@@ -60,7 +60,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts That <see cref="SRPAuthenticationResponseStageTwo.ClanMembershipData"/> Serialises To <see cref="ClanMemberDataError"/>
     /// </summary>
     [Test]
-    public async Task ClanMembershipData_Serialises_To_ClanMemberDataError()
+    public async Task Clan_Membership_Data_Serialises_To_Clan_Member_Data_Error()
     {
         ClanMemberDataError errorData = new ();
 
@@ -87,7 +87,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts That <see cref="DiscriminatedUnionDictionary.OwnedStoreItemsData"/> Serialises To <see cref="StoreItemData"/>
     /// </summary>
     [Test]
-    public async Task OwnedStoreItemsData_Serialises_To_StoreItemData()
+    public async Task Owned_Store_Items_Data_Serialises_To_Store_Item_Data()
     {
         DiscriminatedUnionDictionary storeItemData = new ()
         {
@@ -183,7 +183,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts That <see cref="DiscriminatedUnionDictionary.OwnedStoreItemsData"/> Serialises To <see cref="StoreItemDiscountCoupon"/>
     /// </summary>
     [Test]
-    public async Task OwnedStoreItemsData_Serialises_To_StoreItemDiscountCoupon()
+    public async Task Owned_Store_Items_Data_Serialises_To_Store_Item_Discount_Coupon()
     {
         DiscriminatedUnionDictionary storeItemDiscountCoupon = new ()
         {
@@ -249,7 +249,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts That <see cref="DiscriminatedUnionDictionary.OwnedStoreItemsData"/> Serialises To Mixed Types
     /// </summary>
     [Test]
-    public async Task OwnedStoreItemsData_Serialises_To_MixedTypes()
+    public async Task Owned_Store_Items_Data_Serialises_To_Mixed_Types()
     {
         DiscriminatedUnionDictionary @object = new ()
         {
@@ -346,7 +346,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts That <see cref="NestedDiscriminatedUnionDictionary.MatchPlayerStatistics"/> Serialises To <see cref="ExtendedNativePropertyCollection"/> And <see cref="NativePropertyCollection"/>
     /// </summary>
     [Test]
-    public async Task MatchPlayerStatistics_Serialises_To_ExtendedNativePropertyCollection_And_NativePropertyCollection()
+    public async Task Match_Player_Statistics_Serialises_To_Extended_Native_Property_Collection_And_Native_Property_Collection()
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {
@@ -483,7 +483,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts That <see cref="DiscriminatedUnionPropertyCollection.ClanMembershipData"/> And <see cref="DiscriminatedUnionPropertyCollection.OwnedStoreItemsData"/> Serialise Correctly
     /// </summary>
     [Test]
-    public async Task ClanMembershipData_And_OwnedStoreItemsData_Serialise_Correctly()
+    public async Task Clan_Membership_Data_And_Owned_Store_Items_Data_Serialise_Correctly()
     {
         DiscriminatedUnionPropertyCollection @object = new ()
         {
@@ -583,7 +583,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts that an empty discriminated union dictionary serialises to an empty PHP array.
     /// </summary>
     [Test]
-    public async Task EmptyDiscriminatedUnionDictionary_Serialises_To_EmptyPHPArray()
+    public async Task Empty_Discriminated_Union_Dictionary_Serialises_To_Empty_PHP_Array()
     {
         DiscriminatedUnionDictionary @object = new ()
         {
@@ -620,7 +620,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts that a single-entry discriminated union dictionary with each union variant serialises correctly.
     /// </summary>
     [Test]
-    public async Task SingleEntryDiscriminatedUnionDictionary_Serialises_Correctly_For_Each_Variant()
+    public async Task Single_Entry_Discriminated_Union_Dictionary_Serialises_Correctly_For_Each_Variant()
     {
         DiscriminatedUnionDictionary firstVariant = new ()
         {
@@ -733,7 +733,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts that nested discriminated union dictionaries with a single player produce correct output.
     /// </summary>
     [Test]
-    public async Task NestedDiscriminatedUnionDictionary_With_SinglePlayer_Serialises_Correctly()
+    public async Task Nested_Discriminated_Union_Dictionary_With_Single_Player_Serialises_Correctly()
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {
@@ -811,7 +811,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     Asserts that an empty nested discriminated union dictionary serialises to an empty PHP array.
     /// </summary>
     [Test]
-    public async Task EmptyNestedDiscriminatedUnionDictionary_Serialises_To_EmptyPHPArray()
+    public async Task Empty_Nested_Discriminated_Union_Dictionary_Serialises_To_Empty_PHP_Array()
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {
@@ -830,7 +830,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     ///     The extended variant should contain all base properties plus its own additional properties.
     /// </summary>
     [Test]
-    public async Task InheritedDiscriminatedUnion_Serialises_BaseAndDerivedProperties_Correctly()
+    public async Task Inherited_Discriminated_Union_Serialises_Base_And_Derived_Properties_Correctly()
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {

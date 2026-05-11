@@ -12,7 +12,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("login@kongor.com", "LoginPlayer", "SecurePassword123!")]
     [Arguments("auth@kongor.net", "AuthUser", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithValidCredentials_ReturnsOKWithValidJWT(string emailAddress, string accountName, string password)
+    public async Task Log_In_User_With_Valid_Credentials_Returns_OK_With_Valid_JWT(string emailAddress, string accountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -55,7 +55,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("NonExistentPlayer", "SomePassword123!")]
     [Arguments("InvalidUser", "AnotherPass123!")]
-    public async Task LogInUser_WithInvalidAccountName_ReturnsNotFound(string accountName, string password)
+    public async Task Log_In_User_With_Invalid_Account_Name_Returns_Not_Found(string accountName, string password)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -76,7 +76,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("wrongpass@kongor.com", "WrongPassUser", "CorrectPassword123!", "WrongPassword123!")]
     [Arguments("badauth@kongor.net", "BadAuthUser", "RightP@ss!", "WrongP@ss!")]
-    public async Task LogInUser_WithInvalidPassword_ReturnsUnauthorized(string emailAddress, string accountName, string correctPassword, string wrongPassword)
+    public async Task Log_In_User_With_Invalid_Password_Returns_Unauthorized(string emailAddress, string accountName, string correctPassword, string wrongPassword)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -101,7 +101,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("claims@kongor.com", "ClaimsUser", "SecurePassword123!")]
     [Arguments("jwt@kongor.net", "JWTUser", "MyP@ssw0rd!")]
-    public async Task LogInUser_JWTContainsAllRequiredClaims(string emailAddress, string accountName, string password)
+    public async Task Log_In_User_JWT_Contains_All_Required_Claims(string emailAddress, string accountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -128,7 +128,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("fullflow@kongor.com", "FlowUser", "SecurePassword123!")]
     [Arguments("complete@kongor.net", "CompleteUser", "MyP@ssw0rd!")]
-    public async Task CompleteAuthenticationFlow_RegisterEmailThenUserThenLogin_Succeeds(string emailAddress, string accountName, string password)
+    public async Task Complete_Authentication_Flow_Register_Email_Then_User_Then_Login_Succeeds(string emailAddress, string accountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -165,7 +165,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("caselogin@kongor.com", "CaseLoginUser", "CaseLoginUser", "SecurePassword123!")]
     [Arguments("UPPERCASELOGIN@kongor.net", "UPPERCASEUSER", "UPPERCASEUSER", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithExactCaseAccountName_ReturnsOK(string emailAddress, string registeredAccountName, string loginAccountName, string password)
+    public async Task Log_In_User_With_Exact_Case_Account_Name_Returns_OK(string emailAddress, string registeredAccountName, string loginAccountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -190,7 +190,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("caselogin@kongor.com", "CaseLoginUser", "caseloginuser", "SecurePassword123!")]
     [Arguments("UPPERCASELOGIN@kongor.net", "UPPERCASEUSER", "uppercaseuser", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithDifferentCaseAccountName_ReturnsOK(string emailAddress, string registeredAccountName, string loginAccountName, string password)
+    public async Task Log_In_User_With_Different_Case_Account_Name_Returns_OK(string emailAddress, string registeredAccountName, string loginAccountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -217,7 +217,7 @@ public sealed class UserAuthenticationTests(ZORGATHIntegrationWebApplicationFact
     [Test]
     [Arguments("expiry@kongor.com", "ExpiryUser", "SecurePassword123!")]
     [Arguments("tokenlife@kongor.net", "TokenLifeUser", "MyP@ssw0rd!")]
-    public async Task LogInUser_JWTHasValidExpirationClaim(string emailAddress, string accountName, string password)
+    public async Task Log_In_User_JWT_Has_Valid_Expiration_Claim(string emailAddress, string accountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 

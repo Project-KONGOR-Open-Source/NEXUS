@@ -7,7 +7,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 public sealed class BotMatchTests
 {
     [Test]
-    public async Task BotMatch_HasNoHellbourneTeam()
+    public async Task Bot_Match_Has_No_Hellbourne_Team()
     {
         MatchmakingGroupInformation coopInformation = MatchmakingTestBuilder.CoopInformation();
         MatchmakingGroup coopGroup = MatchmakingTestBuilder.BuildGroup([MatchmakingTestBuilder.BaselineTMR], information: coopInformation);
@@ -23,7 +23,7 @@ public sealed class BotMatchTests
     }
 
     [Test]
-    public async Task BotMatch_ForcesCasualGameTypeAndCaldavarMap()
+    public async Task Bot_Match_Forces_Casual_Game_Type_And_Caldavar_Map()
     {
         // The Co-Op Information Specifies CASUAL Already, But "FromBotGroup" Hardcodes The Output Regardless
 
@@ -42,7 +42,7 @@ public sealed class BotMatchTests
     }
 
     [Test]
-    public async Task BotMatch_CarriesBotDifficultyFromGroupInformation()
+    public async Task Bot_Match_Carries_Bot_Difficulty_From_Group_Information()
     {
         MatchmakingGroupInformation coopInformation = MatchmakingTestBuilder.Information(groupType: ChatProtocol.TMMType.TMM_TYPE_COOP, botDifficulty: 3);
         MatchmakingGroup coopGroup = MatchmakingTestBuilder.BuildGroup([MatchmakingTestBuilder.BaselineTMR], information: coopInformation);
@@ -53,7 +53,7 @@ public sealed class BotMatchTests
     }
 
     [Test]
-    public async Task BotMatch_MarksTheGroupAsMatched()
+    public async Task Bot_Match_Marks_The_Group_As_Matched()
     {
         MatchmakingGroupInformation coopInformation = MatchmakingTestBuilder.CoopInformation();
         MatchmakingGroup coopGroup = MatchmakingTestBuilder.BuildGroup([MatchmakingTestBuilder.BaselineTMR, MatchmakingTestBuilder.BaselineTMR], information: coopInformation);

@@ -32,7 +32,7 @@ public sealed class MatchupPredictionTests
     private const double LogisticAtMinusOne = 0.2689;
 
     [Test]
-    public async Task EqualTeams_PredictsFiftyPercent()
+    public async Task Equal_Teams_Predicts_50_Percent()
     {
         double prediction = MatchmakingMatch.CalculateMatchupPrediction(legionTMR: MatchmakingTestBuilder.BaselineTMR, hellbourneTMR: MatchmakingTestBuilder.BaselineTMR);
 
@@ -47,7 +47,7 @@ public sealed class MatchupPredictionTests
     [Arguments(+1.0, LogisticAtPlusOne,  "Legion +1 Scale")]
     [Arguments(+2.0, LogisticAtPlusTwo,  "Legion +2 Scales")]
     [Arguments(-1.0, LogisticAtMinusOne, "Legion -1 Scale")]
-    public async Task LegionAtMultipleOfDefaultScale_ProducesExpectedLogistic(double offsetInScales, double expectedPrediction, string description)
+    public async Task Legion_At_Multiple_Of_Default_Scale_Produces_Expected_Logistic(double offsetInScales, double expectedPrediction, string description)
     {
         double legionTMR = MatchmakingTestBuilder.BaselineTMR + offsetInScales * DefaultLogisticScale;
 
@@ -57,7 +57,7 @@ public sealed class MatchupPredictionTests
     }
 
     [Test]
-    public async Task TighterScale_AmplifiesTheCurve()
+    public async Task Tighter_Scale_Amplifies_The_Curve()
     {
         // Same TMR Difference Of +80, Halved Scale → Effectively Two Scales Apart, Prediction Climbs From 0.7311 To 0.8808
         const double TightScale = DefaultLogisticScale / 2.0;

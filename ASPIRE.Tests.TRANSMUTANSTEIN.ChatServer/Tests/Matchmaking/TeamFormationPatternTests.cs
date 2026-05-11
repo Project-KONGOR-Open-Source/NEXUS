@@ -14,7 +14,7 @@ public sealed class TeamFormationPatternTests
     private const double FarHighTMR = 1900.0;
 
     [Test]
-    public async Task TwoFiveStacks_FormTwoFullTeams()
+    public async Task Two_Five_Stacks_Form_Two_Full_Teams()
     {
         List<MatchmakingGroup> queue =
         [
@@ -42,7 +42,7 @@ public sealed class TeamFormationPatternTests
     [Arguments(new[] { 2, 2, 1 },       "2+2+1")]
     [Arguments(new[] { 2, 1, 1, 1 },    "2+1+1+1")]
     [Arguments(new[] { 1, 1, 1, 1, 1 }, "1+1+1+1+1")]
-    public async Task PatternPhase_FormsExactlyOneFullTeam(int[] groupSizes, string expectedPattern)
+    public async Task Pattern_Phase_Forms_Exactly_One_Full_Team(int[] groupSizes, string expectedPattern)
     {
         List<MatchmakingGroup> queue = [.. groupSizes.Select(BuildBaselineGroup)];
 
@@ -57,7 +57,7 @@ public sealed class TeamFormationPatternTests
     }
 
     [Test]
-    public async Task FIFOOrdering_LongestWaitingFourStackTakesTheSolo()
+    public async Task FIFO_Ordering_Longest_Waiting_Four_Stack_Takes_The_Solo()
     {
         // Three Four-Stacks Queued At Different Times, Plus One Solo
         // The Earliest Four-Stack Should Pair With The Solo (Forming A 4+1) Before The Others
@@ -87,7 +87,7 @@ public sealed class TeamFormationPatternTests
     }
 
     [Test]
-    public async Task PhaseOrdering_FullStacksFormBeforeSolosAreCombined()
+    public async Task Phase_Ordering_Full_Stacks_Form_Before_Solos_Are_Combined()
     {
         // One Full Stack And Six Solos; Phase 1 Forms The Five-Stack Team; Phase 5 Stitches Five Of The Six Solos Into A Solo Team; The Sixth Solo Is Left Over
 
@@ -109,7 +109,7 @@ public sealed class TeamFormationPatternTests
     }
 
     [Test]
-    public async Task IncompletePattern_LeavesGroupsUnused()
+    public async Task Incomplete_Pattern_Leaves_Groups_Unused()
     {
         // One Trio Plus One Solo; No Way To Form A 5-Player Team With This Composition
 
@@ -125,7 +125,7 @@ public sealed class TeamFormationPatternTests
     }
 
     [Test]
-    public async Task BestOpponentSelection_ChoosesClosestTMRMatchAmongMultipleCandidates()
+    public async Task Best_Opponent_Selection_Chooses_Closest_TMR_Match_Among_Multiple_Candidates()
     {
         // Three Five-Stack Teams With Distinct Effective Ratings; The Broker Should Pair The Two Closest Teams (A And B), Leaving C Unmatched
         // Without The "Best Opponent" Logic, If The Algorithm Just Pair The First Compatible Opponent, The Test Would Fail Because A Could Be Paired With C First

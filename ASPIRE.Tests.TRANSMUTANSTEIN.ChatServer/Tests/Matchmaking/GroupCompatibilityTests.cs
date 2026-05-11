@@ -10,7 +10,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 public sealed class GroupCompatibilityTests
 {
     [Test]
-    public async Task QueuePreferences_SameModeSameRegionSameRanked_AreCompatible()
+    public async Task Queue_Preferences_Same_Mode_Same_Region_Same_Ranked_Are_Compatible()
     {
         MatchmakingGroup left  = MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR);
         MatchmakingGroup right = MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR);
@@ -19,7 +19,7 @@ public sealed class GroupCompatibilityTests
     }
 
     [Test]
-    public async Task QueuePreferences_DisjointGameModes_AreNotCompatible()
+    public async Task Queue_Preferences_Disjoint_Game_Modes_Are_Not_Compatible()
     {
         MatchmakingGroupInformation apOnly = MatchmakingTestBuilder.Information(gameModes: ["ap"]);
         MatchmakingGroupInformation sdOnly = MatchmakingTestBuilder.Information(gameModes: ["sd"]);
@@ -31,7 +31,7 @@ public sealed class GroupCompatibilityTests
     }
 
     [Test]
-    public async Task QueuePreferences_OverlappingGameModes_AreCompatible()
+    public async Task Queue_Preferences_Overlapping_Game_Modes_Are_Compatible()
     {
         MatchmakingGroupInformation apOrSd = MatchmakingTestBuilder.Information(gameModes: ["ap", "sd"]);
         MatchmakingGroupInformation sdOrBd = MatchmakingTestBuilder.Information(gameModes: ["sd", "bd"]);
@@ -43,7 +43,7 @@ public sealed class GroupCompatibilityTests
     }
 
     [Test]
-    public async Task QueuePreferences_DisjointRegionsWithoutNewerthWildcard_AreNotCompatible()
+    public async Task Queue_Preferences_Disjoint_Regions_Without_Newerth_Wildcard_Are_Not_Compatible()
     {
         MatchmakingGroupInformation useOnly = MatchmakingTestBuilder.Information(gameRegions: ["USE"]);
         MatchmakingGroupInformation euOnly  = MatchmakingTestBuilder.Information(gameRegions: ["EU"]);
@@ -55,7 +55,7 @@ public sealed class GroupCompatibilityTests
     }
 
     [Test]
-    public async Task QueuePreferences_NewerthWildcardOverlapsAnyRegion()
+    public async Task Queue_Preferences_Newerth_Wildcard_Overlaps_Any_Region()
     {
         MatchmakingGroupInformation newerth = MatchmakingTestBuilder.Information(gameRegions: ["NEWERTH"]);
         MatchmakingGroupInformation euOnly  = MatchmakingTestBuilder.Information(gameRegions: ["EU"]);
@@ -67,7 +67,7 @@ public sealed class GroupCompatibilityTests
     }
 
     [Test]
-    public async Task QueuePreferences_DifferingRankedStatus_AreNotCompatible()
+    public async Task Queue_Preferences_Differing_Ranked_Status_Are_Not_Compatible()
     {
         MatchmakingGroupInformation ranked   = MatchmakingTestBuilder.Information(ranked: true);
         MatchmakingGroupInformation unranked = MatchmakingTestBuilder.Information(ranked: false);
@@ -79,7 +79,7 @@ public sealed class GroupCompatibilityTests
     }
 
     [Test]
-    public async Task GroupIsCompatibleWith_DifferingGameType_IsNotCompatible()
+    public async Task Group_Is_Compatible_With_Differing_Game_Type_Is_Not_Compatible()
     {
         MatchmakingGroupInformation normal  = MatchmakingTestBuilder.Information(gameType: ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL);
         MatchmakingGroupInformation midwars = MatchmakingTestBuilder.Information(gameType: ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS);
@@ -91,7 +91,7 @@ public sealed class GroupCompatibilityTests
     }
 
     [Test]
-    public async Task GroupIsCompatibleWith_CombinedSizeExceedsTeamSize_IsNotCompatible()
+    public async Task Group_Is_Compatible_With_Combined_Size_Exceeds_Team_Size_Is_Not_Compatible()
     {
         // Two Trios Cannot Combine For A 5-Player Team (3 + 3 = 6 > 5)
 

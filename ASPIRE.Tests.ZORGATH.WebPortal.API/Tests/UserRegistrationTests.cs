@@ -12,7 +12,7 @@ public sealed class UserRegistrationTests(ZORGATHIntegrationWebApplicationFactor
     [Test]
     [Arguments("test@kongor.com", "TestPlayer", "SecurePassword123!")]
     [Arguments("user@kongor.net", "GameUser", "MyP@ssw0rd!")]
-    public async Task RegisterUserAndMainAccount_WithValidData_ReturnsCreatedAndCreatesUserAndAccount(string emailAddress, string accountName, string password)
+    public async Task Register_User_And_Main_Account_With_Valid_Data_Returns_Created_And_Creates_User_And_Account(string emailAddress, string accountName, string password)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -83,7 +83,7 @@ public sealed class UserRegistrationTests(ZORGATHIntegrationWebApplicationFactor
     [Test]
     [Arguments("mismatch@kongor.com", "MismatchUser", "Password123!", "DifferentPass123!")]
     [Arguments("test@kongor.net", "TestUser", "MyP@ss!", "WrongP@ss!")]
-    public async Task RegisterUserAndMainAccount_WithMismatchedPasswords_ReturnsBadRequest(string emailAddress, string accountName, string password, string confirmPassword)
+    public async Task Register_User_And_Main_Account_With_Mismatched_Passwords_Returns_Bad_Request(string emailAddress, string accountName, string password, string confirmPassword)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -116,7 +116,7 @@ public sealed class UserRegistrationTests(ZORGATHIntegrationWebApplicationFactor
     [Test]
     [Arguments("InvalidUser", "SecurePassword123!")]
     [Arguments("TestPlayer", "MyP@ssw0rd!")]
-    public async Task RegisterUserAndMainAccount_WithInvalidToken_ReturnsNotFound(string accountName, string password)
+    public async Task Register_User_And_Main_Account_With_Invalid_Token_Returns_Not_Found(string accountName, string password)
     {
         string invalidToken = Guid.CreateVersion7().ToString();
 
@@ -140,7 +140,7 @@ public sealed class UserRegistrationTests(ZORGATHIntegrationWebApplicationFactor
     [Test]
     [Arguments("user1@kongor.com", "user2@kongor.com", "DuplicateName", "SecurePassword123!")]
     [Arguments("first@kongor.net", "second@kongor.net", "SameName", "MyP@ssw0rd!")]
-    public async Task RegisterUserAndMainAccount_WithDuplicateAccountName_ReturnsConflict(string emailAddressOne, string emailAddressTwo, string accountName, string password)
+    public async Task Register_User_And_Main_Account_With_Duplicate_Account_Name_Returns_Conflict(string emailAddressOne, string emailAddressTwo, string accountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -177,7 +177,7 @@ public sealed class UserRegistrationTests(ZORGATHIntegrationWebApplicationFactor
     [Test]
     [Arguments("token.reuse@kongor.com", "TokenUser", "SecurePassword123!")]
     [Arguments("token.consumed@kongor.net", "ConsumedUser", "MyP@ssw0rd!")]
-    public async Task RegisterUserAndMainAccount_WithConsumedToken_ReturnsConflict(string emailAddress, string accountName, string password)
+    public async Task Register_User_And_Main_Account_With_Consumed_Token_Returns_Conflict(string emailAddress, string accountName, string password)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -222,7 +222,7 @@ public sealed class UserRegistrationTests(ZORGATHIntegrationWebApplicationFactor
     [Test]
     [Arguments("case.one@kongor.com", "case.two@kongor.com", "CaseUser", "CaseUser", "SecurePassword123!")]
     [Arguments("TEST-ONE@KONGOR.NET", "TEST-TWO@KONGOR.NET", "TESTUSER", "TESTUSER", "MyP@ssw0rd!")]
-    public async Task RegisterUserAndMainAccount_WithExactCaseAccountName_ReturnsConflict(string firstEmailAddress, string secondEmailAddress, string firstAccountName, string secondAccountName, string password)
+    public async Task Register_User_And_Main_Account_With_Exact_Case_Account_Name_Returns_Conflict(string firstEmailAddress, string secondEmailAddress, string firstAccountName, string secondAccountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -259,7 +259,7 @@ public sealed class UserRegistrationTests(ZORGATHIntegrationWebApplicationFactor
     [Test]
     [Arguments("case.one@kongor.com", "case.two@kongor.com", "CaseUser", "caseuser", "SecurePassword123!")]
     [Arguments("TEST-ONE@KONGOR.NET", "TEST-TWO@KONGOR.NET", "TESTUSER", "testuser", "MyP@ssw0rd!")]
-    public async Task RegisterUserAndMainAccount_WithDifferentCaseAccountName_ReturnsConflict(string firstEmailAddress, string secondEmailAddress, string firstAccountName, string secondAccountName, string password)
+    public async Task Register_User_And_Main_Account_With_Different_Case_Account_Name_Returns_Conflict(string firstEmailAddress, string secondEmailAddress, string firstAccountName, string secondAccountName, string password)
     {
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 

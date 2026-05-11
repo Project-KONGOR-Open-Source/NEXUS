@@ -10,7 +10,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
         => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
 
     [Test]
-    public async Task Apply_SoloWinMainAccountFirstMatch_AppliesMatchRewardAndPostSignupBonus()
+    public async Task Apply_Solo_Win_Main_Account_First_Match_Applies_Match_Reward_And_Post_Signup_Bonus()
     {
         Account account = await SeedMainAccount("solo.win.first@kongor.com", "SoloWinFirst");
 
@@ -45,7 +45,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
-    public async Task Apply_SoloLossMainAccountFirstMatch_AppliesLossRewardAndPostSignupBonus()
+    public async Task Apply_Solo_Loss_Main_Account_First_Match_Applies_Loss_Reward_And_Post_Signup_Bonus()
     {
         Account account = await SeedMainAccount("solo.loss.first@kongor.com", "SoloLossFirst");
 
@@ -80,7 +80,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
-    public async Task Apply_AltAccount_DoesNotApplyPostSignupBonus()
+    public async Task Apply_Alt_Account_Does_Not_Apply_Post_Signup_Bonus()
     {
         Account mainAccount = await SeedMainAccount("alt.host@kongor.com", "AltHost");
         Account altAccount = await SeedAltAccount(mainAccount, "AltChild");
@@ -110,7 +110,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
-    public async Task Apply_MainAccountBeyondThreshold_DoesNotApplyPostSignupBonus()
+    public async Task Apply_Main_Account_Beyond_Threshold_Does_Not_Apply_Post_Signup_Bonus()
     {
         Account account = await SeedMainAccount("veteran@kongor.com", "Veteran");
 
@@ -154,7 +154,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     [Arguments(3, "ThreePersonGroup")]
     [Arguments(4, "FourPersonGroup")]
     [Arguments(5, "FivePersonGroup")]
-    public async Task Apply_GroupNumber_SelectsMatchingRewardBucket(int groupNumber, string bucketName)
+    public async Task Apply_Group_Number_Selects_Matching_Reward_Bucket(int groupNumber, string bucketName)
     {
         Account account = await SeedMainAccount($"group.{groupNumber}@kongor.com", $"Group{groupNumber}");
 
@@ -201,7 +201,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     [Arguments(MatchType.AM_MATCHMAKING_BOTMATCH, false, AccountStatisticsType.Cooperative)]
     [Arguments(MatchType.AM_MATCHMAKING_MIDWARS,  false, AccountStatisticsType.MidWars)]
     [Arguments(MatchType.AM_MATCHMAKING_RIFTWARS, false, AccountStatisticsType.RiftWars)]
-    public async Task ResolveAccountStatisticsType_MapsMatchTypeCorrectly(MatchType matchType, bool isCasual, AccountStatisticsType expected)
+    public async Task Resolve_Account_Statistics_Type_Maps_Match_Type_Correctly(MatchType matchType, bool isCasual, AccountStatisticsType expected)
     {
         MatchInformation matchInformation = BuildMatchInformation(matchType, isCasual);
 
@@ -211,7 +211,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
-    public async Task ResolveAccountStatisticsType_NullMatchInformation_FallsBackToPublic()
+    public async Task Resolve_Account_Statistics_Type_NULL_Match_Information_Falls_Back_To_Public()
     {
         AccountStatisticsType resolved = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation: null);
 

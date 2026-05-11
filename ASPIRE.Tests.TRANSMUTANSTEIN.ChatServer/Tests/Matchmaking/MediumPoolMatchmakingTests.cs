@@ -26,7 +26,7 @@ public sealed class MediumPoolMatchmakingTests
     private const double SufficientQueueMinutesForMediumExpansion = 3.0;
 
     [Test]
-    public async Task TmrSpread_AfterMediumDelay_ExpandsAtConfiguredRate()
+    public async Task TMR_Spread_After_Medium_Delay_Expands_At_Configured_Rate()
     {
         // Medium: Delay = 1.5m, Rate = 75 / Min, Cap = 500
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
@@ -61,7 +61,7 @@ public sealed class MediumPoolMatchmakingTests
     }
 
     [Test]
-    public async Task TmrSpread_BeyondMediumCap_StillRejectsLongQueues()
+    public async Task TMR_Spread_Beyond_Medium_Cap_Still_Rejects_Long_Queues()
     {
         // 600 TMR Apart, Queued 10m → Naive Spread = 50 + 8.5 * 75 = 687.5, Cap = 500 → 600 Stays Above Cap → No Match
         const double BeyondMediumCapDelta = 600.0;
@@ -84,7 +84,7 @@ public sealed class MediumPoolMatchmakingTests
     }
 
     [Test]
-    public async Task PlusZeroMinusOneCheck_IsEnforcedInMediumPools()
+    public async Task Plus_Zero_Minus_One_Check_Is_Enforced_In_Medium_Pools()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -122,7 +122,7 @@ public sealed class MediumPoolMatchmakingTests
     }
 
     [Test]
-    public async Task MakeupTolerance_3PlusTwoVersusFiveSolosIsRejectedAt4()
+    public async Task Makeup_Tolerance_3_Plus_Two_Versus_Five_Solos_Is_Rejected_At_4()
     {
         // 3+2 (13) Vs 1+1+1+1+1 (5) → Difference = 8, Above Medium Tolerance Of 4
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();

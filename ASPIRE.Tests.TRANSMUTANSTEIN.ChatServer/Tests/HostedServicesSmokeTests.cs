@@ -11,7 +11,7 @@ public sealed class HostedServicesSmokeTests(TRANSMUTANSTEINIntegrationWebApplic
         => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
 
     [Test]
-    public async Task DatabaseContext_ResolvesAndIsMigrated()
+    public async Task Database_Context_Resolves_And_Is_Migrated()
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -28,7 +28,7 @@ public sealed class HostedServicesSmokeTests(TRANSMUTANSTEINIntegrationWebApplic
     }
 
     [Test]
-    public async Task RedisMultiplexer_Resolves()
+    public async Task Redis_Multiplexer_Resolves()
     {
         IConnectionMultiplexer connectionMultiplexer = webApplicationFactory.Services.GetRequiredService<IConnectionMultiplexer>();
 

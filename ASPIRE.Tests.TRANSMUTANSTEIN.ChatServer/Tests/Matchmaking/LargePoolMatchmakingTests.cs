@@ -31,7 +31,7 @@ public sealed class LargePoolMatchmakingTests
     private const double VeryLongQueueMinutes = 30.0;
 
     [Test]
-    public async Task TmrSpread_BeyondLargeCap_PreventsMatchEvenWithLongQueue()
+    public async Task TMR_Spread_Beyond_Large_Cap_Prevents_Match_Even_With_Long_Queue()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -51,7 +51,7 @@ public sealed class LargePoolMatchmakingTests
     }
 
     [Test]
-    public async Task TmrSpread_WithinLargeCap_AllowsMatchAfterExpansionDelay()
+    public async Task TMR_Spread_Within_Large_Cap_Allows_Match_After_Expansion_Delay()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -71,7 +71,7 @@ public sealed class LargePoolMatchmakingTests
     }
 
     [Test]
-    public async Task MakeupTolerance_2InLargePool_RejectsMostAsymmetries()
+    public async Task Makeup_Tolerance_2_In_Large_Pool_Rejects_Most_Asymmetries()
     {
         // Large Tolerance = 2; A 3+1+1 (11) Vs 1+1+1+1+1 (5) → Difference = 6; Rejected
 

@@ -14,7 +14,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
         => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
 
     [Test]
-    public async Task Index_WithInvalidCookie_ReturnsStatusZero()
+    public async Task Index_With_Invalid_Cookie_Returns_Status_Zero()
     {
         HttpClient client = webApplicationFactory.CreateClient();
 
@@ -31,7 +31,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task Index_WithValidCookie_ReturnsEveryDeclaredResultParam()
+    public async Task Index_With_Valid_Cookie_Returns_Every_Declared_Result_Parameter()
     {
         (string cookie, _) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "plinko.index@kongor.com", "PlinkoIndex", goldCoins: 500, plinkoTickets: 100);
 
@@ -57,7 +57,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task Drop_WithInsufficientGold_ReturnsFailureWithoutMutation()
+    public async Task Drop_With_Insufficient_Gold_Returns_Failure_Without_Mutation()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "plinko.poor.gold@kongor.com", "PoorGold", goldCoins: 10, plinkoTickets: 0);
 
@@ -81,7 +81,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task Drop_WithInsufficientTickets_ReturnsFailureWithoutMutation()
+    public async Task Drop_With_Insufficient_Tickets_Returns_Failure_Without_Mutation()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "plinko.poor.ticket@kongor.com", "PoorTicket", goldCoins: 0, plinkoTickets: 5);
 
@@ -108,7 +108,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     [Arguments("silver")]
     [Arguments("")]
     [Arguments("gold_or_tickets")]
-    public async Task Drop_WithUnsupportedCurrency_ReturnsFailureWithoutMutation(string currency)
+    public async Task Drop_With_Unsupported_Currency_Returns_Failure_Without_Mutation(string currency)
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, $"plinko.bad.{Guid.NewGuid():N}@kongor.com", $"Bad{Guid.NewGuid().ToString("N")[..8]}", goldCoins: 1000, plinkoTickets: 1000);
 
@@ -132,7 +132,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task Drop_WithSufficientGold_DeductsCostAndReturnsEveryDeclaredResultParam()
+    public async Task Drop_With_Sufficient_Gold_Deducts_Cost_And_Returns_Every_Declared_Result_Parameter()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "plinko.drop.gold@kongor.com", "DropGold", goldCoins: 1000, plinkoTickets: 0);
 
@@ -167,7 +167,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task Drop_WithTickets_DeductsTicketCost()
+    public async Task Drop_With_Tickets_Deducts_Ticket_Cost()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "plinko.drop.ticket@kongor.com", "DropTicket", goldCoins: 0, plinkoTickets: 500);
 
@@ -187,7 +187,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task Drop_ExhaustedChestTier_PaysExhaustionReward()
+    public async Task Drop_Exhausted_Chest_Tier_Pays_Exhaustion_Reward()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "plinko.exhaust@kongor.com", "Exhaust", goldCoins: 1000, plinkoTickets: 100);
 
@@ -229,7 +229,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     [Arguments(2)]
     [Arguments(3)]
     [Arguments(4)]
-    public async Task ViewChest_WithValidTier_ReturnsEveryDeclaredResultParam(int tierID)
+    public async Task View_Chest_With_Valid_Tier_Returns_Every_Declared_Result_Parameter(int tierID)
     {
         (string cookie, _) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, $"viewchest{tierID}@kongor.com", $"ViewChest{tierID}", goldCoins: 0, plinkoTickets: 0);
 
@@ -264,7 +264,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     [Arguments(5)]
     [Arguments(6)]
     [Arguments(99)]
-    public async Task ViewChest_WithUnsupportedTier_ReturnsStatusZero(int tierID)
+    public async Task View_Chest_With_Unsupported_Tier_Returns_Status_Zero(int tierID)
     {
         (string cookie, _) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, $"badtier{tierID}@kongor.com", $"BadTier{tierID}", goldCoins: 0, plinkoTickets: 0);
 
@@ -281,7 +281,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task ViewChest_WithTargetIndexZero_ClampsToOneWithoutThrowing()
+    public async Task View_Chest_With_Target_Index_Zero_Clamps_To_One_Without_Throwing()
     {
         (string cookie, _) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "clamp@kongor.com", "Clamp", goldCoins: 0, plinkoTickets: 0);
 
@@ -300,7 +300,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
-    public async Task ViewChest_WithTargetIndexBeyondTierSize_ReturnsEmptyPage()
+    public async Task View_Chest_With_Target_Index_Beyond_Tier_Size_Returns_Empty_Page()
     {
         (string cookie, _) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "beyond@kongor.com", "Beyond", goldCoins: 0, plinkoTickets: 0);
 

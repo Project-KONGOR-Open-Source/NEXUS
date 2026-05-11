@@ -12,7 +12,7 @@ public sealed class EmailAddressRegistrationTests(ZORGATHIntegrationWebApplicati
     [Test]
     [Arguments("test@kongor.com")]
     [Arguments("user@kongor.net")]
-    public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOKAndCreatesTokenAndDeliversEmail(string emailAddress)
+    public async Task Register_Email_Address_With_Valid_Email_Address_Returns_OK_And_Creates_Token_And_Delivers_Email(string emailAddress)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -58,7 +58,7 @@ public sealed class EmailAddressRegistrationTests(ZORGATHIntegrationWebApplicati
     [Test]
     [Arguments("test@kongor.com", "different@kongor.com")]
     [Arguments("user@kongor.net", "typo@kongor.net")]
-    public async Task RegisterEmailAddress_WithMismatchedConfirmation_ReturnsBadRequest(string emailAddress, string confirmEmailAddress)
+    public async Task Register_Email_Address_With_Mismatched_Confirmation_Returns_Bad_Request(string emailAddress, string confirmEmailAddress)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -78,7 +78,7 @@ public sealed class EmailAddressRegistrationTests(ZORGATHIntegrationWebApplicati
     [Test]
     [Arguments("duplicate@kongor.com")]
     [Arguments("existing@kongor.net")]
-    public async Task RegisterEmailAddress_WhenAlreadyRegistered_ReturnsBadRequest(string emailAddress)
+    public async Task Register_Email_Address_When_Already_Registered_Returns_Bad_Request(string emailAddress)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 

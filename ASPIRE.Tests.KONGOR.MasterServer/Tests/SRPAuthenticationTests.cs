@@ -12,7 +12,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("srpuser1@kongor.com", "SRP1", "SecurePassword123!")]
     [Arguments("srpuser2@kongor.net", "SRP2", "MyP@ssw0rd!")]
-    public async Task CreateAccountWithSRPCredentials_WithValidData_CreatesAccountWithValidSRPFields(string emailAddress, string accountName, string password)
+    public async Task Create_Account_With_SRP_Credentials_With_Valid_Data_Creates_Account_With_Valid_SRP_Fields(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -52,7 +52,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("salt1@kongor.com", "Salt1", "SecurePassword123!")]
     [Arguments("salt2@kongor.net", "Salt2", "MyP@ssw0rd!")]
-    public async Task CreateAccountWithSRPCredentials_GeneratesUniqueSaltsForDifferentAccounts(string emailAddress, string accountName, string password)
+    public async Task Create_Account_With_SRP_Credentials_Generates_Unique_Salts_For_Different_Accounts(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -65,7 +65,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("hash1@kongor.com", "Hash1", "SecurePassword123!")]
     [Arguments("hash2@kongor.net", "Hash2", "MyP@ssw0rd!")]
-    public async Task CreateAccountWithSRPCredentials_HashesAreDeterministicForSamePasswordAndSalt(string emailAddress, string accountName, string password)
+    public async Task Create_Account_With_SRP_Credentials_Hashes_Are_Deterministic_For_Same_Password_And_Salt(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -80,7 +80,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("role1@kongor.com", "Role1", "SecurePassword123!")]
     [Arguments("role2@kongor.net", "Role2", "MyP@ssw0rd!")]
-    public async Task CreateAccountWithSRPCredentials_AssignsUserRoleCorrectly(string emailAddress, string accountName, string password)
+    public async Task Create_Account_With_SRP_Credentials_Assigns_User_Role_Correctly(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -107,7 +107,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("pbkdf1@kongor.com", "PBKDF2_1", "SecurePassword123!")]
     [Arguments("pbkdf2@kongor.net", "PBKDF2_2", "MyP@ssw0rd!")]
-    public async Task CreateAccountWithSRPCredentials_GeneratesBothSRPAndPBKDF2Hashes(string emailAddress, string accountName, string password)
+    public async Task Create_Account_With_SRP_Credentials_Generates_Both_SRP_And_PBKDF2_Hashes(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -130,7 +130,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("srpauth1@kongor.com", "SRPAuth1", "SecurePassword123!")]
     [Arguments("srpauth2@kongor.net", "SRPAuth2", "MyP@ssw0rd!")]
-    public async Task AuthenticateWithSRP_WithValidCredentials_ReturnsSuccessfulAuthentication(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_With_Valid_Credentials_Returns_Successful_Authentication(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -151,7 +151,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("srpflow1@kongor.com", "Flow1", "SecurePassword123!")]
     [Arguments("srpflow2@kongor.net", "Flow2", "MyP@ssw0rd!")]
-    public async Task AuthenticateWithSRP_CompletesFullAuthenticationFlow_ReturnsAccountData(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_Completes_Full_Authentication_Flow_Returns_Account_Data(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -183,7 +183,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("preauth1@kongor.com", "PreAuth1", "SecurePassword123!")]
     [Arguments("preauth2@kongor.net", "PreAuth2", "MyP@ssw0rd!")]
-    public async Task PerformPreAuthentication_WithValidAccount_ReturnsSessionDataAndServerEphemeral(string emailAddress, string accountName, string password)
+    public async Task Perform_Pre_Authentication_With_Valid_Account_Returns_Session_Data_And_Server_Ephemeral(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -210,7 +210,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("NonExistentAccount")]
     [Arguments("InvalidUser123")]
-    public async Task PerformPreAuthentication_WithNonExistentAccount_ReturnsNotFound(string accountName)
+    public async Task Perform_Pre_Authentication_With_Non_Existent_Account_Returns_Not_Found(string accountName)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -233,7 +233,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("crypto1@kongor.com", "Crypto1", "SecurePassword123!")]
     [Arguments("crypto2@kongor.net", "Crypto2", "MyP@ssw0rd!")]
-    public async Task AuthenticateWithSRP_CryptographicOperations_ProducesValidServerProof(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_Cryptographic_Operations_Produces_Valid_Server_Proof(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -255,7 +255,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("unique1@kongor.com", "Unique1", "SecurePassword123!")]
     [Arguments("unique2@kongor.net", "Unique2", "MyP@ssw0rd!")]
-    public async Task AuthenticateWithSRP_MultipleAuthentications_GeneratesUniqueCookies(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_Multiple_Authentications_Generates_Unique_Cookies(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -272,7 +272,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
     [Test]
     [Arguments("disabled@kongor.com", "Disabled", "SecurePassword123!")]
-    public async Task AuthenticateWithSRP_WithDisabledAccount_ReturnsUnauthorised(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_With_Disabled_Account_Returns_Unauthorised(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -301,7 +301,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     [Test]
     [Arguments("wrongpass1@kongor.com", "WrongPass1", "CorrectPassword123!", "WrongPassword456!")]
     [Arguments("wrongpass2@kongor.net", "WrongPass2", "MyP@ssw0rd!", "NotMyP@ssw0rd!")]
-    public async Task AuthenticateWithSRP_WithIncorrectPassword_ReturnsAuthenticationFailure(string emailAddress, string accountName, string correctPassword, string wrongPassword)
+    public async Task Authenticate_With_SRP_With_Incorrect_Password_Returns_Authentication_Failure(string emailAddress, string accountName, string correctPassword, string wrongPassword)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -318,7 +318,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
     [Test]
     [Arguments("sameaccount@kongor.com", "SameAcct", "SecurePassword123!")]
-    public async Task AuthenticateWithSRP_SameAccountMultipleLogins_GeneratesUniqueCookies(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_Same_Account_Multiple_Logins_Generates_Unique_Cookies(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -337,7 +337,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
     [Test]
     [Arguments("casepass@kongor.com", "CasePass", "SecurePassword123!")]
-    public async Task AuthenticateWithSRP_WithDifferentPasswordCase_ReturnsAuthenticationFailure(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_With_Different_Password_Case_Returns_Authentication_Failure(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -356,7 +356,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
     [Test]
     [Arguments("tamperedproof@kongor.com", "TamperProof", "SecurePassword123!")]
-    public async Task AuthenticateWithSRP_WithTamperedClientProof_ReturnsAuthenticationFailure(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_With_Tampered_Client_Proof_Returns_Authentication_Failure(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -410,7 +410,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
     [Test]
     [Arguments("serververify@kongor.com", "ServerVerify", "SecurePassword123!")]
-    public async Task AuthenticateWithSRP_ServerProof_IsVerifiableByClient(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_Server_Proof_Is_Verifiable_By_Client(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 

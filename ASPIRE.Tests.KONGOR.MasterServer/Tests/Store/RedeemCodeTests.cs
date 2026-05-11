@@ -20,7 +20,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
         => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
 
     [Test]
-    public async Task Redeem_WithCurrencyOnlyCode_GrantsCurrencyAndReturnsSuccess()
+    public async Task Redeem_With_Currency_Only_Code_Grants_Currency_And_Returns_Success()
     {
         (string cookie, int accountID, int userID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.currency@kongor.com", "RedeemCurrency", goldCoins: 100, silverCoins: 500, plinkoTickets: 10);
 
@@ -51,7 +51,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
     }
 
     [Test]
-    public async Task Redeem_WithProductOnlyCode_GrantsProductAndReturnsRedeemedWithProductSegment()
+    public async Task Redeem_With_Product_Only_Code_Grants_Product_And_Returns_Redeemed_With_Product_Segment()
     {
         (string cookie, int accountID, int userID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.product@kongor.com", "RedeemProduct", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
 
@@ -74,7 +74,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
     }
 
     [Test]
-    public async Task Redeem_WithFullBundle_GrantsEverythingAndEmitsAllThreeSegments()
+    public async Task Redeem_With_Full_Bundle_Grants_Everything_And_Emits_All_Three_Segments()
     {
         (string cookie, int accountID, int userID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.bundle@kongor.com", "RedeemBundle", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
 
@@ -98,7 +98,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
     }
 
     [Test]
-    public async Task Redeem_IsCaseInsensitive()
+    public async Task Redeem_Is_Case_Insensitive()
     {
         (string cookie, int accountID, _) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.case@kongor.com", "RedeemCase", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
 
@@ -112,7 +112,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
     }
 
     [Test]
-    public async Task Redeem_WithUnknownCode_ReturnsInvalidErrorAndDoesNotMutate()
+    public async Task Redeem_With_Unknown_Code_Returns_Invalid_Error_And_Does_Not_Mutate()
     {
         (string cookie, int accountID, int userID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.unknown@kongor.com", "RedeemUnknown", goldCoins: 100, silverCoins: 500, plinkoTickets: 10);
 
@@ -137,7 +137,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
     }
 
     [Test]
-    public async Task Redeem_WithBlankCode_ReturnsInvalidError()
+    public async Task Redeem_With_Blank_Code_Returns_Invalid_Error()
     {
         (string cookie, int accountID, _) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.blank@kongor.com", "RedeemBlank", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
 
@@ -153,7 +153,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
     }
 
     [Test]
-    public async Task Redeem_WithAlreadyUsedCode_ReturnsAlreadyUsedErrorAndDoesNotDoubleGrant()
+    public async Task Redeem_With_Already_Used_Code_Returns_Already_Used_Error_And_Does_Not_Double_Grant()
     {
         (string firstCookie, int firstAccountID, int _) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.first@kongor.com", "RedeemFirst", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
         (string secondCookie, int secondAccountID, int secondUserID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.second@kongor.com", "RedeemSecond", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
@@ -179,7 +179,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
     }
 
     [Test]
-    public async Task Redeem_WithProductCodeWhenAlreadyOwned_StillConsumesCodeButDoesNotDuplicateOwnership()
+    public async Task Redeem_With_Product_Code_When_Already_Owned_Still_Consumes_Code_But_Does_Not_Duplicate_Ownership()
     {
         (string cookie, int accountID, int userID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.own@kongor.com", "RedeemOwn", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
 

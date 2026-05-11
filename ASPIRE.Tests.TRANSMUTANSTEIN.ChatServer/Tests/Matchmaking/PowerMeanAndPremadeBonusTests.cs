@@ -32,7 +32,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     private const double EffectiveRatingFullStackAtBaseline = PowerMeanFiveAtBaseline + FullStackPremadeBonus / 5.0;
 
     [Test]
-    public async Task PowerMean_OfFiveEqualRatings_HardcodedExpectedValue()
+    public async Task Power_Mean_Of_Five_Equal_Ratings_Hardcoded_Expected_Value()
     {
         MatchmakingGroup group = BuildBaselineGroup(5);
         MatchmakingTeam team = MatchmakingTeam.FromGroups([group], teamSize: 5);
@@ -41,7 +41,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     }
 
     [Test]
-    public async Task PowerMean_WithOneHighOutlier_HardcodedExpectedValue()
+    public async Task Power_Mean_With_One_High_Outlier_Hardcoded_Expected_Value()
     {
         MatchmakingGroup uniform = BuildBaselineGroup(5);
         MatchmakingGroup outlier = MatchmakingTestBuilder.BuildGroup
@@ -69,7 +69,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     [Arguments(3, 32.0)]
     [Arguments(4, 64.0)]
     [Arguments(5, FullStackPremadeBonus)]
-    public async Task PremadeBonus_FollowsFourTimesTwoPowGroupSize(int groupSize, double expectedBonus)
+    public async Task Premade_Bonus_Follows_Four_Times_Two_To_The_Power_Of_Group_Size(int groupSize, double expectedBonus)
     {
         MatchmakingGroup group = BuildBaselineGroup(groupSize);
 
@@ -77,7 +77,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     }
 
     [Test]
-    public async Task EffectiveTeamRating_DistributesPremadeBonusAcrossPlayers()
+    public async Task Effective_Team_Rating_Distributes_Premade_Bonus_Across_Players()
     {
         MatchmakingGroup fullStack = BuildBaselineGroup(5);
         MatchmakingTeam team = MatchmakingTeam.FromGroups([fullStack], teamSize: 5);
@@ -86,7 +86,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     }
 
     [Test]
-    public async Task EffectiveTeamRating_FiveSolosHasNoPremadeBonus()
+    public async Task Effective_Team_Rating_Five_Solos_Has_No_Premade_Bonus()
     {
         List<MatchmakingGroup> solos =
         [
@@ -111,7 +111,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     [Arguments(new[] { 2, 2, 1 },        "2+2+1",      9)]
     [Arguments(new[] { 2, 1, 1, 1 },     "2+1+1+1",    7)]
     [Arguments(new[] { 1, 1, 1, 1, 1 },  "1+1+1+1+1",  5)]
-    public async Task GroupMakeup_5v5_PatternHasExpectedScore(int[] groupSizes, string expectedPattern, int expectedScore)
+    public async Task Group_Makeup_5V5_Pattern_Has_Expected_Score(int[] groupSizes, string expectedPattern, int expectedScore)
     {
         List<MatchmakingGroup> groups = [.. groupSizes.Select(BuildBaselineGroup)];
 
@@ -128,7 +128,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     [Arguments(new[] { 3 },        "3",     9)]
     [Arguments(new[] { 2, 1 },     "2+1",   5)]
     [Arguments(new[] { 1, 1, 1 },  "1+1+1", 3)]
-    public async Task GroupMakeup_3v3_PatternHasExpectedScore(int[] groupSizes, string expectedPattern, int expectedScore)
+    public async Task Group_Makeup_3V3_Pattern_Has_Expected_Score(int[] groupSizes, string expectedPattern, int expectedScore)
     {
         List<MatchmakingGroup> groups = [.. groupSizes.Select(BuildBaselineGroup)];
 
@@ -142,7 +142,7 @@ public sealed class PowerMeanAndPremadeBonusTests
     }
 
     [Test]
-    public async Task GroupMakeup_1v1_AlwaysScoresOne()
+    public async Task Group_Makeup_1V1_Always_Scores_One()
     {
         MatchmakingGroup solo = MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR);
         MatchmakingTeam team = MatchmakingTeam.FromGroups([solo], teamSize: 1);

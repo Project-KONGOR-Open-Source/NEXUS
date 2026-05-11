@@ -12,7 +12,7 @@ public sealed class ChatServerStatusClientTests(KONGORIntegrationWebApplicationF
         => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().WithWireMockContainer().InitialiseAsync();
 
     [Test]
-    public async Task GetStatus_WhenChatServerReportsHealthy_ReturnsIsHealthyTrue()
+    public async Task Get_Status_When_Chat_Server_Reports_Healthy_Returns_Is_Healthy_True()
     {
         await PostHealthMapping(statusCode: 200, body: """{"status":"Healthy"}""");
 
@@ -28,7 +28,7 @@ public sealed class ChatServerStatusClientTests(KONGORIntegrationWebApplicationF
     }
 
     [Test]
-    public async Task GetStatus_WhenChatServerReportsHealthyInLowerCase_StillTreatsItAsHealthy()
+    public async Task Get_Status_When_Chat_Server_Reports_Healthy_In_Lower_Case_Still_Treats_It_As_Healthy()
     {
         await PostHealthMapping(statusCode: 200, body: """{"status":"healthy"}""");
 
@@ -44,7 +44,7 @@ public sealed class ChatServerStatusClientTests(KONGORIntegrationWebApplicationF
     }
 
     [Test]
-    public async Task GetStatus_WhenChatServerReportsDegraded_ReturnsIsHealthyFalse()
+    public async Task Get_Status_When_Chat_Server_Reports_Degraded_Returns_Is_Healthy_False()
     {
         await PostHealthMapping(statusCode: 200, body: """{"status":"Degraded"}""");
 
@@ -60,7 +60,7 @@ public sealed class ChatServerStatusClientTests(KONGORIntegrationWebApplicationF
     }
 
     [Test]
-    public async Task GetStatus_WhenChatServerReturnsServiceUnavailable_ReturnsIsHealthyFalseWithStatusCode()
+    public async Task Get_Status_When_Chat_Server_Returns_Service_Unavailable_Returns_Is_Healthy_False_With_Status_Code()
     {
         await PostHealthMapping(statusCode: 503, body: string.Empty);
 

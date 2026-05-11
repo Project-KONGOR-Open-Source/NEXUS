@@ -33,7 +33,7 @@ public sealed class GroupExperienceAndDisparityTests
     [Arguments(0,                                  1625.0, true,  "Fresh Account, At TMR Cutoff")]
     [Arguments(ExperiencedMatchCountThreshold - 1, 1500.0, false, "One Below Match Count, Mid-Tier TMR")]
     [Arguments(ExperiencedMatchCountThreshold,     1500.0, true,  "At Match Count Threshold, Mid-Tier TMR")]
-    public async Task IsExperienced_GatesOnEitherMatchCountOrAverageTMR(int totalMatchCount, double averageTMR, bool expectExperienced, string description)
+    public async Task Is_Experienced_Gates_On_Either_Match_Count_Or_Average_TMR(int totalMatchCount, double averageTMR, bool expectExperienced, string description)
     {
         // The Group Has A Single Solo Member; AverageTMR Equals That Member's TMR
 
@@ -43,7 +43,7 @@ public sealed class GroupExperienceAndDisparityTests
     }
 
     [Test]
-    public async Task GetAdaptiveTMRSpread_AtZeroQueueMinutes_EqualsInGroupTMRRange()
+    public async Task Get_Adaptive_TMR_Spread_At_Zero_Queue_Minutes_Equals_In_Group_TMR_Range()
     {
         const double LowTMR  = 1400.0;
         const double HighTMR = 1600.0;
@@ -59,7 +59,7 @@ public sealed class GroupExperienceAndDisparityTests
     }
 
     [Test]
-    public async Task GetAdaptiveTMRSpread_PastDelay_ExpandsAtConfiguredRate()
+    public async Task Get_Adaptive_TMR_Spread_Past_Delay_Expands_At_Configured_Rate()
     {
         const double LowTMR              = 1400.0;
         const double HighTMR             = 1600.0;
@@ -78,7 +78,7 @@ public sealed class GroupExperienceAndDisparityTests
     }
 
     [Test]
-    public async Task GetAdaptiveTMRSpread_BeforeDelay_DoesNotExpand()
+    public async Task Get_Adaptive_TMR_Spread_Before_Delay_Does_Not_Expand()
     {
         const double LowTMR  = 1400.0;
         const double HighTMR = 1600.0;
@@ -94,7 +94,7 @@ public sealed class GroupExperienceAndDisparityTests
     }
 
     [Test]
-    public async Task HasExcessiveTMRDisparity_SoloGroup_ReturnsFalse()
+    public async Task Has_Excessive_TMR_Disparity_Solo_Group_Returns_False()
     {
         // The Early Return For "Members.Count <= 1" Means A Solo Group Never Trips The Check
 
@@ -104,7 +104,7 @@ public sealed class GroupExperienceAndDisparityTests
     }
 
     [Test]
-    public async Task HasExcessiveTMRDisparity_BalancedThreeStack_ReturnsFalse()
+    public async Task Has_Excessive_TMR_Disparity_Balanced_Three_Stack_Returns_False()
     {
         // Three Players All At Baseline; Synthetic Full Team Has Highest = Average, Disparity = 0
 
@@ -117,7 +117,7 @@ public sealed class GroupExperienceAndDisparityTests
     }
 
     [Test]
-    public async Task HasExcessiveTMRDisparity_ThreeStackWithOneFarOutlier_ReturnsTrue()
+    public async Task Has_Excessive_TMR_Disparity_Three_Stack_With_One_Far_Outlier_Returns_True()
     {
         // For A 3-Stack At [1900, 1500, 1500] Extrapolated To Team Size 5:
         //     Total = 4900, AverageTMR = 1633.33, TeamApproximation = 4900 + 1633.33 * 2 = 8166.66
@@ -135,7 +135,7 @@ public sealed class GroupExperienceAndDisparityTests
     }
 
     [Test]
-    public async Task HasExcessiveTMRDisparity_ThreeStackJustBelowThreshold_ReturnsFalse()
+    public async Task Has_Excessive_TMR_Disparity_Three_Stack_Just_Below_Threshold_Returns_False()
     {
         // For A 3-Stack [Highest, Baseline, Baseline] Extrapolated To Team Size 5, Algebra Gives:
         //     Disparity = (10 * Highest - 10 * Baseline) / 12

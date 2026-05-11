@@ -19,7 +19,7 @@ public sealed class TicketExchangeTests(KONGORIntegrationWebApplicationFactory w
         => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
 
     [Test]
-    public async Task List_WithInvalidCookie_ReturnsStatusBadCookie()
+    public async Task List_With_Invalid_Cookie_Returns_Status_Bad_Cookie()
     {
         HttpClient client = webApplicationFactory.CreateClient();
 
@@ -36,7 +36,7 @@ public sealed class TicketExchangeTests(KONGORIntegrationWebApplicationFactory w
     }
 
     [Test]
-    public async Task List_WithValidCookie_ReturnsSuccessAndCatalogue()
+    public async Task List_With_Valid_Cookie_Returns_Success_And_Catalogue()
     {
         (string cookie, _) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "exchange.list@kongor.com", "ExchangeList", goldCoins: 0, plinkoTickets: 1300);
 
@@ -57,7 +57,7 @@ public sealed class TicketExchangeTests(KONGORIntegrationWebApplicationFactory w
     }
 
     [Test]
-    public async Task Purchase_HappyPath_DeductsTicketsAndGrantsItem()
+    public async Task Purchase_Happy_Path_Deducts_Tickets_And_Grants_Item()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "exchange.buy@kongor.com", "ExchangeBuy", goldCoins: 0, plinkoTickets: 1300);
 
@@ -92,7 +92,7 @@ public sealed class TicketExchangeTests(KONGORIntegrationWebApplicationFactory w
     }
 
     [Test]
-    public async Task Purchase_WithInsufficientTickets_ReturnsInsufficientStatusAndDoesNotMutate()
+    public async Task Purchase_With_Insufficient_Tickets_Returns_Insufficient_Status_And_Does_Not_Mutate()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "exchange.cheap@kongor.com", "ExchangeCheap", goldCoins: 0, plinkoTickets: 10);
 
@@ -116,7 +116,7 @@ public sealed class TicketExchangeTests(KONGORIntegrationWebApplicationFactory w
     }
 
     [Test]
-    public async Task Purchase_AlreadyOwned_ReturnsAlreadyOwnedStatusAndDoesNotMutate()
+    public async Task Purchase_Already_Owned_Returns_Already_Owned_Status_And_Does_Not_Mutate()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "exchange.dupe@kongor.com", "ExchangeDupe", goldCoins: 0, plinkoTickets: 5000);
 
@@ -141,7 +141,7 @@ public sealed class TicketExchangeTests(KONGORIntegrationWebApplicationFactory w
     }
 
     [Test]
-    public async Task Purchase_UnknownProductID_ReturnsInvalidItem()
+    public async Task Purchase_Unknown_Product_ID_Returns_Invalid_Item()
     {
         (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "exchange.unknown@kongor.com", "ExchangeUnknown", goldCoins: 0, plinkoTickets: 5000);
 

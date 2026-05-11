@@ -28,7 +28,7 @@ public sealed class StoreItemTests
     [Arguments(StoreItemType.TeleportEffect,     "te")]
     [Arguments(StoreItemType.SelectionCircle,    "sc")]
     [Arguments(StoreItemType.Bundle,             "")]
-    public async Task GetTypeCode_ReturnsExpectedValueForEveryStoreItemType(StoreItemType type, string expected)
+    public async Task Get_Type_Code_Returns_Expected_Value_For_Every_Store_Item_Type(StoreItemType type, string expected)
     {
         await Assert.That(StoreItem.GetTypeCode(type)).IsEqualTo(expected);
     }
@@ -55,7 +55,7 @@ public sealed class StoreItemTests
     [Arguments(StoreItemType.TeleportEffect,     "te.")]
     [Arguments(StoreItemType.SelectionCircle,    "sc.")]
     [Arguments(StoreItemType.Bundle,             "")]
-    public async Task GetPrefix_ReturnsExpectedValueForEveryStoreItemType(StoreItemType type, string expected)
+    public async Task Get_Prefix_Returns_Expected_Value_For_Every_Store_Item_Type(StoreItemType type, string expected)
     {
         await Assert.That(StoreItem.GetPrefix(type)).IsEqualTo(expected);
     }
@@ -87,7 +87,7 @@ public sealed class StoreItemTests
     [Arguments(StoreItemType.TauntBadge,         "")]
     [Arguments(StoreItemType.TeleportEffect,     "")]
     [Arguments(StoreItemType.SelectionCircle,    "")]
-    public async Task GetTypeName_ReturnsExpectedValueForEveryStoreItemType(StoreItemType type, string expected)
+    public async Task Get_Type_Name_Returns_Expected_Value_For_Every_Store_Item_Type(StoreItemType type, string expected)
     {
         await Assert.That(StoreItem.GetTypeName(type)).IsEqualTo(expected);
     }
@@ -97,7 +97,7 @@ public sealed class StoreItemTests
     ///     If a new type is introduced, the parameterised tests above will no longer be exhaustive and this assertion will fail until they are extended.
     /// </summary>
     [Test]
-    public async Task EveryStoreItemTypeIsCoveredByTheParameterisedTestsAbove()
+    public async Task Every_Store_Item_Type_Is_Covered_By_The_Parameterised_Tests_Above()
     {
         const int expectedStoreItemTypeCount = 21;
 

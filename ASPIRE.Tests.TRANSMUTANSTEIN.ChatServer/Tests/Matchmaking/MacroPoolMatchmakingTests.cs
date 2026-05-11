@@ -41,7 +41,7 @@ public sealed class MacroPoolMatchmakingTests
     private const int MicroTolerance = 20;
 
     [Test]
-    public async Task FreshTeams100ApartCannotMatchAtMacroBaseSpread()
+    public async Task Fresh_Teams_100_Apart_Cannot_Match_At_Macro_Base_Spread()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -61,7 +61,7 @@ public sealed class MacroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task TeamsAreMatchedOnceMacroSpreadHasExpandedPastTheirDifference()
+    public async Task Teams_Are_Matched_Once_Macro_Spread_Has_Expanded_Past_Their_Difference()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -81,7 +81,7 @@ public sealed class MacroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task TmrSpreadCapsAtMacroMaximum()
+    public async Task TMR_Spread_Caps_At_Macro_Maximum()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -101,7 +101,7 @@ public sealed class MacroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task PlusZeroMinusOneCheckIsEnforcedInMacroPools()
+    public async Task Plus_Zero_Minus_One_Check_Is_Enforced_In_Macro_Pools()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -131,7 +131,7 @@ public sealed class MacroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task BalancedFiveStacksMatchUpInMacroPool()
+    public async Task Balanced_Five_Stacks_Match_Up_In_Macro_Pool()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -149,7 +149,7 @@ public sealed class MacroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task C1Fix_TwoMatchingFourPlusOnesPairWithFalseFlag()
+    public async Task Two_Matching_Four_Plus_Ones_Pair_With_False_Flag()
     {
         // Two 4+1 Compositions (Both Score 17, Difference = 0) Should Pair And Not Trip MismatchedGroupMakeup In A Macro Pool
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
@@ -175,7 +175,7 @@ public sealed class MacroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task C1Fix_FourPlusOneVersusThreePlusTwoFlagsTrueWithMacroTolerance()
+    public async Task Four_Plus_One_Versus_Three_Plus_Two_Flags_True_With_Macro_Tolerance()
     {
         // Bypasses The Broker To Test The Construction-Level Behaviour Of MismatchedGroupMakeup With An Explicit Pool-Aware Tolerance Of 2 (Macro / Large Default)
         // 4+1 (17) Vs 3+2 (13) Has Difference = 4 > <see cref="MacroTolerance"/> So The Flag Must Fire
@@ -189,7 +189,7 @@ public sealed class MacroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task C1Fix_SameDiffWithMicroToleranceFlagsFalse()
+    public async Task Same_Difference_With_Micro_Tolerance_Flags_False()
     {
         // The Same Pairing With <see cref="MicroTolerance"/> Should NOT Be Flagged; Pins The Tolerance Wiring
 

@@ -16,7 +16,7 @@ public sealed class SmallPoolMatchmakingTests
     private const double FarPaddingTMR = 2500.0;
 
     [Test]
-    public async Task TwoFiveStacks_AreMatchedAgainstEachOther()
+    public async Task Two_Five_Stacks_Are_Matched_Against_Each_Other()
     {
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -37,7 +37,7 @@ public sealed class SmallPoolMatchmakingTests
     }
 
     [Test]
-    public async Task MakeupTolerance_5StackVersusSolosIsRejectedAt8()
+    public async Task Makeup_Tolerance_5_Stack_Versus_Solos_Is_Rejected_At_8()
     {
         // Small Tolerance = 8, And A 5-Stack (25) Vs Five Solos (5) Has A Diff Of 20: Rejected
 
@@ -62,7 +62,7 @@ public sealed class SmallPoolMatchmakingTests
     }
 
     [Test]
-    public async Task MakeupTolerance_4Plus1Versus3Plus2IsAccepted()
+    public async Task Makeup_Tolerance_4_Plus_1_Versus_3_Plus_2_Is_Accepted()
     {
         // Difference = 17 - 13 = 4, Within Small Tolerance Of 8
 
@@ -91,7 +91,7 @@ public sealed class SmallPoolMatchmakingTests
     }
 
     [Test]
-    public async Task PlusZeroMinusOneCheck_IsStillDisabledInSmallPools()
+    public async Task Plus_Zero_Minus_One_Check_Is_Still_Disabled_In_Small_Pools()
     {
         // Forces The Small Pool Tier (≥ 50 Queued Players) Manually Rather Than Via The Resolver, Then Verifies That The +0/-1 Check Does Not Reject A Pairing Of Two Outlier Teams
         // Verifies By Checking That The OUTLIER TEAMS SPECIFICALLY Get Paired (Not Just That Some Match Forms, Which Could Pass Even If The Check Was Wrongly Enabled And Padding Solos Matched Among Themselves)
