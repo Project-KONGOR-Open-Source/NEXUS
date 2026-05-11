@@ -16,8 +16,6 @@ internal static class MatchmakingTestBuilder
     /// </summary>
     public const double OutlierHighTMR = 2200.0;
 
-    private static int _nextAccountID = 0;
-
     static MatchmakingTestBuilder()
     {
         // The Algorithm Calls Into "TRANSMUTANSTEIN.ChatServer.Utilities.Log", Which Throws Until Initialised By The Production Host; Tests Construct The Algorithm Directly, So We Wire In A No-Op Logger Here
@@ -77,9 +75,9 @@ internal static class MatchmakingTestBuilder
 
         for (int index = 0; index < memberTMRs.Count; index++)
         {
-            int accountID = Interlocked.Increment(ref _nextAccountID);
+            int accountID = Math.Abs(Guid.NewGuid().GetHashCode());
 
-            string accountName = $"P{accountID}";
+            string accountName = $"P{accountID:X8}";
 
             ClientChatSession session = CreateNullSession(accountID, accountName);
 
