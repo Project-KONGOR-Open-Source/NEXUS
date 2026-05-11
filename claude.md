@@ -65,6 +65,13 @@
 
  - in XML documentation, use <see langword="true"/>, <see langword="false"/>, <see langword="null"/>, to refer to language keywords
 
+ - never create any meta comments or XML documentation that relate to the inference session
+   - WRONG: "This Change Fixes Bugs 2, 3, And 5 Discovered During The Analysis Phase"
+
+ - never create comments or XML documentation with technical details which can cause a risk of drift
+   - RIGHT: "Tests For The TCP Service"
+   - WRONG: "Tests For The TCP Service Running On Port 12321"
+
 ### Code Generation
 
  - always ensure that the generated code is syntactically correct and adheres to best practices for the target programming language
@@ -101,3 +108,7 @@
  - when expecting no element or a single element from a collection as the result of a LINQ operation, always use SingleOrDefault or SingleOrDefaultAsync
    - RIGHT: SingleOrDefault, SingleOrDefaultAsync
    - WRONG: FirstOrDefault, FirstOrDefaultAsync, LastOrDefault, LastOrDefaultAsync
+
+ - when writing tests, use an underscore between every word or logical sequence of numbers
+   - RIGHT: Running_10_Instances_Of_The_Service_Does_Not_Exceed_100_MB_Of_Memory
+   - WRONG: Running10Instances_OfTheService_DoesNotExceed100MBOfMemory
