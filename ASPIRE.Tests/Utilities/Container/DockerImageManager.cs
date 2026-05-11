@@ -11,10 +11,18 @@ public static class DockerImageManager
 {
     /// <summary>
     ///     Ensures each image is present locally, pulling only those that are missing.
+    ///     If the Docker Engine is unreachable (daemon stopped, named pipe missing), the pre-pull is skipped with a warning so that test runs which do not require containers can still proceed; tests that genuinely need a container will surface a clearer error when they try to start one.
     /// </summary>
     public static async Task EnsureImagesArePulled(params string[] images)
     {
         using HttpClient client = CreateDockerEngineClient();
+
+        if (await DockerEngineIsReachable(client) is false)
+        {
+            Console.WriteLine($"  [WARNING_] Docker Engine Is Unreachable; Skipping Image Pre-Pull. Tests Requiring Containers Will Fail When They Attempt To Start One.");
+
+            return;
+        }
 
         foreach (string image in images)
         {
@@ -38,6 +46,31 @@ public static class DockerImageManager
             {
                 Console.WriteLine($"  [WARNING_] Failed To Pull {image}: {exception.Message}");
             }
+        }
+    }
+
+    /// <summary>
+    ///     Probes the Docker Engine endpoint with a short connection timeout to determine whether the daemon is reachable.
+    ///     The shared <see cref="HttpClient"/> uses an infinite timeout to allow long-running image pulls to drain, so this probe uses its own bounded <see cref="CancellationTokenSource"/> rather than relying on the client's timeout.
+    /// </summary>
+    private static async Task<bool> DockerEngineIsReachable(HttpClient client)
+    {
+        try
+        {
+            using CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromSeconds(5));
+
+            using HttpRequestMessage request = new(HttpMethod.Get, "/_ping");
+
+            using HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
+
+            return response.IsSuccessStatusCode;
+        }
+
+        catch (Exception exception)
+        {
+            Console.WriteLine($"  [WARNING_] Docker Engine Probe Failed: {exception.Message}");
+
+            return false;
         }
     }
 
