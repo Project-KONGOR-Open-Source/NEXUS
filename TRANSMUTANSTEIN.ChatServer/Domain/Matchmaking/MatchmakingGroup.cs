@@ -828,7 +828,7 @@ public class MatchmakingGroup
     /// <returns>
     ///     <see langword="true"/> if disparity exceeds the threshold, <see langword="false"/> otherwise.
     /// </returns>
-    private bool HasExcessiveTMRDisparity()
+    internal bool HasExcessiveTMRDisparity()
     {
         if (Members.Count <= 1)
             return false;
