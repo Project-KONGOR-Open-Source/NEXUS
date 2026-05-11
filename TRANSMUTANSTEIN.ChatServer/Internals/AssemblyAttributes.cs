@@ -1,1 +1,1 @@
-﻿[assembly: InternalsVisibleTo(AssemblyConstant.TestCollectionAssembly)]
+﻿[assembly: InternalsVisibleTo(AssemblyConstant.ChatServerTestAssembly)]
