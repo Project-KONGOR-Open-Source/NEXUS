@@ -12,15 +12,14 @@
     <AuthorizeView Context="authContext">
         <Authorized>
             @* Page Header *@
-            <MudCard Class="glass-card pa-6 mb-6 animate-fade-in" Elevation="0">
+            <MudCard Class="glass-card pa-6 mb-6 animate-fade-in" Elevation="0" Style="position: relative;">
+                <MudButton Href="/account" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Style="position: absolute; top: 24px; right: 24px;">
+                    Back
+                </MudButton>
                 <MudStack Spacing="2">
                     <MudText Typo="Typo.caption" Color="Color.Secondary">Account</MudText>
-                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                        <MudText Typo="Typo.h4" Color="Color.Primary">Tools</MudText>
-                        <MudButton Href="/account" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack">
-                            Back
-                        </MudButton>
-                    </MudStack>
+                    <MudText Typo="Typo.h4" Color="Color.Primary">Tools</MudText>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
                         Tools available on your account. Some tools require elevated permissions, and do not display for accounts without those permissions.
                     </MudText>
