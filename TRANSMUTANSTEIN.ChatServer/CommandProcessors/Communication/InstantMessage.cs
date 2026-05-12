@@ -103,6 +103,7 @@ public class InstantMessage : ISynchronousCommandProcessor<ClientChatSession>
         buffer.WriteInt8(session.Account.GetChatClientFlags());                  // Chat Client Flags
         buffer.WriteString(session.Account.NameColourNoPrefixCode);              // Chat Name Colour
         buffer.WriteString(session.Account.IconNoPrefixCode);                    // Account Icon
+        buffer.WriteInt32(session.Account.AscensionLevel);                       // Ascension Level
     }
 
     private static void SendFailure(ClientChatSession session, string targetName)
