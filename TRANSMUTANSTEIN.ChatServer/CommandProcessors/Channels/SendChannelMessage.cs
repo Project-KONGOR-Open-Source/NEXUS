@@ -26,6 +26,10 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
             return;
         }
 
+        // Silently Drop Messages For Channels The Sender Is Not A Member Of
+        if (channel.Members.ContainsKey(session.Account.Name) is false)
+            return;
+
         // Check If The Sender Is Silenced In This Channel
         if (channel.IsSilenced(session))
         {
