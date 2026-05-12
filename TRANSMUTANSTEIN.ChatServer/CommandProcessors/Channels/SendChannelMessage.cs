@@ -13,6 +13,7 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
 
         // Check Flood Prevention (Service Handles Both Check And Response)
         if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
+            return;
 
         ChatChannel? channel = Context.ChatChannels.Values
             .SingleOrDefault(chatChannel => chatChannel.ID == requestData.ChannelID);
