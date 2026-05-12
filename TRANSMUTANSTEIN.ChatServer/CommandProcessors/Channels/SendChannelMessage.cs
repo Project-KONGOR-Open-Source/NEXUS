@@ -7,14 +7,21 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
     {
         SendChannelMessageRequestData requestData = new (buffer);
 
-        ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
         // Silently Drop Empty Messages
         if (string.IsNullOrEmpty(requestData.Message))
             return;
 
         // Check Flood Prevention (Service Handles Both Check And Response)
         if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
+
+        ChatChannel? channel = Context.ChatChannels.Values
+            .SingleOrDefault(chatChannel => chatChannel.ID == requestData.ChannelID);
+
+        // An Unknown Channel ID Implies The Server Lost A Channel It Previously Announced Or The Client Sent A Malformed ID
+        if (channel is null)
         {
+            Log.Error(@"[BUG] Account ""{AccountName}"" Sent A Channel Message For Unknown Channel ID {ChannelID}", session.Account.Name, requestData.ChannelID);
+
             return;
         }
 
