@@ -94,6 +94,9 @@ public class KONGOR
             });
         }
 
+        // Register The Token Cleanup Background Service Which Periodically Purges Expired Tokens From The Database
+        builder.Services.AddHostedService<TokenCleanupService>();
+
         // Add MVC Controllers Support
         builder.Services.AddControllers();
 
