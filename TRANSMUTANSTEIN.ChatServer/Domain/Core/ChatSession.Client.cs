@@ -309,6 +309,36 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // Remove The Chat Session From The Chat Sessions Collection
         if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
             Log.Error(@"Failed To Remove Chat Session For Account Name ""{Account.Name}""", Account.Name);
+
+        // Record The Last-Active Timestamp; The Account Entity Was Loaded On A Long-Disposed Handshake Context, So Issue A Direct Update Via A Fresh Scope
+        // Fire-And-Forget Because The Cleanup Path Is Synchronous And This Telemetry Write Must Not Block The Disconnect
+        UpdateLastActiveTimestamp(Account.ID);
+    }
+
+    /// <summary>
+    ///     Issues a fire-and-forget direct update against <c>Accounts.TimestampLastActive</c> for the given account.
+    ///     Invoked from the disconnect cleanup so that every disconnect path (logout, quit, drop, kick) refreshes the timestamp uniformly, mirroring the login-side update on the authentication path.
+    /// </summary>
+    private void UpdateLastActiveTimestamp(int accountID)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await using AsyncServiceScope scope = ServiceProvider.CreateAsyncScope();
+
+                MerrickContext context = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+                await context.Accounts
+                    .Where(account => account.ID == accountID)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(account => account.TimestampLastActive, DateTimeOffset.UtcNow));
+            }
+
+            catch (Exception exception)
+            {
+                Log.Error(exception, @"Failed To Update Last-Active Timestamp For Account ID {AccountID}", accountID);
+            }
+        });
     }
 
     public void Terminate()
