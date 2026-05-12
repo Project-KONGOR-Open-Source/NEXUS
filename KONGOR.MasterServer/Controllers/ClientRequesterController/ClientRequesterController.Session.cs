@@ -16,6 +16,10 @@ public partial class ClientRequesterController
         {
             await DistributedCache.RemoveAccountNameForSessionCookie(cookie);
 
+            // Notify The Chat Server To Force-Terminate Any Active Chat Session For This Account
+            // The Client Normally Closes Its Own Chat Socket On Logout, But This Guards Against Cases Where That Does Not Happen Cleanly
+            await DistributedCache.PublishAccountLogout(accountName);
+
             Logger.LogInformation(@"Account ""{AccountName}"" Has Logged Out", accountName);
         }
 

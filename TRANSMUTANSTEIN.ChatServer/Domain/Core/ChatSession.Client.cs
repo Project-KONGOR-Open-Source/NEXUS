@@ -271,16 +271,25 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // TODO: Send Notification With Logout Reason To Client
     }
 
-    public void Terminate()
-    {
-        // If Account Is NULL, The Session Was Never Authenticated - Just Disconnect And Dispose
-        if (Account is null)
-        {
-            Disconnect();
-            Dispose();
+    /// <summary>
+    ///     Tracks whether the per-account cleanup performed by <see cref="CleanUpSession"/> has already run for this session.
+    ///     Required because both <see cref="Terminate"/> and <see cref="OnDisconnected"/> route through the same cleanup, and only one of them should take effect.
+    /// </summary>
+    private int CleanupCompleted;
 
+    /// <summary>
+    ///     Performs the idempotent per-account in-memory cleanup associated with this chat session ending.
+    ///     The operation does not touch the socket, and the caller is responsible for any TCP-level shutdown.
+    /// </summary>
+    private void CleanUpSession()
+    {
+        // Use Interlocked To Guarantee The Cleanup Body Runs At Most Once, Even Under Concurrent Disconnect Paths
+        if (Interlocked.Exchange(ref CleanupCompleted, 1) is 1)
             return;
-        }
+
+        // If Account Is NULL, The Session Was Never Authenticated - Nothing To Clean Up
+        if (Account is null)
+            return;
 
         // Leave All Chat Channels (With No Flags = All Channels)
         LeaveAllChannels();
@@ -297,15 +306,36 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // Send Disconnection Notification To Online Peers (Friends And Clan Members)
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 
-        // Log The Client Out And Disconnect The Chat Session
-        LogOut(); Disconnect();
-
         // Remove The Chat Session From The Chat Sessions Collection
         if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
-            Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
+            Log.Error(@"Failed To Remove Chat Session For Account Name ""{Account.Name}""", Account.Name);
+    }
+
+    public void Terminate()
+    {
+        // For Authenticated Sessions, Notify The Client Of The Forced Logout While The Socket Is Still Open
+        if (Account is not null)
+            LogOut();
+
+        // Perform The In-Memory Cleanup
+        CleanUpSession();
+
+        // Tear Down The Underlying Socket
+        Disconnect();
 
         // Dispose Of The Chat Session
         Dispose();
+    }
+
+    /// <summary>
+    ///     Invoked by the TCP transport after the underlying socket has been closed (client logout, game quit, network drop, kick).
+    ///     Ensures the same per-account cleanup that <see cref="Terminate"/> performs runs for any disconnect path, not only the explicit termination one.
+    /// </summary>
+    protected override void OnDisconnected()
+    {
+        CleanUpSession();
+
+        base.OnDisconnected();
     }
 
     /// <summary>
