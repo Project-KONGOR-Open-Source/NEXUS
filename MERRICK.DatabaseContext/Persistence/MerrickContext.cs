@@ -38,6 +38,7 @@ public sealed class MerrickContext : DbContext
         ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
         ConfigureMatchParticipantStatistics(builder.Entity<MatchParticipantStatistics>());
+        ConfigureTokens(builder.Entity<Token>());
     }
 
     private static void ConfigureSchemas(ModelBuilder builder)
@@ -136,5 +137,15 @@ public sealed class MerrickContext : DbContext
     private static void ConfigureMatchStatistics(EntityTypeBuilder<MatchStatistics> builder)
     {
         builder.OwnsMany(statistics => statistics.FragHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+    }
+
+    private static void ConfigureTokens(EntityTypeBuilder<Token> builder)
+    {
+        // SQL Server's "time" Type Tops Out Below 24 Hours, So Validity Is Persisted As Tick Count (bigint).
+        builder.Property(token => token.Validity).HasConversion
+        (
+            value => value.Ticks,
+            value => TimeSpan.FromTicks(value)
+        );
     }
 }
