@@ -8,6 +8,9 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
         SendChannelMessageRequestData requestData = new (buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
+        // Silently Drop Empty Messages
+        if (string.IsNullOrEmpty(requestData.Message))
+            return;
 
         // Check Flood Prevention (Service Handles Both Check And Response)
         if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
