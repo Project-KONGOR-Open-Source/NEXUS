@@ -206,9 +206,12 @@ public class ASPIRE
         }
 
         // Add Web Portal UI Project
+        # pragma warning disable ASPIREBROWSERLOGS001
         builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
             .WithReference(webPortalAPI).WaitFor(webPortalAPI) // Connect To Web Portal API And Wait For It To Start
-            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
+            .WithBrowserLogs(userDataMode: BrowserUserDataMode.Isolated); // Experimental Extension; Surfaces Web Browser Logs In The Aspire Dashboard
+        # pragma warning restore ASPIREBROWSERLOGS001
 
         // Start Orchestrating Distributed Application
         builder.Build().Run();
