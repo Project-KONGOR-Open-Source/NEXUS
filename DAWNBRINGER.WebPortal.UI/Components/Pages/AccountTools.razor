@@ -6,7 +6,7 @@
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
 
-<PageTitle>Tools - Project KONGOR</PageTitle>
+<PageTitle>Account Tools - Project KONGOR</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6 pt-8">
     <AuthorizeView Context="authContext">
@@ -22,7 +22,7 @@
                         </MudButton>
                     </MudStack>
                     <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        Tools available on your account. Some tools require additional permissions.
+                        Tools available on your account. Some tools require elevated permissions, and do not display for accounts without those permissions.
                     </MudText>
                 </MudStack>
             </MudCard>
@@ -30,8 +30,8 @@
             @* Filter Bar *@
             <MudCard Class="glass-card pa-4 mb-6 animate-fade-in-delay-1" Elevation="0">
                 <MudTextField @bind-Value="SearchQuery"
-                              Label="Filter tools"
-                              Placeholder="Type to filter by name or description..."
+                              Label="Filter Tools"
+                              Placeholder="Type To Filter By Name Or Description ..."
                               Variant="Variant.Outlined"
                               Immediate="true"
                               Adornment="Adornment.Start"
@@ -88,7 +88,7 @@
 
                         <MudStack Spacing="3">
                             <MudText Typo="Typo.body2" Color="Color.Secondary">
-                                Enter the authorisation token provided by an administrator and choose a name for your new host account. The host account will be created as a sub-account under your current user.
+                                Enter the authorisation token provided by an administrator and choose a name for your new match server host account. The account will be created as a sub-account under your current user.
                             </MudText>
 
                             <MudTextField @bind-Value="AddHostAccountFormModel.Token"
@@ -120,7 +120,7 @@
                         @if (AddHostAccountProcessing)
                         {
                             <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                            <MudText>Creating...</MudText>
+                            <MudText>Creating ...</MudText>
                         }
                         else
                         {
@@ -139,7 +139,7 @@
                     @if (IssuedAuthorisationToken is null)
                     {
                         <MudText Typo="Typo.body2" Color="Color.Secondary">
-                            Issue a single-use authorisation token that lets any user create a host sub-account on their user. The token is valid for 24 hours, and must be shared with the recipient out-of-band.
+                            Issue a single-use authorisation token that lets a user create a match server host sub-account on their user. The token is valid for 24 hours, and must be shared with the recipient out-of-band.
                         </MudText>
                     }
                     else
@@ -172,7 +172,7 @@
                             @if (IssueHostAuthorisationProcessing)
                             {
                                 <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
-                                <MudText>Issuing...</MudText>
+                                <MudText>Issuing ...</MudText>
                             }
                             else
                             {
@@ -229,7 +229,7 @@
 
         new ToolDefinition(
             Name: "Issue Host Account Authorisation Token",
-            Description: "Generate a single-use, 24-hour authorisation token that lets a user create a host account.",
+            Description: "Generate a single-use authorisation token with a 24-hour expiration period, that allows a user to create a match server host account.",
             Icon: Icons.Material.Filled.AdminPanelSettings,
             ActionLabel: "Issue",
             IsVisible: () => IsAdministrator,
@@ -302,12 +302,15 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add($"Host account \"{AddHostAccountFormModel.Name}\" was created successfully.", Severity.Success);
+                Snackbar.Add($@"Host account ""{AddHostAccountFormModel.Name}"" was created successfully.", Severity.Success);
+
                 AddHostAccountDialogVisible = false;
             }
+
             else
             {
                 string errorMessage = await response.Content.ReadAsStringAsync();
+
                 Snackbar.Add(string.IsNullOrWhiteSpace(errorMessage) ? "Failed to create host account." : errorMessage, Severity.Error);
             }
         }
@@ -336,11 +339,14 @@
             if (response.IsSuccessStatusCode)
             {
                 IssuedAuthorisationToken = await response.Content.ReadFromJsonAsync<HostAccountAuthorisationTokenResponse>();
+
                 Snackbar.Add("Authorisation token issued successfully.", Severity.Success);
             }
+
             else
             {
                 string errorMessage = await response.Content.ReadAsStringAsync();
+
                 Snackbar.Add(string.IsNullOrWhiteSpace(errorMessage) ? "Failed to issue authorisation token." : errorMessage, Severity.Error);
             }
         }
@@ -364,6 +370,7 @@
         try
         {
             await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", IssuedAuthorisationToken.Token.ToString());
+
             Snackbar.Add("Token copied to clipboard.", Severity.Info);
         }
 
