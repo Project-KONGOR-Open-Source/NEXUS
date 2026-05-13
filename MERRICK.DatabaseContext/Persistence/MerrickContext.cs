@@ -71,6 +71,12 @@ public sealed class MerrickContext : DbContext
             {
                 ID = 2,
                 Name = UserRoles.User
+            },
+
+            new Role
+            {
+                ID = 3,
+                Name = UserRoles.Custodian
             }
         );
     }
