@@ -3,7 +3,6 @@ namespace ZORGATH.WebPortal.API.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-[Authorize(Policy = UserRoles.Administrator)]
 [EnableRateLimiting(RateLimiterPolicies.Strict)]
 public class AdministrationController(MerrickContext databaseContext, ILogger<AdministrationController> logger) : ControllerBase
 {
@@ -13,6 +12,7 @@ public class AdministrationController(MerrickContext databaseContext, ILogger<Ad
     private static readonly TimeSpan HostAccountAuthorisationTokenValidity = TimeSpan.FromHours(24);
 
     [HttpPost("Authorise/Host", Name = "Issue Host Account Authorisation Token")]
+    [Authorize(Policy = UserRoles.RolesWithElevatedPrivileges)]
     [ProducesResponseType(typeof(HostAccountAuthorisationTokenDTO), StatusCodes.Status201Created)]
     public async Task<IActionResult> IssueHostAccountAuthorisationToken()
     {
