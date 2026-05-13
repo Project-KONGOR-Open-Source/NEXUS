@@ -222,7 +222,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             string? userIDClaimValue = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.UserID))?.Value;
 
             if (int.TryParse(userIDClaimValue, out int authenticatedUserID).Equals(false))
-                return Unauthorized(@"The authenticated user identifier is missing or invalid");
+                return Unauthorized(@"The Authenticated User Identifier Is Missing Or Invalid");
 
             if (authenticatedUserID.Equals(id).Equals(false))
                 return Forbid();
