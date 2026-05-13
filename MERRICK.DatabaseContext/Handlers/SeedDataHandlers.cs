@@ -251,6 +251,46 @@ public static class SeedDataHandlers
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public static async Task SeedRoot(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    {
+        const string rootEmailAddress = "root@project.kongor";
+        const string rootAccountName = "ROOT";
+
+        if (await context.Users.AnyAsync(user => user.EmailAddress.Equals(rootEmailAddress), cancellationToken))
+            return;
+
+        if (await context.Roles.NoneAsync(cancellationToken))
+            return;
+
+        Role roleCustodian = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Custodian), cancellationToken);
+
+        User userRoot = new ()
+        {
+            EmailAddress = rootEmailAddress,
+            Role = roleCustodian,
+            SRPPasswordSalt = "81c278a3ed03cf4549e787feac5ffe1d051029e15159b1cf0b087b4f8a85cb69",
+            SRPPasswordHash = "bfad34f4dc65064dcae6e2064e12d63b299909b6c0cdb33306a91f26bb624e35",
+            PBKDF2PasswordHash = "AQAAAAIAAYagAAAAECx4DCy3qYARlevpaVUJXy28QyvXDcQiJZ1KOSx547WDLBV0pdx2MX5m+Pe3xhtQAg=="
+        };
+
+        await context.Users.AddAsync(userRoot, cancellationToken);
+
+        Account accountRoot = new ()
+        {
+            Name = rootAccountName,
+            User = userRoot,
+            Type = AccountType.ServerHost,
+            IsMain = true,
+            AutoConnectChatChannels = [ ChatChannels.ServerHostsChannel ]
+        };
+
+        await context.AddAsync(accountRoot, cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded ROOT User With Email Address ""{EmailAddress}"" And Custodian Role", rootEmailAddress);
+    }
+
     public static async Task SeedHeroGuides(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
         if (await context.HeroGuides.AnyAsync(cancellationToken) || await context.Accounts.NoneAsync(cancellationToken)) return;
