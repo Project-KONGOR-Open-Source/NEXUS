@@ -197,6 +197,7 @@
     private string SearchQuery { get; set; } = string.Empty;
 
     private bool IsAdministrator { get; set; }
+    private bool IsCustodian { get; set; }
 
     private bool AddHostAccountDialogVisible { get; set; }
     private bool IssueHostAuthorisationDialogVisible { get; set; }
@@ -231,7 +232,7 @@
             Description: "Generate a single-use authorisation token with a 24-hour expiration period, that allows a user to create a match server host account.",
             Icon: Icons.Material.Filled.AdminPanelSettings,
             ActionLabel: "Issue",
-            IsVisible: () => IsAdministrator,
+            IsVisible: () => IsAdministrator || IsCustodian,
             OnInvoke: OpenIssueHostAuthorisationDialog)
     };
 
@@ -262,6 +263,7 @@
         string? userRole = authenticationState.User.Claims.SingleOrDefault(claim => claim.Type.Equals("user_role"))?.Value;
 
         IsAdministrator = string.Equals(userRole, "ADMINISTRATOR", StringComparison.Ordinal);
+        IsCustodian = string.Equals(userRole, "CUSTODIAN", StringComparison.Ordinal);
     }
 
     private void OpenAddHostAccountDialog()
