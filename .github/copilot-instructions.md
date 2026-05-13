@@ -18,11 +18,11 @@
 
  - always align lambda operators for switch expressions, as in the following example:
     ```
-    return UserType switch
+    return userType switch
     {
         UserType.Staff  => "internal",
         UserType.Client => "external",
-        _               => throw new ArgumentOutOfRangeException(@$"Unsupported User Type ""{UserType}""")
+        _               => throw new ArgumentOutOfRangeException(nameof(userType), @$"Unsupported User Type ""{userType}""")
     };
     ```
 

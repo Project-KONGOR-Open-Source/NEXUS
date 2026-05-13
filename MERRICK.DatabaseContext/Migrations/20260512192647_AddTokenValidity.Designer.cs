@@ -4,6 +4,7 @@ using MERRICK.DatabaseContext.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    partial class MerrickContextModelSnapshot : ModelSnapshot
+    [Migration("20260512192647_AddTokenValidity")]
+    partial class AddTokenValidity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -872,11 +875,6 @@ namespace MERRICK.DatabaseContext.Migrations
                         {
                             ID = 2,
                             Name = "USER"
-                        },
-                        new
-                        {
-                            ID = 3,
-                            Name = "CUSTODIAN"
                         });
                 });
 

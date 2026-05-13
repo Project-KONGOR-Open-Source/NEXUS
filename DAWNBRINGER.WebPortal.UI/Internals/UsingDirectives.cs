@@ -1,6 +1,7 @@
 ﻿global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.ServiceDefaults;
 
+global using DAWNBRINGER.WebPortal.UI.Attributes;
 global using DAWNBRINGER.WebPortal.UI.Services;
 
 global using Microsoft.AspNetCore.Authorization;

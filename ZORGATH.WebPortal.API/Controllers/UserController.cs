@@ -131,14 +131,20 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (result is not PasswordVerificationResult.Success)
             return Unauthorized("Invalid User Name And/Or Password");
 
-        if (new [] { UserRoles.Administrator, UserRoles.User }.Contains(user.Role.Name).Equals(false))
+        if (new [] { UserRoles.Administrator, UserRoles.Custodian, UserRoles.User }.Contains(user.Role.Name).Equals(false))
         {
             Logger.LogError(@"[BUG] Unknown User Role ""{User.Role.Name}""", user.Role.Name);
 
             return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
         }
 
-        IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;
+        IEnumerable<Claim> userRoleClaims = user.Role.Name switch
+        {
+            UserRoles.Administrator => UserRoleClaims.Administrator,
+            UserRoles.Custodian     => UserRoleClaims.Custodian,
+            UserRoles.User          => UserRoleClaims.User,
+            _                       => throw new ArgumentOutOfRangeException(nameof(user.Role.Name), @$"Unsupported User Role ""{user.Role.Name}""")
+        };
 
         IEnumerable<Claim> openIDClaims = new List<Claim>
         {
@@ -203,19 +209,20 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         string role = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.UserRole))?.Value ?? string.Empty;
 
-        if (role.Equals(UserRoles.Administrator).Equals(false) && role.Equals(UserRoles.User).Equals(false))
+        if (new [] { UserRoles.Administrator, UserRoles.Custodian, UserRoles.User }.Contains(role).Equals(false))
         {
             Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);
 
             return BadRequest($@"Unknown User Role ""{role}""");
         }
 
-        if (role.Equals(UserRoles.User))
+        // Administrators May Inspect Any User; Custodians And Standard Users Are Limited To Their Own User
+        if (role.Equals(UserRoles.Administrator).Equals(false))
         {
             string? userIDClaimValue = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.UserID))?.Value;
 
             if (int.TryParse(userIDClaimValue, out int authenticatedUserID).Equals(false))
-                return Unauthorized(@"The authenticated user identifier is missing or invalid");
+                return Unauthorized(@"The Authenticated User Identifier Is Missing Or Invalid");
 
             if (authenticatedUserID.Equals(id).Equals(false))
                 return Forbid();

@@ -13,6 +13,7 @@ global using MailKit.Net.Smtp;
 global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Utility;
+global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Extensions;
 global using MERRICK.DatabaseContext.Persistence;
 

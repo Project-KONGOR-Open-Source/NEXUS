@@ -16,6 +16,12 @@ public class Token
     public required Guid Value { get; set; }
 
     public required string Data { get; set; }
+
+    /// <summary>
+    ///     The duration, measured from <see cref="TimestampCreated"/>, during which this token can be redeemed.
+    ///     After this window elapses, the token is considered expired and is purged by the token cleanup service.
+    /// </summary>
+    public required TimeSpan Validity { get; set; }
 }
 
 public enum TokenPurpose
@@ -24,5 +30,6 @@ public enum TokenPurpose
     EmailAddressUpdate,
     AccountPasswordRecovery,
     AccountPasswordReset,
-    AccountPasswordUpdate
+    AccountPasswordUpdate,
+    HostAccountAuthorisation
 }

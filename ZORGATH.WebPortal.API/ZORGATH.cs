@@ -127,8 +127,10 @@ public class ZORGATH
         // Add Authorization Policies For Role-Based Access Control
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy(UserRoles.Administrator, policy => policy.RequireClaim(Claims.UserRole, UserRoles.Administrator))
+            .AddPolicy(UserRoles.Custodian, policy => policy.RequireClaim(Claims.UserRole, UserRoles.Custodian))
             .AddPolicy(UserRoles.User, policy => policy.RequireClaim(Claims.UserRole, UserRoles.User))
-            .AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim(Claims.UserRole, UserRoles.AllRoles.Split(',')));
+            .AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim(Claims.UserRole, UserRoles.AllRoles.Split(',')))
+            .AddPolicy(UserRoles.RolesWithElevatedPrivileges, policy => policy.RequireClaim(Claims.UserRole, UserRoles.RolesWithElevatedPrivileges.Split(',')));
 
         // Enable MVC Controllers
         builder.Services.AddControllers();
