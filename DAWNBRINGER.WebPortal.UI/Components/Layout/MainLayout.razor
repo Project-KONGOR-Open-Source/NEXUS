@@ -14,7 +14,7 @@
             </MudHidden>
 
             <MudButton Href="/" Color="Color.Inherit" Variant="Variant.Text" Class="kongor-home-button">
-                <MudImage Src="images/logo.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2 logo-glow" />
+                <MudImage Src="images/home.png" Alt="Project KONGOR" Width="40" Height="40" Class="mr-2 logo-glow" />
                 Home
             </MudButton>
 
@@ -24,6 +24,7 @@
                 <MudStack Row="true" Class="align-center gap-2">
                     <MudMenu Label="Community" Color="Color.Inherit" Variant="Variant.Text" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
                         <MudMenuItem Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank">Discord</MudMenuItem>
+                        <MudMenuItem Href="https://app.element.io/#/room/#newerth:matrix.org" Target="_blank">Element</MudMenuItem>
                         <MudMenuItem Href="https://www.reddit.com/r/newerth/" Target="_blank">Reddit</MudMenuItem>
                     </MudMenu>
 
@@ -54,6 +55,7 @@
 
             <MudSpacer />
 
+            <MudIconButton Icon="@CursorTrailIcon" Color="Color.Inherit" Size="Size.Large" OnClick="ToggleCursorTrail" />
             <MudIconButton Icon="@ThemeIcon" Color="Color.Inherit" Edge="Edge.End" Size="Size.Large" OnClick="ToggleTheme" />
         </MudContainer>
     </MudAppBar>
@@ -62,6 +64,7 @@
         <MudNavMenu>
             <MudNavGroup Title="Community" Icon="@Icons.Material.Filled.People" Expanded="false">
                 <MudNavLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank">Discord</MudNavLink>
+                <MudNavLink Href="https://app.element.io/#/room/#newerth:matrix.org" Target="_blank">Element</MudNavLink>
                 <MudNavLink Href="https://www.reddit.com/r/newerth/" Target="_blank">Reddit</MudNavLink>
             </MudNavGroup>
             <MudNavLink Href="/downloads" Icon="@Icons.Material.Filled.Download">Downloads</MudNavLink>
@@ -83,6 +86,7 @@
 
             <MudDivider Class="my-2" />
 
+            <MudNavLink Icon="@CursorTrailIcon" OnClick="ToggleCursorTrail">@(CursorTrailEnabled ? "Disable Trail" : "Enable Trail")</MudNavLink>
             <MudNavLink Icon="@ThemeIcon" OnClick="ToggleTheme">@(IsDarkMode ? "Light Mode" : "Dark Mode")</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
@@ -103,6 +107,7 @@
                         <MudLink Href="/downloads" Typo="Typo.body2" Color="Color.Inherit">Downloads</MudLink>
                         <MudLink Href="https://codex.kongor.net" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Knowledge Base</MudLink>
                         <MudLink Href="https://discord.com/invite/N6pKzGDqUH" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Discord</MudLink>
+                        <MudLink Href="https://app.element.io/#/room/#newerth:matrix.org" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Element</MudLink>
                         <MudLink Href="https://www.reddit.com/r/newerth/" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">Reddit</MudLink>
                         <MudLink Href="https://github.com/Project-KONGOR-Open-Source" Target="_blank" Typo="Typo.body2" Color="Color.Inherit">GitHub</MudLink>
                     </MudStack>
@@ -128,6 +133,9 @@
 
     [Inject]
     private PortalAuthenticationService AuthenticationService { get; set; } = null!;
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = null!;
 
     private static readonly MudTheme Theme = new ()
     {
@@ -183,6 +191,7 @@
             GrayDark = "#1A3D1A",
             GrayDarker = "#0F260F"
         },
+
         PaletteLight = new PaletteLight
         {
             Primary = "#1976D2",
@@ -217,10 +226,12 @@
             LinesDefault = "#37474F60",
             LinesInputs = "#0A192960"
         },
+
         LayoutProperties = new LayoutProperties
         {
             DefaultBorderRadius = "8px"
         },
+
         Typography = new Typography
         {
             Default = new DefaultTypography
@@ -229,6 +240,7 @@
                 FontSize = "1rem",
                 LineHeight = "1.65"
             },
+
             H1 = new H1Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -236,6 +248,7 @@
                 FontWeight = "500",
                 LineHeight = "1.25"
             },
+
             H2 = new H2Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -243,6 +256,7 @@
                 FontWeight = "500",
                 LineHeight = "1.25"
             },
+
             H3 = new H3Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -250,6 +264,7 @@
                 FontWeight = "500",
                 LineHeight = "1.35"
             },
+
             H4 = new H4Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -257,6 +272,7 @@
                 FontWeight = "500",
                 LineHeight = "1.35"
             },
+
             H5 = new H5Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -264,6 +280,7 @@
                 FontWeight = "500",
                 LineHeight = "1.45"
             },
+
             H6 = new H6Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -271,6 +288,7 @@
                 FontWeight = "500",
                 LineHeight = "1.45"
             },
+
             Subtitle1 = new Subtitle1Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -278,6 +296,7 @@
                 FontWeight = "400",
                 LineHeight = "1.5"
             },
+
             Subtitle2 = new Subtitle2Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -285,6 +304,7 @@
                 FontWeight = "500",
                 LineHeight = "1.5"
             },
+
             Body1 = new Body1Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -292,6 +312,7 @@
                 FontWeight = "400",
                 LineHeight = "1.65"
             },
+
             Body2 = new Body2Typography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -299,6 +320,7 @@
                 FontWeight = "400",
                 LineHeight = "1.65"
             },
+
             Button = new ButtonTypography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -306,6 +328,7 @@
                 FontWeight = "500",
                 LineHeight = "1.5"
             },
+
             Caption = new CaptionTypography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -313,6 +336,7 @@
                 FontWeight = "400",
                 LineHeight = "1.5"
             },
+
             Overline = new OverlineTypography
             {
                 FontFamily = ["Ubuntu", "sans-serif"],
@@ -330,21 +354,26 @@
 
     private bool DrawerOpen { get; set; }
 
+    private bool CursorTrailEnabled { get; set; }
+
     private string ThemeIcon => IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+
+    private string CursorTrailIcon => CursorTrailEnabled ? Icons.Material.Filled.AutoFixHigh : Icons.Material.Filled.AutoFixOff;
 
     private Color AppBarButtonColour => Color.Primary;
 
     private string ThemeClass => IsDarkMode ? "dark-mode" : "light-mode";
 
     private string ContentStyle => IsDarkMode
-        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(10, 15, 13, 0.82), rgba(10, 15, 13, 0.92)), url('images/caldavar.jpg') center/cover no-repeat fixed;"
-        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.94)), url('images/caldavar.jpg') center/cover no-repeat fixed;";
+        ? "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(10, 15, 13, 0.82), rgba(10, 15, 13, 0.92)), url('images/background.jpg') center/cover no-repeat fixed;"
+        : "padding-top: 64px; min-height: 100vh; background: linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.94)), url('images/background.jpg') center/cover no-repeat fixed;";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             IsDarkMode = await ThemeProvider.GetSystemDarkModeAsync();
+            CursorTrailEnabled = await JSRuntime.InvokeAsync<bool>("CursorTrail.isEnabled");
             StateHasChanged();
         }
     }
@@ -352,6 +381,12 @@
     private void ToggleTheme()
     {
         IsDarkMode = !IsDarkMode;
+    }
+
+    private async Task ToggleCursorTrail()
+    {
+        CursorTrailEnabled = !CursorTrailEnabled;
+        await JSRuntime.InvokeVoidAsync(CursorTrailEnabled ? "CursorTrail.enable" : "CursorTrail.disable");
     }
 
     private void ToggleDrawer()

@@ -67,7 +67,8 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
             Purpose = TokenPurpose.AccountPasswordReset,
             EmailAddress = payload.EmailAddress,
             Value = Guid.CreateVersion7(),
-            Data = JsonSerializer.Serialize(tokenData)
+            Data = JsonSerializer.Serialize(tokenData),
+            Validity = TimeSpan.FromHours(1)
         };
 
         await MerrickContext.Tokens.AddAsync(token);
@@ -187,7 +188,8 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
             Purpose = TokenPurpose.AccountPasswordUpdate,
             EmailAddress = userEmailAddress,
             Value = Guid.CreateVersion7(),
-            Data = JsonSerializer.Serialize(tokenData)
+            Data = JsonSerializer.Serialize(tokenData),
+            Validity = TimeSpan.FromHours(1)
         };
 
         await MerrickContext.Tokens.AddAsync(token);

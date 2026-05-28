@@ -1,0 +1,1 @@
+[assembly: ClassConstructor<TRANSMUTANSTEINIntegrationDependencyResolver>]

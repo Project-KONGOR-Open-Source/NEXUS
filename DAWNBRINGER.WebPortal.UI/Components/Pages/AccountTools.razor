@@ -1,0 +1,391 @@
+@page "/account/tools"
+
+@attribute [Authorize]
+
+@inject PortalAuthenticationService AuthenticationService
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Account Tools - Project KONGOR</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6 pt-8">
+    <AuthorizeView Context="authContext">
+        <Authorized>
+            @* Page Header *@
+            <MudCard Class="glass-card pa-6 mb-6 animate-fade-in" Elevation="0" Style="position: relative;">
+                <MudButton Href="/account" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Style="position: absolute; top: 24px; right: 24px;">
+                    Back
+                </MudButton>
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Account</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Primary">Tools</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Tools available on your account. Some tools require elevated permissions, and do not display for accounts without those permissions.
+                    </MudText>
+                </MudStack>
+            </MudCard>
+
+            @* Filter Bar *@
+            <MudCard Class="glass-card pa-4 mb-6 animate-fade-in-delay-1" Elevation="0">
+                <MudTextField @bind-Value="SearchQuery"
+                              Label="Filter Tools"
+                              Placeholder="Type To Filter By Name Or Description ..."
+                              Variant="Variant.Outlined"
+                              Immediate="true"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search" />
+            </MudCard>
+
+            @* Tools Grid *@
+            @if (FilteredTools.Any())
+            {
+                <MudGrid Spacing="4">
+                    @foreach (ToolDefinition tool in FilteredTools)
+                    {
+                        <MudItem xs="12" md="6">
+                            <MudCard Class="glass-card pa-4 animate-fade-in-delay-2" Elevation="0" Style="height: 220px;">
+                                <MudCardContent>
+                                    <MudStack Spacing="2" Class="mb-2">
+                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                            <MudIcon Icon="@tool.Icon" Color="Color.Primary" />
+                                            <MudText Typo="Typo.h6">@tool.Name</MudText>
+                                        </MudStack>
+                                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                            @tool.Description
+                                        </MudText>
+                                    </MudStack>
+                                </MudCardContent>
+                                <MudCardActions Class="justify-end">
+                                    <MudButton Variant="Variant.Filled"
+                                               Color="Color.Primary"
+                                               Class="glow-button"
+                                               OnClick="tool.OnInvoke">
+                                        @tool.ActionLabel
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    No tools match your filter.
+                </MudAlert>
+            }
+
+            @* Add Host Account Dialog *@
+            <MudDialog @bind-Visible="AddHostAccountDialogVisible" Options="DialogOptions">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">Add Host Account</MudText>
+                </TitleContent>
+                <DialogContent>
+                    <EditForm Model="AddHostAccountFormModel" OnValidSubmit="HandleAddHostAccountSubmit" id="add-host-account-form">
+                        <DataAnnotationsValidator />
+
+                        <MudStack Spacing="3">
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                                Enter the authorisation token provided by an administrator and choose a name for your new match server host account. The account will be created as a sub-account under your current user.
+                            </MudText>
+
+                            <MudTextField @bind-Value="AddHostAccountFormModel.Token"
+                                          For="@(() => AddHostAccountFormModel.Token)"
+                                          Label="Authorisation Token"
+                                          HelperText="The GUID issued to you by an administrator."
+                                          Variant="Variant.Outlined"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.VpnKey" />
+
+                            <MudTextField @bind-Value="AddHostAccountFormModel.Name"
+                                          For="@(() => AddHostAccountFormModel.Name)"
+                                          Label="Account Name"
+                                          HelperText="Between 4 and 15 characters: letters, numbers, underscores, hyphens."
+                                          Variant="Variant.Outlined"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.AccountCircle" />
+                        </MudStack>
+                    </EditForm>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton OnClick="CloseAddHostAccountDialog" Disabled="AddHostAccountProcessing">Cancel</MudButton>
+                    <MudButton ButtonType="ButtonType.Submit"
+                               form="add-host-account-form"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Class="glow-button"
+                               Disabled="AddHostAccountProcessing">
+                        @if (AddHostAccountProcessing)
+                        {
+                            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                            <MudText>Creating ...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Create</MudText>
+                        }
+                    </MudButton>
+                </DialogActions>
+            </MudDialog>
+
+            @* Issue Host Authorisation Token Dialog (Admin) *@
+            <MudDialog @bind-Visible="IssueHostAuthorisationDialogVisible" Options="DialogOptions">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">Issue Host Account Authorisation Token</MudText>
+                </TitleContent>
+                <DialogContent>
+                    @if (IssuedAuthorisationToken is null)
+                    {
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Issue a single-use authorisation token that lets a user create a match server host sub-account on their user. The token is valid for 24 hours, and must be shared with the recipient out-of-band.
+                        </MudText>
+                    }
+                    else
+                    {
+                        <MudStack Spacing="3">
+                            <MudAlert Severity="Severity.Success" Variant="Variant.Outlined">
+                                Token issued successfully. Copy it now and share it with the recipient out-of-band. It expires on @IssuedAuthorisationToken.ExpiresAt.ToLocalTime().ToString("dd MMM yyyy HH:mm").
+                            </MudAlert>
+
+                            <MudTextField Value="@IssuedAuthorisationToken.Token.ToString()"
+                                          Label="Authorisation Token"
+                                          Variant="Variant.Outlined"
+                                          ReadOnly="true"
+                                          Adornment="Adornment.End"
+                                          AdornmentIcon="@Icons.Material.Filled.ContentCopy"
+                                          OnAdornmentClick="CopyIssuedTokenToClipboard"
+                                          AdornmentAriaLabel="Copy token to clipboard" />
+                        </MudStack>
+                    }
+                </DialogContent>
+                <DialogActions>
+                    @if (IssuedAuthorisationToken is null)
+                    {
+                        <MudButton OnClick="CloseIssueHostAuthorisationDialog" Disabled="IssueHostAuthorisationProcessing">Cancel</MudButton>
+                        <MudButton OnClick="HandleIssueHostAuthorisationSubmit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Class="glow-button"
+                                   Disabled="IssueHostAuthorisationProcessing">
+                            @if (IssueHostAuthorisationProcessing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Issuing ...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Issue Token</MudText>
+                            }
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudButton OnClick="CloseIssueHostAuthorisationDialog" Variant="Variant.Filled" Color="Color.Primary">Done</MudButton>
+                    }
+                </DialogActions>
+            </MudDialog>
+        </Authorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private string SearchQuery { get; set; } = string.Empty;
+
+    private bool IsAdministrator { get; set; }
+    private bool IsCustodian { get; set; }
+
+    private bool AddHostAccountDialogVisible { get; set; }
+    private bool IssueHostAuthorisationDialogVisible { get; set; }
+
+    private bool AddHostAccountProcessing { get; set; }
+    private bool IssueHostAuthorisationProcessing { get; set; }
+
+    private AddHostAccountFormModel AddHostAccountFormModel { get; set; } = new ();
+
+    private HostAccountAuthorisationTokenResponse? IssuedAuthorisationToken { get; set; }
+
+    private static readonly DialogOptions DialogOptions = new ()
+    {
+        CloseOnEscapeKey = true,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+
+    private List<ToolDefinition> AllTools => new ()
+    {
+        new ToolDefinition(
+            Name: "Add Host Account",
+            Description: "Redeem an authorisation token to add a match server host account as a sub-account of your user.",
+            Icon: Icons.Material.Filled.Dns,
+            ActionLabel: "Add",
+            IsVisible: () => true,
+            OnInvoke: OpenAddHostAccountDialog),
+
+        new ToolDefinition(
+            Name: "Issue Host Account Authorisation Token",
+            Description: "Generate a single-use authorisation token with a 24-hour expiration period, that allows a user to create a match server host account.",
+            Icon: Icons.Material.Filled.AdminPanelSettings,
+            ActionLabel: "Issue",
+            IsVisible: () => IsAdministrator || IsCustodian,
+            OnInvoke: OpenIssueHostAuthorisationDialog)
+    };
+
+    private IEnumerable<ToolDefinition> VisibleTools => AllTools.Where(tool => tool.IsVisible());
+
+    private IEnumerable<ToolDefinition> FilteredTools
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery))
+                return VisibleTools;
+
+            string[] terms = SearchQuery.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return VisibleTools.Where(tool => terms.All(term =>
+                tool.Name.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                tool.Description.Contains(term, StringComparison.OrdinalIgnoreCase)));
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is null)
+            return;
+
+        AuthenticationState authenticationState = await AuthenticationStateTask;
+
+        string? userRole = authenticationState.User.Claims.SingleOrDefault(claim => claim.Type.Equals("user_role"))?.Value;
+
+        IsAdministrator = string.Equals(userRole, "ADMINISTRATOR", StringComparison.Ordinal);
+        IsCustodian = string.Equals(userRole, "CUSTODIAN", StringComparison.Ordinal);
+    }
+
+    private void OpenAddHostAccountDialog()
+    {
+        AddHostAccountFormModel = new AddHostAccountFormModel();
+        AddHostAccountDialogVisible = true;
+    }
+
+    private void CloseAddHostAccountDialog()
+    {
+        AddHostAccountDialogVisible = false;
+    }
+
+    private void OpenIssueHostAuthorisationDialog()
+    {
+        IssuedAuthorisationToken = null;
+        IssueHostAuthorisationDialogVisible = true;
+    }
+
+    private void CloseIssueHostAuthorisationDialog()
+    {
+        IssueHostAuthorisationDialogVisible = false;
+        IssuedAuthorisationToken = null;
+    }
+
+    private async Task HandleAddHostAccountSubmit()
+    {
+        AddHostAccountProcessing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            CreateAccountRequest request = new (AddHostAccountFormModel.Name);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync($"/Accounts/{AddHostAccountFormModel.Token}", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($@"Host account ""{AddHostAccountFormModel.Name}"" was created successfully.", Severity.Success);
+
+                AddHostAccountDialogVisible = false;
+            }
+
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+
+                Snackbar.Add(string.IsNullOrWhiteSpace(errorMessage) ? "Failed to create host account." : errorMessage, Severity.Error);
+            }
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+
+        finally
+        {
+            AddHostAccountProcessing = false;
+        }
+    }
+
+    private async Task HandleIssueHostAuthorisationSubmit()
+    {
+        IssueHostAuthorisationProcessing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            HttpResponseMessage response = await client.PostAsync("/Administration/Authorise/Host", content: null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                IssuedAuthorisationToken = await response.Content.ReadFromJsonAsync<HostAccountAuthorisationTokenResponse>();
+
+                Snackbar.Add("Authorisation token issued successfully.", Severity.Success);
+            }
+
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+
+                Snackbar.Add(string.IsNullOrWhiteSpace(errorMessage) ? "Failed to issue authorisation token." : errorMessage, Severity.Error);
+            }
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+
+        finally
+        {
+            IssueHostAuthorisationProcessing = false;
+        }
+    }
+
+    private async Task CopyIssuedTokenToClipboard()
+    {
+        if (IssuedAuthorisationToken is null)
+            return;
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", IssuedAuthorisationToken.Token.ToString());
+
+            Snackbar.Add("Token copied to clipboard.", Severity.Info);
+        }
+
+        catch (JSException)
+        {
+            Snackbar.Add("Unable to access the clipboard. Copy the token manually.", Severity.Warning);
+        }
+    }
+
+    private sealed record ToolDefinition(
+        string Name,
+        string Description,
+        string Icon,
+        string ActionLabel,
+        Func<bool> IsVisible,
+        Action OnInvoke);
+}

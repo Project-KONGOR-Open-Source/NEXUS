@@ -75,4 +75,17 @@ public static partial class DistributedCacheExtensions
             await distributedCacheStore.KeyDeleteAsync(key);
         }
     }
+
+    /// <summary>
+    ///     The Redis pub/sub channel on which account logout notifications are published by the master server and consumed by the chat server.
+    ///     Used to force-terminate any active TCP chat session for the logged-out account, so that peers no longer see them as connected even if the client's chat socket has not closed.
+    /// </summary>
+    public const string AccountLogoutChannel = "ACCOUNT-LOGOUT";
+
+    /// <summary>
+    ///     Publishes an account logout notification on <see cref="AccountLogoutChannel"/>.
+    ///     The payload is the canonical account name as stored against the session cookie.
+    /// </summary>
+    public static async Task PublishAccountLogout(this IDatabase distributedCacheStore, string accountName)
+        => await distributedCacheStore.Multiplexer.GetSubscriber().PublishAsync(RedisChannel.Literal(AccountLogoutChannel), accountName);
 }

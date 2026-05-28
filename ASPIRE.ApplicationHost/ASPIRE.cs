@@ -38,6 +38,9 @@ public class ASPIRE
             .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
 
+        // TODO: Consider Migrating To Valkey For Field-Level TTL Support And Native Namespace Scoping
+        // INFO: Valkey Namespaces Would Let ASPIRE.Tests Drop The Per-Factory Key-Prefix Wrapper Around IDatabase In Favour Of Real Keyspace Isolation
+
         // Create Resource Relationship After Parent Resource Is Defined
         distributedCachePassword
             .WithDescription("Distributed Cache Password") // Add Description To Parameter Resource
@@ -203,9 +206,12 @@ public class ASPIRE
         }
 
         // Add Web Portal UI Project
+        # pragma warning disable ASPIREBROWSERLOGS001
         builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
             .WithReference(webPortalAPI).WaitFor(webPortalAPI) // Connect To Web Portal API And Wait For It To Start
-            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
+            .WithBrowserLogs(userDataMode: BrowserUserDataMode.Isolated); // Experimental Extension; Surfaces Web Browser Logs In The Aspire Dashboard
+        # pragma warning restore ASPIREBROWSERLOGS001
 
         // Start Orchestrating Distributed Application
         builder.Build().Run();

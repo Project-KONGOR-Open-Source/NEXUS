@@ -1,6 +1,10 @@
 ﻿global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.ServiceDefaults;
 
+// TODO: Replace This Direct Reference With A Service Bus For Private Inter-Service Communication At The Server Level
+global using KONGOR.MasterServer.Configuration;
+global using KONGOR.MasterServer.Configuration.Economy;
+
 global using FluentValidation;
 global using FluentValidation.Results;
 
@@ -9,6 +13,7 @@ global using MailKit.Net.Smtp;
 global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Utility;
+global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Extensions;
 global using MERRICK.DatabaseContext.Persistence;
 

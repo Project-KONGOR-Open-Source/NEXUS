@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Controllers.StatsRequesterController;
+namespace KONGOR.MasterServer.Controllers.StatsRequesterController;
 
 public partial class StatsRequesterController
 {
@@ -43,7 +43,10 @@ public partial class StatsRequesterController
 
             if (existingMatchParticipantStatistics is null)
             {
-                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+                Account? account = await MerrickContext.Accounts
+                    .Include(account => account.Clan)
+                    .Include(account => account.User)
+                    .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
                 if (account is null)
                 {
@@ -55,6 +58,8 @@ public partial class StatsRequesterController
                 MatchParticipantStatistics matchParticipantStatistics = form.ToMatchParticipantStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
 
                 await MerrickContext.MatchParticipantStatistics.AddAsync(matchParticipantStatistics);
+
+                await MatchCompletionRewardsHandler.Apply(MerrickContext, Logger, account, matchInformation, matchParticipantStatistics);
             }
 
             else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
@@ -129,7 +134,10 @@ public partial class StatsRequesterController
 
             if (existingMatchParticipantStatistics is null)
             {
-                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+                Account? account = await MerrickContext.Accounts
+                    .Include(account => account.Clan)
+                    .Include(account => account.User)
+                    .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
                 if (account is null)
                 {
@@ -141,6 +149,8 @@ public partial class StatsRequesterController
                 MatchParticipantStatistics matchParticipantStatistics = form.ToMatchParticipantStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
 
                 await MerrickContext.MatchParticipantStatistics.AddAsync(matchParticipantStatistics);
+
+                await MatchCompletionRewardsHandler.Apply(MerrickContext, Logger, account, matchInformation: null, matchParticipantStatistics);
             }
 
             else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");

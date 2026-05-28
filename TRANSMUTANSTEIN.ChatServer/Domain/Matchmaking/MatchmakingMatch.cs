@@ -221,7 +221,11 @@ public class MatchmakingMatch
     /// <summary>
     ///     Creates a match from two teams and calculates the matchup prediction.
     /// </summary>
-    public static MatchmakingMatch FromTeams(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam, double logisticPredictionScale = 80.0)
+    /// <remarks>
+    ///     The <paramref name="groupMakeupTolerance"/> argument should match the pool-size-aware tolerance the broker used to permit this pairing, so that <see cref="MismatchedGroupMakeup"/> only fires when the makeup difference actually exceeded the broker's allowance for that pool tier.
+    ///     The default of 2, which is the strictest value, matches the Macro/Large tolerance and is preserved for direct callers without a pool context.
+    /// </remarks>
+    public static MatchmakingMatch FromTeams(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam, double logisticPredictionScale = 80.0, int groupMakeupTolerance = 2)
     {
         MatchmakingMatch match = new ()
         {
@@ -232,8 +236,8 @@ public class MatchmakingMatch
         // Calculate Matchup Prediction Using Effective Team Rating (Power Mean + Premade Bonus)
         match.MatchupPrediction = CalculateMatchupPrediction(legionTeam.EffectiveTeamRating, hellbourneTeam.EffectiveTeamRating, logisticPredictionScale);
 
-        // Check For Mismatched Group Makeup
-        match.MismatchedGroupMakeup = Math.Abs(legionTeam.GroupMakeup - hellbourneTeam.GroupMakeup) > 2;
+        // Check For Mismatched Group Makeup Using The Pool-Size-Aware Tolerance That Permitted This Pairing
+        match.MismatchedGroupMakeup = Math.Abs(legionTeam.GroupMakeup - hellbourneTeam.GroupMakeup) > groupMakeupTolerance;
 
         // Mark Teams As Matched
         legionTeam.MatchedUp = true;

@@ -46,6 +46,17 @@ public class KONGOR
         // Register IDatabase From IConnectionMultiplexer
         builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
+        // Bind Chat Server Status Settings
+        builder.Services.Configure<ChatServerStatusSettings>(builder.Configuration.GetSection(ChatServerStatusSettings.SectionName));
+
+        // Register The Typed HTTP Client That Probes The Chat Server's Health Endpoint
+        builder.Services.AddHttpClient<IChatServerStatusClient, ChatServerStatusClient>((serviceProvider, httpClient) =>
+        {
+            ChatServerStatusSettings settings = serviceProvider.GetRequiredService<IOptionsMonitor<ChatServerStatusSettings>>().CurrentValue;
+
+            httpClient.BaseAddress = new Uri(settings.BaseURL);
+        });
+
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
 
@@ -82,6 +93,9 @@ public class KONGOR
                 options.RequestBodyLogLimit = 4096; /* 4KB Request Body Limit */ options.ResponseBodyLogLimit = 4096; /* 4KB Response Body Limit */
             });
         }
+
+        // Register The Token Cleanup Background Service Which Periodically Purges Expired Tokens From The Database
+        builder.Services.AddHostedService<TokenCleanupService>();
 
         // Add MVC Controllers Support
         builder.Services.AddControllers();

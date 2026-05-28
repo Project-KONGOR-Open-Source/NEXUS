@@ -1,9 +1,10 @@
-/* ==================================================================================================
-   PROJECT KONGOR PORTAL — LIGHT THEME PALETTE
+/* ======================================================================================================
+   PROJECT KONGOR PORTAL — LIGHT THEME PALETTE & ANIMATIONS
 
    Defines the CSS custom properties consumed by the rules in portal.common.css.
+   Also defines the light-mode keyframes and theme-scoped animation-name bindings for glow/pulse effects.
    The palette is the light-mode counterpart to portal.dark.css and mirrors it variable-for-variable.
-   ================================================================================================== */
+   ====================================================================================================== */
 
 .light-mode {
     --kongor-primary:              #1976D2;
@@ -14,4 +15,27 @@
     --kongor-shadow-rgb:           10, 25, 41;
     --kongor-timeline-surface:     #FFFFFF;
     --kongor-footer-fade-rgb:      227, 242, 253;
+}
+
+/* --- Pulsing Text Glow ------------------------------------- */
+
+@keyframes kongor-text-pulse-light {
+    0%, 100% { text-shadow: 0 0 16px rgba(var(--kongor-primary-rgb), 0.8), 0 0 48px rgba(var(--kongor-primary-rgb), 0.45); }
+    50% { text-shadow: 0 0 32px rgba(var(--kongor-primary-rgb), 1), 0 0 72px rgba(var(--kongor-primary-rgb), 0.75), 0 0 108px rgba(var(--kongor-primary-rgb), 0.45); }
+}
+
+.light-mode .hero-title,
+.light-mode .account-name-glow {
+    animation-name: kongor-text-pulse-light;
+}
+
+/* --- Logo Glow Animation ----------------------------------- */
+
+@keyframes kongor-pulse-glow-light {
+    0%, 100% { filter: drop-shadow(0 0 6px rgba(var(--kongor-primary-rgb), 0.8)); }
+    50% { filter: drop-shadow(0 0 18px rgba(var(--kongor-primary-rgb), 1)); }
+}
+
+.light-mode .logo-glow {
+    animation-name: kongor-pulse-glow-light;
 }

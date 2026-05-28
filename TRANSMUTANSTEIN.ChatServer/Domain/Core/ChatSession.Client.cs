@@ -271,16 +271,25 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // TODO: Send Notification With Logout Reason To Client
     }
 
-    public void Terminate()
-    {
-        // If Account Is NULL, The Session Was Never Authenticated - Just Disconnect And Dispose
-        if (Account is null)
-        {
-            Disconnect();
-            Dispose();
+    /// <summary>
+    ///     Tracks whether the per-account cleanup performed by <see cref="CleanUpSession"/> has already run for this session.
+    ///     Required because both <see cref="Terminate"/> and <see cref="OnDisconnected"/> route through the same cleanup, and only one of them should take effect.
+    /// </summary>
+    private int CleanupCompleted;
 
+    /// <summary>
+    ///     Performs the idempotent per-account in-memory cleanup associated with this chat session ending.
+    ///     The operation does not touch the socket, and the caller is responsible for any TCP-level shutdown.
+    /// </summary>
+    private void CleanUpSession()
+    {
+        // Use Interlocked To Guarantee The Cleanup Body Runs At Most Once, Even Under Concurrent Disconnect Paths
+        if (Interlocked.Exchange(ref CleanupCompleted, 1) is 1)
             return;
-        }
+
+        // If Account Is NULL, The Session Was Never Authenticated - Nothing To Clean Up
+        if (Account is null)
+            return;
 
         // Leave All Chat Channels (With No Flags = All Channels)
         LeaveAllChannels();
@@ -297,15 +306,66 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // Send Disconnection Notification To Online Peers (Friends And Clan Members)
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 
-        // Log The Client Out And Disconnect The Chat Session
-        LogOut(); Disconnect();
-
         // Remove The Chat Session From The Chat Sessions Collection
         if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
-            Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
+            Log.Error(@"Failed To Remove Chat Session For Account Name ""{Account.Name}""", Account.Name);
+
+        // Record The Last-Active Timestamp; The Account Entity Was Loaded On A Long-Disposed Handshake Context, So Issue A Direct Update Via A Fresh Scope
+        // Fire-And-Forget Because The Cleanup Path Is Synchronous And This Telemetry Write Must Not Block The Disconnect
+        UpdateLastActiveTimestamp(Account.ID);
+    }
+
+    /// <summary>
+    ///     Issues a fire-and-forget direct update against <c>Accounts.TimestampLastActive</c> for the given account.
+    ///     Invoked from the disconnect cleanup so that every disconnect path (logout, quit, drop, kick) refreshes the timestamp uniformly, mirroring the login-side update on the authentication path.
+    /// </summary>
+    private void UpdateLastActiveTimestamp(int accountID)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await using AsyncServiceScope scope = ServiceProvider.CreateAsyncScope();
+
+                MerrickContext context = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+                await context.Accounts
+                    .Where(account => account.ID == accountID)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(account => account.TimestampLastActive, DateTimeOffset.UtcNow));
+            }
+
+            catch (Exception exception)
+            {
+                Log.Error(exception, @"Failed To Update Last-Active Timestamp For Account ID {AccountID}", accountID);
+            }
+        });
+    }
+
+    public void Terminate()
+    {
+        // For Authenticated Sessions, Notify The Client Of The Forced Logout While The Socket Is Still Open
+        if (Account is not null)
+            LogOut();
+
+        // Perform The In-Memory Cleanup
+        CleanUpSession();
+
+        // Tear Down The Underlying Socket
+        Disconnect();
 
         // Dispose Of The Chat Session
         Dispose();
+    }
+
+    /// <summary>
+    ///     Invoked by the TCP transport after the underlying socket has been closed (client logout, game quit, network drop, kick).
+    ///     Ensures the same per-account cleanup that <see cref="Terminate"/> performs runs for any disconnect path, not only the explicit termination one.
+    /// </summary>
+    protected override void OnDisconnected()
+    {
+        CleanUpSession();
+
+        base.OnDisconnected();
     }
 
     /// <summary>

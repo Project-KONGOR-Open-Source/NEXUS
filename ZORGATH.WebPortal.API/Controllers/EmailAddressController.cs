@@ -47,7 +47,8 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
                 Purpose = TokenPurpose.EmailAddressVerification,
                 EmailAddress = payload.EmailAddress,
                 Value = Guid.CreateVersion7(),
-                Data = sanitizedEmailAddress
+                Data = sanitizedEmailAddress,
+                Validity = TimeSpan.FromHours(24)
             };
 
             await MerrickContext.Tokens.AddAsync(token);
@@ -132,7 +133,8 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
             Purpose = TokenPurpose.EmailAddressUpdate,
             EmailAddress = user.EmailAddress,
             Value = Guid.CreateVersion7(),
-            Data = sanitizedEmailAddress
+            Data = sanitizedEmailAddress,
+            Validity = TimeSpan.FromHours(24)
         };
 
         await MerrickContext.Tokens.AddAsync(token);

@@ -18,7 +18,7 @@ namespace MERRICK.DatabaseContext.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("data")
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -798,6 +798,50 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.ToTable("MatchStatistics", "stat");
                 });
 
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.RedeemableCode", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int>("GoldCoinsReward")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlinkoTicketsReward")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RedeemedByAccountID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SilverCoinsReward")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("TimestampCreated")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("TimestampRedeemed")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("RedeemedByAccountID");
+
+                    b.ToTable("RedeemableCodes", "misc");
+                });
+
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.Role", b =>
                 {
                     b.Property<int>("ID")
@@ -828,6 +872,11 @@ namespace MERRICK.DatabaseContext.Migrations
                         {
                             ID = 2,
                             Name = "USER"
+                        },
+                        new
+                        {
+                            ID = 3,
+                            Name = "CUSTODIAN"
                         });
                 });
 
@@ -855,6 +904,9 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.Property<DateTimeOffset>("TimestampCreated")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<long>("Validity")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("Value")
                         .HasColumnType("uniqueidentifier");
@@ -1213,6 +1265,15 @@ namespace MERRICK.DatabaseContext.Migrations
                         });
 
                     b.Navigation("FragHistory");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.RedeemableCode", b =>
+                {
+                    b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "RedeemedByAccount")
+                        .WithMany()
+                        .HasForeignKey("RedeemedByAccountID");
+
+                    b.Navigation("RedeemedByAccount");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Clan", b =>

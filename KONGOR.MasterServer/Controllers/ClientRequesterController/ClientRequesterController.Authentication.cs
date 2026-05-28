@@ -19,6 +19,8 @@ public partial class ClientRequesterController
         if (systemInformation is null)
             return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSystemInformation)));
 
+        // Despite The C# ".Equals" Looking Ordinal, This Translates To A Plain SQL Equality, And SQL Server's Default Collation Is Case-Insensitive, So Any Casing Variant Of A Registered Account Name Matches Here
+        // Authentication Therefore Succeeds Regardless Of The Submitted Casing; Any Propagation Beyond This Method Must Use The Canonical "account.Name" Rather Than The User-Supplied "accountName" To Avoid Leaking The Caller's Casing Downstream
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .Include(account => account.Clan)
@@ -122,6 +124,8 @@ public partial class ClientRequesterController
         if (serverProof is null)
             return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectPassword)));
 
+        // Despite The C# ".Equals" Looking Ordinal, This Translates To A Plain SQL Equality, And SQL Server's Default Collation Is Case-Insensitive, So Any Casing Variant Of A Registered Account Name Matches Here
+        // Authentication Therefore Succeeds Regardless Of The Submitted Casing; Any Propagation Beyond This Method Must Use The Canonical "account.Name" Rather Than The User-Supplied "accountName" To Avoid Leaking The Caller's Casing Downstream
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User).ThenInclude(user => user.Accounts)
             .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
@@ -236,7 +240,7 @@ public partial class ClientRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        await DistributedCache.SetAccountNameForSessionCookie(cookie, accountName);
+        await DistributedCache.SetAccountNameForSessionCookie(cookie, account.Name);
 
         return Ok(PhpSerialization.Serialize(response));
     }

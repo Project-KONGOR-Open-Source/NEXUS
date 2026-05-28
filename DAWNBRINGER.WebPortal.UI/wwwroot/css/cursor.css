@@ -1,0 +1,17 @@
+/* ===========================================================
+   PROJECT KONGOR PORTAL — MYSTICAL CURSOR TRAIL (WebGL Fluid)
+
+   Adds a mystical smoky trail effect to the cursor.
+   CSS counterpart to ../js/cursor.js.
+   =========================================================== */
+
+#fluid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    pointer-events: none;
+    visibility: hidden;
+    z-index: 9999;
+}

@@ -3,6 +3,12 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
     /// <summary>
+    ///     Gets the application root service provider associated with the chat server host.
+    ///     Used by derived sessions when they need to resolve scoped services from outside a request/command scope (e.g. fire-and-forget work on the disconnect path).
+    /// </summary>
+    protected IServiceProvider ServiceProvider { get; } = serviceProvider;
+
+    /// <summary>
     ///     Gets the current hosting environment information for the web application.
     /// </summary>
     /// <remarks>
@@ -167,7 +173,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     private OneOf<object, object>? GetCommandTypeInstance(Type type)
     {
-        object instance = ActivatorUtilities.CreateInstance(serviceProvider, type);
+        object instance = ActivatorUtilities.CreateInstance(ServiceProvider, type);
 
         Type? syncInterface = type.GetInterfaces()
             .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>));

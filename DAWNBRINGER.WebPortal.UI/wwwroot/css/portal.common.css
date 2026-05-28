@@ -214,18 +214,17 @@ h1:focus {
 
 /* --- Pulsing Text Glow ------------------------------------- */
 
-@keyframes kongor-text-pulse {
-    0%, 100% { text-shadow: 0 0 16px rgba(var(--kongor-primary-rgb), 0.5), 0 0 48px rgba(var(--kongor-primary-rgb), 0.22); }
-    50% { text-shadow: 0 0 32px rgba(var(--kongor-primary-rgb), 0.8), 0 0 72px rgba(var(--kongor-primary-rgb), 0.45), 0 0 108px rgba(var(--kongor-primary-rgb), 0.2); }
-}
-
 .hero-title {
     letter-spacing: 0.05em;
-    animation: kongor-text-pulse 3s ease-in-out infinite;
+    animation-duration: 3s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
 }
 
 .account-name-glow {
-    animation: kongor-text-pulse 3s ease-in-out infinite;
+    animation-duration: 3s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
 }
 
 /* --- Section Dividers & Headers ---------------------------- */
@@ -273,14 +272,12 @@ h1:focus {
 }
 
 /* --- Logo Glow Animation ----------------------------------- */
-
-@keyframes kongor-pulse-glow {
-    0%, 100% { filter: drop-shadow(0 0 6px rgba(var(--kongor-primary-rgb), 0.45)); }
-    50% { filter: drop-shadow(0 0 18px rgba(var(--kongor-primary-rgb), 0.7)); }
-}
+/* Keyframes + theme-scoped animation-name bindings live in portal.dark.css / portal.light.css. */
 
 .logo-glow {
-    animation: kongor-pulse-glow 3s ease-in-out infinite;
+    animation-duration: 3s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
 }
 
 /* --- Footer ------------------------------------------------ */

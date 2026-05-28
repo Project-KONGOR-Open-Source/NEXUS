@@ -21,6 +21,7 @@ public sealed class MerrickContext : DbContext
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
     public DbSet<MatchParticipantStatistics> MatchParticipantStatistics => Set<MatchParticipantStatistics>();
+    public DbSet<RedeemableCode> RedeemableCodes => Set<RedeemableCode>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
@@ -37,6 +38,7 @@ public sealed class MerrickContext : DbContext
         ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
         ConfigureMatchParticipantStatistics(builder.Entity<MatchParticipantStatistics>());
+        ConfigureTokens(builder.Entity<Token>());
     }
 
     private static void ConfigureSchemas(ModelBuilder builder)
@@ -49,6 +51,7 @@ public sealed class MerrickContext : DbContext
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
         builder.Entity<MatchParticipantStatistics>().ToTable("MatchParticipantStatistics", StatisticsSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
+        builder.Entity<RedeemableCode>().ToTable("RedeemableCodes", MiscellaneousSchema);
         builder.Entity<Role>().ToTable("Roles", AuthenticationSchema);
         builder.Entity<Token>().ToTable("Tokens", AuthenticationSchema);
         builder.Entity<User>().ToTable("Users", CoreSchema);
@@ -68,6 +71,12 @@ public sealed class MerrickContext : DbContext
             {
                 ID = 2,
                 Name = UserRoles.User
+            },
+
+            new Role
+            {
+                ID = 3,
+                Name = UserRoles.Custodian
             }
         );
     }
@@ -134,5 +143,15 @@ public sealed class MerrickContext : DbContext
     private static void ConfigureMatchStatistics(EntityTypeBuilder<MatchStatistics> builder)
     {
         builder.OwnsMany(statistics => statistics.FragHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+    }
+
+    private static void ConfigureTokens(EntityTypeBuilder<Token> builder)
+    {
+        // SQL Server's "time" Type Tops Out Below 24 Hours, So Validity Is Persisted As Tick Count (bigint).
+        builder.Property(token => token.Validity).HasConversion
+        (
+            value => value.Ticks,
+            value => TimeSpan.FromTicks(value)
+        );
     }
 }

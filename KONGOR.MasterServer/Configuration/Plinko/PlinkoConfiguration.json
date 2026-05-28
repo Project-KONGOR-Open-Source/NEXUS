@@ -1,0 +1,24 @@
+{
+    "GoldCost": 50,
+    "TicketCost": 100,
+    "TierBucketOrder": [5, 3, 4, 1, 6, 2],
+    "LastUpdateTimes": "1502806719,1639282922,1639282923,1639282922,1502424000,1639282922",
+    "DropProbabilities": {
+        "Tier1": 4,
+        "Tier2": 6,
+        "Tier3": 10,
+        "Tier4": 20,
+        "Tier5": 8,
+        "Tier6": 52
+    },
+    "ExhaustionTicketRewards": {
+        "Tier1": 300,
+        "Tier2": 225,
+        "Tier3": 150,
+        "Tier4": 75
+    },
+    "ConsolationTickets": {
+        "Tier5": 50,
+        "Tier6": 25
+    }
+}
