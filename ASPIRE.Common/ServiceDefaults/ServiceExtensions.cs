@@ -41,7 +41,7 @@ public static class ServiceExtensions
         string applicationName = builder.Environment.ApplicationName;
         string? seqServerURL = builder.Configuration.GetConnectionString("seq");
 
-        // Serilog Becomes The Logging Backend But Forwards Every Event To The Already-Registered Microsoft.Extensions.Logging Providers (Including OpenTelemetry), So The Aspire Dashboard Remains Fully Functional
+        // "writeToProviders" Forwards Every Serilog Event To The Registered Microsoft.Extensions.Logging Providers (Including OpenTelemetry), So Those Providers (And Therefore The Aspire Dashboard) Also Receive Every Log Event
         // The Console And OpenTelemetry Destinations Are Owned By Those Forwarded Providers, So Serilog Itself Only Adds The File And Seq Sinks; This Keeps One Writer Per Destination And Avoids Duplicate Log Entries
         builder.Services.AddSerilog(loggerConfiguration =>
         {
