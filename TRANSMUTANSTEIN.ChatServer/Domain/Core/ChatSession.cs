@@ -23,7 +23,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     /// <summary>
     ///     The session-scoped logger, enriched with the session identifier (and, once authenticated, the account) so that every session-level log event carries that context.
     /// </summary>
-    protected ILogger Logger { get; set; } = Log.ForContext("Source.Context", nameof(ChatSession));
+    protected ILogger Logger { get; set; } = Log.ForContext<ChatSession>();
 
     /// <summary>
     ///     The instant at which the session connected, used to report the session's lifetime when it disconnects.
@@ -51,7 +51,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     {
         ConnectedAt = DateTimeOffset.UtcNow;
 
-        Logger = Log.ForContext("Source.Context", GetType().Name)
+        Logger = Log.ForContext(GetType())
             .ForContext("Session.ID", ID)
             .ForContext("Remote.EndPoint", Socket.RemoteEndPoint?.ToString());
 
