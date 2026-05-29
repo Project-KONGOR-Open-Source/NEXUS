@@ -53,17 +53,4 @@ public class Log
 
     public static void Critical(string message, params object?[] arguments)
         => Get().Fatal(message, arguments);
-
-    /*
-        // Unlike Microsoft.Extensions.Logging, Serilog Applies Its Own Minimum-Level Checks Internally
-        // So These Methods Do Not Need To Guard Their Calls With "IsEnabled" Checks, Such As In The Example Below
-
-        public static void Debug(Exception? exception, string? message, params object?[] arguments)
-        {
-            ILogger logger = Get();
-
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.Log(LogLevel.Debug, exception, message, arguments);
-        }
-    */
 }
