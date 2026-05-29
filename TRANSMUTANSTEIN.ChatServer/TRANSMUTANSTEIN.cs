@@ -10,6 +10,9 @@ public class TRANSMUTANSTEIN
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
+        // Add Serilog Logging
+        builder.AddSerilogLogging();
+
         // Configure Matchmaking Settings
         builder.Services.Configure<MatchmakingSettings>(builder.Configuration.GetSection(MatchmakingSettings.SectionName));
 

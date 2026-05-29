@@ -4,7 +4,8 @@ global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Enumerations.Statistics;
 global using ASPIRE.Common.Extensions.Collections;
 global using ASPIRE.Common.Extensions.Cryptography;
-global using ASPIRE.Common.ServiceDefaults;
+global using ASPIRE.Common.Extensions.Logging;
+global using ASPIRE.Common.Extensions.Services;
 
 global using KONGOR.MasterServer.Attributes.Serialisation;
 global using KONGOR.MasterServer.Configuration;

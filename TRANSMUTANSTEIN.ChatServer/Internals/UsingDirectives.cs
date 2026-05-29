@@ -3,7 +3,8 @@ global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Extensions.Collections;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.Constants;
-global using ASPIRE.Common.ServiceDefaults;
+global using ASPIRE.Common.Extensions.Logging;
+global using ASPIRE.Common.Extensions.Services;
 
 // TODO: Move These To A Shared Project And Remove Inter-Project Dependencies
 global using KONGOR.MasterServer.Configuration;
@@ -25,6 +26,8 @@ global using Microsoft.Extensions.Diagnostics.HealthChecks;
 global using Microsoft.Extensions.Options;
 
 global using OneOf;
+
+global using Serilog.Context;
 
 global using StackExchange.Redis;
 

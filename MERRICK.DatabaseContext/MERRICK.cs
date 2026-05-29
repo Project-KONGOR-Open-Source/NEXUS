@@ -13,6 +13,9 @@ public class MERRICK
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
+        // Add Serilog Logging
+        builder.AddSerilogLogging();
+
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {

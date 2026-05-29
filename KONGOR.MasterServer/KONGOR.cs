@@ -19,6 +19,9 @@ public class KONGOR
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
+        // Add Serilog Logging
+        builder.AddSerilogLogging();
+
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
@@ -153,6 +156,9 @@ public class KONGOR
 
         // Enable Forwarded Headers Middleware For Reverse Proxy Support
         application.UseForwardedHeaders();
+
+        // Emit One Structured Log Event Per HTTP Request
+        application.UseSerilogRequestLogging();
 
         if (application.Services.GetService<IConnectionMultiplexer>() is IConnectionMultiplexer connectionMultiplexer)
         {

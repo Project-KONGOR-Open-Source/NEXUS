@@ -1,5 +1,6 @@
 ﻿global using ASPIRE.Common.Constants;
-global using ASPIRE.Common.ServiceDefaults;
+global using ASPIRE.Common.Extensions.Logging;
+global using ASPIRE.Common.Extensions.Services;
 
 // TODO: Replace This Direct Reference With A Service Bus For Private Inter-Service Communication At The Server Level
 global using KONGOR.MasterServer.Configuration;

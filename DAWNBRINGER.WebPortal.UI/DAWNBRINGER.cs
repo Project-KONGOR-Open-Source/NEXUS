@@ -14,6 +14,9 @@ public class DAWNBRINGER
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
+        // Add Serilog Logging
+        builder.AddSerilogLogging();
+
         // Add Razor Components With Interactive Server Rendering
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
