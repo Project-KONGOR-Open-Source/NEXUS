@@ -148,22 +148,24 @@ aspire exec --resource database-context -- dotnet ef database update
 
 <br/>
 
-Install/Update .NET Aspire
+Update .NET Aspire
 
 > [!NOTE]
 > The Aspire NuGet packages referenced by the respective projects need to be in-sync with each other and with the Aspire SDK.
 
-1. update the Aspire NuGet packages to the latest version
-2. manually (for now), update the Aspire SDK in the application host project file
-3. optionally (but good practice), ensure that the service defaults are on the latest version of the project template
-    1. make sure that the latest Aspire project templates are installed by executing `dotnet new install Aspire.ProjectTemplates@X.Y.Z --force`, where `X.Y.Z` is the required Aspire version, which would ideally be the latest released version
+1. update the Aspire SDK and NuGet packages to the latest version by running `aspire update`
+2. optionally (but good practice), ensure that the service defaults are on the latest version of the project template
+    1. make sure that the latest Aspire project templates are installed by executing `dotnet new install Aspire.ProjectTemplates`
     2. optionally, update all project templates by executing `dotnet new update`
     3. make sure that the Aspire project templates are correctly installed, by executing `dotnet new list aspire --type project`
     4. create a temporary service defaults project by executing `dotnet new aspire-servicedefaults`
     5. copy the content of the generated extensions class over the already existing extensions class, and then delete the temporary project
 
 > [!NOTE]
-> Mode in-depth information is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/fundamentals/setup-tooling.
+> Mode in-depth information is available at the following resources:
+> - https://aspire.dev/get-started/prerequisites
+> - https://aspire.dev/get-started/aspire-sdk-templates
+> - https://aspire.dev/whats-new/upgrade-aspire
 
 <br/>
 
