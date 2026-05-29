@@ -23,7 +23,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     /// <summary>
     ///     The session-scoped logger, enriched with the session identifier (and, once authenticated, the account) so that every session-level log event carries that context.
     /// </summary>
-    protected Serilog.ILogger Logger { get; set; } = Log.ForContext("Source.Context", nameof(ChatSession));
+    protected ILogger Logger { get; set; } = Log.ForContext("Source.Context", nameof(ChatSession));
 
     /// <summary>
     ///     The instant at which the session connected, used to report the session's lifetime when it disconnects.
