@@ -19,7 +19,8 @@ internal static class MatchmakingTestBuilder
     static MatchmakingTestBuilder()
     {
         // The Algorithm Calls Into "TRANSMUTANSTEIN.ChatServer.Utilities.Log", Which Throws Until Initialised By The Production Host; Tests Construct The Algorithm Directly, So We Wire In A No-Op Logger Here
-        Log.Initialise(NullLogger.Instance);
+        // A Serilog Logger With No Sinks Discards Every Event, So It Serves As The No-Op Equivalent Of The Previous Microsoft.Extensions.Logging "NullLogger"
+        Log.Initialise(new Serilog.LoggerConfiguration().CreateLogger());
     }
 
     /// <summary>
