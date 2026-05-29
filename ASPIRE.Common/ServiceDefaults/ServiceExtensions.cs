@@ -128,7 +128,7 @@ public static class ServiceExtensions
 
     public static WebApplication UseRequestLogging(this WebApplication application)
     {
-        // Emit A Single Structured Log Event Summarising Each HTTP Request (Method, Path, Status Code, And Elapsed Time)
+        // Emit One Structured Log Event Per HTTP Request, Capturing Its Method, Path, Status Code, And Elapsed Time
         application.UseSerilogRequestLogging();
 
         return application;
