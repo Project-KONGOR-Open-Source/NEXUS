@@ -49,10 +49,8 @@ global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Social;
+global using TRANSMUTANSTEIN.ChatServer.Extensions.Collections;
 global using TRANSMUTANSTEIN.ChatServer.Extensions.Protocol;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Services;
 global using TRANSMUTANSTEIN.ChatServer.Utilities;
-
-// TODO: Either Move This To A Type Alias File, Or Consolidate The Duplication (Preferably The Latter)
-global using ServerStatus = ASPIRE.Common.ChatProtocol.ServerStatus;

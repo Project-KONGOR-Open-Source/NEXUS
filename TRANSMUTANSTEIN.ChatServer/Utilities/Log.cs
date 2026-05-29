@@ -1,112 +1,69 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Utilities;
+namespace TRANSMUTANSTEIN.ChatServer.Utilities;
 
 public class Log
 {
-    private static ILogger? MaybeLogger { get; set; }
+    private static Serilog.ILogger? MaybeLogger { get; set; }
 
-    public static ILogger Initialise(ILogger logger)
+    public static Serilog.ILogger Initialise(Serilog.ILogger logger)
     {
         MaybeLogger = logger;
 
         return MaybeLogger;
     }
 
-    private static ILogger Get()
-        => MaybeLogger is null ? throw new InvalidOperationException("Logger Has Not Been Initialised") : MaybeLogger;
+    private static Serilog.ILogger Get()
+        => MaybeLogger ?? throw new InvalidOperationException("Logger Has Not Been Initialised");
 
-    public static void Debug(Exception? exception, string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+    // Creates A Derived Logger That Attaches The Given Structured Property To Every Event Written Through It
+    public static Serilog.ILogger ForContext(string propertyName, object? value, bool destructureObjects = false)
+        => Get().ForContext(propertyName, value, destructureObjects);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-            logger.Log(LogLevel.Debug, exception, message, arguments);
-    }
+    public static void Trace(Exception? exception, string message, params object?[] arguments)
+        => Get().Verbose(exception, message, arguments);
 
-    public static void Debug(string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+    public static void Trace(string message, params object?[] arguments)
+        => Get().Verbose(message, arguments);
 
-        if (logger.IsEnabled(LogLevel.Debug))
-            logger.Log(LogLevel.Debug, message, arguments);
-    }
+    public static void Debug(Exception? exception, string message, params object?[] arguments)
+        => Get().Debug(exception, message, arguments);
 
-    public static void Trace(Exception? exception, string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+    public static void Debug(string message, params object?[] arguments)
+        => Get().Debug(message, arguments);
 
-        if (logger.IsEnabled(LogLevel.Trace))
-            logger.Log(LogLevel.Trace, exception, message, arguments);
-    }
+    public static void Information(Exception? exception, string message, params object?[] arguments)
+        => Get().Information(exception, message, arguments);
 
-    public static void Trace(string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+    public static void Information(string message, params object?[] arguments)
+        => Get().Information(message, arguments);
 
-        if (logger.IsEnabled(LogLevel.Trace))
-            logger.Log(LogLevel.Trace, message, arguments);
-    }
+    public static void Warning(Exception? exception, string message, params object?[] arguments)
+        => Get().Warning(exception, message, arguments);
 
-    public static void Information(Exception? exception, string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+    public static void Warning(string message, params object?[] arguments)
+        => Get().Warning(message, arguments);
 
-        if (logger.IsEnabled(LogLevel.Information))
-            logger.Log(LogLevel.Information, exception, message, arguments);
-    }
+    public static void Error(Exception? exception, string message, params object?[] arguments)
+        => Get().Error(exception, message, arguments);
 
-    public static void Information(string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+    public static void Error(string message, params object?[] arguments)
+        => Get().Error(message, arguments);
 
-        if (logger.IsEnabled(LogLevel.Information))
-            logger.Log(LogLevel.Information, message, arguments);
-    }
+    public static void Critical(Exception? exception, string message, params object?[] arguments)
+        => Get().Fatal(exception, message, arguments);
 
-    public static void Warning(Exception? exception, string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+    public static void Critical(string message, params object?[] arguments)
+        => Get().Fatal(message, arguments);
 
-        if (logger.IsEnabled(LogLevel.Warning))
-            logger.Log(LogLevel.Warning, exception, message, arguments);
-    }
+    /*
+        // Unlike Microsoft.Extensions.Logging, Serilog Applies Its Own Minimum-Level Checks Internally
+        // So These Methods Do Not Need To Guard Their Calls With "IsEnabled" Checks, Such As In The Example Below
 
-    public static void Warning(string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
+        public static void Debug(Exception? exception, string? message, params object?[] arguments)
+        {
+            ILogger logger = Get();
 
-        if (logger.IsEnabled(LogLevel.Warning))
-            logger.Log(LogLevel.Warning, message, arguments);
-    }
-
-    public static void Error(Exception? exception, string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
-
-        if (logger.IsEnabled(LogLevel.Error))
-            logger.Log(LogLevel.Error, exception, message, arguments);
-    }
-
-    public static void Error(string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
-
-        if (logger.IsEnabled(LogLevel.Error))
-            logger.Log(LogLevel.Error, message, arguments);
-    }
-
-    public static void Critical(Exception? exception, string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
-
-        if (logger.IsEnabled(LogLevel.Critical))
-            logger.Log(LogLevel.Critical, exception, message, arguments);
-    }
-
-    public static void Critical(string? message, params object?[] arguments)
-    {
-        ILogger logger = Get();
-
-        if (logger.IsEnabled(LogLevel.Critical))
-            logger.Log(LogLevel.Critical, message, arguments);
-    }
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.Log(LogLevel.Debug, exception, message, arguments);
+        }
+    */
 }

@@ -20,19 +20,57 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     private byte[] RemainingPreviouslyReceivedData { get; set; } = [];
 
+    /// <summary>
+    ///     The session-scoped logger, enriched with the session identifier (and, once authenticated, the account) so that every session-level log event carries that context.
+    /// </summary>
+    protected Serilog.ILogger Logger { get; set; } = Log.ForContext("Source.Context", nameof(ChatSession));
+
+    /// <summary>
+    ///     The instant at which the session connected, used to report the session's lifetime when it disconnects.
+    /// </summary>
+    protected DateTimeOffset ConnectedAt { get; private set; }
+
+    /// <summary>
+    ///     The most recent command processed for this session, reported when the session disconnects to aid post-mortem diagnosis.
+    /// </summary>
+    private ushort? LastProcessedCommand { get; set; }
+
+    /// <summary>
+    ///     The identifier of the account associated with this session, or <see langword="null"/> if the session is not authenticated.
+    ///     It is pushed into the ambient log context for the duration of each command, so that log events raised by the command processors are attributed to the account.
+    /// </summary>
+    protected virtual int? LoggingAccountID => null;
+
+    /// <summary>
+    ///     The name of the account associated with this session, or <see langword="null"/> if the session is not authenticated.
+    ///     It is pushed into the ambient log context for the duration of each command, so that log events raised by the command processors are attributed to the account.
+    /// </summary>
+    protected virtual string? LoggingAccountName => null;
+
     protected override void OnConnected()
     {
-        Log.Information("Chat Session ID {SessionID} Was Created", ID);
+        ConnectedAt = DateTimeOffset.UtcNow;
+
+        Logger = Log.ForContext("Source.Context", GetType().Name)
+            .ForContext("Session.ID", ID)
+            .ForContext("Remote.EndPoint", Socket.RemoteEndPoint?.ToString());
+
+        Logger.Information("Chat Session {Session.ID} Connected From {Remote.EndPoint}", ID, Socket.RemoteEndPoint?.ToString());
     }
 
     protected override void OnError(SocketError error)
     {
-        Log.Information("Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}", ID, error);
+        Logger.Information("Chat Session {Session.ID} Caught Socket Error {Socket.ErrorCode} After {Bytes.Received} Bytes Received / {Bytes.Sent} Bytes Sent", ID, error, BytesReceived, BytesSent);
     }
 
     protected override void OnDisconnected()
     {
-        Log.Information("Chat Session ID {SessionID} Has Terminated", ID);
+        TimeSpan sessionDuration = DateTimeOffset.UtcNow - ConnectedAt;
+
+        string lastProcessedCommand = LastProcessedCommand is { } command ? $"0x{command:X4}" : "(NONE)";
+
+        Logger.Information("Chat Session {Session.ID} Disconnected After {Session.DurationSeconds:F1}s; {Bytes.Received} Bytes Received / {Bytes.Sent} Bytes Sent; Last Command Processed Was {LastProcessedCommand}",
+            ID, sessionDuration.TotalSeconds, BytesReceived, BytesSent, lastProcessedCommand);
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -83,22 +121,31 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     {
         ushort command = BitConverter.ToUInt16([segment[0], segment[1]]);
 
+        LastProcessedCommand = command;
+
+        // Attach The Session And Command Context To Every Log Event Raised While This Command Is Handled, Including Those Emitted By The Command Processors Themselves
+        // These Properties Flow Through The Ambient Log Context, So They Are Also Captured By Asynchronous Command Processors Whose Continuations Run After This Method Returns
+
+        using IDisposable sessionScope = LogContext.PushProperty("Session.ID", ID);
+        using IDisposable accountIDScope = LogContext.PushProperty("Account.ID", LoggingAccountID);
+        using IDisposable accountNameScope = LogContext.PushProperty("Account.Name", LoggingAccountName);
+        using IDisposable commandScope = LogContext.PushProperty("Command", $"0x{command:X4}");
+        using IDisposable correlationScope = LogContext.PushProperty("Command.CorrelationID", Guid.CreateVersion7());
+
         Type? commandType = GetCommandType(command);
+
+        using IDisposable commandNameScope = LogContext.PushProperty("Command.Name", commandType?.Name);
 
         if (commandType is null)
         {
-            string output = new StringBuilder($@"Missing Type Mapping For Command: ""0x{command:X4}""")
-                .Append(Environment.NewLine).Append($"Message UTF8 Bytes: {string.Join(':', segment)}")
-                .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(segment)}")
-                .ToString();
-
-            Log.Error(output);
+            Log.Error("Missing Type Mapping For Command {Command}; Payload Was {Payload.Length} Bytes: {Payload.Hex} (UTF-8 Text: {Payload.Text})",
+                $"0x{command:X4}", segment.Length, segment.ToHexString(), Encoding.UTF8.GetString(segment));
         }
 
         else
         {
             if (HostEnvironment.IsDevelopment())
-                Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
+                Log.Debug("Processing Command {Command} ({Command.Name})", $"0x{command:X4}", commandType.Name);
 
             if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
             {
@@ -147,11 +194,12 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
                 catch (Exception exception)
                 {
-                    Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
+                    Log.Error(exception, @"[BUG] Unhandled Exception Processing Command {Command} ({Command.Name}); Payload {Payload.Length} Bytes: {Payload.Hex}",
+                        $"0x{command:X4}", commandType.Name, segment.Length, segment.ToHexString());
                 }
             }
 
-            else Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
+            else Log.Error(@"[BUG] Could Not Create Command Type Instance For Command {Command} ({Command.Name})", $"0x{command:X4}", commandType.Name);
         }
     }
 
@@ -200,7 +248,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     {
         if (buffer.Size > ChatProtocol.MAX_PACKET_SIZE)
         {
-            Log.Error(@"Packet Of {PacketSize} Bytes Exceeds Maximum Allowed Size Of {MaximumPacketSize} Bytes", buffer.Size, ChatProtocol.MAX_PACKET_SIZE);
+            Logger.Error("Outbound Packet Of {Packet.Size} Bytes Exceeds The Maximum Allowed Size Of {Packet.MaximumSize} Bytes And Will Not Be Sent", buffer.Size, ChatProtocol.MAX_PACKET_SIZE);
 
             return false;
         }

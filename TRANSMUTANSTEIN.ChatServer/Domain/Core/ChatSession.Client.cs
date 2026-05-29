@@ -27,10 +27,23 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// </summary>
     public HashSet<int> CurrentChannels { get; set; } = [];
 
+    /// <summary>
+    ///     Surfaces the authenticated account's identifier to the base session, so that it can be pushed into the ambient log context while commands are processed.
+    /// </summary>
+    protected override int? LoggingAccountID => Account?.ID;
+
+    /// <summary>
+    ///     Surfaces the authenticated account's name to the base session, so that it can be pushed into the ambient log context while commands are processed.
+    /// </summary>
+    protected override string? LoggingAccountName => Account?.Name;
+
     public ClientChatSession Accept(Account account)
     {
         // Link The Account To The Chat Session
         Account = account;
+
+        // Enrich This Session's Logger With The Authenticated Account, So That Every Subsequent Session-Level Log Event Is Attributed To It
+        Logger = Logger.ForContext("Account.ID", account.ID).ForContext("Account.Name", account.Name);
 
         // Add The Chat Session To The Chat Sessions Collection
         Context.ClientChatSessions.AddOrUpdate(account.Name, this, (key, existing) => this);

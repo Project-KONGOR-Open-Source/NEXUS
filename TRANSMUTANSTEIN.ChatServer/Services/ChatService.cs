@@ -6,7 +6,7 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        Log.Initialise(serviceProvider.GetRequiredService<ILogger<Log>>());
+        Log.Initialise(serviceProvider.GetRequiredService<Serilog.ILogger>());
 
         IPAddress address = IPAddress.Any;
 
