@@ -1,4 +1,4 @@
-namespace ASPIRE.Common.ServiceDefaults;
+namespace ASPIRE.Common.Extensions.Services;
 
 // Adds common Aspire services: service discovery, resilience, health checks, and OpenTelemetry.
 // This project should be referenced by each service project in your solution.
@@ -11,8 +11,6 @@ public static class ServiceExtensions
     public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         builder.ConfigureOpenTelemetry();
-
-        builder.AddSerilogLogging();
 
         builder.AddDefaultHealthChecks();
 
@@ -32,34 +30,6 @@ public static class ServiceExtensions
         // {
         //     options.AllowedSchemes = ["https"];
         // });
-
-        return builder;
-    }
-
-    public static TBuilder AddSerilogLogging<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
-    {
-        string applicationName = builder.Environment.ApplicationName;
-        string? seqServerURL = builder.Configuration.GetConnectionString("seq");
-
-        // "writeToProviders" Forwards Every Serilog Event To The Registered Microsoft.Extensions.Logging Providers (Including OpenTelemetry), So Those Providers (And Therefore The Aspire Dashboard) Also Receive Every Log Event
-        // The Console And OpenTelemetry Destinations Are Owned By Those Forwarded Providers, So Serilog Itself Only Adds The File And Seq Sinks; This Keeps One Writer Per Destination And Avoids Duplicate Log Entries
-        builder.Services.AddSerilog(loggerConfiguration =>
-        {
-            loggerConfiguration
-                .ReadFrom.Configuration(builder.Configuration)
-                .Enrich.FromLogContext()
-                .Enrich.WithMachineName()
-                .Enrich.WithEnvironmentName()
-                .Enrich.WithThreadId()
-                .Enrich.WithExceptionDetails()
-                .WriteTo.File($"logs/{applicationName}..log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 30, flushToDiskInterval: TimeSpan.FromSeconds(1));
-
-            // TODO: Move Logs To Repository Root Once The Source Code Moves To A "source" Directory
-
-            if (string.IsNullOrWhiteSpace(seqServerURL) is false)
-                loggerConfiguration.WriteTo.Seq(seqServerURL);
-        },
-        writeToProviders: true);
 
         return builder;
     }
@@ -124,14 +94,6 @@ public static class ServiceExtensions
             .AddCheck("self", () => HealthCheckResult.Healthy(), ["live"]);
 
         return builder;
-    }
-
-    public static WebApplication UseRequestLogging(this WebApplication application)
-    {
-        // Emit One Structured Log Event Per HTTP Request, Capturing Its Method, Path, Status Code, And Elapsed Time
-        application.UseSerilogRequestLogging();
-
-        return application;
     }
 
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
