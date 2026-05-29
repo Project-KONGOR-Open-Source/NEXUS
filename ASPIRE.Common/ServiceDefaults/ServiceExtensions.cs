@@ -126,6 +126,14 @@ public static class ServiceExtensions
         return builder;
     }
 
+    public static WebApplication UseRequestLogging(this WebApplication application)
+    {
+        // Emit A Single Structured Log Event Summarising Each HTTP Request (Method, Path, Status Code, And Elapsed Time)
+        application.UseSerilogRequestLogging();
+
+        return application;
+    }
+
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
         // All health checks must pass for app to be considered ready to accept traffic after starting
