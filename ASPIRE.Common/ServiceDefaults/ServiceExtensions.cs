@@ -12,6 +12,8 @@ public static class ServiceExtensions
     {
         builder.ConfigureOpenTelemetry();
 
+        builder.AddSerilogLogging();
+
         builder.AddDefaultHealthChecks();
 
         builder.Services.AddServiceDiscovery();
@@ -30,6 +32,34 @@ public static class ServiceExtensions
         // {
         //     options.AllowedSchemes = ["https"];
         // });
+
+        return builder;
+    }
+
+    public static TBuilder AddSerilogLogging<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    {
+        string applicationName = builder.Environment.ApplicationName;
+        string? seqServerURL = builder.Configuration.GetConnectionString("seq");
+
+        // Serilog Becomes The Logging Backend But Forwards Every Event To The Already-Registered Microsoft.Extensions.Logging Providers (Including OpenTelemetry), So The Aspire Dashboard Remains Fully Functional
+        // The Console And OpenTelemetry Destinations Are Owned By Those Forwarded Providers, So Serilog Itself Only Adds The File And Seq Sinks; This Keeps One Writer Per Destination And Avoids Duplicate Log Entries
+        builder.Services.AddSerilog(loggerConfiguration =>
+        {
+            loggerConfiguration
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .Enrich.WithMachineName()
+                .Enrich.WithEnvironmentName()
+                .Enrich.WithThreadId()
+                .Enrich.WithExceptionDetails()
+                .WriteTo.File($"logs/{applicationName}..log", rollingInterval: RollingInterval.Day, retainedFileCountLimit: 30, flushToDiskInterval: TimeSpan.FromSeconds(1));
+
+            // TODO: Move Logs To Repository Root Once The Source Code Moves To A "source" Directory
+
+            if (string.IsNullOrWhiteSpace(seqServerURL) is false)
+                loggerConfiguration.WriteTo.Seq(seqServerURL);
+        },
+        writeToProviders: true);
 
         return builder;
     }
