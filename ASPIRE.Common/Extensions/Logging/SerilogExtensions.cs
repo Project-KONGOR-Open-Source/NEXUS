@@ -31,7 +31,7 @@ public static class SerilogExtensions
         return builder;
     }
 
-    public static WebApplication UseSerilogRequestLogging(this WebApplication application)
+    public static WebApplication UseSerilogLogging(this WebApplication application)
     {
         // Emit One Structured Log Event Per HTTP Request, Capturing Its Method, Path, Status Code, And Elapsed Time
         application.UseSerilogRequestLogging();

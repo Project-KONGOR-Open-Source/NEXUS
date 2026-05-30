@@ -158,7 +158,7 @@ public class KONGOR
         application.UseForwardedHeaders();
 
         // Emit One Structured Log Event Per HTTP Request
-        application.UseSerilogRequestLogging();
+        application.UseSerilogLogging();
 
         if (application.Services.GetService<IConnectionMultiplexer>() is IConnectionMultiplexer connectionMultiplexer)
         {

@@ -231,7 +231,7 @@ public class ZORGATH
         application.UseForwardedHeaders();
 
         // Emit One Structured Log Event Per HTTP Request
-        application.UseSerilogRequestLogging();
+        application.UseSerilogLogging();
 
         // Configure Development-Specific Middleware
         if (application.Environment.IsDevelopment())
