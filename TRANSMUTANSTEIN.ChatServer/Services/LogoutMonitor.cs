@@ -16,7 +16,7 @@ public class LogoutMonitor(IConnectionMultiplexer distributedCacheProvider, ILog
 
         await Subscriber.SubscribeAsync(AccountLogoutChannel, HandleAccountLogout);
 
-        logger.LogInformation(@"Subscribed To Account Logout Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
+        logger.LogInformation(@"Subscribed To Account Logout Event Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -26,7 +26,7 @@ public class LogoutMonitor(IConnectionMultiplexer distributedCacheProvider, ILog
 
         await Subscriber.UnsubscribeAsync(AccountLogoutChannel);
 
-        logger.LogInformation(@"Unsubscribed From Account Logout Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
+        logger.LogInformation(@"Unsubscribed From Account Logout Event Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
     }
 
     private void HandleAccountLogout(RedisChannel channel, RedisValue message)
@@ -35,7 +35,7 @@ public class LogoutMonitor(IConnectionMultiplexer distributedCacheProvider, ILog
 
         if (accountName is null)
         {
-            logger.LogWarning(@"Received Empty Or Null Payload On Account Logout Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
+            logger.LogWarning(@"Received Empty Or Null Payload On Account Logout Event Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
 
             return;
         }
