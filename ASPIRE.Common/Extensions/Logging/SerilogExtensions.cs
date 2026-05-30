@@ -5,7 +5,7 @@ public static class SerilogExtensions
     public static TBuilder AddSerilogLogging<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
     {
         string applicationName = builder.Environment.ApplicationName;
-        string? seqServerURL = builder.Configuration.GetConnectionString("seq");
+        string? logServerURL = builder.Configuration.GetConnectionString("log-server");
 
         builder.Services.AddSerilog(loggerConfiguration =>
         {
@@ -20,8 +20,8 @@ public static class SerilogExtensions
 
             // TODO: Move Logs To Repository Root Once The Source Code Moves To A "source" Directory
 
-            if (string.IsNullOrWhiteSpace(seqServerURL) is false)
-                loggerConfiguration.WriteTo.Seq(seqServerURL);
+            if (string.IsNullOrWhiteSpace(logServerURL) is false)
+                loggerConfiguration.WriteTo.Seq(logServerURL);
         },
 
         // Forwards Every Serilog Event To The Registered Microsoft.Extensions.Logging Providers (Including OpenTelemetry), So Those Providers (And Therefore The Aspire Dashboard) Also Receive Every Log Event
