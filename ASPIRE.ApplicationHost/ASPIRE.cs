@@ -95,9 +95,40 @@ public class ASPIRE
         IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase("database", databaseName)
             .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
 
+        // Add Structured Log Server Resource
+        IResourceBuilder<SeqResource> logServer = builder.AddSeq("seq")
+            .WithImageTag("latest") // Latest Seq Image: https://hub.docker.com/r/datalust/seq/tags
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("seq-data") // Persist Ingested Logs As Docker-Managed Data Volume
+            .WithEnvironment("SEQ_DIAGNOSTICS_INTERNALLOGGINGLEVEL", "Warning"); // Quieten Seq's Own Internal Maintenance Logging, Which By Default Goes Into STDERR At Information Level
+
+        // In Non-Development Environments, Protect The Seq UI With An Administrator Password
+        if (builder.Environment.IsDevelopment() is false)
+        {
+            // Set Seq Administrator Password Parameter Name And Environment Variable Name
+            const string seqAdministratorPasswordParameterName = "seq-password";
+            const string seqAdministratorPasswordEnvironmentVariableName = "SEQ_PASSWORD";
+
+            // Attempt To Resolve Seq Administrator Password From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+            string? resolvedSeqAdministratorPassword = configuration[$"Parameters:{seqAdministratorPasswordParameterName}"] ?? configuration[seqAdministratorPasswordEnvironmentVariableName];
+
+            // Populate Seq Administrator Password If Available In User Secrets Or Environment Variables
+            IResourceBuilder<ParameterResource> seqAdministratorPassword = resolvedSeqAdministratorPassword is not null
+                ? builder.AddParameter(seqAdministratorPasswordParameterName, resolvedSeqAdministratorPassword, secret: true)
+                : builder.AddParameter(seqAdministratorPasswordParameterName, secret: true);
+
+            // Set The Initial Administrator Password On The Seq Resource
+            logServer.WithEnvironment("SEQ_FIRSTRUN_ADMINPASSWORD", seqAdministratorPassword);
+
+            // Create Resource Relationship After Parent Resource Is Defined
+            seqAdministratorPassword
+                .WithDescription("Seq Administrator Password") // Add Description To Parameter Resource
+                .WithParentRelationship(logServer); // Set Log Server As Parent Resource
+        }
+
         // Add Database Project
         builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithParentRelationship(databaseServer) // Set Database Server As Parent Resource
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
@@ -105,6 +136,7 @@ public class ASPIRE
         builder.AddProject<KONGOR>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
             .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
@@ -115,6 +147,7 @@ public class ASPIRE
         builder.AddProject<TRANSMUTANSTEIN>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
             .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
@@ -124,6 +157,7 @@ public class ASPIRE
         // Add Web Portal API Project
         IResourceBuilder<ProjectResource> webPortalAPI = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Local STMP Server In Development
@@ -209,6 +243,7 @@ public class ASPIRE
         # pragma warning disable ASPIREBROWSERLOGS001
         builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
             .WithReference(webPortalAPI).WaitFor(webPortalAPI) // Connect To Web Portal API And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
             .WithBrowserLogs(userDataMode: BrowserUserDataMode.Isolated); // Experimental Extension; Surfaces Web Browser Logs In The Aspire Dashboard
         # pragma warning restore ASPIREBROWSERLOGS001
