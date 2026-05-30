@@ -95,35 +95,20 @@ public class ASPIRE
         IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase("database", databaseName)
             .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
 
+        // The Default Seq Administrator User Name
+        const string logServerFirstRunAdministratorUserName = "admin";
+
+        // Any Well-Known Password; Needs To Be Changed On First Login
+        const string logServerFirstRunAdministratorPassword = "admin";
+
         // Add Structured Log Server Resource
         IResourceBuilder<SeqResource> logServer = builder.AddSeq("log-server")
             .WithImageTag("latest") // Latest Seq Image: https://hub.docker.com/r/datalust/seq/tags
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("log-server-data") // Persist Ingested Logs As Docker-Managed Data Volume
-            .WithEnvironment("SEQ_DIAGNOSTICS_INTERNALLOGGINGLEVEL", "Warning"); // Quieten Seq's Own Internal Maintenance Logging, Which By Default Goes Into STDERR At Information Level
-
-        // In Non-Development Environments, Protect The Log Server UI With An Administrator Password
-        if (builder.Environment.IsDevelopment() is false)
-        {
-            // Set Log Server Administrator Password Parameter Name And Environment Variable Name
-            const string logServerAdministratorPasswordParameterName = "log-server-password";
-            const string logServerAdministratorPasswordEnvironmentVariableName = "LOG_SERVER_PASSWORD";
-
-            // Attempt To Resolve Log Server Administrator Password From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
-            string? resolvedLogServerAdministratorPassword = configuration[$"Parameters:{logServerAdministratorPasswordParameterName}"] ?? configuration[logServerAdministratorPasswordEnvironmentVariableName];
-
-            // Populate Log Server Administrator Password If Available In User Secrets Or Environment Variables
-            IResourceBuilder<ParameterResource> logServerAdministratorPassword = resolvedLogServerAdministratorPassword is not null
-                ? builder.AddParameter(logServerAdministratorPasswordParameterName, resolvedLogServerAdministratorPassword, secret: true)
-                : builder.AddParameter(logServerAdministratorPasswordParameterName, secret: true);
-
-            // Set The Initial Administrator Password On The Log Server Resource
-            logServer.WithEnvironment("SEQ_FIRSTRUN_ADMINPASSWORD", logServerAdministratorPassword);
-
-            // Create Resource Relationship After Parent Resource Is Defined
-            logServerAdministratorPassword
-                .WithDescription("Log Server Administrator Password") // Add Description To Parameter Resource
-                .WithParentRelationship(logServer); // Set Log Server As Parent Resource
-        }
+            .WithEnvironment("SEQ_DIAGNOSTICS_INTERNALLOGGINGLEVEL", "Warning") // Quieten Seq's Own Internal Maintenance Logging, Which By Default Goes Into STDERR At Information Level
+            .WithEnvironment("ACCEPT_EULA", "Y") // Automatically Accept End User License Agreement: https://datalust.co/docs/environment-variables
+            .WithEnvironment("SEQ_FIRSTRUN_ADMINUSERNAME", logServerFirstRunAdministratorUserName) // Set The Initial Administrator User Name On The Log Server Resource
+            .WithEnvironment("SEQ_FIRSTRUN_ADMINPASSWORD", logServerFirstRunAdministratorPassword); // Set The Initial Administrator Password On The Log Server Resource
 
         // Add Database Project
         builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
