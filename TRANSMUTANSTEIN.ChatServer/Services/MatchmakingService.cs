@@ -8,11 +8,13 @@ public class MatchmakingService : BackgroundService, IDisposable
 {
     private readonly IOptions<MatchmakingSettings> _settings;
     private readonly IDatabase _distributedCacheStore;
+    private readonly ILogger<MatchmakingService> _logger;
 
-    public MatchmakingService(IOptions<MatchmakingSettings> settings, IDatabase distributedCacheStore)
+    public MatchmakingService(IOptions<MatchmakingSettings> settings, IDatabase distributedCacheStore, ILogger<MatchmakingService> logger)
     {
         _settings = settings;
         _distributedCacheStore = distributedCacheStore;
+        _logger = logger;
     }
 
     /// <summary>
@@ -51,18 +53,18 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Log.Information("Matchmaking Service Has Started");
+        _logger.LogInformation("Matchmaking Service Has Started");
 
         await RunMatchBroker(stoppingToken);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        Log.Information("Matchmaking Service Is Stopping");
+        _logger.LogInformation("Matchmaking Service Is Stopping");
 
         await base.StopAsync(cancellationToken);
 
-        Log.Information("Matchmaking Service Has Stopped");
+        _logger.LogInformation("Matchmaking Service Has Stopped");
     }
 
     public override void Dispose()
@@ -122,7 +124,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
             PoolSizeParameters poolSizeParameters = MatchmakingAlgorithm.ResolvePoolSizeParameters(queuedPlayerCount, _settings.Value);
 
-            Log.Debug(@"Broker Cycle: {PlayerCount} Queued Players, Pool Tier = {PoolTier}", queuedPlayerCount, poolSizeParameters.Tier);
+            _logger.LogDebug(@"Broker Cycle: {PlayerCount} Queued Players, Pool Tier = {PoolTier}", queuedPlayerCount, poolSizeParameters.Tier);
 
             IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(regularGroups, _settings.Value, poolSizeParameters);
 
@@ -161,7 +163,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         if (server is null || serverSession is null)
         {
-            Log.Warning(@"No Available Server Found For Match GUID {MatchGUID}", match.GUID);
+            _logger.LogWarning(@"No Available Server Found For Match GUID {MatchGUID}", match.GUID);
 
             return false;
         }
@@ -178,7 +180,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Send CreateMatch Command To The Game Server
         SendCreateMatch(match, serverSession);
 
-        Log.Information(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
+        _logger.LogInformation(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
             match.GUID, server.ID, match.ServerAddress, match.ServerPort);
 
         // Send Leave Queue Notification To Dismiss The Client's Queue Timer
@@ -204,7 +206,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         match.State = MatchmakingMatchState.WaitingForPlayers;
 
-        Log.Information(@"Match Notifications Sent: GUID={MatchGUID}, Server={ServerAddress}:{ServerPort}",
+        _logger.LogInformation(@"Match Notifications Sent: GUID={MatchGUID}, Server={ServerAddress}:{ServerPort}",
             match.GUID, server.IPAddress, server.Port);
 
         return true;
@@ -388,20 +390,20 @@ public class MatchmakingService : BackgroundService, IDisposable
         {
             if (Context.MatchServerChatSessions.TryGetValue(server.ID, out MatchServerChatSession? session))
             {
-                Log.Debug(@"Found Idle Server With Session: ServerID={ServerID}, ServerName={ServerName}", server.ID, server.Name);
+                _logger.LogDebug(@"Found Idle Server With Session: ServerID={ServerID}, ServerName={ServerName}", server.ID, server.Name);
 
                 return (server, session);
             }
 
-            Log.Debug(@"Idle Server Has No Active Chat Session: ServerID={ServerID}", server.ID);
+            _logger.LogDebug(@"Idle Server Has No Active Chat Session: ServerID={ServerID}", server.ID);
         }
 
         // No Idle Server With Active Session Found
         if (servers.Count == 0)
-            Log.Warning(@"No Servers Available For Match GUID {MatchGUID}", match.GUID);
+            _logger.LogWarning(@"No Servers Available For Match GUID {MatchGUID}", match.GUID);
 
         else
-            Log.Warning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {ServerCount})", match.GUID, servers.Count);
+            _logger.LogWarning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {ServerCount})", match.GUID, servers.Count);
 
         return (null, null);
     }
