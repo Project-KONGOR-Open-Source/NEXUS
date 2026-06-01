@@ -69,7 +69,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         string lastProcessedCommand = LastProcessedCommand is { } command ? $"0x{command:X4}" : "(NONE)";
 
-        Logger.Information("Chat Session {SessionID} Disconnected After {SessionDurationSeconds:F1}s; {BytesReceived} Bytes Received / {BytesSent} Bytes Sent; Last Command Processed Was {LastProcessedCommand}",
+        Logger.Information("Chat Session {SessionID} Disconnected After {SessionDurationSeconds:F3}s; {BytesReceived} Bytes Received / {BytesSent} Bytes Sent; Last Command Processed Was {LastProcessedCommand}",
             ID, sessionDuration.TotalSeconds, BytesReceived, BytesSent, lastProcessedCommand);
     }
 
