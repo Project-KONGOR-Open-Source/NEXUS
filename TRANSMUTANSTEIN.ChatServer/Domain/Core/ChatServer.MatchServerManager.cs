@@ -20,7 +20,7 @@ public class MatchServerManagerChatServer(IServiceProvider serviceProvider, IPAd
 
     protected override void OnError(SocketError error)
     {
-        Log.Error("Chat Server Has Encountered A Match Server Manager Connection Socket Error: {SocketError}", error);
+        Log.Error("Chat Server Has Encountered A Match Server Manager Connection Socket Error: {SocketErrorCode}", error);
 
         base.OnError(error);
     }

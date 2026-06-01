@@ -119,7 +119,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Check For Duplicate Match Server Manager Instances
         if (Context.MatchServerManagerChatSessions.TryGetValue(requestData.ServerManagerID, out MatchServerManagerChatSession? existingSession))
         {
-            Log.Information(@"Disconnecting Duplicate Match Server Manager Instance With ID ""{ServerID}"" And Address ""{Address}"")", requestData.ServerManagerID, manager.IPAddress);
+            Log.Information(@"Disconnecting Duplicate Match Server Manager Instance With ID ""{ServerManagerID}"" And Address ""{Address}"")", requestData.ServerManagerID, manager.IPAddress);
 
             await existingSession.Terminate(distributedCacheStore);
 
@@ -129,7 +129,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Register Match Server Manager
         Context.MatchServerManagerChatSessions[requestData.ServerManagerID] = session;
 
-        Log.Information(@"Match Server Manager Connection Accepted - Manager ID: ""{ManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}""",
+        Log.Information(@"Match Server Manager Connection Accepted - Manager ID: ""{ServerManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}""",
             requestData.ServerManagerID, manager.HostAccountName, manager.IPAddress);
 
         // Accept Connection And Send Configuration
@@ -137,7 +137,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             .SetOnline()
             .SendOptions();
 
-        Log.Debug(@"Match Server Manager ID ""{ManagerID}"" Options - Statistics: Enabled, Replays: Enabled, HTTP Upload: Enabled", requestData.ServerManagerID);
+        Log.Debug(@"Match Server Manager ID ""{ServerManagerID}"" Options - Statistics: Enabled, Replays: Enabled, HTTP Upload: Enabled", requestData.ServerManagerID);
     }
 }
 

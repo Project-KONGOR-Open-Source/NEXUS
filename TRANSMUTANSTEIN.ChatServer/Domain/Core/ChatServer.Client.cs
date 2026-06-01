@@ -20,7 +20,7 @@ public class ClientChatServer(IServiceProvider serviceProvider, IPAddress addres
 
     protected override void OnError(SocketError error)
     {
-        Log.Error("Chat Server Has Encountered A Client Connection Socket Error: {SocketError}", error);
+        Log.Error("Chat Server Has Encountered A Client Connection Socket Error: {SocketErrorCode}", error);
 
         base.OnError(error);
     }

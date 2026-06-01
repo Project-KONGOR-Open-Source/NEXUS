@@ -39,8 +39,8 @@ public partial class ClientRequesterController
         // Requester Account Does Not Have Target As A Friend
         if (friendToRemoveFromRequesterAccount is null)
         {
-            Logger.LogError(@"[BUG] Account ""{AccountName}"" (ID: {AccountID}) Attempted To Remove Non-Existent Friend ""{FriendName}""",
-                requesterAccount.Name, requesterAccount.ID, accountName);
+            Logger.LogError(@"[BUG] Account ""{AccountName}"" (ID: {AccountID}) Attempted To Remove Non-Existent Friend With ID {FriendID}",
+                requesterAccount.Name, requesterAccount.ID, friendID);
 
             // Return Success Even If Friend Not Found, For Idempotency
             return Ok(PhpSerialization.Serialize(new Dictionary<string, string> { { "remove_buddy", "OK" } }));
@@ -62,7 +62,7 @@ public partial class ClientRequesterController
         if (friendToRemoveFromTargetAccount is null)
         {
             Logger.LogError(@"[BUG] Account ""{AccountName}"" (ID: {AccountID}) Attempted To Remove Friend ""{FriendName}"", But Target Account Does Not Have Them As A Friend",
-                targetAccount.Name, targetAccount.ID, requesterAccount.Name);
+                requesterAccount.Name, requesterAccount.ID, targetAccount.Name);
 
             // Return Success Even If Friend Not Found, For Idempotency
             return Ok(PhpSerialization.Serialize(new Dictionary<string, string> { { "remove_buddy", "OK" } }));
