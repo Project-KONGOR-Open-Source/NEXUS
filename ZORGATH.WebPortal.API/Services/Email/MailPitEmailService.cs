@@ -146,14 +146,14 @@ public class MailPitEmailService(IOptions<OperationalConfiguration> configuratio
 
         if (string.IsNullOrWhiteSpace(SMTPConfiguration.Host))
         {
-            Logger.LogError("Failed To Send Email To {EmailAddress} Using MailPit: SMTP Host Is Not Configured", emailAddress);
+            Logger.LogError("Failed To Send Email To {RecipientEmailAddress} Using MailPit: SMTP Host Is Not Configured", emailAddress);
 
             return false;
         }
 
         if (SMTPConfiguration.Port is null)
         {
-            Logger.LogError("Failed To Send Email To {EmailAddress} Using MailPit: SMTP Port Is Not Configured", emailAddress);
+            Logger.LogError("Failed To Send Email To {RecipientEmailAddress} Using MailPit: SMTP Port Is Not Configured", emailAddress);
 
             return false;
         }
@@ -165,14 +165,14 @@ public class MailPitEmailService(IOptions<OperationalConfiguration> configuratio
 
             await client.SendAsync(message);
 
-            Logger.LogDebug("Email Sent To {EmailAddress} Using MailPit: {Subject}", emailAddress, subject);
+            Logger.LogDebug("Email Sent To {RecipientEmailAddress} Using MailPit: {Subject}", emailAddress, subject);
 
             return true;
         }
 
         catch (Exception exception)
         {
-            Logger.LogError(exception, "Failed To Send Email To {EmailAddress} Using MailPit", emailAddress);
+            Logger.LogError(exception, "Failed To Send Email To {RecipientEmailAddress} Using MailPit", emailAddress);
 
             return false;
         }

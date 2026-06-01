@@ -35,7 +35,7 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
 
             if (contentResult.Content is null)
             {
-                Logger.LogError(@"[BUG] Sanitized Email Address ""{Payload.EmailAddress}"" Is NULL", payload.EmailAddress);
+                Logger.LogError(@"[BUG] Sanitized Email Address ""{SubmittedEmailAddress}"" Is NULL", payload.EmailAddress);
 
                 return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
             }
@@ -106,7 +106,7 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
 
         if (contentResult.Content is null)
         {
-            Logger.LogError(@"[BUG] Sanitized Email Address ""{Payload.EmailAddress}"" Is NULL", payload.EmailAddress);
+            Logger.LogError(@"[BUG] Sanitized Email Address ""{SubmittedEmailAddress}"" Is NULL", payload.EmailAddress);
 
             return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
         }
@@ -183,7 +183,7 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
         bool sent = await EmailService.SendEmailAddressUpdateConfirmation(oldEmailAddress, newEmailAddress);
 
         if (sent.Equals(false))
-            Logger.LogWarning("Email Address Was Updated Successfully But A Confirmation Email Could Not Be Sent To {EmailAddress}", newEmailAddress);
+            Logger.LogWarning("Email Address Was Updated Successfully But A Confirmation Email Could Not Be Sent To {UserEmailAddress}", newEmailAddress);
 
         return Ok("Email Address Was Updated Successfully");
     }

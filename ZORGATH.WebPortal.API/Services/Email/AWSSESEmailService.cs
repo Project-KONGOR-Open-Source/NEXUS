@@ -145,21 +145,21 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
         if (string.IsNullOrWhiteSpace(SMTPConfiguration.Host))
         {
-            Logger.LogError("Failed To Send Email To {EmailAddress} Using AWS SES: SMTP Host Is Not Configured", emailAddress);
+            Logger.LogError("Failed To Send Email To {RecipientEmailAddress} Using AWS SES: SMTP Host Is Not Configured", emailAddress);
 
             return false;
         }
 
         if (SMTPConfiguration.Port is null)
         {
-            Logger.LogError("Failed To Send Email To {EmailAddress} Using AWS SES: SMTP Port Is Not Configured", emailAddress);
+            Logger.LogError("Failed To Send Email To {RecipientEmailAddress} Using AWS SES: SMTP Port Is Not Configured", emailAddress);
 
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(SMTPConfiguration.Username) || string.IsNullOrWhiteSpace(SMTPConfiguration.Password))
         {
-            Logger.LogError("Failed To Send Email To {EmailAddress} Using AWS SES: SMTP Credentials Are Not Configured", emailAddress);
+            Logger.LogError("Failed To Send Email To {RecipientEmailAddress} Using AWS SES: SMTP Credentials Are Not Configured", emailAddress);
 
             return false;
         }
@@ -175,19 +175,19 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
             // AWS SES Returns A Response Starting With "Ok" On Success (e.g. "Ok 010b018307ef6101-59cfc741-dcbf-44a5-a935-b76452b87bf3-000000")
             if (response.StartsWith("OK", StringComparison.OrdinalIgnoreCase))
             {
-                Logger.LogDebug("Email Sent To {EmailAddress} Using AWS SES: {Subject}", emailAddress, subject);
+                Logger.LogDebug("Email Sent To {RecipientEmailAddress} Using AWS SES: {Subject}", emailAddress, subject);
 
                 return true;
             }
 
-            Logger.LogError("Email Sending Failure Using AWS SES To {EmailAddress}: {Response}", emailAddress, response);
+            Logger.LogError("Email Sending Failure Using AWS SES To {RecipientEmailAddress}: {Response}", emailAddress, response);
 
             return false;
         }
 
         catch (Exception exception)
         {
-            Logger.LogError(exception, "Failed To Send Email To {EmailAddress} Using AWS SES", emailAddress);
+            Logger.LogError(exception, "Failed To Send Email To {RecipientEmailAddress} Using AWS SES", emailAddress);
 
             return false;
         }
