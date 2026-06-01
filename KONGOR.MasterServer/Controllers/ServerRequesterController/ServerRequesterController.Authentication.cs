@@ -68,7 +68,7 @@ public partial class ServerRequesterController
         response["cdn_upload_host"] = Configuration.CDN.Host;
         response["cdn_upload_target"] = "upload";
 
-        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
+        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerAddress}"" With Cookie ""{MatchServerManagerCookie}""",
             matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
@@ -174,7 +174,7 @@ public partial class ServerRequesterController
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerIPAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
+        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
             matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
@@ -222,7 +222,7 @@ public partial class ServerRequesterController
 
         if (account is null)
         {
-            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{Cookie}""", accountNameForSessionCookie, cookie);
+            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{SessionCookie}""", accountNameForSessionCookie, cookie);
 
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }

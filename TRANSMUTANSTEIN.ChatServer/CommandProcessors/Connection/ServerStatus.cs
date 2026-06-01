@@ -7,14 +7,14 @@ public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousComman
     {
         ServerStatusRequestData requestData = new (buffer);
 
-        Log.Debug(@"Received Status Update From Server ID ""{ServerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Status: {Status}",
+        Log.Debug(@"Received Status Update From Server ID ""{MatchServerID}"" - Name: ""{MatchServerName}"", Address: ""{MatchServerAddress}:{MatchServerPort}"", Location: ""{Location}"", Status: {Status}",
             requestData.ServerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Status);
 
         MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(requestData.ServerID);
 
         if (matchServer is null)
         {
-            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{ServerID}""", requestData.ServerID);
+            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{MatchServerID}""", requestData.ServerID);
 
             return;
         }
@@ -31,7 +31,7 @@ public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousComman
         // Update Distributed Cache
         await distributedCacheStore.SetMatchServer(matchServer.HostAccountName, matchServer);
 
-        Log.Information(@"Updated Status For Match Server ID ""{ServerID}"" To ""{Status}""", requestData.ServerID, requestData.Status);
+        Log.Information(@"Updated Status For Match Server ID ""{MatchServerID}"" To ""{Status}""", requestData.ServerID, requestData.Status);
 
         // TODO: If Status Is IDLE, Mark Server As Available For Match Allocation
         // TODO: If Status Is ACTIVE, Update Match Information And Player Availability States

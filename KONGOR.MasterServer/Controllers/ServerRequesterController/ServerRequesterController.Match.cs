@@ -73,7 +73,7 @@ public partial class ServerRequesterController
             ["disabled_hero_list"] = string.Empty
         };
 
-        Logger.LogInformation(@"Match ID {MatchID} Has Started - Host Name: {HostAccountName}, Server ID: {ServerID}, Map: {Map}",
+        Logger.LogInformation(@"Match ID {MatchID} Has Started - Host Name: {HostAccountName}, Server ID: {MatchServerID}, Map: {Map}",
             matchInformation.MatchID, hostAccountName, matchServer.ID, map);
 
         return Ok(PhpSerialization.Serialize(response));

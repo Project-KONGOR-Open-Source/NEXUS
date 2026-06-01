@@ -13,7 +13,7 @@ public class StatisticsSubmissionResult : ISynchronousCommandProcessor<MatchServ
 
         if (requestData.Result is ChatProtocol.StatSubmissionResult.SSR_SUCCESS)
         {
-            Log.Information(@"Statistics Submission Succeeded For Match {MatchID} On Server ID {ServerID} In {RequestTime}ms",
+            Log.Information(@"Statistics Submission Succeeded For Match {MatchID} On Server ID {MatchServerID} In {RequestTime}ms",
                 requestData.MatchID, session.Metadata.ServerID, requestData.RequestTimeMilliseconds);
 
             // TODO: Update Group MMRs For Players In The Match
@@ -21,7 +21,7 @@ public class StatisticsSubmissionResult : ISynchronousCommandProcessor<MatchServ
 
         else
         {
-            Log.Error(@"Statistics Submission Failed For Match {MatchID} On Server ID {ServerID} With Result ""{Result}"" In {RequestTime}ms",
+            Log.Error(@"Statistics Submission Failed For Match {MatchID} On Server ID {MatchServerID} With Result ""{Result}"" In {RequestTime}ms",
                 requestData.MatchID, session.Metadata.ServerID, requestData.Result, requestData.RequestTimeMilliseconds);
         }
     }

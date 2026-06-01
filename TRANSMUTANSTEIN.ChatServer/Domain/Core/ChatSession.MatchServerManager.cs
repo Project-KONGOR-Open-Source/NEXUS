@@ -187,11 +187,11 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
         // Remove The Match Server Manager Chat Session
         if (Context.MatchServerManagerChatSessions.TryRemove(Metadata.ServerManagerID, out MatchServerManagerChatSession? existingSession))
         {
-            Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Was Removed From The Match Server Manager Pool", Metadata.ServerManagerID);
+            Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Was Removed From The Match Server Manager Pool", Metadata.ServerManagerID);
 
             if (existingSession is null)
             {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Null Session In The Match Server Manager Pool", Metadata.ServerManagerID);
+                Log.Warning(@"Match Server Manager ID ""{MatchServerManagerID}"" Had A Null Session In The Match Server Manager Pool", Metadata.ServerManagerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -201,7 +201,7 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
             if (existingSession.Metadata.SessionCookie != Metadata.SessionCookie)
             {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Mismatched Session Cookie", Metadata.ServerManagerID);
+                Log.Warning(@"Match Server Manager ID ""{MatchServerManagerID}"" Had A Mismatched Session Cookie", Metadata.ServerManagerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -215,13 +215,13 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
         else
         {
-            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Attempted To Disconnect But Was Not Found In The Match Server Manager Pool", Metadata.ServerManagerID);
+            Log.Warning(@"Match Server Manager ID ""{MatchServerManagerID}"" Attempted To Disconnect But Was Not Found In The Match Server Manager Pool", Metadata.ServerManagerID);
         }
 
         // Disconnect And Dispose The Chat Session
         Disconnect(); Dispose();
 
-        Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
+        Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
     }
 
     private async Task Remove(IDatabase distributedCacheStore)

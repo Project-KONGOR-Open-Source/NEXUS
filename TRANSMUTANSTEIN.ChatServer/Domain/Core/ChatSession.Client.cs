@@ -91,7 +91,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         if (server is null)
         {
-            Log.Error(@"[BUG] Client Account ID ""{AccountID}"" Attempted To Join Match On Unknown Server ""{ServerAddress}""", Account.ID, serverAddress);
+            Log.Error(@"[BUG] Client Account ID ""{AccountID}"" Attempted To Join Match On Unknown Server ""{MatchServerAddress}""", Account.ID, serverAddress);
 
             return this;
         }
@@ -532,7 +532,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         {
             ChatProtocol.ChatClientStatus status = onlinePeerSession.Metadata.LastKnownClientState;
 
-            Log.Debug(@"Initial Status Peer: Name=""{Name}"", ID={ID}, NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+            Log.Debug(@"Initial Status Peer: Name=""{AccountName}"", ID={AccountID}, NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
                 onlinePeerSession.Account.Name, onlinePeerSession.Account.ID, onlinePeerSession.Account.NameColourNoPrefixCode,
                 onlinePeerSession.Account.IconNoPrefixCode, onlinePeerSession.Account.AscensionLevel);
 

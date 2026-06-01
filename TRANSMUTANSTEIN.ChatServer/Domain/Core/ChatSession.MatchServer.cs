@@ -241,11 +241,11 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
         // Remove The Match Server Chat Session
         if (Context.MatchServerChatSessions.TryRemove(Metadata.ServerID, out MatchServerChatSession? existingSession))
         {
-            Log.Information(@"Match Server ID ""{ServerID}"" Was Removed From The Match Server Pool", Metadata.ServerID);
+            Log.Information(@"Match Server ID ""{MatchServerID}"" Was Removed From The Match Server Pool", Metadata.ServerID);
 
             if (existingSession is null)
             {
-                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Null Session In The Match Server Pool", Metadata.ServerID);
+                Log.Warning(@"Match Server ID ""{MatchServerID}"" Had A Null Session In The Match Server Pool", Metadata.ServerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -255,7 +255,7 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
             if (existingSession.Metadata.SessionCookie != Metadata.SessionCookie)
             {
-                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Mismatched Session Cookie", Metadata.ServerID);
+                Log.Warning(@"Match Server ID ""{MatchServerID}"" Had A Mismatched Session Cookie", Metadata.ServerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -269,13 +269,13 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
         else
         {
-            Log.Warning(@"Match Server ID ""{ServerID}"" Attempted To Disconnect But Was Not Found In The Match Server Pool", Metadata.ServerID);
+            Log.Warning(@"Match Server ID ""{MatchServerID}"" Attempted To Disconnect But Was Not Found In The Match Server Pool", Metadata.ServerID);
         }
 
         // Disconnect And Dispose The Chat Session
         Disconnect(); Dispose();
 
-        Log.Information(@"Match Server ID ""{ServerID}"" Has Disconnected Gracefully", Metadata.ServerID);
+        Log.Information(@"Match Server ID ""{MatchServerID}"" Has Disconnected Gracefully", Metadata.ServerID);
     }
 
     private async Task Remove(IDatabase distributedCacheStore)

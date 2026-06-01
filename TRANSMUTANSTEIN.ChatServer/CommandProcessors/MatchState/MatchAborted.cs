@@ -14,7 +14,7 @@ public class MatchAborted(IDatabase distributedCacheStore) : IAsynchronousComman
         // Remove Match Information From Distributed Cache
         await distributedCacheStore.RemoveMatchInformation(requestData.MatchupID);
 
-        Log.Information(@"Arranged Match {MatchupID} Aborted On Server ID ""{ServerID}"": Reason={Reason}",
+        Log.Information(@"Arranged Match {MatchupID} Aborted On Server ID ""{MatchServerID}"": Reason={Reason}",
             requestData.MatchupID, session.Metadata.ServerID, requestData.Reason);
 
         // TODO: Check What MatchupID Is Or Whether It Can Just Be Called MatchID Instead

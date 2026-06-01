@@ -7,7 +7,7 @@ public class ServerManagerStatus : ISynchronousCommandProcessor<MatchServerManag
     {
         ServerManagerStatusRequestData requestData = new (buffer);
 
-        Log.Debug(@"Received Status Update From Server Manager ID ""{ServerManagerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Version: ""{Version}"", Shutting Down: {ShuttingDown}",
+        Log.Debug(@"Received Status Update From Server Manager ID ""{MatchServerManagerID}"" - Name: ""{MatchServerManagerName}"", Address: ""{MatchServerManagerAddress}:{MatchServerManagerPort}"", Location: ""{Location}"", Version: ""{Version}"", Shutting Down: {ShuttingDown}",
             requestData.ServerManagerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Version, requestData.ShuttingDown);
 
         // TODO: Update Any Relevant Match Server Manager Data

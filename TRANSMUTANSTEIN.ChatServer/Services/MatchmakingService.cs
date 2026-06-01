@@ -180,7 +180,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Send CreateMatch Command To The Game Server
         SendCreateMatch(match, serverSession);
 
-        _logger.LogInformation(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
+        _logger.LogInformation(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={MatchServerID}, Server={MatchServerAddress}:{MatchServerPort}",
             match.GUID, server.ID, match.ServerAddress, match.ServerPort);
 
         // Send Leave Queue Notification To Dismiss The Client's Queue Timer
@@ -206,7 +206,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         match.State = MatchmakingMatchState.WaitingForPlayers;
 
-        _logger.LogInformation(@"Match Notifications Sent: GUID={MatchGUID}, Server={ServerAddress}:{ServerPort}",
+        _logger.LogInformation(@"Match Notifications Sent: GUID={MatchGUID}, Server={MatchServerAddress}:{MatchServerPort}",
             match.GUID, server.IPAddress, server.Port);
 
         return true;
@@ -390,12 +390,12 @@ public class MatchmakingService : BackgroundService, IDisposable
         {
             if (Context.MatchServerChatSessions.TryGetValue(server.ID, out MatchServerChatSession? session))
             {
-                _logger.LogDebug(@"Found Idle Server With Session: ServerID={ServerID}, ServerName={ServerName}", server.ID, server.Name);
+                _logger.LogDebug(@"Found Idle Server With Session: ServerID={MatchServerID}, ServerName={MatchServerName}", server.ID, server.Name);
 
                 return (server, session);
             }
 
-            _logger.LogDebug(@"Idle Server Has No Active Chat Session: ServerID={ServerID}", server.ID);
+            _logger.LogDebug(@"Idle Server Has No Active Chat Session: ServerID={MatchServerID}", server.ID);
         }
 
         // No Idle Server With Active Session Found
@@ -403,7 +403,7 @@ public class MatchmakingService : BackgroundService, IDisposable
             _logger.LogWarning(@"No Servers Available For Match GUID {MatchGUID}", match.GUID);
 
         else
-            _logger.LogWarning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {ServerCount})", match.GUID, servers.Count);
+            _logger.LogWarning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {MatchServerCount})", match.GUID, servers.Count);
 
         return (null, null);
     }

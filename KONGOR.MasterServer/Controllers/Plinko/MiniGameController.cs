@@ -298,7 +298,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
 
         if (isValid.Equals(false) || accountName is null)
         {
-            Logger.LogWarning(@"Plinko Request With Invalid Cookie ""{Cookie}"" From ""{IPAddress}""",
+            Logger.LogWarning(@"Plinko Request With Invalid Cookie ""{SessionCookie}"" From ""{IPAddress}""",
                 cookie, Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN");
 
             return null;

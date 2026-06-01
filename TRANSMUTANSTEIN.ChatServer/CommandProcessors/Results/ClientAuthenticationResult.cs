@@ -9,7 +9,7 @@ public class ClientAuthenticationResult : ISynchronousCommandProcessor<MatchServ
 
         if (requestData.Result is not ChatProtocol.ClientAuthenticationResult.CAR_SUCCESS)
         {
-            Log.Error(@"Client Authentication Failed On Match Server ID ""{ServerID}"" With Result ""{Result}""", session.Metadata.ServerID, requestData.Result);
+            Log.Error(@"Client Authentication Failed On Match Server ID ""{MatchServerID}"" With Result ""{Result}""", session.Metadata.ServerID, requestData.Result);
         }
     }
 }

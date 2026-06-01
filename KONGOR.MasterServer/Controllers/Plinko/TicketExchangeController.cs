@@ -154,7 +154,7 @@ public class TicketExchangeController(MerrickContext databaseContext, IDatabase 
 
         if (isValid.Equals(false) || accountName is null)
         {
-            Logger.LogWarning(@"Ticket Exchange Request With Invalid Cookie ""{Cookie}"" From ""{IPAddress}""",
+            Logger.LogWarning(@"Ticket Exchange Request With Invalid Cookie ""{SessionCookie}"" From ""{IPAddress}""",
                 cookie, Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN");
 
             return null;

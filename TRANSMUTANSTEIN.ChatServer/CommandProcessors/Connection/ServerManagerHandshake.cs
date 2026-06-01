@@ -14,7 +14,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Validate Protocol Version
         if (requestData.ChatProtocolVersion != ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION)
         {
-            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Chat Protocol Version Mismatch (Expected: ""{ExpectedVersion}"", Received: ""{ReceivedVersion}"")",
+            Log.Warning(@"Match Server Manager ID ""{MatchServerManagerID}"" Chat Protocol Version Mismatch (Expected: ""{ExpectedVersion}"", Received: ""{ReceivedVersion}"")",
                 requestData.ServerManagerID, ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION, requestData.ChatProtocolVersion);
 
             ChatBuffer rejectResponse = new ();
@@ -33,7 +33,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Validate Server Manager Cookie Against Distributed Cache
         if (manager is null)
         {
-            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Cookie ""{Cookie}"" Is Invalid", requestData.ServerManagerID, requestData.SessionCookie);
+            Log.Warning(@"Match Server Manager ID ""{MatchServerManagerID}"" Cookie ""{MatchServerManagerCookie}"" Is Invalid", requestData.ServerManagerID, requestData.SessionCookie);
 
             ChatBuffer rejectResponse = new ();
 
@@ -49,7 +49,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Validate Server Manager ID Match
         if (manager.ID != requestData.ServerManagerID)
         {
-            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Does Not Match The Server Manager ID With Session Cookie ""{Cookie}""", requestData.ServerManagerID, requestData.SessionCookie);
+            Log.Warning(@"Match Server Manager ID ""{MatchServerManagerID}"" Does Not Match The Server Manager ID With Session Cookie ""{MatchServerManagerCookie}""", requestData.ServerManagerID, requestData.SessionCookie);
 
             ChatBuffer rejectResponse = new ();
 
@@ -67,7 +67,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Validate Host Account Against Database
         if (hostAccount is null)
         {
-            Log.Warning(@"Could Not Find Host Account ID ""{HostAccountID}"" For Match Server Manager ID ""{ServerManagerID}"")", manager.HostAccountID, requestData.ServerManagerID);
+            Log.Warning(@"Could Not Find Host Account ID ""{HostAccountID}"" For Match Server Manager ID ""{MatchServerManagerID}"")", manager.HostAccountID, requestData.ServerManagerID);
 
             ChatBuffer rejectResponse = new ();
 
@@ -86,7 +86,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Validate Match Hosting Permissions
         if (hostAccount.Type != AccountType.ServerHost)
         {
-            Log.Warning(@"Host Account ID ""{HostAccountID}"" For Match Server Manager ID ""{ServerManagerID}"" Does Not Have Match Hosting Permissions", manager.HostAccountID, requestData.ServerManagerID);
+            Log.Warning(@"Host Account ID ""{HostAccountID}"" For Match Server Manager ID ""{MatchServerManagerID}"" Does Not Have Match Hosting Permissions", manager.HostAccountID, requestData.ServerManagerID);
 
             ChatBuffer rejectResponse = new ();
 
@@ -102,7 +102,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Validate Host Account ID Match
         if (hostAccount.ID != manager.HostAccountID)
         {
-            Log.Warning(@"Match Server Manager Host Account ID ""{ReceivedHostAccountID}"" Does Not Match The Host Account ID ""{ExpectedHostAccountID}"" For Match Server Manager ID ""{ServerManagerID}""",
+            Log.Warning(@"Match Server Manager Host Account ID ""{ReceivedHostAccountID}"" Does Not Match The Host Account ID ""{ExpectedHostAccountID}"" For Match Server Manager ID ""{MatchServerManagerID}""",
                 manager.HostAccountID, hostAccount.ID, requestData.ServerManagerID);
 
             ChatBuffer rejectResponse = new ();
@@ -119,7 +119,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Check For Duplicate Match Server Manager Instances
         if (Context.MatchServerManagerChatSessions.TryGetValue(requestData.ServerManagerID, out MatchServerManagerChatSession? existingSession))
         {
-            Log.Information(@"Disconnecting Duplicate Match Server Manager Instance With ID ""{ServerManagerID}"" And Address ""{Address}"")", requestData.ServerManagerID, manager.IPAddress);
+            Log.Information(@"Disconnecting Duplicate Match Server Manager Instance With ID ""{MatchServerManagerID}"" And Address ""{MatchServerManagerAddress}"")", requestData.ServerManagerID, manager.IPAddress);
 
             await existingSession.Terminate(distributedCacheStore);
 
@@ -129,7 +129,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         // Register Match Server Manager
         Context.MatchServerManagerChatSessions[requestData.ServerManagerID] = session;
 
-        Log.Information(@"Match Server Manager Connection Accepted - Manager ID: ""{ServerManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}""",
+        Log.Information(@"Match Server Manager Connection Accepted - Manager ID: ""{MatchServerManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{MatchServerManagerAddress}""",
             requestData.ServerManagerID, manager.HostAccountName, manager.IPAddress);
 
         // Accept Connection And Send Configuration
@@ -137,7 +137,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             .SetOnline()
             .SendOptions();
 
-        Log.Debug(@"Match Server Manager ID ""{ServerManagerID}"" Options - Statistics: Enabled, Replays: Enabled, HTTP Upload: Enabled", requestData.ServerManagerID);
+        Log.Debug(@"Match Server Manager ID ""{MatchServerManagerID}"" Options - Statistics: Enabled, Replays: Enabled, HTTP Upload: Enabled", requestData.ServerManagerID);
     }
 }
 

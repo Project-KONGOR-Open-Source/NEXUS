@@ -11,7 +11,7 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
     {
         MatchAnnounceRequestData requestData = new (buffer);
 
-        Log.Information(@"Match Announce Received: ServerID={ServerID}, CorrelationID={CorrelationID}, MatchID={MatchID}",
+        Log.Information(@"Match Announce Received: ServerID={MatchServerID}, CorrelationID={CorrelationID}, MatchID={MatchID}",
             session.Metadata.ServerID, requestData.CorrelationID, requestData.MatchID);
 
         // Find The Pending Match By Correlation ID
@@ -48,7 +48,7 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
 
         else
         {
-            Log.Warning(@"Could Not Create MatchInformation: Server Not Found For ServerID {ServerID}", pendingMatch.AssignedServerID);
+            Log.Warning(@"Could Not Create MatchInformation: Server Not Found For ServerID {MatchServerID}", pendingMatch.AssignedServerID);
         }
 
         // Send AutoMatchConnect To All Players
@@ -64,7 +64,7 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
                 member.IsInGame = true;
         }
 
-        Log.Information(@"Match Spawned: GUID={MatchGUID}, MatchID={MatchID}, Server={ServerAddress}:{ServerPort}",
+        Log.Information(@"Match Spawned: GUID={MatchGUID}, MatchID={MatchID}, Server={MatchServerAddress}:{MatchServerPort}",
             pendingMatch.GUID, requestData.MatchID, serverAddress, serverPort);
     }
 

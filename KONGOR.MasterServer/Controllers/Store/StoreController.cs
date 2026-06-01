@@ -28,7 +28,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
         if (isValid.Equals(false) || accountName is null)
         {
-            Logger.LogWarning(@"Store Request With Invalid Cookie ""{Cookie}"" From ""{IPAddress}""",
+            Logger.LogWarning(@"Store Request With Invalid Cookie ""{SessionCookie}"" From ""{IPAddress}""",
                 cookie, Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN");
 
             return Ok(PhpSerialization.Serialize(CreateErrorResponse((int) StoreErrorCode.STORE_SESSION_ERROR)));

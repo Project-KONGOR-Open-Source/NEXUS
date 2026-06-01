@@ -11,7 +11,7 @@ public class MatchAbandoned(IDatabase distributedCacheStore) : IAsynchronousComm
     {
         MatchAbandonedRequestData requestData = new (buffer);
 
-        Log.Information(@"Match Abandoned On Server ID ""{ServerID}"": Failed={Failed}",
+        Log.Information(@"Match Abandoned On Server ID ""{MatchServerID}"": Failed={Failed}",
             session.Metadata.ServerID, requestData.Failed);
 
         // The Protocol Does Not Carry A Match ID, So We Use The Session Metadata Which Is Populated By NET_CHAT_GS_STATUS.
