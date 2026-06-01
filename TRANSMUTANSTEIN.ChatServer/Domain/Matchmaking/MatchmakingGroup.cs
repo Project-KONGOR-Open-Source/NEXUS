@@ -412,7 +412,7 @@ public class MatchmakingGroup
                 if (member.IsReady is false)
                 {
                     if (member.IsLeader is false)
-                        Log.Error(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
+                        Log.Error(@"[BUG] Non-Leader Group Member ""{AccountName}"" With ID ""{AccountID}"" Was Not Ready", member.Account.Name, member.Account.ID);
 
                     // All Matchmaking Group Members Need To Be Ready For The Queue To Start
                     member.IsReady = true;
@@ -444,7 +444,7 @@ public class MatchmakingGroup
         // Prevent Double-Queuing: Check If Already In Queue
         if (QueueStartTime is not null)
         {
-            Log.Error(@"[BUG] Matchmaking Group GUID ""{Group.GUID}"" Tried To Join Queue While Already Queued", GUID);
+            Log.Error(@"[BUG] Matchmaking Group GUID ""{GroupGUID}"" Tried To Join Queue While Already Queued", GUID);
 
             return;
         }
@@ -492,7 +492,7 @@ public class MatchmakingGroup
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(queueUpdateBroadcast);
 
-        Log.Debug(@"Group GUID ""{Group.GUID}"" Joined Queue With {MemberCount} Member(s)", GUID, Members.Count);
+        Log.Debug(@"Group GUID ""{GroupGUID}"" Joined Queue With {MemberCount} Member(s)", GUID, Members.Count);
     }
 
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
@@ -717,7 +717,7 @@ public class MatchmakingGroup
     {
         if (Members.Count == 0)
         {
-            Log.Error(@"[BUG] Attempted To Reassign Slots In Empty Matchmaking Group GUID ""{Group.GUID}""", GUID);
+            Log.Error(@"[BUG] Attempted To Reassign Slots In Empty Matchmaking Group GUID ""{GroupGUID}""", GUID);
 
             return;
         }
@@ -867,6 +867,6 @@ public class MatchmakingGroup
 
         Leader.Session.Send(error);
 
-        Log.Information(@"Queue Join Rejected For Group GUID ""{Group.GUID}"": {Reason}", GUID, errorMessage);
+        Log.Information(@"Queue Join Rejected For Group GUID ""{GroupGUID}"": {Reason}", GUID, errorMessage);
     }
 }

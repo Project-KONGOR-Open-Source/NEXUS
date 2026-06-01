@@ -288,7 +288,7 @@ public static class SeedDataHandlers
 
         await context.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation(@"Seeded ROOT User With Email Address ""{EmailAddress}"" And Custodian Role", rootEmailAddress);
+        logger.LogInformation(@"Seeded {AccountName} Account With Email Address ""{UserEmailAddress}"" And Custodian Role", rootAccountName, rootEmailAddress);
     }
 
     public static async Task SeedHeroGuides(MerrickContext context, CancellationToken cancellationToken, ILogger logger)

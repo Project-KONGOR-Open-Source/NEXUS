@@ -43,7 +43,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         Account = account;
 
         // Enrich This Session's Logger With The Authenticated Account, So That Every Subsequent Session-Level Log Event Is Attributed To It
-        Logger = Logger.ForContext("Account.ID", account.ID).ForContext("Account.Name", account.Name);
+        Logger = Logger.ForContext("AccountID", account.ID).ForContext("AccountName", account.Name);
 
         // Add The Chat Session To The Chat Sessions Collection
         Context.ClientChatSessions.AddOrUpdate(account.Name, this, (key, existing) => this);
@@ -321,7 +321,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         // Remove The Chat Session From The Chat Sessions Collection
         if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
-            Log.Error(@"Failed To Remove Chat Session For Account Name ""{Account.Name}""", Account.Name);
+            Log.Error(@"Failed To Remove Chat Session For Account Name ""{AccountName}""", Account.Name);
 
         // Record The Last-Active Timestamp; The Account Entity Was Loaded On A Long-Disposed Handshake Context, So Issue A Direct Update Via A Fresh Scope
         // Fire-And-Forget Because The Cleanup Path Is Synchronous And This Telemetry Write Must Not Block The Disconnect
@@ -451,7 +451,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         {
             if (matchServer is null)
             {
-                Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
+                Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{AccountName}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
 
                 return;
             }

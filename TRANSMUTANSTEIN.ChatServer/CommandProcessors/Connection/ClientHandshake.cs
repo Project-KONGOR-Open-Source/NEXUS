@@ -16,7 +16,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         // Ensure Session Cookie Exists In Cache
         if (cachedAccountName is null)
         {
-            Log.Warning(@"Authentication Failed For Account ID ""{RequestData.AccountID}"": Session Cookie ""{RequestData.SessionCookie}"" Not Found In Cache",
+            Log.Warning(@"Authentication Failed For Account ID ""{AccountID}"": Session Cookie ""{SessionCookie}"" Not Found In Cache",
                 requestData.AccountID, requestData.SessionCookie);
 
             session
@@ -34,7 +34,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         if (account is null)
         {
-            Log.Error(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
+            Log.Error(@"[BUG] Account With ID ""{AccountID}"" Could Not Be Found", requestData.AccountID);
 
             session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_UNKNOWN)
@@ -46,7 +46,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         // Ensure Account Name Matches Cached Account Name From Session Cookie
         if (account.Name.Equals(cachedAccountName, StringComparison.Ordinal).Equals(false))
         {
-            Log.Warning(@"Authentication Failed: Account ID ""{RequestData.AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
+            Log.Warning(@"Authentication Failed: Account ID ""{AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
                 requestData.AccountID, cachedAccountName);
 
             session
@@ -61,7 +61,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         if (requestData.SessionAuthenticationHash.Equals(expectedSessionAuthenticationHash, StringComparison.OrdinalIgnoreCase).Equals(false))
         {
-            Log.Warning(@"Authentication Failed For Account ""{Account.Name}"": Invalid Authentication Hash", account.Name);
+            Log.Warning(@"Authentication Failed For Account ""{AccountName}"": Invalid Authentication Hash", account.Name);
 
             session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
@@ -83,7 +83,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
                 if (existingSessionMatch is not null)
                 {
-                    Log.Information(@"Disconnecting Existing Session For Account ID ""{SubAccountID}"" (Account ""{ExistingSessionMatch.Account.Name}"") Due To Concurrent Connection Attempt",
+                    Log.Information(@"Disconnecting Existing Session For Account ID ""{ExistingSessionAccountID}"" (Account ""{ExistingSessionAccountName}"") Due To Concurrent Connection Attempt",
                         subAccountID, existingSessionMatch.Account.Name);
 
                     existingSessionMatch
@@ -95,7 +95,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         if (Context.ClientChatSessions.Values.SingleOrDefault(existingSession => existingSession.Account?.ID == account.ID) is { } existingSession)
         {
-            Log.Information(@"Disconnecting Existing Session For Account ""{Account.Name}"" Due To Concurrent Connection Attempt", account.Name);
+            Log.Information(@"Disconnecting Existing Session For Account ""{AccountName}"" Due To Concurrent Connection Attempt", account.Name);
 
             existingSession
                 .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
