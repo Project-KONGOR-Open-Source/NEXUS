@@ -4,7 +4,19 @@ public static class SeedDataHandlers
 {
     public static async Task SeedUsers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Users.AnyAsync(cancellationToken) || await context.Roles.NoneAsync(cancellationToken)) return;
+        if (await context.Users.AnyAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Users: Users Have Already Been Seeded");
+
+            return;
+        }
+
+        if (await context.Roles.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Users: Roles Have Not Yet Been Seeded");
+
+            return;
+        }
 
         Role roleAdministrator = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Administrator), cancellationToken: cancellationToken);
 
@@ -51,11 +63,19 @@ public static class SeedDataHandlers
         await context.Users.AddAsync(userGuest, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded Administrator And Guest Users With Email Addresses ""{AdministratorEmailAddress}"" And ""{GuestEmailAddress}""",
+            userAdministrator.EmailAddress, userGuest.EmailAddress);
     }
 
     public static async Task SeedClans(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Clans.AnyAsync(cancellationToken)) return;
+        if (await context.Clans.AnyAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Clans: Clans Have Already Been Seeded");
+
+            return;
+        }
 
         IEnumerable<Clan> clans =
         [
@@ -67,11 +87,33 @@ public static class SeedDataHandlers
 
         await context.Clans.AddRangeAsync(clans, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded {ClanCount} Clans: {ClanNames}",
+            clans.Count(), string.Join(", ", clans.Select(clan => clan.Name)));
     }
 
     public static async Task SeedAccounts(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Accounts.AnyAsync(cancellationToken) || await context.Users.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.AnyAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Accounts: Accounts Have Already Been Seeded");
+
+            return;
+        }
+
+        if (await context.Users.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Accounts: Users Have Not Yet Been Seeded");
+
+            return;
+        }
+
+        if (await context.Clans.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Accounts: Clans Have Not Yet Been Seeded");
+
+            return;
+        }
 
         User user = await context.Users.FirstAsync(cancellationToken);
         Clan clan = await context.Clans.FirstAsync(cancellationToken);
@@ -158,6 +200,10 @@ public static class SeedDataHandlers
 
         await context.SaveChangesAsync(cancellationToken);
 
+        int seededAccountCount = await context.Accounts.CountAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded {AccountCount} Accounts Across System, Sub-, Host, And Guest Account Types", seededAccountCount);
+
         // Also Include Friended/Ignored/Banned Peer Seeding To Reduce The Application Startup Duration
 
         await SeedFriendedPeers(context, cancellationToken, logger);
@@ -167,9 +213,19 @@ public static class SeedDataHandlers
 
     private static async Task SeedFriendedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Accounts.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Friended Peers: Accounts Or Clans Have Not Yet Been Seeded");
 
-        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.FriendedPeers.Count > 0)) return;
+            return;
+        }
+
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.FriendedPeers.Count > 0))
+        {
+            logger.LogDebug("Skipped Seeding Friended Peers: Friended Peers Have Already Been Seeded");
+
+            return;
+        }
 
         Account systemAccount = await context.Accounts.Include(account => account.User).FirstAsync(cancellationToken);
 
@@ -202,13 +258,25 @@ public static class SeedDataHandlers
         }
 
         await context.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded Friended Peers For {AccountCount} Accounts", subAccounts.Count + hostAccounts.Count);
     }
 
     private static async Task SeedIgnoredPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Accounts.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Ignored Peers: Accounts Have Not Yet Been Seeded");
 
-        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.IgnoredPeers.Count > 0)) return;
+            return;
+        }
+
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.IgnoredPeers.Count > 0))
+        {
+            logger.LogDebug("Skipped Seeding Ignored Peers: Ignored Peers Have Already Been Seeded");
+
+            return;
+        }
 
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
@@ -225,13 +293,25 @@ public static class SeedDataHandlers
         }
 
         await context.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded {IgnoredPeerCount} Ignored Peers For Account ""{AccountName}""", guestAccounts.Count, systemAccount.Name);
     }
 
     private static async Task SeedBannedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Accounts.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Banned Peers: Accounts Have Not Yet Been Seeded");
 
-        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.BannedPeers.Count > 0)) return;
+            return;
+        }
+
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.BannedPeers.Count > 0))
+        {
+            logger.LogDebug("Skipped Seeding Banned Peers: Banned Peers Have Already Been Seeded");
+
+            return;
+        }
 
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
@@ -249,6 +329,8 @@ public static class SeedDataHandlers
         }
 
         await context.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded {BannedPeerCount} Banned Peers For Account ""{AccountName}""", guestAccounts.Count, systemAccount.Name);
     }
 
     public static async Task SeedRoot(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
@@ -257,10 +339,18 @@ public static class SeedDataHandlers
         const string rootAccountName = "ROOT";
 
         if (await context.Users.AnyAsync(user => user.EmailAddress.Equals(rootEmailAddress), cancellationToken))
+        {
+            logger.LogDebug(@"Skipped Seeding {AccountName} Account: It Has Already Been Seeded", rootAccountName);
+
             return;
+        }
 
         if (await context.Roles.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug(@"Skipped Seeding {AccountName} Account: Roles Have Not Yet Been Seeded", rootAccountName);
+
             return;
+        }
 
         Role roleCustodian = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Custodian), cancellationToken);
 
@@ -293,7 +383,19 @@ public static class SeedDataHandlers
 
     public static async Task SeedHeroGuides(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.HeroGuides.AnyAsync(cancellationToken) || await context.Accounts.NoneAsync(cancellationToken)) return;
+        if (await context.HeroGuides.AnyAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Hero Guides: Hero Guides Have Already Been Seeded");
+
+            return;
+        }
+
+        if (await context.Accounts.NoneAsync(cancellationToken))
+        {
+            logger.LogDebug("Skipped Seeding Hero Guides: Accounts Have Not Yet Been Seeded");
+
+            return;
+        }
 
         Account author = await context.Accounts.FirstAsync(cancellationToken);
 
@@ -326,5 +428,7 @@ public static class SeedDataHandlers
         await context.HeroGuides.AddRangeAsync(guides, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation(@"Seeded {HeroGuideCount} Hero Guides Authored By Account ""{AccountName}""", guideDTOs.Length, author.Name);
     }
 }
