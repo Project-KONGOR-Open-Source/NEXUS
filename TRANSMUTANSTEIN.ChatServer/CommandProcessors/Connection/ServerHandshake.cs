@@ -86,7 +86,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         // Validate Match Hosting Permissions
         if (hostAccount.Type != AccountType.ServerHost)
         {
-            Log.Warning(@"Host Account ID ""{HostAccountID}"" For Match Server ID ""{ServerID}"" Does Not Have Match Hosting Permissions", requestData.ServerID, server.HostAccountID);
+            Log.Warning(@"Host Account ID ""{HostAccountID}"" For Match Server ID ""{ServerID}"" Does Not Have Match Hosting Permissions", server.HostAccountID, requestData.ServerID);
 
             ChatBuffer rejectResponse = new ();
 
