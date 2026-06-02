@@ -1,18 +1,28 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ServerManagerToChatServer.NET_CHAT_SM_STATUS)]
-public class ServerManagerStatus : ISynchronousCommandProcessor<MatchServerManagerChatSession>
+public class ServerManagerStatus(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerManagerChatSession>
 {
-    public void Process(MatchServerManagerChatSession session, ChatBuffer buffer)
+    public async Task Process(MatchServerManagerChatSession session, ChatBuffer buffer)
     {
         ServerManagerStatusRequestData requestData = new (buffer);
 
         Log.Debug(@"Received Status Update From Server Manager ID ""{MatchServerManagerID}"" - Name: ""{MatchServerManagerName}"", Address: ""{MatchServerManagerAddress}:{MatchServerManagerPort}"", Location: ""{Location}"", Version: ""{Version}"", Shutting Down: {ShuttingDown}",
             requestData.ServerManagerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Version, requestData.ShuttingDown);
 
-        // TODO: Update Any Relevant Match Server Manager Data
+        // A Match Server Manager Announcing That It Is Shutting Down Is A Graceful Departure
+        // So We Terminate The Session, Which Removes It From The Pool And Distributed Cache And Releases Any Restricted Open-Password Hosting Lease It Held
+        if (requestData.ShuttingDown)
+        {
+            Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Reported That It Is Shutting Down And Will Be Removed", requestData.ServerManagerID);
 
-        // TODO: Update Server Manager In Distributed Cache
+            await session.Terminate(distributedCacheStore);
+
+            return;
+        }
+
+        // A Routine Heartbeat Carries No Match Server Manager Data That Is Persisted In The Distributed Cache
+        // The Match Server Manager Liveness Is Tracked Via The In-Memory Session Pool And Reconciled By The "StaleHostReaper"
     }
 }
 

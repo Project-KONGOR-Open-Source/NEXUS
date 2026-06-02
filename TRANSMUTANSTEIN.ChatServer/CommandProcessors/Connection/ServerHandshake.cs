@@ -116,18 +116,20 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             return;
         }
 
-        // Check For Duplicate Match Server Instances
-        if (Context.MatchServerChatSessions.TryGetValue(requestData.ServerID, out MatchServerChatSession? existingSession))
-        {
-            Log.Information(@"Disconnecting Duplicate Match Server Instance With ID ""{MatchServerID}"" And Address ""{MatchServerAddress}:{MatchServerPort}"")", requestData.ServerID, server.IPAddress, server.Port);
-
-            await existingSession.Terminate(distributedCacheStore);
-
-            Context.MatchServerChatSessions.TryRemove(requestData.ServerID, out _);
-        }
+        // Register This Session As The Current Holder Before Superseding Any Previous One, So The Pool Never Briefly Exposes A Disposed Session To Concurrent Readers Such As Matchmaking Server Selection
+        Context.MatchServerChatSessions.TryGetValue(requestData.ServerID, out MatchServerChatSession? existingSession);
 
         // Register Match Server
         Context.MatchServerChatSessions[requestData.ServerID] = session;
+
+        // Supersede Any Existing Session For This Match Server
+        // The Host Is Reconnecting With Its Reused Session Cookie, So The Stale Socket Is Torn Down But The Distributed Cache Entry Is Preserved For This New Session
+        if (existingSession is not null)
+        {
+            Log.Information(@"Superseding Existing Match Server Session With ID ""{MatchServerID}"" And Address ""{MatchServerAddress}:{MatchServerPort}""", requestData.ServerID, server.IPAddress, server.Port);
+
+            existingSession.Supersede();
+        }
 
         Log.Information(@"Match Server Connection Accepted - Server ID: ""{MatchServerID}"", Host Account: ""{HostAccountName}"", Address: ""{MatchServerAddress}:{MatchServerPort}"", Location: ""{Location}""",
             requestData.ServerID, server.HostAccountName, server.IPAddress, server.Port, server.Location);

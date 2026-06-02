@@ -33,9 +33,24 @@ public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousComman
 
         Log.Information(@"Updated Status For Match Server ID ""{MatchServerID}"" To ""{Status}""", requestData.ServerID, requestData.Status);
 
-        // TODO: If Status Is IDLE, Mark Server As Available For Match Allocation
-        // TODO: If Status Is ACTIVE, Update Match Information And Player Availability States
-        // TODO: If Status Is CRASHED Or KILLED, Remove Server From Pool And Handle Match Cleanup
+        // A KILLED Match Server Has Been Intentionally Terminated With No Respawn
+        // So We Remove It From The Pool And Distributed Cache Immediately Rather Than Waiting For Its Connection To Drop
+        if (requestData.Status is ChatProtocol.ServerStatus.SERVER_STATUS_KILLED)
+        {
+            Log.Information(@"Match Server ID ""{MatchServerID}"" Reported Status KILLED And Will Be Removed From The Pool", requestData.ServerID);
+
+            await session.Terminate(distributedCacheStore);
+
+            return;
+        }
+
+        /*
+            Availability For Match Allocation Is Driven By The Recorded Status
+            Matchmaking Only Selects Match Servers Reported As IDLE (See "FindAvailableServerWithSession")
+            So An ACTIVE Or CRASHED Server Is Naturally Excluded, While Its Match Data Remains Available Via The Hydrated Session Metadata
+            A CRASHED Server Is Retained Because It May Respawn And Report IDLE Again
+            A Server That Genuinely Goes Away Is Removed By The Disconnect Cleanup And The "StaleHostReaper"
+        */
     }
 }
 
