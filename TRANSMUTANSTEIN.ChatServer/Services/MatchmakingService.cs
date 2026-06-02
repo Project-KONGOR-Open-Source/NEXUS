@@ -378,8 +378,14 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
+    ///     The maximum age of a match server's last status update before its chat session is treated as stale and the server is skipped for selection.
+    ///     A healthy match server sends a status heartbeat at least once per minute, so this threshold tolerates a couple of missed heartbeats before excluding a server whose connection has gone quiet without being detected at the transport level (for example, a hung server process whose socket is still open).
+    /// </summary>
+    private static readonly TimeSpan MatchServerStatusFreshnessThreshold = TimeSpan.FromSeconds(150);
+
+    /// <summary>
     ///     Finds an available server for a match along with its chat session.
-    ///     Returns <see langword="null"/> if no idle server with an active session is found.
+    ///     Returns <see langword="null"/> if no idle server with an active and recently-active session is found.
     /// </summary>
     private async Task<(MatchServer? Server, MatchServerChatSession? Session)> FindAvailableServerWithSession(MatchmakingMatch match)
     {
@@ -390,6 +396,14 @@ public class MatchmakingService : BackgroundService, IDisposable
         {
             if (Context.MatchServerChatSessions.TryGetValue(server.ID, out MatchServerChatSession? session))
             {
+                // Skip A Server Whose Chat Session Has Gone Quiet (No Recent Status Heartbeat), Which Indicates A Stale Connection Not Yet Detected At The Transport Level
+                if (DateTimeOffset.UtcNow - session.Metadata.LastStatusUpdate > MatchServerStatusFreshnessThreshold)
+                {
+                    _logger.LogWarning(@"Skipping Idle Server With A Stale Chat Session: ServerID={MatchServerID}, LastStatusUpdate={LastStatusUpdate}", server.ID, session.Metadata.LastStatusUpdate);
+
+                    continue;
+                }
+
                 _logger.LogDebug(@"Found Idle Server With Session: ServerID={MatchServerID}, ServerName={MatchServerName}", server.ID, server.Name);
 
                 return (server, session);
