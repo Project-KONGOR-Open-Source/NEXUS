@@ -2,10 +2,6 @@
 
 public static partial class DistributedCacheExtensions
 {
-    // TODO: Make Match Servers And Match Server Managers Individual Keys Instead Of Hash Entries And Have Expiration Policies That Renew On Status Update
-
-    // TODO: Implement Cleanup Routine To Remove Stale Match Servers And Match Servers Managers (Managers With No Servers Should Also Be Considered Stale)
-
     private const string MatchServerManagersKey = "MATCH-SERVER-MANAGERS";
 
     /// <summary>
@@ -213,6 +209,44 @@ public static partial class DistributedCacheExtensions
             matchServer.MatchServerManagerID = null;
         }
     }
+
+    // The Hosting Lease Restricts An Open-Password Host Account (e.g. OPERATOR) To A Single Concurrent Host
+    // The Lease Is Anchored On The Server Manager Session: The Manager Claims It, Match Servers Require And Renew It, And It Is Released When The Match Server Manager Disconnects
+    // It Is Time-To-Live-Backed So That It Self-Heals If The Holding Host Crashes Without A Clean Disconnect
+
+    // The Time-To-Live Is Chosen To Comfortably Exceed The Server Heartbeat Interval, So That An Actively-Hosting Machine Always Renews It In Time, While A Crashed Host Releases It Within A Few Minutes
+    private static readonly TimeSpan HostLeaseTimeToLive = TimeSpan.FromMinutes(5);
+
+    private static string ConstructHostLeaseKey(string hostAccountName) => $"MATCH-HOST-LEASE:{hostAccountName}";
+
+    /// <summary>
+    ///     Attempts to atomically claim the single-holder hosting lease for the specified host account.
+    ///     The claim succeeds only if no lease is currently held.
+    /// </summary>
+    /// <param name="distributedCacheStore">The distributed cache store.</param>
+    /// <param name="hostAccountName">The host account name to claim the lease for.</param>
+    /// <returns><see langword="true"/> if the lease was claimed by this call, <see langword="false"/> if it is already held.</returns>
+    public static async Task<bool> TryClaimHostLease(this IDatabase distributedCacheStore, string hostAccountName)
+        => await distributedCacheStore.StringSetAsync(ConstructHostLeaseKey(hostAccountName), DateTimeOffset.UtcNow.ToString("O"), HostLeaseTimeToLive, When.NotExists);
+
+    /// <summary>
+    ///     Determines whether the single-holder hosting lease for the specified host account is currently held.
+    /// </summary>
+    public static async Task<bool> IsHostLeaseHeld(this IDatabase distributedCacheStore, string hostAccountName)
+        => await distributedCacheStore.KeyExistsAsync(ConstructHostLeaseKey(hostAccountName));
+
+    /// <summary>
+    ///     Renews the time-to-live of an existing hosting lease for the specified host account.
+    ///     Has no effect if the lease is not currently held.
+    /// </summary>
+    public static async Task RenewHostLease(this IDatabase distributedCacheStore, string hostAccountName)
+        => await distributedCacheStore.KeyExpireAsync(ConstructHostLeaseKey(hostAccountName), HostLeaseTimeToLive);
+
+    /// <summary>
+    ///     Releases the single-holder hosting lease for the specified host account.
+    /// </summary>
+    public static async Task ReleaseHostLease(this IDatabase distributedCacheStore, string hostAccountName)
+        => await distributedCacheStore.KeyDeleteAsync(ConstructHostLeaseKey(hostAccountName));
 
     private static string ConstructMatchInformationKey(int matchID) => $@"MATCH-INFORMATION:[""{matchID}""]";
 
