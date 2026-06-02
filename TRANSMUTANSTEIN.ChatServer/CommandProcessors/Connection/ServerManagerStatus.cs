@@ -11,7 +11,7 @@ public class ServerManagerStatus(IDatabase distributedCacheStore) : IAsynchronou
             requestData.ServerManagerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Version, requestData.ShuttingDown);
 
         // A Match Server Manager Announcing That It Is Shutting Down Is A Graceful Departure
-        // So We Terminate The Session, Which Removes It From The Pool And Distributed Cache And Releases Any Restricted Open-Password Hosting Lease It Held
+        // So We Terminate The Session, Which Removes It From The Pool And Distributed Cache And Releases Its Hosting Lease
         if (requestData.ShuttingDown)
         {
             Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Reported That It Is Shutting Down And Will Be Removed", requestData.ServerManagerID);

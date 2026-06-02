@@ -282,7 +282,6 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
         // Release The Single-Holder Hosting Lease
         // The Match Server Manager Session Genuinely Ending (Graceful Shutdown Or Crash, Not A Reconnect) Is The Authoritative "Host Gone" Signal
-        // So The Account Becomes Claimable Again By The Next Host
         if (Account is not null)
             await distributedCacheStore.ReleaseHostLease(Account.Name);
     }

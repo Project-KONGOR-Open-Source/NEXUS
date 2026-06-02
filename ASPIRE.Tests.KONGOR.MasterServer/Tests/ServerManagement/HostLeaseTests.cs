@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.ServerManagement;
 
 /// <summary>
-///     Tests for the single-holder hosting lease that restricts an open-password host account (e.g. OPERATOR) to a single concurrent host.
+///     Tests for the single-holder hosting lease that restricts a host account to a single concurrent host.
 /// </summary>
 public sealed class HostLeaseTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
 {
@@ -16,7 +16,7 @@ public sealed class HostLeaseTests(KONGORIntegrationWebApplicationFactory webApp
 
         IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        const string hostAccountName = "OPERATOR-CLAIM";
+        const string hostAccountName = "HOST-CLAIM";
 
         bool claimed = await distributedCacheStore.TryClaimHostLease(hostAccountName);
 
@@ -34,7 +34,7 @@ public sealed class HostLeaseTests(KONGORIntegrationWebApplicationFactory webApp
 
         IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        const string hostAccountName = "OPERATOR-DUPLICATE";
+        const string hostAccountName = "HOST-DUPLICATE";
 
         bool firstClaim = await distributedCacheStore.TryClaimHostLease(hostAccountName);
         bool secondClaim = await distributedCacheStore.TryClaimHostLease(hostAccountName);
@@ -53,7 +53,7 @@ public sealed class HostLeaseTests(KONGORIntegrationWebApplicationFactory webApp
 
         IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        const string hostAccountName = "OPERATOR-RELEASE";
+        const string hostAccountName = "HOST-RELEASE";
 
         await distributedCacheStore.TryClaimHostLease(hostAccountName);
         await distributedCacheStore.ReleaseHostLease(hostAccountName);
@@ -75,7 +75,7 @@ public sealed class HostLeaseTests(KONGORIntegrationWebApplicationFactory webApp
 
         IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        const string hostAccountName = "OPERATOR-TIME-TO-LIVE";
+        const string hostAccountName = "HOST-TIME-TO-LIVE";
 
         await distributedCacheStore.TryClaimHostLease(hostAccountName);
 
@@ -95,7 +95,7 @@ public sealed class HostLeaseTests(KONGORIntegrationWebApplicationFactory webApp
 
         IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        const string hostAccountName = "OPERATOR-RENEW-UNHELD";
+        const string hostAccountName = "HOST-RENEW-UNHELD";
 
         await distributedCacheStore.RenewHostLease(hostAccountName);
 

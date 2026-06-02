@@ -210,7 +210,7 @@ public static partial class DistributedCacheExtensions
         }
     }
 
-    // The Hosting Lease Restricts An Open-Password Host Account (e.g. OPERATOR) To A Single Concurrent Host
+    // The Hosting Lease Restricts A Host Account To A Single Concurrent Host
     // The Lease Is Anchored On The Server Manager Session: The Manager Claims It, Match Servers Require And Renew It, And It Is Released When The Match Server Manager Disconnects
     // It Is Time-To-Live-Backed So That It Self-Heals If The Holding Host Crashes Without A Clean Disconnect
 
