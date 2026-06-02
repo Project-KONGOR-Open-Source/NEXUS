@@ -495,6 +495,19 @@ public class MatchmakingGroup
         Log.Debug(@"Group GUID ""{GroupGUID}"" Joined Queue With {MemberCount} Member(s)", GUID, Members.Count);
     }
 
+    /// <summary>
+    ///     Resets the readiness and loading state of every member, mirroring the original chat server's behaviour whenever a group leaves the queue (which includes when it is matched into a game).
+    ///     The leader is set to not ready and non-leader members are set to ready, so that group readiness is determined solely by the leader, and every member's loading progress is reset to zero.
+    /// </summary>
+    public void UnloadAndUnreadyMembers()
+    {
+        foreach (MatchmakingGroupMember member in Members)
+        {
+            member.IsReady = member.IsLeader is false;
+            member.LoadingPercent = 0;
+        }
+    }
+
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
         ChatBuffer update = new ();
