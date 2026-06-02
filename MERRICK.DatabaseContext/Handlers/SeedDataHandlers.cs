@@ -333,52 +333,52 @@ public static class SeedDataHandlers
         logger.LogInformation(@"Seeded {BannedPeerCount} Banned Peers For Account ""{AccountName}""", guestAccounts.Count, systemAccount.Name);
     }
 
-    public static async Task SeedRoot(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    public static async Task SeedOperator(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        const string rootEmailAddress = "root@project.kongor";
-        const string rootAccountName = "ROOT";
+        const string operatorEmailAddress = "operator@project.kongor";
+        const string operatorAccountName = "OPERATOR";
 
-        if (await context.Users.AnyAsync(user => user.EmailAddress.Equals(rootEmailAddress), cancellationToken))
+        if (await context.Users.AnyAsync(user => user.EmailAddress.Equals(operatorEmailAddress), cancellationToken))
         {
-            logger.LogDebug(@"Skipped Seeding {AccountName} Account: It Has Already Been Seeded", rootAccountName);
+            logger.LogDebug(@"Skipped Seeding {AccountName} Account: It Has Already Been Seeded", operatorAccountName);
 
             return;
         }
 
         if (await context.Roles.NoneAsync(cancellationToken))
         {
-            logger.LogDebug(@"Skipped Seeding {AccountName} Account: Roles Have Not Yet Been Seeded", rootAccountName);
+            logger.LogDebug(@"Skipped Seeding {AccountName} Account: Roles Have Not Yet Been Seeded", operatorAccountName);
 
             return;
         }
 
         Role roleCustodian = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Custodian), cancellationToken);
 
-        User userRoot = new ()
+        User userOperator = new ()
         {
-            EmailAddress = rootEmailAddress,
+            EmailAddress = operatorEmailAddress,
             Role = roleCustodian,
             SRPPasswordSalt = "81c278a3ed03cf4549e787feac5ffe1d051029e15159b1cf0b087b4f8a85cb69",
             SRPPasswordHash = "bfad34f4dc65064dcae6e2064e12d63b299909b6c0cdb33306a91f26bb624e35",
             PBKDF2PasswordHash = "AQAAAAIAAYagAAAAECx4DCy3qYARlevpaVUJXy28QyvXDcQiJZ1KOSx547WDLBV0pdx2MX5m+Pe3xhtQAg=="
         };
 
-        await context.Users.AddAsync(userRoot, cancellationToken);
+        await context.Users.AddAsync(userOperator, cancellationToken);
 
-        Account accountRoot = new ()
+        Account accountOperator = new ()
         {
-            Name = rootAccountName,
-            User = userRoot,
+            Name = operatorAccountName,
+            User = userOperator,
             Type = AccountType.ServerHost,
             IsMain = true,
             AutoConnectChatChannels = [ ChatChannels.ServerHostsChannel ]
         };
 
-        await context.AddAsync(accountRoot, cancellationToken);
+        await context.AddAsync(accountOperator, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
 
-        logger.LogInformation(@"Seeded {AccountName} Account With Email Address ""{UserEmailAddress}"" And Custodian Role", rootAccountName, rootEmailAddress);
+        logger.LogInformation(@"Seeded {AccountName} Account With Email Address ""{UserEmailAddress}"" And Custodian Role", operatorAccountName, operatorEmailAddress);
     }
 
     public static async Task SeedHeroGuides(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
