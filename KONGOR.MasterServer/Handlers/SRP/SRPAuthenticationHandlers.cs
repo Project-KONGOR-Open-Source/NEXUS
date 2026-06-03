@@ -44,7 +44,7 @@ public static class SRPAuthenticationHandlers
             AwardsTooltips = SetAwardsTooltips(),
             DataPoints = SetDataPoints(),
             CloudStorageInformation = SetCloudStorageInformation(parameters.Account),
-            Notifications = SetNotifications()
+            Notifications = parameters.Notifications
         };
 
         return response;
@@ -88,6 +88,7 @@ public static class SRPAuthenticationHandlers
         public required string ServerProof { get; set; }
         public required string ClientIPAddress { get; set; }
         public required (string Address, int Port) ChatServer { get; set; }
+        public required List<Notification> Notifications { get; set; }
     }
 
     # region Chat Server Authentication Secret
@@ -238,11 +239,4 @@ public static class SRPAuthenticationHandlers
     }
 
     private static AwardsTooltips SetAwardsTooltips() => new ();
-
-    private static List<Notification> SetNotifications()
-    {
-        // TODO: Implement This
-
-        return [];
-    }
 }

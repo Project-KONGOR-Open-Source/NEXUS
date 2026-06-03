@@ -231,7 +231,8 @@ public partial class ClientRequesterController
             ClanRoster = account.Clan?.Members ?? [],
             ServerProof = serverProof,
             ClientIPAddress = remoteIPAddress,
-            ChatServer = (chatServerHost, chatServerClientConnectionsPort)
+            ChatServer = (chatServerHost, chatServerClientConnectionsPort),
+            Notifications = await BuildLoginNotifications(account.ID)
         };
 
         SRPAuthenticationResponseStageTwo response = SRPAuthenticationHandlers.GenerateStageTwoResponse(parameters, out string cookie);
