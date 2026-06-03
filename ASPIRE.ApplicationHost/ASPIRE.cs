@@ -219,14 +219,12 @@ public class ASPIRE
                 ? builder.AddParameter(smtpPasswordParameterName, resolvedSMTPPassword, secret: true)
                 : builder.AddParameter(smtpPasswordParameterName, secret: true);
 
-            // Pass SMTP Configuration To Web Portal API As Environment Variables That Override The "Operational:SMTP" Configuration Section
-            // The "__" Separator In Environment Variable Names Maps To ":" In ASP.NET Core's Configuration System (e.g. "Operational__SMTP__Host" Resolves To "Operational:SMTP:Host")
-            // These Environment Variables Are Set On The Child Process Before It Starts, So They Are Available During Configuration Building And Before IOptions<T> Is Bound
+            // Pass SMTP Configuration To Web Portal API
             webPortalAPI
-                .WithEnvironment("Operational__SMTP__Host", smtpHost)
-                .WithEnvironment("Operational__SMTP__Port", smtpPort)
-                .WithEnvironment("Operational__SMTP__Username", smtpUsername)
-                .WithEnvironment("Operational__SMTP__Password", smtpPassword);
+                .WithEnvironment("SMTP_HOST", smtpHost)
+                .WithEnvironment("SMTP_PORT", smtpPort)
+                .WithEnvironment("SMTP_USERNAME", smtpUsername)
+                .WithEnvironment("SMTP_PASSWORD", smtpPassword);
 
             // Create Resource Relationships After Parent Resource Is Defined
             smtpHost.WithDescription("SMTP Host").WithParentRelationship(webPortalAPI);
