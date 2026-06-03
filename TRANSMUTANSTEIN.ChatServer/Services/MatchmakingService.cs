@@ -197,7 +197,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         // Reset Each Matched Group's Readiness And Loading State And Mark Its Members As In-Game
         // A Party Group Stays Alive On The Client After A Match Is Found (Only Solo Queues Self-Disband), So The Chat Server Must Reset The Leader To Not-Ready And Broadcast The Update
-        // Without This, The Client's Matchmaking Loading Overlay Remains Visible And Covers The Game
+        // Without This, The Client's Matchmaking Loading Overlay Remains Visible And Covers The Match Lobby Interface
         foreach (MatchmakingGroup group in match.GetAllGroups())
         {
             group.QueueStartTime = null;
