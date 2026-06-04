@@ -163,7 +163,14 @@ public class Friend
 
         if (pendingFriendRequestNotificationID is null)
         {
-            Log.Warning(@"Friend Request Approval By Account ""{ApproverAccountName}"" (ID: {ApproverAccountID}) Failed: No Pending Friend Request From ""{RequesterAccountName}"" (ID: {RequesterAccountID}) Was Found In The Distributed Cache Store", approverAccount.Name, approverAccount.ID, requesterAccount.Name, requesterAccount.ID);
+            Log.Information
+            (
+                @"Friend Request Approval By Account ""{ApproverAccountName}"" (ID: {ApproverAccountID}) Found No Pending Friend Request From ""{RequesterAccountName}"" (ID: {RequesterAccountID}) In The Distributed Cache Store" + Environment.NewLine +
+                "Usually Benign: The Request Was Already Approved/Declined, Or The Notification Was Consumed By A Reciprocal Friend Request, Cleared When All Notifications Were Removed, Or Expired As Per Its Time-To-Live Policy" + Environment.NewLine +
+                "Worth Investigating If Unexpected: A Notification Removal Racing This Approval, A Duplicate Approval, A Recycled Requester Name Resolving To The Wrong Account, Or Lost Or Corrupted Cache Data",
+
+                approverAccount.Name, approverAccount.ID, requesterAccount.Name, requesterAccount.ID
+            );
 
             SendFriendApproveFailure(session, requesterAccount.ID, requesterAccount.NameWithClanTag);
 
