@@ -118,6 +118,7 @@ Update The Database Schema
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Development"
 dotnet ef database update --project MERRICK.DatabaseContext
+# TODO: this command above fails to resolve the connection string > create custom resource command (https://aspire.dev/fundamentals/custom-resource-commands/?aspire-lang=csharp#command-arguments)
 ```
 
 ```powershell
@@ -125,6 +126,7 @@ dotnet ef database update --project MERRICK.DatabaseContext
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Production"
 dotnet ef database update --project MERRICK.DatabaseContext
+# TODO: this command above fails to resolve the connection string > create custom resource command (https://aspire.dev/fundamentals/custom-resource-commands/?aspire-lang=csharp#command-arguments)
 ```
 
 > [!NOTE]
