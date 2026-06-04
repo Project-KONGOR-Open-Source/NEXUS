@@ -555,10 +555,14 @@ public class MatchmakingGroup
                 int normalRankLevel = CalculateCampaignLevel(member.TMR);
                 int casualRankLevel = CalculateCampaignLevel(member.CasualTMR);
 
+                // Get Global Leaderboard Index
+                int normalGlobalLeaderboardIndex = -1; // TODO: Implement Global Leaderboard Index Calculation
+                int casualGlobalLeaderboardIndex = -1; // TODO: Implement Global Leaderboard Index Calculation
+
                 update.WriteInt32(normalRankLevel);                                      // Normal Rank Level (Campaign Level / Medal)
                 update.WriteInt32(casualRankLevel);                                      // Casual Rank Level (Campaign Level / Medal)
-                update.WriteInt32(normalRankLevel);                                      // Normal Rank (Global Ranking Index - Placeholder)
-                update.WriteInt32(casualRankLevel);                                      // Casual Rank (Global Ranking Index - Placeholder)
+                update.WriteInt32(normalGlobalLeaderboardIndex);                         // Normal Ranking Global Leaderboard Index (-1 = Unranked, 1 = Highest Ranked Player)
+                update.WriteInt32(casualGlobalLeaderboardIndex);                         // Casual Ranking Global Leaderboard Index (-1 = Unranked, 1 = Highest Ranked Player)
                 update.WriteBool(member.IsEligibleForMatchmaking);                       // Eligible For Campaign
 
                 // Rating: Use -1 To Hide For Unranked, Otherwise Show Real Rating
