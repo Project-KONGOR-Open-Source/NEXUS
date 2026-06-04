@@ -76,14 +76,10 @@ public class ASPIRE
         // While Aspire's Service Orchestration Is Not Running, The Port To Connect Directly To The Running SQL Server Container Can Be Found In Docker (e.g. "docker container list")
         const int databasePort = 1433;
 
-        // Configure SQL Server Data Directory
-        string userHomeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string databaseDirectory = Path.Combine(userHomeDirectory, "SQL", "MERRICK", databaseName);
-
-        // Add SQL Server Container With Persistent Data In The Current User's Directory (Cross-Platform)
+        // Add SQL Server Resource (SQL Server 2025 Requires A Container-Native Data Directory, A Linux-To-Windows Bind Mount Causes I/O Failures During Startup, So A Data Volume Is Required)
         IResourceBuilder<SqlServerServerResource> databaseServer = builder.AddSqlServer("database-server", password: databasePassword, port: databasePort)
-            .WithImageTag("2022-latest") // SQL Server Image Tags: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/tags
-            .WithLifetime(ContainerLifetime.Persistent).WithDataBindMount(source: databaseDirectory) // Persist SQL Server Data On Host File System
+            .WithImageTag("latest") // SQL Server Image Tags: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/tags
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume($"database-server-{databaseName}") // Persist SQL Server Data As Docker-Managed Data Volume
             .WithEnvironment("ACCEPT_EULA", "Y").WithEnvironment("MSSQL_PID", "Developer"); // SQL Server Image Information: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/about
 
         // Create Resource Relationship After Parent Resource Is Defined
