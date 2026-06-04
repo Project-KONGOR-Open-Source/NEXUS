@@ -12,9 +12,12 @@ public class RemoveFriend : ISynchronousCommandProcessor<ClientChatSession>
 
         /*
             This is a NOOP (no operation) as per the implementation of the chat protocol on the side of the game client.
-            The intention is to avoid notifying players when they have been removed from another player's friend list.
-            The requesting player will still appear in the friend list of the removed player until they perform a logout/login cycle.
+            The intention is to avoid notifying users when they have been removed from another user's friend list.
+            The requesting user will still appear in the friend list of the removed user until the removed user performs a client restart.
+            A logout/login cycle causes on the side of the removed user causes the requesting user to correctly be marked as not a friend anymore, however they will still appear in the friend list until the client is restarted.
         */
+
+        // TODO: Implement Real-Time Friend Removal In The Client
 
         return;
     }
