@@ -48,6 +48,45 @@ public partial class ClientRequesterController
     }
 
     /// <summary>
+    ///     Handles the removal of every notification for the account, such as when the player clears all notifications in one action.
+    ///     The response is always a success, mirroring the original Master Server API, and the removal is generic across all persisted notification types.
+    /// </summary>
+    private async Task<IActionResult> RemoveAllNotifications()
+    {
+        string? cookie = Request.Form["cookie"];
+
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+
+        // Validate The Session Cookie And Resolve The Account, So The Removal Is Scoped To The Owner Of The Notifications
+        (bool isValid, string? accountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
+
+        if (isValid.Equals(false) || accountName is null)
+        {
+            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Attempted To Remove All Notifications With Invalid Cookie ""{cookie}""");
+
+            return Unauthorized($@"Unrecognised Cookie ""{cookie}""");
+        }
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(candidate => candidate.Name.Equals(accountName));
+
+        if (account is not null)
+        {
+            await RemoveAllPersistedNotifications(account.ID);
+
+            Logger.LogInformation(@"Account ""{AccountName}"" (ID: {AccountID}) Removed All Notifications", account.Name, account.ID);
+        }
+
+        Dictionary<string, string> response = new ()
+        {
+            { "status", "OK" }
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
     ///     Removes the persisted notification with the supplied ID for the account, dispatching to each persisted notification type in turn.
     ///     Returns <see langword="true"/> if a backing entry was found and removed; otherwise <see langword="false"/>.
     /// </summary>
@@ -59,6 +98,16 @@ public partial class ClientRequesterController
         // TODO: Implement Removal Of Other Persisted Notification Types (e.g. Clan Invites)
 
         return false;
+    }
+
+    /// <summary>
+    ///     Removes every persisted notification for the account, dispatching to each persisted notification type in turn.
+    /// </summary>
+    private async Task RemoveAllPersistedNotifications(int accountID)
+    {
+        await DistributedCache.RemoveAllFriendRequestsForAccount(accountID);
+
+        // TODO: Implement Removal Of Other Persisted Notification Types (e.g. Clan Invites)
     }
 
     /// <summary>

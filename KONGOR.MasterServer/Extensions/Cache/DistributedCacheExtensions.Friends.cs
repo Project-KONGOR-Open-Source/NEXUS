@@ -137,6 +137,20 @@ public static partial class DistributedCacheExtensions
     }
 
     /// <summary>
+    ///     Removes every pending friend request which targets the account, clearing the account's entire friend request inbox.
+    ///     This is invoked when the client removes all notifications at once.
+    /// </summary>
+    public static async Task RemoveAllFriendRequestsForAccount(this IDatabase distributedCacheStore, int accountID)
+    {
+        List<(int RequesterAccountID, int NotificationID, DateTimeOffset CreatedAt)> pendingRequests = await distributedCacheStore.GetPendingFriendRequestsForAccount(accountID);
+
+        foreach ((int RequesterAccountID, int NotificationID, DateTimeOffset CreatedAt) pendingRequest in pendingRequests)
+        {
+            await distributedCacheStore.RemoveFriendRequest(pendingRequest.RequesterAccountID, accountID);
+        }
+    }
+
+    /// <summary>
     ///     Parses the cached value of a friend request into the target's notification ID and the creation timestamp.
     ///     Returns <see langword="null"/> when the value is absent or malformed.
     ///     A missing timestamp is tolerated and falls back to the current time.

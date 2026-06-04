@@ -73,6 +73,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
             // notifications
             "delete_notification"           => await DeleteNotification(),
+            "remove_all_notifications"      => await RemoveAllNotifications(),
 
             // session
             "logout"                        => await HandleLogout(),
