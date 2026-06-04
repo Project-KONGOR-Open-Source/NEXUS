@@ -118,12 +118,11 @@ dotnet run --project ASPIRE.ApplicationHost --launch-profile "ASPIRE.Application
 
 Create A Database Schema Migration
 
-1. restore the Entity Framework Core CLI and the Aspire CLI by executing `dotnet tool restore`
-2. in the context of the solution directory, execute `aspire exec --resource database-context -- dotnet ef migrations add {NAME}`
+1. in the context of the solution directory, restore the Entity Framework Core CLI and the Aspire CLI by executing `dotnet tool restore`
+2. in the context of the solution directory, execute `dotnet ef migrations add {NAME} --project MERRICK.DatabaseContext`
 
 > [!NOTE]
-> Because the code-first database project is an Aspire resource, it needs the Aspire application host to be running when managing migrations and updating the database, so that Entity Framework Core can gain awareness of resources generated dynamically at run time, such as the connection string. Therefore, it is not possible to run `dotnet ef` commands directly against such a project, because on its own it doesn't have awareness of how to connect to the database server, since this information is passed downstream by the application host at run time.
-> More information on resource-aware CLI commands is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/cli-reference/aspire-exec.
+> More information on Entity Framework Core in Aspire is available here: https://aspire.dev/integrations/databases/efcore/migrations.
 
 <br/>
 
@@ -133,14 +132,14 @@ Update The Database Schema
 # Development Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Development"
-aspire exec --resource database-context -- dotnet ef database update
+dotnet ef database update --project MERRICK.DatabaseContext
 ```
 
 ```powershell
 # Production Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Production"
-aspire exec --resource database-context -- dotnet ef database update
+dotnet ef database update --project MERRICK.DatabaseContext
 ```
 
 > [!NOTE]
