@@ -97,37 +97,45 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     /// </summary>
     private void DecayRequestCounts(object? state)
     {
-        int decayedAccounts = 0;
-        int removedAccounts = 0;
-
-        foreach (KeyValuePair<int, FloodState> entry in AccountFloodStates)
+        try
         {
-            FloodState floodState = entry.Value;
+            int decayedAccounts = 0;
+            int removedAccounts = 0;
 
-            lock (floodState.Lock)
+            foreach (KeyValuePair<int, FloodState> entry in AccountFloodStates)
             {
-                // Decay Request Count By One
-                if (floodState.RequestCount > 0)
+                FloodState floodState = entry.Value;
+
+                lock (floodState.Lock)
                 {
-                    floodState.RequestCount--;
+                    // Decay Request Count By One
+                    if (floodState.RequestCount > 0)
+                    {
+                        floodState.RequestCount--;
 
-                    decayedAccounts++;
+                        decayedAccounts++;
+                    }
+
+                    // Remove Accounts With Zero Request Count And No Recent Activity, To Prevent Memory Leaks
+                    if (floodState.RequestCount == 0 && (DateTime.UtcNow - floodState.LastRequestTime).TotalSeconds > ChatProtocol.FLOOD_GARBAGE_COLLECTION_SECONDS)
+                    {
+                        AccountFloodStates.TryRemove(entry.Key, out _);
+
+                        removedAccounts++;
+                    }
                 }
+            }
 
-                // Remove Accounts With Zero Request Count And No Recent Activity, To Prevent Memory Leaks
-                if (floodState.RequestCount == 0 && (DateTime.UtcNow - floodState.LastRequestTime).TotalSeconds > ChatProtocol.FLOOD_GARBAGE_COLLECTION_SECONDS)
-                {
-                    AccountFloodStates.TryRemove(entry.Key, out _);
-
-                    removedAccounts++;
-                }
+            if (decayedAccounts > 0 || removedAccounts > 0)
+            {
+                logger.LogDebug("Flood Prevention Decay: {DecayedCount} Accounts Decayed, {RemovedCount} Accounts Cleaned Up",
+                    decayedAccounts, removedAccounts);
             }
         }
 
-        if (decayedAccounts > 0 || removedAccounts > 0)
+        catch (Exception exception)
         {
-            logger.LogDebug("Flood Prevention Decay: {DecayedCount} Accounts Decayed, {RemovedCount} Accounts Cleaned Up",
-                decayedAccounts, removedAccounts);
+            logger.LogError(exception, "Flood Prevention Decay Sweep Failed");
         }
     }
 

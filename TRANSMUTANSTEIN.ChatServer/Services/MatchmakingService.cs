@@ -81,74 +81,132 @@ public class MatchmakingService : BackgroundService, IDisposable
     {
         while (cancellationToken.IsCancellationRequested is false)
         {
-            await Task.Delay(_settings.Value.MatchmakingCycleInterval, cancellationToken);
-
-            if (_settings.Value.Enabled is false)
-                continue;
-
-            // Get All Queued Groups (Groups With A Non-NULL QueueStartTime And Not Already Matched)
-            List<MatchmakingGroup> queuedGroups = [.. Groups.Values
-                .Where(group => group.QueueStartTime is not null && group.MatchedUp is false)
-                .OrderBy(group => group.QueueStartTime)];
-
-            if (queuedGroups.Count == 0)
-                continue;
-
-            // Spawn Bot Matches Immediately (Bot Groups Bypass The Regular Match Broker Cycles)
-            List<MatchmakingGroup> botGroups = [.. queuedGroups.Where(group => group.Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_COOP)];
-
-            foreach (MatchmakingGroup botGroup in botGroups)
+            try
             {
-                MatchmakingMatch botMatch = MatchmakingMatch.FromBotGroup(botGroup);
-
-                bool spawned = await SpawnMatch(botMatch);
-
-                if (spawned is false)
-                {
-                    SendNoServersFound(botMatch);
-
-                    botGroup.MatchedUp = false;
-                    botGroup.AssignedMatchGUID = null;
-                    botGroup.AssignedTeamGUID = null;
-                }
+                await Task.Delay(_settings.Value.MatchmakingCycleInterval, cancellationToken);
             }
 
-            // Run The Regular Broker Cycle For Non-Bot Groups
-            List<MatchmakingGroup> regularGroups = [.. queuedGroups
-                .Where(group => group.Information.GroupType != ChatProtocol.TMMType.TMM_TYPE_COOP && group.MatchedUp is false)];
-
-            if (regularGroups.Count == 0)
-                continue;
-
-            int queuedPlayerCount = regularGroups.Sum(group => group.Members.Count);
-
-            PoolSizeParameters poolSizeParameters = MatchmakingAlgorithm.ResolvePoolSizeParameters(queuedPlayerCount, _settings.Value);
-
-            _logger.LogDebug(@"Broker Cycle: {PlayerCount} Queued Players, Pool Tier = {PoolTier}", queuedPlayerCount, poolSizeParameters.Tier);
-
-            IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(regularGroups, _settings.Value, poolSizeParameters);
-
-            // Spawn Each Match
-            foreach (MatchmakingMatch match in matches)
+            catch (OperationCanceledException)
             {
-                bool spawned = await SpawnMatch(match);
-
-                if (spawned is false)
-                {
-                    SendNoServersFound(match);
-
-                    // Return Groups To Queue
-                    foreach (MatchmakingGroup group in match.GetAllGroups())
-                    {
-                        group.MatchedUp = false;
-                        group.AssignedMatchGUID = null;
-                        group.AssignedTeamGUID = null;
-                    }
-                }
+                break;
             }
 
-            // Send Periodic Queue Time Updates (Every 10 Seconds = Every 2 Cycles At 5-Second Intervals)
-            BroadcastQueueTimeUpdates(queuedGroups.Where(group => group.MatchedUp is false).ToList());
+            try
+            {
+                await ProcessBrokerCycle();
+            }
+
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            // A Single Broker Cycle Must Never Tear Down The Host (As Per The Default BackgroundServiceExceptionBehavior == StopHost)
+            catch (Exception exception)
+            {
+                // Log And Continue With The Next Cycle
+                _logger.LogError(exception, "Matchmaking Broker Cycle Failed; Continuing With The Next Cycle");
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Runs a single match broker cycle.
+    ///     Each match is spawned in isolation via <see cref="TrySpawnMatch"/> so that the failure of one match cannot abort the others or the cycle.
+    /// </summary>
+    private async Task ProcessBrokerCycle()
+    {
+        if (_settings.Value.Enabled is false)
+            return;
+
+        // Get All Queued Groups (Groups With A Non-NULL QueueStartTime And Not Already Matched)
+        List<MatchmakingGroup> queuedGroups = [.. Groups.Values
+            .Where(group => group.QueueStartTime is not null && group.MatchedUp is false)
+            .OrderBy(group => group.QueueStartTime)];
+
+        if (queuedGroups.Count == 0)
+            return;
+
+        // Spawn Bot Matches Immediately (Bot Groups Bypass The Regular Match Broker Cycles)
+        List<MatchmakingGroup> botGroups = [.. queuedGroups.Where(group => group.Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_COOP)];
+
+        foreach (MatchmakingGroup botGroup in botGroups)
+            await TrySpawnMatch(MatchmakingMatch.FromBotGroup(botGroup));
+
+        // Run The Regular Broker Cycle For Non-Bot Groups
+        List<MatchmakingGroup> regularGroups = [.. queuedGroups
+            .Where(group => group.Information.GroupType != ChatProtocol.TMMType.TMM_TYPE_COOP && group.MatchedUp is false)];
+
+        if (regularGroups.Count == 0)
+            return;
+
+        int queuedPlayerCount = regularGroups.Sum(group => group.Members.Count);
+
+        PoolSizeParameters poolSizeParameters = MatchmakingAlgorithm.ResolvePoolSizeParameters(queuedPlayerCount, _settings.Value);
+
+        _logger.LogDebug(@"Broker Cycle: {PlayerCount} Queued Players, Pool Tier = {PoolTier}", queuedPlayerCount, poolSizeParameters.Tier);
+
+        IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(regularGroups, _settings.Value, poolSizeParameters);
+
+        // Spawn Each Match In Isolation
+        int spawnedMatchCount = 0;
+
+        foreach (MatchmakingMatch match in matches)
+        {
+            if (await TrySpawnMatch(match))
+                spawnedMatchCount++;
+        }
+
+        if (matches.Count > 0)
+            _logger.LogInformation(@"Broker Cycle Complete: {SpawnedMatchCount} Of {MatchCount} Match(es) Spawned", spawnedMatchCount, matches.Count);
+
+        // Send Periodic Queue Time Updates (Every 10 Seconds = Every 2 Cycles At 5-Second Intervals)
+        BroadcastQueueTimeUpdates(queuedGroups.Where(group => group.MatchedUp is false).ToList());
+    }
+
+    /// <summary>
+    ///     Spawns a single match, isolating any failure so that it cannot abort sibling matches or the broker cycle.
+    ///     When no server is available, the players are notified with a "No Servers Found" message and their groups are returned to the queue.
+    ///     When the spawn fails unexpectedly, the failure is logged and the match's groups are returned to the queue so the broker re-matches them on a later cycle, without misreporting the failure to the players as a server-availability problem.
+    /// </summary>
+    private async Task<bool> TrySpawnMatch(MatchmakingMatch match)
+    {
+        try
+        {
+            bool spawned = await SpawnMatch(match);
+
+            if (spawned is false)
+            {
+                SendNoServersFound(match);
+
+                ReturnMatchGroupsToQueue(match);
+            }
+
+            return spawned;
+        }
+
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, @"Failed To Spawn Match GUID {MatchGUID} With {PlayerCount} Player(s); Returning Its Groups To Queue", match.GUID, match.GetAllPlayers().Count());
+
+            ActiveMatches.TryRemove(match.GUID, out _);
+
+            ReturnMatchGroupsToQueue(match);
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     Returns every group in a match to the queue by clearing its matched-up state, so that the broker re-matches it on a subsequent cycle.
+    /// </summary>
+    private static void ReturnMatchGroupsToQueue(MatchmakingMatch match)
+    {
+        foreach (MatchmakingGroup group in match.GetAllGroups())
+        {
+            group.MatchedUp = false;
+            group.AssignedMatchGUID = null;
+            group.AssignedTeamGUID = null;
         }
     }
 
@@ -198,16 +256,32 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Reset Each Matched Group's Readiness And Loading State And Mark Its Members As In-Game
         // A Party Group Stays Alive On The Client After A Match Is Found (Only Solo Queues Self-Disband), So The Chat Server Must Reset The Leader To Not-Ready And Broadcast The Update
         // Without This, The Client's Matchmaking Loading Overlay Remains Visible And Covers The Match Lobby Interface
+        // The Match Roster Has Already Been Committed To The Match Server (As Per CreateMatch), So This Loop Is Purely Post-Commit Book-Keeping; A Player Who Drops Out Now Is Handled Downstream By The Match Server's Wait-For-Players Logic And The Resulting MatchAbandoned Signal
+        // Each Group's Notification Is Wrapped Individually So That An Exception While Notifying One Group Does Not Skip The Notifications For The Remaining Groups
         foreach (MatchmakingGroup group in match.GetAllGroups())
         {
-            group.QueueStartTime = null;
+            try
+            {
+                group.QueueStartTime = null;
 
-            group.UnloadAndUnreadyMembers();
+                group.UnloadAndUnreadyMembers();
 
-            foreach (MatchmakingGroupMember member in group.Members)
-                member.IsInGame = true;
+                foreach (MatchmakingGroupMember member in group.Members)
+                    member.IsInGame = true;
 
-            group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+                // If Every Member Disconnected During Server Allocation The Group Will Have Been Disbanded, Leaving No One To Notify; Skip The Update In This Case
+                // A Group That Still Has Members Always Has Exactly One Leader (Leadership Is Reassigned Whenever A Member Leaves)
+                if (group.Members.Count is not 0)
+                    group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+
+                else
+                    _logger.LogWarning(@"Skipped Post-Matchup Update For Disbanded Group GUID {GroupGUID}", group.GUID);
+            }
+
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, @"Failed Post-Matchup Handling For Group GUID {GroupGUID} In Match GUID {MatchGUID}", group.GUID, match.GUID);
+            }
         }
 
         match.State = MatchmakingMatchState.WaitingForPlayers;
