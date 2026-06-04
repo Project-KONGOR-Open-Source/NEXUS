@@ -60,21 +60,6 @@ Optionally, but recommended on development machines, also install these tools gl
 
 <hr/>
 
-<h3 align="center">AI Tools</h3>
-
-* Claude Code: https://claude.ai/
-
-  ```powershell
-  # Add MCP Servers
-
-  claude mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp
-  claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: YOUR_API_KEY"
-
-  claude mcp list
-  ```
-
-<hr/>
-
 <h3 align="center">Comprehensive Instructions For Developers</h3>
 
 Run In Development ...
