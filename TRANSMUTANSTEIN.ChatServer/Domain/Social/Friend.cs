@@ -153,6 +153,8 @@ public class Friend
 
         if (requesterAccount is null)
         {
+            Log.Warning(@"Friend Request Approval By Account ""{ApproverAccountName}"" (ID: {ApproverAccountID}) Failed: Requester Account ""{RequesterAccountName}"" Was Not Found", approverAccount.Name, approverAccount.ID, AccountName);
+
             return this;
         }
 
@@ -161,7 +163,8 @@ public class Friend
 
         if (pendingFriendRequestNotificationID is null)
         {
-            // No Pending Request Found (May Have Expired Or Never Existed)
+            Log.Warning(@"Friend Request Approval By Account ""{ApproverAccountName}"" (ID: {ApproverAccountID}) Failed: No Pending Friend Request From ""{RequesterAccountName}"" (ID: {RequesterAccountID}) Was Found In The Distributed Cache Store", approverAccount.Name, approverAccount.ID, requesterAccount.Name, requesterAccount.ID);
+
             SendFriendApproveFailure(session, requesterAccount.ID, requesterAccount.NameWithClanTag);
 
             return this;
