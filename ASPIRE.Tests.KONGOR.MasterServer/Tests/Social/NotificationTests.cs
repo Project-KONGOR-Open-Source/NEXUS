@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Social;
 
 /// <summary>
-///     Tests for notification removal and the re-delivery of missed notifications on login.
+///     Tests for the notification lifecycle: removal through the delete-notification endpoint, and the re-delivery of missed or ignored notifications on login.
 /// </summary>
 public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
 {
@@ -10,7 +10,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
         => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
 
     [Test]
-    public async Task Deleting_A_Notification_Removes_The_Pending_Friend_Request_And_Returns_Success()
+    public async Task Deleting_A_Friend_Request_Notification_Removes_The_Pending_Request_And_Returns_Success()
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -57,7 +57,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
     }
 
     [Test]
-    public async Task Deleting_A_Notification_With_No_Matching_Request_Still_Returns_Success()
+    public async Task Deleting_A_Notification_With_No_Matching_Backing_Entry_Still_Returns_Success()
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -185,8 +185,13 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
         using (Assert.Multiple())
         {
             await Assert.That(authenticationResponse.IsSuccessStatusCode).IsTrue();
+
             // The Notification Carries The Requester's Name And The Type 23 Marker (NOTIFY_TYPE_BUDDY_REQUESTED_ADDED) In Its Pipe-Separated Data
             await Assert.That(authenticationResponseBody).Contains($"{requesterAccount.Name}||23||||");
+
+            // The Timestamp Follows The Notification's Type And Placeholder Fields, In The 24-Hour "dd/MM  HH:mm" Format
+            await Assert.That(Regex.IsMatch(authenticationResponseBody, @"\|\|23\|\|\|\|\d{2}/\d{2}  \d{2}:\d{2}")).IsTrue();
+
             // The Target's Notification ID Is Sent Separately So The Client Can Remove It Once Actioned
             await Assert.That(authenticationResponseBody).Contains(targetNotificationID.ToString());
         }
