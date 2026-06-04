@@ -121,12 +121,13 @@ public partial class ClientRequesterController
 
     /// <summary>
     ///     Formats a notification as the pipe-separated string that the game client parses on login.
-    ///     The client reads index 0 as the primary parameter (such as a sender name), index 2 as the numeric notification type, and index 6 as the timestamp. The remaining indices are placeholders that the client refills.
+    ///     The client reads the primary parameter at index 0 (such as a sender name), the numeric notification type at index 2, and the timestamp at index 6 (in the "dd/MM  HH:mm" 24-hour format).
+    ///     It derives the translation string, the display type, and the action (indices 3 to 5) from the numeric type, so those fields are left empty here.
     ///     The notification ID is supplied separately to the client through the "notify_id" field.
     /// </summary>
     private static string FormatNotification(string parameter, ClientNotificationType notificationType, DateTimeOffset createdAt)
     {
-        string timestamp = createdAt.ToString(@"MM/dd  hh:mm tt", CultureInfo.InvariantCulture);
+        string timestamp = createdAt.ToString(@"dd/MM  HH:mm", CultureInfo.InvariantCulture);
 
         return $"{parameter}||{(int) notificationType}||||{timestamp}";
     }
