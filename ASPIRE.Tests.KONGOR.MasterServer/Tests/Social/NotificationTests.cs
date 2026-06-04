@@ -196,4 +196,115 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
             await Assert.That(authenticationResponseBody).Contains(targetNotificationID.ToString());
         }
     }
+
+    [Test]
+    public async Task Removing_All_Notifications_Clears_Every_Pending_Friend_Request_And_Returns_Success()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account requesterAccountOne, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials("remove_all_requester_one@kongor.com", "RAReqOne", "SecurePassword123!");
+        (Account requesterAccountTwo, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials("remove_all_requester_two@kongor.com", "RAReqTwo", "SecurePassword123!");
+        SRPAuthenticationData targetAuthentication = await srpAuthenticationService.AuthenticateWithSRP("remove_all_target@kongor.com", "RAClearTgt", "SecurePassword123!");
+
+        string cookie = targetAuthentication.Cookie ?? throw new InvalidOperationException("Cookie Is NULL");
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+        await distributedCacheStore.SetFriendRequest(requesterAccountOne.ID, targetAuthentication.Account.ID, 810020);
+        await distributedCacheStore.SetFriendRequest(requesterAccountTwo.ID, targetAuthentication.Account.ID, 810021);
+
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        Dictionary<string, string> formData = new ()
+        {
+            { "account_id", targetAuthentication.Account.ID.ToString() },
+            { "cookie", cookie }
+        };
+
+        HttpResponseMessage response = await httpClient.PostAsync("client_requester.php?f=remove_all_notifications", new FormUrlEncodedContent(formData));
+
+        IDictionary<object, object>? responseData = PhpSerialization.Deserialize(await response.Content.ReadAsStringAsync()) as IDictionary<object, object>;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.IsSuccessStatusCode).IsTrue();
+            await Assert.That(responseData?["status"] as string).IsEqualTo("OK");
+            await Assert.That((await distributedCacheStore.GetPendingFriendRequestsForAccount(targetAuthentication.Account.ID)).Count).IsEqualTo(0);
+        }
+    }
+
+    [Test]
+    public async Task Removing_All_Notifications_With_No_Pending_Notifications_Still_Returns_Success()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        SRPAuthenticationData targetAuthentication = await srpAuthenticationService.AuthenticateWithSRP("remove_all_empty_target@kongor.com", "RAEmptyTgt", "SecurePassword123!");
+
+        string cookie = targetAuthentication.Cookie ?? throw new InvalidOperationException("Cookie Is NULL");
+
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        Dictionary<string, string> formData = new ()
+        {
+            { "account_id", targetAuthentication.Account.ID.ToString() },
+            { "cookie", cookie }
+        };
+
+        HttpResponseMessage response = await httpClient.PostAsync("client_requester.php?f=remove_all_notifications", new FormUrlEncodedContent(formData));
+
+        IDictionary<object, object>? responseData = PhpSerialization.Deserialize(await response.Content.ReadAsStringAsync()) as IDictionary<object, object>;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.IsSuccessStatusCode).IsTrue();
+            await Assert.That(responseData?["status"] as string).IsEqualTo("OK");
+        }
+    }
+
+    [Test]
+    public async Task Removing_All_Notifications_Only_Clears_The_Requesting_Account()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account requesterAccount, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials("remove_all_isolation_requester@kongor.com", "RAIsoReq", "SecurePassword123!");
+        SRPAuthenticationData targetAuthenticationOne = await srpAuthenticationService.AuthenticateWithSRP("remove_all_isolation_target_one@kongor.com", "RAIsoTgtA", "SecurePassword123!");
+        (Account targetAccountTwo, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials("remove_all_isolation_target_two@kongor.com", "RAIsoTgtB", "SecurePassword123!");
+
+        string cookie = targetAuthenticationOne.Cookie ?? throw new InvalidOperationException("Cookie Is NULL");
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+        await distributedCacheStore.SetFriendRequest(requesterAccount.ID, targetAuthenticationOne.Account.ID, 830020);
+        await distributedCacheStore.SetFriendRequest(requesterAccount.ID, targetAccountTwo.ID, 830021);
+
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        Dictionary<string, string> formData = new ()
+        {
+            { "account_id", targetAuthenticationOne.Account.ID.ToString() },
+            { "cookie", cookie }
+        };
+
+        HttpResponseMessage response = await httpClient.PostAsync("client_requester.php?f=remove_all_notifications", new FormUrlEncodedContent(formData));
+
+        IDictionary<object, object>? responseData = PhpSerialization.Deserialize(await response.Content.ReadAsStringAsync()) as IDictionary<object, object>;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.IsSuccessStatusCode).IsTrue();
+            await Assert.That(responseData?["status"] as string).IsEqualTo("OK");
+            await Assert.That((await distributedCacheStore.GetPendingFriendRequestsForAccount(targetAuthenticationOne.Account.ID)).Count).IsEqualTo(0);
+            await Assert.That((await distributedCacheStore.GetPendingFriendRequestsForAccount(targetAccountTwo.ID)).Count).IsEqualTo(1);
+        }
+    }
 }
