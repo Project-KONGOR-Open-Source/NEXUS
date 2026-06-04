@@ -211,6 +211,50 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
+    ///     Cleans up every active match hosted by the given server. Removes each match from the active matches registry and returns its groups to an available, re-queueable state.
+    ///     Invoked when a match ends, is abandoned, or is aborted. Safe to call more than once for the same server, as subsequent calls find no remaining match and do nothing.
+    /// </summary>
+    public static void CleanUpMatchesForServer(int serverID)
+    {
+        foreach (MatchmakingMatch match in ActiveMatches.Values.Where(match => match.AssignedServerID == serverID).ToList())
+        {
+            ActiveMatches.TryRemove(match.GUID, out _);
+
+            ReturnMatchGroupsToAvailableState(match);
+        }
+    }
+
+    /// <summary>
+    ///     Returns each group in an ended, abandoned, or aborted match to an available, re-queueable state.
+    ///     Solo-queued groups are disbanded silently (the client implicitly drops a solo group once it connects to the match).
+    ///     A pre-made party is kept alive so it can re-queue together.
+    /// </summary>
+    private static void ReturnMatchGroupsToAvailableState(MatchmakingMatch match)
+    {
+        foreach (MatchmakingGroup group in match.GetAllGroups())
+        {
+            foreach (MatchmakingGroupMember member in group.Members)
+                member.IsInGame = false;
+
+            group.MatchedUp = false;
+            group.AssignedMatchGUID = null;
+            group.AssignedTeamGUID = null;
+
+            // The Group Was Already Disbanded During The Match (For Example, Every Member Disconnected), So There Is Nothing Left To Reset Or Notify
+            if (group.Members.Count is 0)
+                continue;
+
+            // A Solo Queue Group Does Not Persist Across Matches (Groups Are Keyed By The Leader's Account ID)
+            if (group.Members.Count is 1)
+                Groups.TryRemove(group.Leader.Account.ID, out _);
+
+            // A Premade Party Persists So It Can Re-Queue Together; Refresh The Client's Party Interface To Reflect The Cleared In-Game State
+            else
+                group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+        }
+    }
+
+    /// <summary>
     ///     Spawns a match by allocating a server and sending CreateMatch to the game server.
     ///     Player notifications are sent immediately. We don't wait for AnnounceMatch because some game server configurations use the HTTP path instead.
     /// </summary>
@@ -253,29 +297,35 @@ public class MatchmakingService : BackgroundService, IDisposable
         SendMatchFoundUpdate(match, match.CorrelationID);
         SendFoundServerUpdate(match);
 
-        // Reset Each Matched Group's Readiness And Loading State And Mark Its Members As In-Game
-        // A Party Group Stays Alive On The Client After A Match Is Found (Only Solo Queues Self-Disband), So The Chat Server Must Reset The Leader To Not-Ready And Broadcast The Update
-        // Without This, The Client's Matchmaking Loading Overlay Remains Visible And Covers The Match Lobby Interface
+        // Settle Each Matched Group's Post-Matchup State And Mark Its Members As In-Game
         // The Match Roster Has Already Been Committed To The Match Server (As Per CreateMatch), So This Loop Is Purely Post-Commit Book-Keeping; A Player Who Drops Out Now Is Handled Downstream By The Match Server's Wait-For-Players Logic And The Resulting MatchAbandoned Signal
-        // Each Group's Notification Is Wrapped Individually So That An Exception While Notifying One Group Does Not Skip The Notifications For The Remaining Groups
+        // Each Group Is Handled Individually So That An Exception While Settling One Group Does Not Skip The Remaining Groups
         foreach (MatchmakingGroup group in match.GetAllGroups())
         {
             try
             {
                 group.QueueStartTime = null;
 
-                group.UnloadAndUnreadyMembers();
-
                 foreach (MatchmakingGroupMember member in group.Members)
                     member.IsInGame = true;
 
-                // If Every Member Disconnected During Server Allocation The Group Will Have Been Disbanded, Leaving No One To Notify; Skip The Update In This Case
-                // A Group That Still Has Members Always Has Exactly One Leader (Leadership Is Reassigned Whenever A Member Leaves)
-                if (group.Members.Count is not 0)
-                    group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+                // If Every Member Disconnected During Server Allocation The Group Will Have Been Disbanded, Leaving Nothing To Settle Or Notify
+                if (group.Members.Count is 0)
+                    continue;
 
-                else
-                    _logger.LogWarning(@"Skipped Post-Matchup Update For Disbanded Group GUID {GroupGUID}", group.GUID);
+                // A Solo Queue Group Does Not Persist Once The Match Starts; Disband It Server-Side (The Client Implicitly Drops It When It Connects To The Match), So No Update Is Broadcast
+                if (group.Members.Count is 1)
+                {
+                    Groups.TryRemove(group.Leader.Account.ID, out _);
+
+                    continue;
+                }
+
+                // A Premade Party Stays Alive On The Client After A Match Is Found, So Reset The Leader To Not-Ready And Broadcast The Update
+                // Without This, The Client's Matchmaking Loading Overlay Remains Visible And Covers The Match Lobby Interface
+                group.UnloadAndUnreadyMembers();
+
+                group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
             }
 
             catch (Exception exception)
