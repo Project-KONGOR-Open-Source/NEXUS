@@ -15,6 +15,11 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
     public Account Account { get; set; } = null!;
 
     /// <summary>
+    ///     Used to determine whether an <see cref="ObjectDisposedException"/> raised during distributed cache cleanup coincides with a graceful application shutdown.
+    /// </summary>
+    private IHostApplicationLifetime ApplicationLifetime { get; } = serviceProvider.GetRequiredService<IHostApplicationLifetime>();
+
+    /// <summary>
     ///     Completes the connection process by sending the accept packet.
     /// </summary>
     public MatchServerChatSession SetOnline()
@@ -316,6 +321,13 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
                 {
                     // IDatabase Is Registered As A Singleton And Can Be Resolved Directly From The Root Service Provider Without A Scope
                     await Remove(ServiceProvider.GetRequiredService<IDatabase>());
+                }
+
+                catch (ObjectDisposedException objectDisposedException)
+                {
+                    // "ApplicationStopping" Distinguishes A Genuine Graceful Shutdown (Expected) From A Disposal That Occurs While The Application Is Still Running (A Real Problem)
+                    Log.Error(objectDisposedException, @"Distributed Cache Cleanup For Match Server ID ""{MatchServerID}"" Failed With An ObjectDisposedException" + Environment.NewLine + @"Disposed Object: ""{DisposedObjectName}""" + Environment.NewLine + "Application Stopping: {ApplicationStopping}",
+                        Metadata.ServerID, objectDisposedException.ObjectName ?? "UNKNOWN", ApplicationLifetime.ApplicationStopping.IsCancellationRequested);
                 }
 
                 catch (Exception exception)
