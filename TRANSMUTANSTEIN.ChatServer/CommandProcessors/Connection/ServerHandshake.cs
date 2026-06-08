@@ -148,9 +148,6 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             $"svr_submitMatchStatAbilities {BooleanToString(settings.SubmitMatchStatisticsAbilities)}",
             $"svr_submitMatchStatFrags {BooleanToString(settings.SubmitMatchStatisticsFrags)}",
 
-            // Network Visibility
-            $"svr_broadcast {BooleanToString(settings.Broadcast)}",
-
             // Server Identity
             $"svr_name {uniqueServerName}"
         ];

@@ -38,13 +38,6 @@ public class MatchServerSettings
     public bool SubmitMatchStatisticsFrags { get; set; } = true;
 
     /// <summary>
-    ///     Whether the match server should broadcast its presence on the local network.
-    ///     Maps to the "svr_broadcast" CVAR.
-    ///     Should be disabled in production to prevent the server from appearing in local server browsers.
-    /// </summary>
-    public bool Broadcast { get; set; } = true;
-
-    /// <summary>
     ///     The maximum outgoing bandwidth per client in bytes per second.
     ///     Maps to the "svr_maxbps" CVAR.
     ///     A value of 0 uses the match server's built-in default.
