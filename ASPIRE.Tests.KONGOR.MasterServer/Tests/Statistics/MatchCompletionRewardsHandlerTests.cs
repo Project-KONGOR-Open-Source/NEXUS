@@ -154,7 +154,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     [Arguments(3, "ThreePersonGroup")]
     [Arguments(4, "FourPersonGroup")]
     [Arguments(5, "FivePersonGroup")]
-    public async Task Apply_Group_Number_Selects_Matching_Reward_Bucket(int groupNumber, string bucketName)
+    public async Task Apply_Group_Number_Selects_Matching_Reward_Partition(int groupNumber, string partitionName)
     {
         Account account = await SeedMainAccount($"group.{groupNumber}@kongor.com", $"Group{groupNumber}");
 
@@ -173,14 +173,14 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
         MatchRewards matchRewards = JSONConfiguration.EconomyConfiguration.MatchRewards;
         PostSignupBonus bonus = JSONConfiguration.EconomyConfiguration.EventRewards.PostSignupBonus;
 
-        Win expected = bucketName switch
+        Win expected = partitionName switch
         {
             "Solo"             => matchRewards.Solo.Win,
             "TwoPersonGroup"   => matchRewards.TwoPersonGroup.Win,
             "ThreePersonGroup" => matchRewards.ThreePersonGroup.Win,
             "FourPersonGroup"  => matchRewards.FourPersonGroup.Win,
             "FivePersonGroup"  => matchRewards.FivePersonGroup.Win,
-            _                  => throw new ArgumentOutOfRangeException(nameof(bucketName), bucketName, null)
+            _                  => throw new ArgumentOutOfRangeException(nameof(partitionName), partitionName, null)
         };
 
         User user = await databaseContext.Users.SingleAsync(record => record.ID == trackedAccount.User.ID);

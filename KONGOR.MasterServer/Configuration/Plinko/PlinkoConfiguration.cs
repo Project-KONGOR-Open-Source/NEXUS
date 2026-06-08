@@ -2,7 +2,7 @@ namespace KONGOR.MasterServer.Configuration.Plinko;
 
 /// <summary>
 ///     Configuration for the Plinko mini-game.
-///     Defines the costs to play a drop, the per-tier probabilities, the visual bucket order sent to the client, and the ticket rewards paid out when a chest tier is exhausted or a ticket tier is rolled.
+///     Defines the costs to play a drop, the per-tier probabilities, the visual partition order sent to the client, and the ticket rewards paid out when a chest tier is exhausted or a ticket tier is rolled.
 /// </summary>
 public class PlinkoConfiguration
 {
@@ -17,10 +17,10 @@ public class PlinkoConfiguration
     public required int TicketCost { get; init; }
 
     /// <summary>
-    ///     The visual order in which tiers appear in the six Plinko buckets on the client UI (left to right).
+    ///     The visual order in which tiers appear in the six Plinko partitions on the client UI (left to right).
     ///     Each value is a tier identifier in the range 1 to 6.
     /// </summary>
-    public required int[] TierBucketOrder { get; init; }
+    public required int[] TierPartitionOrder { get; init; }
 
     /// <summary>
     ///     A comma-separated list of six Unix timestamps that the client uses to invalidate its cached tier layout.

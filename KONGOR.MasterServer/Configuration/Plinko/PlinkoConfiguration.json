@@ -1,7 +1,7 @@
 {
     "GoldCost": 50,
     "TicketCost": 100,
-    "TierBucketOrder": [5, 3, 4, 1, 6, 2],
+    "TierPartitionOrder": [5, 3, 4, 1, 6, 2],
     "LastUpdateTimes": "1502806719,1639282922,1639282923,1639282922,1502424000,1639282922",
     "DropProbabilities": {
         "Tier1": 4,

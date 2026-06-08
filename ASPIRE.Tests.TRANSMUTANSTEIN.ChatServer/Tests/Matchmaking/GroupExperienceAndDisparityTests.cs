@@ -3,7 +3,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 /// <summary>
 ///     Locks down three group-level helpers used during queue-join validation and team formation:
 ///     <list type="bullet">
-///         <item><see cref="MatchmakingGroup.IsExperienced"/> — gates "veterans only" matchmaking buckets.</item>
+///         <item><see cref="MatchmakingGroup.IsExperienced"/> — gates "veterans only" matchmaking partitions.</item>
 ///         <item><see cref="MatchmakingGroup.GetAdaptiveTMRSpread"/> — widens the per-group TMR spread as queue time grows.</item>
 ///         <item><see cref="MatchmakingGroup.HasExcessiveTMRDisparity"/> — the in-group anti-boosting check fired during <see cref="MatchmakingGroup.JoinQueue"/>.</item>
 ///     </list>
