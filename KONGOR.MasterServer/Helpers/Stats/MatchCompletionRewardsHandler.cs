@@ -16,13 +16,13 @@ public static class MatchCompletionRewardsHandler
     {
         MatchRewards matchRewards = JSONConfiguration.EconomyConfiguration.MatchRewards;
 
-        (Win winBucket, Loss lossBucket) = SelectGroupBuckets(matchRewards, matchParticipantStatistics.GroupNumber, logger);
+        (Win winPartition, Loss lossPartition) = SelectGroupPartitions(matchRewards, matchParticipantStatistics, logger);
 
         bool isWin = matchParticipantStatistics.Win is 1;
 
-        int rewardGoldCoins     = isWin ? winBucket.GoldCoins     : lossBucket.GoldCoins;
-        int rewardSilverCoins   = isWin ? winBucket.SilverCoins   : lossBucket.SilverCoins;
-        int rewardPlinkoTickets = isWin ? winBucket.PlinkoTickets : lossBucket.PlinkoTickets;
+        int rewardGoldCoins     = isWin ? winPartition.GoldCoins     : lossPartition.GoldCoins;
+        int rewardSilverCoins   = isWin ? winPartition.SilverCoins   : lossPartition.SilverCoins;
+        int rewardPlinkoTickets = isWin ? winPartition.PlinkoTickets : lossPartition.PlinkoTickets;
 
         account.User.GoldCoins     += rewardGoldCoins;
         account.User.SilverCoins   += rewardSilverCoins;
@@ -90,22 +90,23 @@ public static class MatchCompletionRewardsHandler
         };
     }
 
-    private static (Win Win, Loss Loss) SelectGroupBuckets(MatchRewards matchRewards, int groupNumber, ILogger logger)
+    private static (Win Win, Loss Loss) SelectGroupPartitions(MatchRewards matchRewards, MatchParticipantStatistics matchParticipantStatistics, ILogger logger)
     {
-        return groupNumber switch
+        return matchParticipantStatistics.GroupNumber switch
         {
             1 => (matchRewards.Solo.Win,             matchRewards.Solo.Loss),
             2 => (matchRewards.TwoPersonGroup.Win,   matchRewards.TwoPersonGroup.Loss),
             3 => (matchRewards.ThreePersonGroup.Win, matchRewards.ThreePersonGroup.Loss),
             4 => (matchRewards.FourPersonGroup.Win,  matchRewards.FourPersonGroup.Loss),
             5 => (matchRewards.FivePersonGroup.Win,  matchRewards.FivePersonGroup.Loss),
-            _ => LogAndFallBackToSolo(matchRewards, groupNumber, logger)
+            _ => LogAndFallBackToSolo(matchRewards,  matchParticipantStatistics, logger)
         };
     }
 
-    private static (Win Win, Loss Loss) LogAndFallBackToSolo(MatchRewards matchRewards, int groupNumber, ILogger logger)
+    private static (Win Win, Loss Loss) LogAndFallBackToSolo(MatchRewards matchRewards, MatchParticipantStatistics matchParticipantStatistics, ILogger logger)
     {
-        logger.LogWarning(@"Unexpected GroupNumber ""{GroupNumber}"" On Match Participant; Falling Back To Solo Rewards", groupNumber);
+        logger.LogWarning(@"Unexpected Group Number ""{GroupNumber}"" Encountered For Match Participant With Account ID ""{AccountID}"" (Match ID ""{MatchID}""); Falling Back To Solo Rewards",
+            matchParticipantStatistics.GroupNumber, matchParticipantStatistics.AccountID, matchParticipantStatistics.MatchID);
 
         return (matchRewards.Solo.Win, matchRewards.Solo.Loss);
     }
