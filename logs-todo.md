@@ -5,47 +5,21 @@ Frequencies are occurrence counts across the inspected logs.
 
 ## Bugs To Fix
 
-### 1. `GroupLeave` (0x0C0C) throws when the account is not in a matchmaking group
-- **Frequency:** ~11 (recurring, many account IDs)
-- **Symptom:** `[BUG] Unhandled Exception Processing Command 0x0C0C (GroupLeave)` → `NullReferenceException: No Matchmaking Group Found For Account ID "N"`.
-- **Location:** `TRANSMUTANSTEIN.ChatServer\CommandProcessors\Matchmaking\GroupLeave.cs:10` calling `MatchmakingGroup.GetByMemberAccountID` (`...\Domain\Matchmaking\MatchmakingGroup.cs:197`).
-- **Root cause:** `GetByMemberAccountID` unconditionally throws when no group is found; `GroupLeave.Process` calls it without a null/membership check, so a leave from a player who is not grouped crashes the command.
-- **Fix:** In `GroupLeave.Process`, look the group up via `MatchmakingService.GetMatchmakingGroup(...)` and no-op (or return a benign client response) when it is null, instead of going through the throwing helper.
-
-### 2. Redis cleanup on disconnect fails with `ObjectDisposedException`
-- **Frequency:** 5+ (burst on shutdown / mass disconnect)
-- **Symptom:** `Failed To Remove Match Server [Manager] ID "N" From The Distributed Cache During Cleanup` → `ObjectDisposedException: ... SafeWaitHandle` (via OpenTelemetry StackExchangeRedis instrumentation).
-- **Location:** `...\Domain\Core\ChatSession.MatchServerManager.cs:264,281`; `ChatSession.MatchServer.cs:318,334`; `KONGOR.MasterServer\Extensions\Cache\DistributedCacheExtensions.Matchmaking.cs:92,197`.
-- **Root cause:** `OnDisconnected` spawns a fire-and-forget `Task.Run` that resolves the singleton `IDatabase` and issues Redis deletes; on host shutdown the connection multiplexer is disposed before the background task finishes.
-- **Fix:** Capture/await cleanup deterministically — e.g. resolve `IDatabase` before spawning, add a timeout/cancellation tied to `IHostApplicationLifetime`, and treat `ObjectDisposedException` during shutdown as benign (downgrade from error) so it does not spam the log.
-
-### 3. `CampaignStatisticsResponse` throws `Sequence contains no matching element`
-- **Frequency:** 1 (but every `get_campaign_hero_stats` request risks it)
-- **Symptom:** HTTP 500 on `/client_requester.php`; `InvalidOperationException: Sequence contains no matching element`.
-- **Location:** `KONGOR.MasterServer\Models\RequestResponse\Stats\CampaignStatisticsResponse.cs:15`, reached from `ClientRequesterController.Stats.cs:304`.
-- **Root cause:** `account.User.Accounts.Single(account => account.IsMain)` finds no account flagged as main (or the collection is not loaded).
-- **Fix:** Guard the main-account lookup (e.g. `SingleOrDefault` with a sensible fallback to the current account ID), and/or ensure `User.Accounts` is loaded and exactly one account is marked main. Keep `Single*` per project convention but handle the no-match case.
-
-### 4. Production exception handler returns 404 (no `/error` endpoint)
-- **Frequency:** 342 (the most frequent exception; a secondary effect of every unhandled 500)
-- **Symptom:** `InvalidOperationException: The exception handler configured on ExceptionHandlerOptions produced a 404 status response ... set AllowStatusCode404Response to true.`
-- **Location:** `KONGOR.MasterServer\KONGOR.cs:184` — `application.UseExceptionHandler("/error")` with no matching `/error` endpoint.
-- **Root cause:** The configured exception-handling path does not resolve to a handler, so the handler itself 404s and masks the original exception with a confusing secondary one.
-- **Fix:** Provide a real `/error` endpoint (or use `AddProblemDetails` / lambda-based `UseExceptionHandler`), or set `AllowStatusCode404Response = true`. Resolving bugs #1–#3 removes most of the triggering 500s.
-
 ### 5. `[BUG] Received Status Update For Unknown Match Server ID "0"`
 - **Frequency:** 8+ (recurring across both days)
 - **Symptom:** Match-server status update arrives with server ID `0`; handler logs `[BUG]` and drops the update.
 - **Location:** `TRANSMUTANSTEIN.ChatServer\CommandProcessors\Connection\ServerStatus.cs` (logged when `GetMatchServerByID` returns null).
 - **Root cause:** A status update is sent before the server has a valid registered ID (startup/registration race, or an unregistered/restarted server). ID is assigned at auth via `serverIdentifier.GetDeterministicInt32Hash()`.
-- **Fix:** Add diagnostic context (dump the full status payload + remote endpoint) to identify the source, and decide policy — ignore quietly vs. force re-auth. Investigate the server registration sequence so status updates cannot precede ID assignment.
+- **Done:** The log line now dumps the full status payload (name, address, port, host name, match ID, slave ID, status) to identify the source.
+- **Remaining:** Add the remote TCP endpoint to the log line; investigate the registration sequence so status updates cannot precede ID assignment; decide policy — ignore quietly vs. force re-auth.
 
 ### 6. `GroupNumber "-1"` on match participants → falls back to solo rewards
 - **Frequency:** 28
 - **Symptom:** `Unexpected GroupNumber "-1" On Match Participant; Falling Back To Solo Rewards`.
 - **Location:** `KONGOR.MasterServer\Helpers\Stats\MatchCompletionRewardsHandler.cs:93-111` (`SelectGroupBuckets` switch default).
 - **Root cause:** Valid group numbers are 1–5; `-1` indicates the group size was never set correctly upstream in the match-submission pipeline. The solo fallback is a safe stop-gap but hides a data-integrity defect.
-- **Fix:** The fallback is acceptable to keep, but trace where `-1` originates (match creation/submission) and ensure participants always carry a 1–5 group number; consider logging match GUID + participant for correlation.
+- **Done:** The fallback warning now logs the match ID and account ID for correlation. The solo fallback is intentionally retained.
+- **Remaining:** Trace where `-1` originates (match creation/submission) and ensure participants always carry a 1–5 group number.
 
 ## Unimplemented Features
 
@@ -72,8 +46,8 @@ Frequencies are occurrence counts across the inspected logs.
 
 ### 9. Forged / empty cookie → 401
 - **Frequency:** 29. `IP Address "X" Has Made A Client Request With Forged Cookie ""`.
-- **Location:** `ClientRequesterController.cs:29-37`. Returns `Unauthorized` (401) — the rejection itself is correct, and these are *not* the cause of the 500s (those are #7/#3).
-- **Action:** The cookie is almost always **empty** (`""`), and the current log line does not capture enough to explain *why*. Enrich the diagnostics — see **#14**.
+- **Location:** `ClientRequesterController.cs:29-37`. Returns `Unauthorized` (401) — the rejection itself is correct, and these are *not* the cause of the 500s (those are #7).
+- **Status:** Monitor only. The cookie is almost always **empty** (`""`). The diagnostics have now been enriched — both forged-cookie sites log a request-context snapshot (requested function, present query/form key names, cookie length, remote endpoint, user-agent) — so the next occurrence is self-diagnosing.
 
 ### 10. Server auth rejected — no manager holds the hosting lease
 - **Frequency:** 5. `Rejected Server Authentication For Host Account "HOST": No Server Manager Holds The Hosting Lease`.
@@ -82,19 +56,17 @@ Frequencies are occurrence counts across the inspected logs.
 ### 11. No available server for match (stale server sessions skipped)
 - **Frequency:** 8 (one stale server, `ServerID=294943409`, repeatedly skipped). `Skipping Idle Server With A Stale Chat Session` → `No Idle Servers With Active Sessions For Match GUID` → `No Available Server Found For Match GUID`.
 - **Location:** `TRANSMUTANSTEIN.ChatServer\Services\MatchmakingService.cs:510-553` (150s freshness threshold).
-- **Note:** Correctly skips stale servers, but there is **no active reaper** — stale in-memory sessions linger until TCP timeout / graceful disconnect. Consider (lower priority) a periodic task that disconnects sessions whose `LastStatusUpdate` exceeds the freshness threshold. Likely the same root condition as bug #12 / #2 (cleanup not completing).
+- **Note:** The freshness-skip itself is correct by design. A `StaleHostReaper` exists, but it only reaps cache entries that have **no** live chat session — it does **not** cover this case, where the server still has a live (TCP-connected) chat session that has merely stopped sending status heartbeats (`LastStatusUpdate` stale). Such a server is skipped on every selection and lingers until its TCP session actually drops, at which point the reaper finally treats it as an orphan. The original recommendation stands: consider a periodic task that proactively reaps/disconnects sessions whose `LastStatusUpdate` exceeds the freshness threshold. Likely the same root condition as #12.
 
 ## Observed In Operation (Not Yet In Logs)
 
 ### 12. Match servers become undiscoverable after a match, until manager + servers are restarted
 - **Frequency:** Reported manually; reproducible after a match completes.
 - **Symptom:** Once a match finishes, no match servers can be allocated for subsequent matches (the symptom surfaces as #11's `No Available Server Found For Match GUID` cluster). The match servers themselves report **no errors**. Restarting the server manager **and** the match servers restores discovery.
-- **Suspected area:** The recently-added **host-lease** code is the prime suspect, since the regression appears to be recent. The server-list / server-retrieval path is a secondary, less likely suspect (believed not to have changed recently).
-- **Investigate:**
-  - Whether the hosting lease is correctly **renewed/retained** across a match lifecycle, or whether it is released/expired when a match ends and never re-acquired without a manager restart (cross-reference #10 — `IsHostLeaseHeld` gating server auth in `ServerRequesterController.Authentication.cs:146-151`).
-  - Whether the per-match status/session state in Redis is left **stale** after a match (cross-reference #2 — `OnDisconnected` cleanup failing — and #11 — stale sessions being skipped with no reaper), such that idle post-match servers are filtered out of `FindAvailableServerWithSession` (`MatchmakingService.cs:510-553`).
-  - Whether the server's `LastStatusUpdate` stops being refreshed post-match (status updates dropped — see #5 — would make a healthy server look stale).
-- **Note:** Strong likelihood this is the *same underlying defect* as #11 (and possibly #2): a host/server entry that is never refreshed or cleaned up after a match, so allocation silently filters every server out. A manager+server restart works because it re-acquires the lease and re-registers fresh sessions. Reproduce with one manager + one server, complete a match, then watch the lease key and the match-server hash/`LastStatusUpdate` in Redis to confirm which value goes stale.
+- **Suspected area:** The **host-lease** code is the prime suspect, since the regression appears to be recent. The server-list / server-retrieval path is a secondary, less likely suspect (believed not to have changed recently).
+- **Likely master-server symptom:** The recurring `Rejected Server Authentication For Host Account "HOST": No Server Manager Holds The Hosting Lease` (#10) — observed 7× across 2026-06-05/06 — fits this: after a match the lease ends up in a state where no manager is seen to hold it, so hosts are rejected at authentication and no server becomes available; a manager restart re-acquires the lease and restores discovery.
+- **Not the reaper:** The `StaleHostReaper` (committed several days *before* these logs) does **not** fix this — it only releases the lease for a manager with **no** live session, and the lease rejections recur in logs generated after it shipped. If the post-match manager session stays connected, the reaper never acts.
+- **Investigate (against current code, with a fresh repro):** Whether the hosting lease is renewed/retained across a match lifecycle, or released/expired when a match ends and never re-acquired without a manager restart (`IsHostLeaseHeld` gating server auth in `ServerRequesterController.Authentication.cs:146-151`). Reproduce with one manager + one server, complete a match, then watch the lease key and the match-server hash / `LastStatusUpdate` in Redis to confirm which value goes stale. Secondary angle: whether `LastStatusUpdate` stops being refreshed post-match (dropped status updates — see #5 — would make a healthy server look stale; overlaps #11).
 
 ### 13. Stats submission failure — suspected large-payload / form-limit issue (investigate)
 - **Frequency:** Reported manually; not clearly present in the inspected master-server logs (server logs needed to confirm).
@@ -110,19 +82,6 @@ Frequencies are occurrence counts across the inspected logs.
 
 ## Diagnostics & Logging Improvements
 
-> General principle: where a warning/error fires but the cause is *not evident from the message alone*, log a JSON-serialised representation of the request — or, if the full request would be too large, the important parts (requested function, present form keys, account/identity, remote endpoint, user-agent). The goal is to make the next occurrence self-diagnosing rather than requiring a repro.
+> General principle: where a warning/error fires but the cause is *not evident from the message alone*, log a JSON-serialised representation of the request — or, if the full request would be too large, the important parts (requested function, present form keys, account/identity, remote endpoint, user-agent). Keep log-property names flat (no dots) so they remain indexable in Seq. The goal is to make the next occurrence self-diagnosing rather than requiring a repro.
 
-### 14. Forged / empty cookie warnings need richer context
-- **Frequency:** 29 client (#9) + occurrences on the patcher path.
-- **Symptom:** `... Has Made A Client Request With Forged Cookie ""` (the cookie is almost always empty), with no indication of *why* the cookie is missing/invalid.
-- **Locations (both forged-cookie log sites):**
-  - `KONGOR.MasterServer\Controllers\ClientRequesterController\ClientRequesterController.cs:34`.
-  - `KONGOR.MasterServer\Controllers\PatcherController\PatcherController.cs:17`.
-- **Current state:** Each log line carries only the remote IP and the (empty) cookie value — insufficient to tell whether the client never set a cookie, sent it under a different key, lost its session, or is a malformed/abusive request.
-- **Fix:** When the cookie fails validation, additionally log a JSON-serialised snapshot of the salient request data, e.g.:
-  - the requested function (`Request.Query["f"]` / `Request.Form["f"]`),
-  - the set of form keys present (names only — avoid dumping secrets/SRP material in full),
-  - the account name/identity if available on the request,
-  - the remote endpoint and `User-Agent`.
-  - If a full serialisation would be too large, include only the important parts above. Keep log-property names flat (no dots) so they remain indexable in Seq.
-- **Note:** Treat this as the template for the broader logging principle above — apply the same "serialise the request when the cause isn't evident" approach to other not-evident warnings (e.g. #5 unknown server ID `0`, #13 stats submission failures).
+This principle has been applied to the forged-cookie sites (see #9). Apply it to the other not-evident warnings as they are touched — e.g. #5 (unknown server ID `0`) and #13 (stats submission failures).
