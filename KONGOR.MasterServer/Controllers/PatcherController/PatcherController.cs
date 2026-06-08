@@ -51,10 +51,10 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
                     UserAgent = Request.Headers.UserAgent.ToString()
                 });
 
-                Logger.LogWarning(@"IP Address ""{IPAddress}"" Has Requested Patch Information With Forged Cookie ""{Cookie}"" - Request Context: {RequestContext}",
+                Logger.LogWarning(@"IP Address ""{IPAddress}"" Has Requested Patch Information With Forged Cookie ""{Cookie}""" + Environment.NewLine + @"Request Context: {RequestContext}",
                     remoteIPAddress, cookie, requestContext);
 
-                return Unauthorized($@"Unrecognized Cookie ""{form.Cookie}""");
+                return Unauthorized($@"Unrecognised Cookie ""{form.Cookie}""");
             }
         }
 
