@@ -31,9 +31,22 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
         {
-            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Request With Forged Cookie ""{Request.Form["cookie"]}""");
+            string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN";
+            string cookie = string.IsNullOrEmpty(Request.Form["cookie"].ToString()) ? "EMPTY" : Request.Form["cookie"].ToString();
 
-            return Unauthorized($@"Unrecognized Cookie ""{Request.Form["cookie"]}""");
+            string requestContext = JsonSerializer.Serialize(new
+            {
+                Function = Request.Query["f"].SingleOrDefault() ?? Request.Form["f"].SingleOrDefault() ?? "NULL",
+                Query = Request.Query.ToDictionary(entry => entry.Key, entry => entry.Value.ToString()),
+                Form = Request.Form.ToDictionary(entry => entry.Key, entry => entry.Value.ToString()),
+                RemoteEndpoint = $"{remoteIPAddress}:{Request.HttpContext.Connection.RemotePort}",
+                UserAgent = Request.Headers.UserAgent.ToString()
+            });
+
+            Logger.LogWarning(@"IP Address ""{IPAddress}"" Has Made A Client Request With Forged Cookie ""{Cookie}""" + Environment.NewLine + @"Request Context: {RequestContext}",
+                remoteIPAddress, cookie, requestContext);
+
+            return Unauthorized($@"Unrecognised Cookie ""{Request.Form["cookie"]}""");
         }
 
         if (endpointRequiresCookieValidation.Equals(false) && accountSessionCookieIsValid.Equals(true))
