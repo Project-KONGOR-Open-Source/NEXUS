@@ -28,7 +28,19 @@ public class MatchmakingService : BackgroundService, IDisposable
     public static ConcurrentDictionary<Guid, MatchmakingMatch> ActiveMatches { get; set; } = [];
 
     public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
-        => memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id), name => GetMatchmakingGroupByMemberName(name));
+    {
+        MatchmakingGroup? group = memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id), name => GetMatchmakingGroupByMemberName(name));
+
+        if (group is null)
+        {
+            string identifierType = memberIdentifier.IsT0 ? "ID" : "Name";
+            string identifierValue = memberIdentifier.IsT0 ? memberIdentifier.AsT0.ToString() : memberIdentifier.AsT1;
+
+            Log.Debug(@"No Matchmaking Group Found For Member {IdentifierType} ""{IdentifierValue}""", identifierType, identifierValue);
+        }
+
+        return group;
+    }
 
     public static MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID)
         => Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.ID == memberID));
