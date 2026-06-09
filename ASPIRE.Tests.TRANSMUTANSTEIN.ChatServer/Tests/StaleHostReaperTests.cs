@@ -89,4 +89,22 @@ public sealed class StaleHostReaperTests
             await Assert.That(nextFirstObservedMissing.Count).IsEqualTo(0);
         }
     }
+
+    [Test]
+    public async Task A_Session_Within_The_Stale_Threshold_Is_Not_Stale()
+    {
+        await Assert.That(StaleHostReaper.TCPSessionIsStale(Now - TimeSpan.FromSeconds(174), Now, TimeSpan.FromSeconds(175))).IsFalse();
+    }
+
+    [Test]
+    public async Task A_Session_Exactly_At_The_Stale_Threshold_Is_Not_Stale()
+    {
+        await Assert.That(StaleHostReaper.TCPSessionIsStale(Now - TimeSpan.FromSeconds(175), Now, TimeSpan.FromSeconds(175))).IsFalse();
+    }
+
+    [Test]
+    public async Task A_Session_Beyond_The_Stale_Threshold_Is_Stale()
+    {
+        await Assert.That(StaleHostReaper.TCPSessionIsStale(Now - TimeSpan.FromSeconds(176), Now, TimeSpan.FromSeconds(175))).IsTrue();
+    }
 }

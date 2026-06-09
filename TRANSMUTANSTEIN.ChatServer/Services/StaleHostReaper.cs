@@ -14,6 +14,18 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
     /// </summary>
     private static readonly TimeSpan StaleGracePeriod = TimeSpan.FromMinutes(2);
 
+    /// <summary>
+    ///     The maximum age of a match server's last status update before its chat session is treated as a hung "zombie" and forcibly terminated, even though its socket is still open.
+    ///     A healthy match server sends a status heartbeat at least once per minute, so a server silent for this long has stopped functioning while still holding its socket.
+    /// </summary>
+    private static readonly TimeSpan MatchServerSessionStaleStateThreshold = TimeSpan.FromSeconds(175);
+
+    /// <summary>
+    ///     Determines whether a TCP session is stale.
+    ///     Stale means that the TCP session's last status update is older than the given threshold, relative to the current instant.
+    /// </summary>
+    public static bool TCPSessionIsStale(DateTimeOffset lastStatusUpdate, DateTimeOffset now, TimeSpan staleThreshold) => now - lastStatusUpdate > staleThreshold;
+
     private Dictionary<int, DateTimeOffset> MatchServersFirstObservedMissing { get; set; } = [];
 
     private Dictionary<int, DateTimeOffset> MatchServerManagersFirstObservedMissing { get; set; } = [];
@@ -42,6 +54,15 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
     private async Task Sweep()
     {
         DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        // Terminate Zombie Match Server Sessions Before Reconciling: A Hung Match Server Whose Socket Is Still Open Keeps Its Chat Session In The Pool (So It Is Never Reaped As Absent) But Has Stopped Sending Status Updates, So It Is Perpetually Skipped On Matchmaking Selection As Stale And Lingers As A Dead-But-Present Entry That Can Never Host A Match Until Its Socket Eventually Drops
+        // Doing So, Removes The Zombie Match Server Session From The In-Memory Match Server Pool And From The Distributed Cache, So The Stale Server Is No Longer Considered As A Candidate For Matchmaking And Is Forced To Reconnect To The Chat Server And Re-Establish A Fresh Session Before It Can Host Again, Which Is The Only Way To Recover From A Hung State
+        foreach (MatchServerChatSession zombieMatchServerSession in Context.MatchServerChatSessions.Values.Where(session => session.Metadata is not null && TCPSessionIsStale(session.Metadata.LastStatusUpdate, now, MatchServerSessionStaleStateThreshold)).ToList())
+        {
+            logger.LogWarning(@"Terminating Stale Match Server Session ID ""{MatchServerID}"" Which Has Not Sent A Status Update Since ""{LastStatusUpdate}""", zombieMatchServerSession.Metadata.ServerID, zombieMatchServerSession.Metadata.LastStatusUpdate);
+
+            await zombieMatchServerSession.Terminate(distributedCacheStore);
+        }
 
         // Reconcile Match Servers
         List<MatchServer> matchServers = await distributedCacheStore.GetMatchServers();
@@ -78,6 +99,12 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
             if (matchServerManager is not null)
                 await distributedCacheStore.ReleaseHostLease(matchServerManager.HostAccountName);
         }
+
+        // Keep The Single-Holder Hosting Lease Fresh For Every Match Server Manager That Still Has A Live Chat Session
+        // The Match Servers' "set_online" Heartbeats Also Renew The Lease, But Only While A Server Happens To Be Alive And Broadcasting
+        // Because The Match Server Manager Is The Lease Holder, Tying Renewal To Its Own Liveness Keeps The Lease Alive Well Within Its Time-To-Live For As Long As The Manager Remains Connected
+        foreach (MatchServerManager liveMatchServerManager in matchServerManagers.Where(candidate => Context.MatchServerManagerChatSessions.ContainsKey(candidate.ID)))
+            await distributedCacheStore.RenewHostLease(liveMatchServerManager.HostAccountName);
     }
 
     /// <summary>
