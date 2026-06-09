@@ -125,7 +125,6 @@ public class ASPIRE
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Enable Entity Framework Core Commands Which Resolve The Database Connection String Through The Aspire Application Host
-        // Supported Commands: https://github.com/microsoft/aspire/blob/427e30e06e3c881027a950f4e6a64a08228d8b20/src/Aspire.Hosting.EntityFrameworkCore/EFResourceBuilderExtensions.cs#L614C1-L752C6
         databaseContext.AddEFMigrations("database-migrations", "MERRICK.DatabaseContext.Persistence.MerrickContext")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Supply The Resolved Connection String Under The Name The Database Context Expects, And Wait For The Database To Start
             .WithParentRelationship(databaseContext); // Set Database Context As Parent Resource
