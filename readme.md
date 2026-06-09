@@ -113,24 +113,27 @@ Create A Database Schema Migration
 
 Update The Database Schema
 
+The database schema is updated by invoking `Aspire.Hosting.EntityFrameworkCore` commands which target the `database-migrations` resource. The application host needs to be running during the execution of `Aspire.Hosting.EntityFrameworkCore` commands, so that the connection string which the `database-migrations` resource requires is resolved automatically from the application host. The application host must therefore be running, and the database which is updated is selected by the launch profile used to start the application host.
+
 ```powershell
 # Development Database
-# In The Context Of The Solution Directory
-$ENV:ASPNETCORE_ENVIRONMENT = "Development"
-dotnet ef database update --project MERRICK.DatabaseContext
-# TODO: this command above fails to resolve the connection string > create custom resource command (https://aspire.dev/fundamentals/custom-resource-commands/?aspire-lang=csharp#command-arguments)
+aspire start --environment Development
+aspire resource database-migrations ef-database-update
+aspire stop
 ```
 
 ```powershell
 # Production Database
-# In The Context Of The Solution Directory
-$ENV:ASPNETCORE_ENVIRONMENT = "Production"
-dotnet ef database update --project MERRICK.DatabaseContext
-# TODO: this command above fails to resolve the connection string > create custom resource command (https://aspire.dev/fundamentals/custom-resource-commands/?aspire-lang=csharp#command-arguments)
+aspire start --environment Production
+aspire resource database-migrations ef-database-update
+aspire stop
 ```
 
 > [!NOTE]
 > While updating the database happens automatically at run time, through code, it is still recommended to update databases manually from the command line, due to the significantly better debugging experience.
+
+> [!NOTE]
+> The `database-migrations` resource exposes multiple commands, which are listed by executing `aspire resource database-migrations --help`, including `ef-database-status`, `ef-migrations-add --name {NAME}`, `ef-migrations-remove`, `ef-database-update`, `ef-database-drop`, and `ef-database-reset`. The same commands are also available as buttons on the resource in the Aspire dashboard. Additional information can be discovered by exploring the `Aspire.Hosting.EntityFrameworkCore` integration [source code](https://github.com/microsoft/aspire/tree/main/src/Aspire.Hosting.EntityFrameworkCore).
 
 <br/>
 

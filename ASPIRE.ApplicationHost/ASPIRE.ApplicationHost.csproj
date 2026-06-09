@@ -15,6 +15,7 @@
 
     <ItemGroup>
         <PackageReference Include="Aspire.Hosting.Browsers" Version="13.4.3-preview.1.26305.13" />
+        <PackageReference Include="Aspire.Hosting.EntityFrameworkCore" Version="13.4.3-preview.1.26305.13" />
         <PackageReference Include="Aspire.Hosting.Redis" Version="13.4.3" />
         <PackageReference Include="Aspire.Hosting.Seq" Version="13.4.3" />
         <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.4.3" />
