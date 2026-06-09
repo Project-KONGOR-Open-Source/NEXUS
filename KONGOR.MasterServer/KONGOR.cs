@@ -63,6 +63,9 @@ public class KONGOR
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
 
+        // Register The Hero Usage Statistics Service Which Aggregates Global Per-Hero Win/Loss Totals For The Hero Usage List
+        builder.Services.AddScoped<HeroUsageStatisticsService>();
+
         // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
         builder.Services.AddRateLimiter(options =>
         {
