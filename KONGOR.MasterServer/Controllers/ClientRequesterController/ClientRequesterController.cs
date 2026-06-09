@@ -3,7 +3,7 @@ namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 [ApiController]
 [Route("client_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ClientRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ClientRequesterController> logger) : ControllerBase
+public partial class ClientRequesterController(MerrickContext databaseContext, IDatabase distributedCache, HeroUsageStatisticsService heroUsageStatisticsService, ILogger<ClientRequesterController> logger) : ControllerBase
 {
     # region Client Requester Controller Description
     /*
@@ -21,6 +21,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
+    private HeroUsageStatisticsService HeroUsageStatistics { get; } = heroUsageStatisticsService;
     private ILogger Logger { get; } = logger;
 
     [HttpPost(Name = "Client Requester All-In-One")]
@@ -109,6 +110,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "get_seasons"                   => await GetSeasons(),
             "match_history_overview"        => await GetMatchHistoryOverview(),
             "show_stats"                    => await GetStatistics(),
+            "get_hero_stats"                => await GetSelectedHeroStatistics(),
+            "get_campaign_hero_stats"       => await GetCampaignHeroStatistics(),
+            "get_hero_usage_list"           => await GetHeroUsageList(),
 
             // store
             "get_daily_special"             => await GetDailySpecial(),
