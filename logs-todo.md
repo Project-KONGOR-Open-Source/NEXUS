@@ -21,27 +21,6 @@ Frequencies are occurrence counts across the inspected logs.
 - **Done:** The fallback warning now logs the match ID and account ID for correlation. The solo fallback is intentionally retained.
 - **Remaining:** Trace where `-1` originates (match creation/submission) and ensure participants always carry a 1–5 group number.
 
-## Unimplemented Features
-
-### 7. Unimplemented Client Requester form parameters (HTTP 500)
-- **Frequency:** 170 total — `get_campaign_hero_stats` (92), `get_hero_stats` (46), `get_hero_usage_list` (26), `get_bundle_contents` (5), `guide_vote` (1).
-- **Symptom:** `NotImplementedException: Unsupported Client Requester Controller Form Parameter: f=...` → HTTP 500.
-- **Location:** `KONGOR.MasterServer\Controllers\ClientRequesterController\ClientRequesterController.cs` form-`f` switch (default throws ~line 108).
-- **Fix:** Implement handler methods and switch cases for the five `f` values above. (Currently implemented: `get_account_mastery`, `get_player_award_summ`, `get_seasons`, `match_history_overview`, `show_stats`, `get_daily_special`, `get_guide_list_filtered`, `get_guide`.)
-
-### 8. Unmapped chat commands (`Missing Type Mapping For Command 0x...`)
-- **Frequency:** many; distinct commands observed: `0x0D08`, `0x0F08`, `0x0E07`, `0x00B8`, `0x00B5`, `0x2F00`.
-- **Symptom:** `Missing Type Mapping For Command 0xNNNN; Payload Was N Bytes: ...`.
-- **Location:** Dispatch via `[ChatCommand(0xNNNN)]` attribute discovery in `...\Domain\Core\ChatSession.cs` (`GetCommandType`).
-- **Observed payloads / likely intent (to confirm before implementing):**
-  - `0x0D08` — TMM queue request (e.g. `midwars hb|sd USW|USE|EU|AU|RU|`, `caldavar rb ...`).
-  - `0x0F08` — small companion command paired with `0x0D08` (likely queue enter/leave toggle).
-  - `0x0E07` — bot roster (`ChronosBot`, `ArachnaBot`, `DefilerBot`, `HammerstormBot`, `WitchSlayerBot`).
-  - `0x00B8` — account + host endpoint (e.g. `kongor 194.164.93.61:11236`).
-  - `0x00B5` — account name only (e.g. `Mabarn`).
-  - `0x2F00` — text payload `/*`.
-- **Fix:** For each command to be supported, add a processor class decorated with `[ChatCommand(0xNNNN)]` implementing `ISynchronousCommandProcessor<ClientChatSession>` (or the async variant) under `CommandProcessors\`. Decode the payloads against the HON client LUA / packet dumps to confirm semantics first.
-
 ## Expected — Monitor Only (no code change unless policy changes)
 
 ### 9. Forged / empty cookie → 401
