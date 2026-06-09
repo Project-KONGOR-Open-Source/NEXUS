@@ -67,7 +67,7 @@ public partial class ClientRequesterController
         if (accountName is null)
             return BadRequest(@"Missing Value For Form Parameter ""nickname""");
 
-        int[] seasons = [ 666 ];
+        int[] seasons = [ SeasonInformation.CurrentSeasonIndex ];
 
         GetSeasonsResponse response = new ()
         {
@@ -214,7 +214,7 @@ public partial class ClientRequesterController
             LevelExperience = account.User.TotalExperience,
             NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(item => item.StartsWith("aa.")),
             TotalMatchesPlayed = aggregates.TotalGamesPlayed,
-            CurrentSeason = 666,
+            CurrentSeason = SeasonInformation.CurrentSeasonIndex,
             SimpleSeasonStats = new SimpleSeasonStats
             {
                 RankedMatchesWon = rankedWins,
@@ -567,7 +567,7 @@ public partial class ClientRequesterController
             StoreItem? heroStoreItem = JSONConfiguration.StoreItemsConfiguration.GetEnabledItemsByType(StoreItemType.Hero)
                 .SingleOrDefault(item => item.Code.Equals(heroIdentifier, StringComparison.OrdinalIgnoreCase));
 
-            response.Add("season", "666");
+            response.Add("season", SeasonInformation.CurrentSeasonIndex.ToString());
             response.Add("account_id", account.ID.ToString());
             response.Add("hero_id", (heroStoreItem?.ID ?? 0).ToString());
 
