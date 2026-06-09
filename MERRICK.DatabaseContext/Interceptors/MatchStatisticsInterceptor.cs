@@ -86,18 +86,7 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
             accountStatistics.HeroStatistics.Heroes.Add(heroStats);
         }
 
-        heroStats.GamesPlayed++;
-        heroStats.Wins += match.Win;
-        heroStats.Losses += match.Loss;
-        heroStats.HeroKills += match.HeroKills;
-        heroStats.HeroDeaths += match.HeroDeaths;
-        heroStats.HeroAssists += match.HeroAssists;
-        heroStats.TeamCreepKills += match.TeamCreepKills;
-        heroStats.Denies += match.Denies;
-        heroStats.Experience += match.Experience;
-        heroStats.Gold += match.Gold;
-        heroStats.Actions += match.Actions;
-        heroStats.TimeEarningExperience += match.TimeEarningExperience;
+        AccumulateHeroStatistics(heroStats, match);
     }
 
     private static async Task UpdateHeroStatisticsAsync(DbContext context, MatchParticipantStatistics match, string map, CancellationToken cancellationToken)
@@ -119,18 +108,71 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
             accountStatistics.HeroStatistics.Heroes.Add(heroStats);
         }
 
+        AccumulateHeroStatistics(heroStats, match);
+    }
+
+    /// <summary>
+    ///     Accumulates a single match's participant statistics into the running per-hero summary totals.
+    /// </summary>
+    private static void AccumulateHeroStatistics(HeroStats heroStats, MatchParticipantStatistics match)
+    {
         heroStats.GamesPlayed++;
         heroStats.Wins += match.Win;
         heroStats.Losses += match.Loss;
+        heroStats.Concedes += match.Conceded;
+        heroStats.ConcedeVotes += match.ConcedeVotes;
+        heroStats.Buybacks += match.Buybacks;
+        heroStats.Disconnections += match.Disconnected;
+        heroStats.Kicks += match.Kicked;
+        heroStats.ScoreTotal += match.Score;
         heroStats.HeroKills += match.HeroKills;
-        heroStats.HeroDeaths += match.HeroDeaths;
+        heroStats.HeroDamage += match.HeroDamage;
+        heroStats.HeroExperience += match.HeroExperience;
+        heroStats.GoldFromHeroKills += match.GoldFromHeroKills;
         heroStats.HeroAssists += match.HeroAssists;
+        heroStats.HeroDeaths += match.HeroDeaths;
+        heroStats.GoldLostToDeath += match.GoldLostToDeath;
+        heroStats.SecondsDead += match.SecondsDead;
         heroStats.TeamCreepKills += match.TeamCreepKills;
+        heroStats.TeamCreepDamage += match.TeamCreepDamage;
+        heroStats.TeamCreepExperience += match.TeamCreepExperience;
+        heroStats.TeamCreepGold += match.TeamCreepGold;
+        heroStats.NeutralCreepKills += match.NeutralCreepKills;
+        heroStats.NeutralCreepDamage += match.NeutralCreepDamage;
+        heroStats.NeutralCreepExperience += match.NeutralCreepExperience;
+        heroStats.NeutralCreepGold += match.NeutralCreepGold;
+        heroStats.BuildingDamage += match.BuildingDamage;
+        heroStats.ExperienceFromBuildings += match.ExperienceFromBuildings;
+        heroStats.BuildingsRazed += match.BuildingsRazed;
+        heroStats.GoldFromBuildings += match.GoldFromBuildings;
         heroStats.Denies += match.Denies;
-        heroStats.Experience += match.Experience;
+        heroStats.ExperienceDenied += match.ExperienceDenied;
         heroStats.Gold += match.Gold;
+        heroStats.GoldSpent += match.GoldSpent;
+        heroStats.Experience += match.Experience;
         heroStats.Actions += match.Actions;
+        heroStats.SecondsPlayed += match.SecondsPlayed;
+        heroStats.ConsumablesPurchased += match.ConsumablesPurchased;
+        heroStats.WardsPlaced += match.WardsPlaced;
         heroStats.TimeEarningExperience += match.TimeEarningExperience;
+        heroStats.FirstBloods += match.FirstBlood;
+        heroStats.DoubleKills += match.DoubleKill;
+        heroStats.TripleKills += match.TripleKill;
+        heroStats.QuadKills += match.QuadKill;
+        heroStats.Annihilations += match.Annihilation;
+        heroStats.KillStreak03 += match.KillStreak03;
+        heroStats.KillStreak04 += match.KillStreak04;
+        heroStats.KillStreak05 += match.KillStreak05;
+        heroStats.KillStreak06 += match.KillStreak06;
+        heroStats.KillStreak07 += match.KillStreak07;
+        heroStats.KillStreak08 += match.KillStreak08;
+        heroStats.KillStreak09 += match.KillStreak09;
+        heroStats.KillStreak10 += match.KillStreak10;
+        heroStats.KillStreak15 += match.KillStreak15;
+        heroStats.Smackdowns += match.Smackdown;
+        heroStats.Humiliations += match.Humiliation;
+        heroStats.Nemeses += match.Nemesis;
+        heroStats.Retributions += match.Retribution;
     }
 
     private static void UpdateAwardStatistics(DbContext context, MatchParticipantStatistics match, MatchStatistics matchStatistics)
