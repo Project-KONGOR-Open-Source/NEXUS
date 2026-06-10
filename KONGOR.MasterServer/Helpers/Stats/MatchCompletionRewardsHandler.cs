@@ -94,11 +94,17 @@ public static class MatchCompletionRewardsHandler
     {
         return matchParticipantStatistics.GroupNumber switch
         {
-            1 => (matchRewards.Solo.Win,             matchRewards.Solo.Loss),
-            2 => (matchRewards.TwoPersonGroup.Win,   matchRewards.TwoPersonGroup.Loss),
-            3 => (matchRewards.ThreePersonGroup.Win, matchRewards.ThreePersonGroup.Loss),
-            4 => (matchRewards.FourPersonGroup.Win,  matchRewards.FourPersonGroup.Loss),
-            5 => (matchRewards.FivePersonGroup.Win,  matchRewards.FivePersonGroup.Loss),
+            // A Group Number Of "-1" Is The Match Server's Sentinel For A Participant With No Arranged-Match Roster (A Public Match Participant), Which Is Correctly Rewarded As Solo
+            -1 => (matchRewards.Solo.Win,             matchRewards.Solo.Loss),
+
+            // Group Numbers Are 1-5 For Arranged Matches, Corresponding To The Number Of Participants On The Player's Roster (e.g. "2" For A Duo, "3" For A Trio, etc.)
+            +1 => (matchRewards.Solo.Win,             matchRewards.Solo.Loss),
+            +2 => (matchRewards.TwoPersonGroup.Win,   matchRewards.TwoPersonGroup.Loss),
+            +3 => (matchRewards.ThreePersonGroup.Win, matchRewards.ThreePersonGroup.Loss),
+            +4 => (matchRewards.FourPersonGroup.Win,  matchRewards.FourPersonGroup.Loss),
+            +5 => (matchRewards.FivePersonGroup.Win,  matchRewards.FivePersonGroup.Loss),
+
+            // Any Other Group Number Is Unexpected, So Log A Warning And Fall Back To Solo Rewards (Rather Than Throwing An Exception And Risk Leaving The Player Without Rewards)
             _ => LogAndFallBackToSolo(matchRewards,  matchParticipantStatistics, logger)
         };
     }

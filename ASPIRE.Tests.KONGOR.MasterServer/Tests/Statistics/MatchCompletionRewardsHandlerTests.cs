@@ -149,11 +149,12 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
-    [Arguments(1, "Solo")]
-    [Arguments(2, "TwoPersonGroup")]
-    [Arguments(3, "ThreePersonGroup")]
-    [Arguments(4, "FourPersonGroup")]
-    [Arguments(5, "FivePersonGroup")]
+    [Arguments(-1, "Solo")]
+    [Arguments(+1, "Solo")]
+    [Arguments(+2, "TwoPersonGroup")]
+    [Arguments(+3, "ThreePersonGroup")]
+    [Arguments(+4, "FourPersonGroup")]
+    [Arguments(+5, "FivePersonGroup")]
     public async Task Apply_Group_Number_Selects_Matching_Reward_Partition(int groupNumber, string partitionName)
     {
         Account account = await SeedMainAccount($"group.{groupNumber}@kongor.com", $"Group{groupNumber}");
