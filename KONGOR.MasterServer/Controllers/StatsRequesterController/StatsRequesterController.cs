@@ -38,6 +38,8 @@ public partial class StatsRequesterController(MerrickContext databaseContext, ID
 
     [HttpPost(Name = "Stats Requester All-In-One")]
     [RequestFormLimits(ValueCountLimit = StatsSubmissionFormValueCountLimit)]
+    // The Order Places This Filter Ahead Of The [ApiController] Model-State Validation, So A Form That Cannot Be Read Is Logged Before The Convention Short-Circuits With A 400
+    [TypeFilter(typeof(FormLimitDiagnosticsFilter), Order = int.MinValue)]
     public async Task<IActionResult> StatsRequester([FromForm] StatsForSubmissionRequestForm form)
     {
         return Request.Form["f"].SingleOrDefault() switch
