@@ -67,7 +67,7 @@ public partial class ClientRequesterController
         if (accountName is null)
             return BadRequest(@"Missing Value For Form Parameter ""nickname""");
 
-        int[] seasons = [ 666 ];
+        int[] seasons = [ SeasonInformation.CurrentSeasonIndex ];
 
         GetSeasonsResponse response = new ()
         {
@@ -214,7 +214,7 @@ public partial class ClientRequesterController
             LevelExperience = account.User.TotalExperience,
             NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(item => item.StartsWith("aa.")),
             TotalMatchesPlayed = aggregates.TotalGamesPlayed,
-            CurrentSeason = 666,
+            CurrentSeason = SeasonInformation.CurrentSeasonIndex,
             SimpleSeasonStats = new SimpleSeasonStats
             {
                 RankedMatchesWon = rankedWins,
@@ -251,7 +251,7 @@ public partial class ClientRequesterController
             return BadRequest(@"Missing Value For Form Parameter ""nickname""");
 
         Account? account = await MerrickContext.Accounts
-            .Include(account => account.User)
+            .Include(account => account.User).ThenInclude(user => user.Accounts)
             .Include(account => account.Clan)
             .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
@@ -474,6 +474,160 @@ public partial class ClientRequesterController
 
         return Ok(PhpSerialization.Serialize(response));
     }
+
+    /// <summary>
+    ///     Returns the detailed statistics for a single hero across the ranked, casual, and player (public) game modes.
+    ///     Each game mode contributes the full detailed field set, prefixed by "rnk_" for ranked, "cs_" for casual, and no prefix for player statistics.
+    ///     Fields that are not currently tracked are returned as "0", mirroring the original API.
+    /// </summary>
+    private async Task<IActionResult> GetSelectedHeroStatistics()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        string? heroIdentifier = Request.Form["hero"];
+
+        if (heroIdentifier is null)
+            return BadRequest(@"Missing Value For Form Parameter ""hero""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToDictionaryAsync(statistics => statistics.Type);
+
+        HeroStats? rankedHeroStatistics = RetrieveHeroStatistics(statisticsByType, AccountStatisticsType.Matchmaking, heroIdentifier);
+        HeroStats? casualHeroStatistics = RetrieveHeroStatistics(statisticsByType, AccountStatisticsType.MatchmakingCasual, heroIdentifier);
+        HeroStats? playerHeroStatistics = RetrieveHeroStatistics(statisticsByType, AccountStatisticsType.Public, heroIdentifier);
+
+        OrderedDictionary response = new ();
+
+        response.Add("success", 1);
+        response.Add("errors", string.Empty);
+
+        DetailedHeroStatisticsFields.Write(response, "rnk_", rankedHeroStatistics);
+        DetailedHeroStatisticsFields.Write(response, "cs_", casualHeroStatistics);
+        DetailedHeroStatisticsFields.Write(response, string.Empty, playerHeroStatistics);
+
+        response.Add("vested_threshold", 5);
+        response.Add(0, true);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns the detailed statistics for a single hero in either the campaign normal or campaign casual game mode for the current season.
+    ///     The "is_casual" form parameter selects the game mode: "1" for campaign casual (the "cam_cs_" field prefix) or "0" for campaign normal (the "cam_" field prefix).
+    ///     When the account has no recorded statistics for the hero, only the trailing response metadata is returned, mirroring the original API.
+    /// </summary>
+    private async Task<IActionResult> GetCampaignHeroStatistics()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        string? heroIdentifier = Request.Form["hero_name"];
+
+        if (heroIdentifier is null)
+            return BadRequest(@"Missing Value For Form Parameter ""hero_name""");
+
+        string? isCasualValue = Request.Form["is_casual"];
+
+        if (isCasualValue is null)
+            return BadRequest(@"Missing Value For Form Parameter ""is_casual""");
+
+        bool isCasual = isCasualValue is "1";
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        AccountStatisticsType statisticsType = isCasual ? AccountStatisticsType.MatchmakingCasual : AccountStatisticsType.Matchmaking;
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToDictionaryAsync(statistics => statistics.Type);
+
+        HeroStats? heroStatistics = RetrieveHeroStatistics(statisticsByType, statisticsType, heroIdentifier);
+
+        OrderedDictionary response = new ();
+
+        // When No Statistics Exist For The Hero, The Original API Returns Only The Trailing Response Metadata
+        if (heroStatistics is not null)
+        {
+            StoreItem? heroStoreItem = JSONConfiguration.StoreItemsConfiguration.GetEnabledItemsByType(StoreItemType.Hero)
+                .SingleOrDefault(item => item.Code.Equals(heroIdentifier, StringComparison.OrdinalIgnoreCase));
+
+            response.Add("season", SeasonInformation.CurrentSeasonIndex.ToString());
+            response.Add("account_id", account.ID.ToString());
+            response.Add("hero_id", (heroStoreItem?.ID ?? 0).ToString());
+
+            DetailedHeroStatisticsFields.Write(response, isCasual ? "cam_cs_" : "cam_", heroStatistics);
+        }
+
+        response.Add("vested_threshold", 5);
+        response.Add(0, true);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns the global hero usage list, ranking every hero by pick rate, win rate, or loss rate across all recorded account statistics.
+    ///     The "sort" form parameter selects the ranking: "use" (the default), "win", or "loss".
+    ///     The underlying per-hero totals are aggregated and cached by <see cref="HeroUsageStatisticsService"/>.
+    /// </summary>
+    private async Task<IActionResult> GetHeroUsageList()
+    {
+        string sort = Request.Form["sort"].ToString();
+
+        if (string.IsNullOrEmpty(sort))
+            sort = "use";
+
+        if (sort is not "use" and not "win" and not "loss")
+            return BadRequest($@"Unsupported Value For Form Parameter ""sort"": ""{sort}""");
+
+        IReadOnlyList<HeroUsageStatistic> heroUsageStatistics = await HeroUsageStatistics.GetHeroUsageStatistics();
+
+        int totalUse = heroUsageStatistics.Sum(statistic => statistic.Wins + statistic.Losses);
+
+        IEnumerable<HeroUsageEntry> entries = heroUsageStatistics
+            .Select(statistic => new HeroUsageEntry(statistic.HeroIdentifier, statistic.Wins, statistic.Losses, totalUse));
+
+        // The "use" Sort Breaks Ties On Win Count
+        List<HeroUsageEntry> sortedEntries = sort switch
+        {
+            "win"  => [.. entries.OrderByDescending(entry => entry.WinPercentage)],
+            "loss" => [.. entries.OrderByDescending(entry => entry.LossPercentage)],
+            _      => [.. entries.OrderByDescending(entry => entry.UsageCount).ThenByDescending(entry => entry.WinCount)]
+        };
+
+        OrderedDictionary response = new ();
+
+        response.Add("success", 1);
+        response.Add("errors", string.Empty);
+        response.Add("total_use", totalUse);
+        response.Add("data", string.Join('`', sortedEntries.Select(entry => entry.Serialise())));
+        response.Add("vested_threshold", 5);
+        response.Add(0, true);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Retrieves the per-hero statistics for the given game mode and hero identifier, or <see langword="null"/> if the account has no statistics recorded for that combination.
+    /// </summary>
+    private static HeroStats? RetrieveHeroStatistics(Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType, AccountStatisticsType type, string heroIdentifier)
+        => statisticsByType.TryGetValue(type, out AccountStatistics? statistics)
+            ? statistics.HeroStatistics.Heroes.SingleOrDefault(hero => hero.HeroIdentifier.Equals(heroIdentifier, StringComparison.OrdinalIgnoreCase)) : null;
 
     private async Task<IActionResult> GetMatchStatistics()
     {
@@ -731,4 +885,50 @@ public partial class ClientRequesterController
 
         return items;
     }
+}
+
+/// <summary>
+///     A single hero entry in the "get_hero_usage_list" response.
+///     Serialises to the pipe-delimited format "identifier|use%|win%|loss%|use_count|win_count|loss_count", where the percentages are formatted to one decimal place.
+/// </summary>
+file sealed class HeroUsageEntry(string heroIdentifier, int wins, int losses, int totalUse)
+{
+    /// <summary>
+    ///     The number of wins with the hero across all resolved matches.
+    /// </summary>
+    public int WinCount { get; } = wins;
+
+    /// <summary>
+    ///     The number of losses with the hero across all resolved matches.
+    /// </summary>
+    public int LossCount { get; } = losses;
+
+    /// <summary>
+    ///     The number of resolved matches in which the hero was used (the sum of wins and losses).
+    /// </summary>
+    public int UsageCount { get; } = wins + losses;
+
+    /// <summary>
+    ///     The hero's share of all resolved matches, as a percentage.
+    /// </summary>
+    public double UsagePercentage => totalUse > 0 ? (double) UsageCount / totalUse * 100.0 : 0.0;
+
+    /// <summary>
+    ///     The hero's win rate across its resolved matches, as a percentage.
+    /// </summary>
+    public double WinPercentage => UsageCount > 0 ? (double) WinCount / UsageCount * 100.0 : 0.0;
+
+    /// <summary>
+    ///     The hero's loss rate across its resolved matches, as a percentage.
+    /// </summary>
+    public double LossPercentage => UsageCount > 0 ? (double) LossCount / UsageCount * 100.0 : 0.0;
+
+    public string Serialise() => string.Join
+    (
+        '|', heroIdentifier,
+        UsagePercentage.ToString("0.0", CultureInfo.InvariantCulture),
+        WinPercentage.ToString("0.0", CultureInfo.InvariantCulture),
+        LossPercentage.ToString("0.0", CultureInfo.InvariantCulture),
+        UsageCount, WinCount, LossCount
+    );
 }

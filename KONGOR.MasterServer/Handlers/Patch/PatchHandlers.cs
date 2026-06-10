@@ -2,10 +2,10 @@
 
 public static class PatchHandlers
 {
-    public static PatchDetails GetLatestClientPatchDetails(string distribution)
+    public static PatchDetails GetLatestPatchDetails(string distribution)
         => DistributionVersions.Single(details => details.DistributionIdentifier.Equals(distribution) && details.Latest.Equals(true));
 
-    public static PatchDetails GetClientPatchDetails(string distribution, string version)
+    public static PatchDetails GetPatchDetails(string distribution, string version)
         => DistributionVersions.Single(details => details.DistributionIdentifier.Equals(distribution) && details.Version.Equals(version));
 
     private static List<PatchDetails> DistributionVersions { get; set; } =

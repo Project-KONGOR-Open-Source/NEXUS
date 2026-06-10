@@ -178,7 +178,7 @@ public sealed class MicroPoolMatchmakingTests
         MatchmakingGroupInformation ranked   = MatchmakingTestBuilder.Information(ranked: true);
         MatchmakingGroupInformation unranked = MatchmakingTestBuilder.Information(ranked: false);
 
-        // Two Distinct Solos In Each Bucket So The 1+1 Pattern Can Form Within Each Group, And Then Paired Across
+        // Two Distinct Solos In Each Partition So The 1+1 Pattern Can Form Within Each Group, And Then Paired Across
         List<MatchmakingGroup> queue =
         [
             MatchmakingTestBuilder.BuildGroup([MatchmakingTestBuilder.BaselineTMR], information: ranked),

@@ -21,8 +21,8 @@ public class ServerManagerStatus(IDatabase distributedCacheStore) : IAsynchronou
             return;
         }
 
-        // A Routine Heartbeat Carries No Match Server Manager Data That Is Persisted In The Distributed Cache
-        // The Match Server Manager Liveness Is Tracked Via The In-Memory Session Pool And Reconciled By The "StaleHostReaper"
+        // The Match Server Manager Sends "NET_CHAT_SM_STATUS" Only Once On Connect Via "CManagerChatConnection", There Is No Periodic Manager Status Heartbeat; The Connection Is Kept Alive By PING/PONG, Not Status Updates
+        // So This Handler Is Effectively One-Shot And Is Not A Lease-Renewal Point; Manager Liveness (And Therefore Its Hosting Lease) Is Tracked Via The In-Memory Session Pool And Renewed Each Sweep By <see cref="StaleHostReaper"/>
     }
 }
 

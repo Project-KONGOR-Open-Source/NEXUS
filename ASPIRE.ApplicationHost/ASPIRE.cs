@@ -118,11 +118,16 @@ public class ASPIRE
         }
 
         // Add Database Project
-        builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
+        IResourceBuilder<ProjectResource> databaseContext = builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithReference(logServer) // Connect To Structured Log Server
             .WithParentRelationship(databaseServer) // Set Database Server As Parent Resource
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+
+        // Enable Entity Framework Core Commands Which Resolve The Database Connection String Through The Aspire Application Host
+        databaseContext.AddEFMigrations("database-migrations", "MERRICK.DatabaseContext.Persistence.MerrickContext")
+            .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Supply The Resolved Connection String Under The Name The Database Context Expects, And Wait For The Database To Start
+            .WithParentRelationship(databaseContext); // Set Database Context As Parent Resource
 
         // Add Master Server Project
         builder.AddProject<KONGOR>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")

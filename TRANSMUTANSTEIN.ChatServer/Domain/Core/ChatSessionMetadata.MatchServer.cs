@@ -36,6 +36,22 @@ public class MatchServerChatSessionMetadata
 
     public byte TeamSize { get; set; }
 
+    /// <summary>
+    ///     The current game phase reported by the match server (for example lobby, hero select, or in progress).
+    /// </summary>
+    public int GamePhase { get; set; }
+
+    /// <summary>
+    ///     The elapsed match time in milliseconds reported by the match server.
+    /// </summary>
+    public int GameTimeMilliseconds { get; set; }
+
+    /// <summary>
+    ///     The Legion team information, the Hellbourne team information, and the ten player information strings from the most recent status update, in that order.
+    ///     Used to answer game-info requests about a player's in-progress match.
+    /// </summary>
+    public string[] TeamAndPlayerInformation { get; set; } = [];
+
     // Match Flags
 
     public byte Tier { get; set; }

@@ -14,7 +14,10 @@ public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousComman
 
         if (matchServer is null)
         {
-            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{MatchServerID}""", requestData.ServerID);
+            string? remoteEndPoint = session.Socket.RemoteEndPoint?.ToString();
+
+            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{MatchServerID}""" + Environment.NewLine + @"RemoteEndPoint: ""{RemoteEndPoint}"", Name: ""{MatchServerName}"", Address: ""{MatchServerAddress}:{MatchServerPort}"", HostName: ""{MatchServerHostName}"", MatchID: ""{MatchID}"", SlaveID: ""{SlaveID}"", Status: {Status}",
+                requestData.ServerID, remoteEndPoint, requestData.Name, requestData.Address, requestData.Port, requestData.HostName, requestData.MatchID, requestData.SlaveID, requestData.Status);
 
             return;
         }
@@ -256,6 +259,14 @@ file class ServerStatusRequestData
         metadata.GameName = GameName;
         metadata.GameModeName = GameMode;
         metadata.TeamSize = TeamSize;
+        metadata.GamePhase = CurrentGamePhase;
+        metadata.GameTimeMilliseconds = CurrentGameTime;
+        metadata.TeamAndPlayerInformation =
+        [
+            LegionTeamInformation, HellbourneTeamInformation,
+            PlayerInformation_01, PlayerInformation_02, PlayerInformation_03, PlayerInformation_04, PlayerInformation_05,
+            PlayerInformation_06, PlayerInformation_07, PlayerInformation_08, PlayerInformation_09, PlayerInformation_10
+        ];
         metadata.Tier = Tier;
         metadata.IsOfficial = Official is 1 || Official is 2;
         metadata.OfficialWithStats = Official is 2;

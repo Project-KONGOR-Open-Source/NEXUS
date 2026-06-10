@@ -115,6 +115,18 @@ public class MatchmakingGroup
     public Guid? AssignedMatchGUID { get; set; }
 
     /// <summary>
+    ///     The bot roster for the ally team in a bot-match group, indexed by team slot (0 to 4).
+    ///     A <see langword="null"/> slot is empty.
+    /// </summary>
+    public string?[] AllyBots { get; } = new string?[5];
+
+    /// <summary>
+    ///     The bot roster for the enemy team in a bot-match group, indexed by team slot (0 to 4).
+    ///     A <see langword="null"/> slot is empty.
+    /// </summary>
+    public string?[] EnemyBots { get; } = new string?[5];
+
+    /// <summary>
     ///     Determines if this group is considered "experienced" based on match count or TMR.
     ///     In the original implementation, a group is experienced if matchCount >= 50 OR TMR >= 1625.
     /// </summary>
@@ -433,6 +445,89 @@ public class MatchmakingGroup
         }
 
         return this;
+    }
+
+    /// <summary>
+    ///     Applies a match-option change from the group leader (game type, map, game modes, regions, ranked status, match fidelity, and bot-match options) and broadcasts the updated group state to all members.
+    /// </summary>
+    public void UpdateGameOptions(ChatProtocol.TMMGameType gameType, string mapName, string[] gameModes, string[] gameRegions, bool ranked, byte matchFidelity, byte botDifficulty, bool randomizeBots)
+    {
+        Information.GameType = gameType;
+        Information.MapName = mapName;
+        Information.GameModes = gameModes;
+        Information.GameRegions = gameRegions;
+        Information.Ranked = ranked;
+        Information.MatchFidelity = matchFidelity;
+        Information.BotDifficulty = botDifficulty;
+        Information.RandomizeBots = randomizeBots;
+
+        // Keep Each Member's Game Mode Access Consistent With The New Game Mode Count (Defaulting To Full Access, As At Group Creation)
+        string gameModeAccess = string.Join('|', gameModes.Select(mode => "true"));
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.GameModeAccess = gameModeAccess;
+
+        MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+    }
+
+    /// <summary>
+    ///     Applies a group-type change from the group leader (for example switching between a player-versus-player group and a co-operative bot-match group) and broadcasts the updated group state to all members.
+    /// </summary>
+    public void ChangeGroupType(ChatProtocol.TMMType groupType)
+    {
+        Information.GroupType = groupType;
+
+        MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+    }
+
+    /// <summary>
+    ///     Sets the bot occupying the given team slot and broadcasts the change to all group members.
+    /// </summary>
+    /// <param name="team">The team the slot belongs to: 1 for the ally team, 2 for the enemy team.</param>
+    /// <param name="slot">The team slot index (0 to 4).</param>
+    /// <param name="botName">The bot definition name (for example "ChronosBot").</param>
+    public void UpdateBot(byte team, byte slot, string botName)
+    {
+        if (slot > 4 /* Slot 5, The Last 0-Indexed Slot */)
+        {
+            Log.Error(@"[BUG] A Bot Update Has Occurred For Out-Of-Range Slot {Slot} In Matchmaking Group GUID ""{GroupGUID}""", slot, GUID);
+
+            return;
+        }
+
+        switch (team)
+        {
+            case 1:
+            {
+                AllyBots[slot] = botName;
+                    
+                break;
+            }
+
+            case 2:
+            {
+                EnemyBots[slot] = botName;
+                    
+                break;
+            }
+
+            default:
+            {
+                Log.Warning(@"Ignoring Bot Update For Unknown Team {Team} In Matchmaking Group GUID ""{GroupGUID}""", team, GUID);
+
+                return;
+            }
+        }
+
+        ChatBuffer update = new ();
+
+        update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_BOT_GROUP_UPDATE);
+        update.WriteInt8(team);      // Team (1 = Ally, 2 = Enemy)
+        update.WriteInt8(slot);      // Team Slot (0 To 4)
+        update.WriteString(botName); // Bot Definition Name
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(update);
     }
 
     /// <summary>
