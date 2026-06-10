@@ -1,27 +1,20 @@
 # Server Log TODOs
 
-Compiled from production logs (KONGOR.MasterServer + TRANSMUTANSTEIN.ChatServer, 2026-06-05 / 2026-06-06).
-Frequencies are occurrence counts across the inspected logs.
-
-## Bugs To Fix
-
 ### 5. `[BUG] Received Status Update For Unknown Match Server ID "0"`
 - **Frequency:** 8+ (recurring across both days)
 - **Symptom:** Match-server status update arrives with server ID `0`; handler logs `[BUG]` and drops the update.
 - **Location:** `TRANSMUTANSTEIN.ChatServer\CommandProcessors\Connection\ServerStatus.cs` (logged when `GetMatchServerByID` returns null).
-- **Root cause:** A status update is sent before the server has a valid registered ID (startup/registration race, or an unregistered/restarted server). ID is assigned at auth via `serverIdentifier.GetDeterministicInt32Hash()`.
-- **Done:** The log line now dumps the full status payload (name, address, port, host name, match ID, slave ID, status) to identify the source.
-- **Remaining:** Add the remote TCP endpoint to the log line; investigate the registration sequence so status updates cannot precede ID assignment; decide policy — ignore quietly vs. force re-auth.
+- **Root cause (traced):** A status update arrived for a server ID not present in the distributed cache, so it is dropped. The originally-assumed cause (ID `0` = uninitialised default) is WRONG: on the match server the uninitialised ID is `INVALID_ACCOUNT` = `(uint)-1` (`HON\src\k2\k2_constants.h:252`), which NEXUS reads via `ReadInt32()` as `-1`, not `0`. The slave sets its ID only from the `new_session` response: `m_uiServerID = phpResponse.GetInteger("server_id")` (`c_hostserver.cpp:1726`), and `CPHPData::GetInteger` returns its default of `0` when the key is absent (`c_phpdata.cpp:606-608`). The slave applies that with no guard, unlike the manager which refuses to proceed unless `server_id != 0` (`c_servermanager.cpp:428`). So a reported `0` means the slave received a 2xx `new_session` response with no `server_id`. **Current NEXUS does not do this:** `HandleServerAuthentication` always returns a non-zero `server_id` (the `GetDeterministicInt32Hash()` value, in place since 2024-06-27 per git blame), and every non-success exit is 4xx (on which the slave bails and keeps `-1`). The other NEXUS `server_id` emissions are the manager hash and a hardcoded `666`; none is `0`. The observed `0`s therefore came from a build/stack whose `new_session` response omitted `server_id` or sourced it from a `0` field (e.g. the legacy server's `["server_id"] = gameServer.GameServerId`, which is `0` for an unpopulated row).
+- **Done:** The unknown-ID log line now also includes the remote TCP endpoint (`RemoteEndPoint`) alongside the full status payload. It remains a single `[BUG]` `Error` for any unknown ID; the earlier `ServerID == 0` vs non-zero split was removed because it was predicated on the false "0 = uninitialised" assumption.
+- **Status:** Monitor only. No live NEXUS path emits `server_id = 0`, so the `[BUG]` line should not recur against the current stack; if it does, it points at a server talking to an older/legacy master. Residual robustness gap (not a current bug): the slave has no `server_id != 0` guard, so any future 2xx `new_session` response that omits the field would silently make that server undiscoverable; the `[BUG]` log is the canary for it.
 
 ### 6. `GroupNumber "-1"` on match participants → falls back to solo rewards
 - **Frequency:** 28
 - **Symptom:** `Unexpected GroupNumber "-1" On Match Participant; Falling Back To Solo Rewards`.
-- **Location:** `KONGOR.MasterServer\Helpers\Stats\MatchCompletionRewardsHandler.cs:93-111` (`SelectGroupBuckets` switch default).
-- **Root cause:** Valid group numbers are 1–5; `-1` indicates the group size was never set correctly upstream in the match-submission pipeline. The solo fallback is a safe stop-gap but hides a data-integrity defect.
-- **Done:** The fallback warning now logs the match ID and account ID for correlation. The solo fallback is intentionally retained.
-- **Remaining:** Trace where `-1` originates (match creation/submission) and ensure participants always carry a 1–5 group number.
-
-## Expected — Monitor Only (no code change unless policy changes)
+- **Location:** `KONGOR.MasterServer\Helpers\Stats\MatchCompletionRewardsHandler.cs` (`SelectGroupPartitions` switch).
+- **Root cause (corrected):** `-1` is NOT a data-integrity defect. It is the game server's sentinel for a participant with no arranged-match roster entry, sent for every player in a public (non-matchmaking) match. Confirmed in the authoritative source at `C:\Users\SADS-810\Source\HON\src\hon_server\c_gameserver.cpp:7569`: `group_num = pPlayerRosterEntry != NULL ? yGroupNum : -1`. Matchmaking parties carry `1`–`5`; public-match players carry `-1`. The 28 occurrences are public matches, and solo rewards are the correct outcome (a public player has no arranged party). Nothing upstream needs changing.
+- **Done:** `SelectGroupPartitions` now has an explicit `-1` arm mapping to the Solo partition (with a comment), so public-match participants are rewarded as solo without the warning. The `_` default still warns and falls back to solo for genuinely out-of-range values (e.g. `0`, `6+`). A `-1` case was added to `MatchCompletionRewardsHandlerTests`.
+- **Status:** Monitor only. Confirm the `Unexpected Group Number "-1"` warning stops appearing; any remaining warnings now indicate a genuinely unexpected value worth investigating.
 
 ### 9. Forged / empty cookie → 401
 - **Frequency:** 29. `IP Address "X" Has Made A Client Request With Forged Cookie ""`.
@@ -33,38 +26,15 @@ Frequencies are occurrence counts across the inspected logs.
 - **Location:** `ServerRequesterController.Authentication.cs:146-151` (`IsHostLeaseHeld` gates server auth).
 - **Status:** Likely a downstream symptom of #12. With the servers silent (`svr_broadcast=false`, see #12) they stop sending the `set_online` heartbeat that renews the shared lease, and with no manager-side renewal at the time the lease lapsed (5-min TTL), so subsequent server auth was rejected. Addressed by #12's `Broadcast=true` (servers resume `set_online`, which renews the lease) plus the new manager-liveness renewal in `StaleHostReaper`. Still monitor-only: a genuinely manager-less host is correctly rejected (manager-less hosting is a bug). Confirm the rejections stop after the fix.
 
-### 11. No available server for match (stale server sessions skipped)
-- **Frequency:** 8 (one stale server, `ServerID=294943409`, repeatedly skipped). `Skipping Idle Server With A Stale Chat Session` → `No Idle Servers With Active Sessions For Match GUID` → `No Available Server Found For Match GUID`.
-- **Location:** `TRANSMUTANSTEIN.ChatServer\Services\MatchmakingService.cs:510-553` (150s freshness threshold).
-- **Root cause:** The servers had stopped sending status heartbeats — the same `svr_broadcast=false` condition as #12 — so `LastStatusUpdate` went stale and the server was skipped on every selection.
-- **Addressed:** The freshness-skip itself is correct by design. The previously-noted reaper gap — a server with a live (TCP-connected) chat session that has merely stopped heartbeating was never reaped, only entries with **no** live session were — is now closed: `StaleHostReaper` terminates such "zombie" sessions once `LastStatusUpdate` exceeds 175s, freeing the slot. The underlying cause is fixed by #12's config change.
-- **Remaining:** Confirm the stale-skip warnings stop recurring after `Broadcast=true` ships.
-
-## Observed In Operation (Not Yet In Logs)
-
-### 12. Match servers become undiscoverable after a match, until manager + servers are restarted
-- **Frequency:** Reported manually; reproducible after a single match completes.
-- **Symptom:** Once a match finishes the match servers go silent — they stop sending heartbeats (both the chat status update and the HTTP `set_online`) with **no error** and no reconnect — so they fall stale and no server can be allocated for subsequent matches (surfaces as #11's `No Available Server Found For Match GUID` cluster). Restarting the manager **and** the match servers restores discovery.
-- **Root cause (confirmed):** The HoN dedicated-server cvar `svr_broadcast` is the master switch for participating in the chat/master infrastructure — not merely "announce on the LAN". When `false` the server early-returns out of connecting to the chat server (`CServerChatConnection::Connect`), sending **both** heartbeats (`CHostServer::SendHeartbeat` — the chat status and the `set_online` send are both past the guard), the shutdown notification, and re-requesting a cleared session cookie. `appsettings.Production.json` set the match-server `Broadcast` setting to `false` (Development was `true`), and TRANSMUTANSTEIN pushes it to every server via the `svr_broadcast {MatchServerSettings.Broadcast}` remote command in `ServerHandshake` — so production servers were told to go dark.
-- **Fix:** Set `Broadcast = true` in `appsettings.Production.json`. A matchmaking-visible dedicated server must have `svr_broadcast=true`.
-- **Ruled out:** The host-lease was the prime suspect but is **not** the root cause; the "transient manager disconnect releases the shared lease" theory was a misdiagnosis. The #10 lease rejections are a downstream symptom.
-- **Retained defence-in-depth (robustness, not the fix):** `StaleHostReaper` now terminates zombie match-server sessions whose `LastStatusUpdate` exceeds 175s (closes the #11 gap); `OnDisconnected` defers cache/lease teardown to the reaper (preserves the cookie-reuse reconnect path, and removes the manager-blip-releases-the-shared-lease failure mode); the reaper renews the lease every 60s for every manager with a live session.
-- **Verify:** With `Broadcast=true`, reproduce with one manager + one server, complete a match, and confirm the servers keep heartbeating and stay discoverable; watch the `MATCH-HOST-LEASE:HOST` key and the match-server hash in Redis — neither should vanish.
-
-### 13. Stats submission failure — suspected large-payload / form-limit issue (investigate)
-- **Frequency:** Reported manually; not clearly present in the inspected master-server logs (server logs needed to confirm).
-- **Symptom:** Match stats submission fails for some matches. Suspected correlation with **large payloads** (long matches / fully-populated stat blobs).
-- **Location:** `KONGOR.MasterServer\Controllers\StatsRequesterController\StatsRequesterController.cs` — `submit_stats` / `resubmit_stats` via `StatsRequester` (`:39-50`).
-- **Leading suspect:** The form value-count cap `StatsSubmissionFormValueCountLimit = 8192` (`:31`, applied via `[RequestFormLimits(ValueCountLimit = ...)]` at `:40`). The code comment notes a long match with all optional CVARs (`svr_submitMatchStatItems`, `svr_submitMatchStatAbilities`, `svr_submitMatchStatFrags`) can reach ~4,500+ values; an exceptionally long/eventful match could plausibly exceed 8,192, at which point the ASP.NET form reader throws `InvalidDataException: Form value count limit 8192 exceeded` and the submission is lost.
-- **Secondary suspects:** Other form limits not overridden by the attribute — default per-value `ValueLengthLimit` (~4 MB), `KeyLengthLimit`, and the Kestrel `MaxRequestBodySize` (~30 MB default; **no override found** anywhere in the project). A very large replay/stat blob could hit the body-size limit before form parsing.
-- **Investigate:**
-  - Pull the match-server (and master-server) logs for the failing match and capture the exact exception / HTTP status returned by `stats_requester.php`.
-  - If it is the value-count limit, measure the actual form value count of a failing submission and raise `StatsSubmissionFormValueCountLimit` accordingly (with headroom), rather than guessing.
-  - Confirm whether the failure is a hard reject (4xx/5xx) or a partial/silent loss, and whether `resubmit_stats` recovers it.
-- **Note:** User can supply server-side logs to confirm if the cause is not obvious from these master-server logs alone.
+### 13. Stats submission failure — suspected large-payload / form-limit issue
+- **Frequency:** Reported manually; not clearly present in the inspected master-server logs.
+- **Symptom:** Match stats submission fails for some matches. Suspected correlation with large payloads (long matches / fully-populated stat blobs).
+- **Location:** `KONGOR.MasterServer\Controllers\StatsRequesterController\StatsRequesterController.cs` (`submit_stats` / `resubmit_stats` via `StatsRequester`).
+- **Limits (confirmed):** Form value count is capped at `8192` (`StatsSubmissionFormValueCountLimit`, applied via `[RequestFormLimits]`). A baseline 5v5 submission is ~1,040 values, rising to ~4,500+ with all optional CVARs (`svr_submitMatchStatItems`, `svr_submitMatchStatAbilities`, `svr_submitMatchStatFrags`) on a long match. Form key length, form value length, and the Kestrel request-body-size limit (~30 MB) are all at framework defaults; no override exists anywhere in the solution.
+- **Failure mode (corrected):** When a form limit is exceeded, the form reader throws while the body is read during model binding. ASP.NET wraps that (`InvalidDataException` for the value-count / key-length / value-length limits, `BadHttpRequestException` for body size, the latter deriving from `IOException`) in a `ValueProviderException`, which `CompositeValueProvider.TryCreateAsync` converts into a model-state error. With `[ApiController]`, that yields an automatic 400 and the action never runs. So the failure is a 400 (not a 500) and carries no propagating exception, which is why it was easy to miss in the logs.
+- **Done:** Added `FormLimitDiagnosticsFilter` (`KONGOR.MasterServer\Filters`), applied to the stats endpoint. It runs ahead of the `[ApiController]` model-state validation, detects the form-read failure in the model state, and logs a flat request-context snapshot (function, query, remote endpoint, user-agent, content length, content type) plus the exact limit message, so the next occurrence is self-diagnosing. The limit was left unchanged (no guessing without data).
+- **Remaining:** When the next failure logs, read the actual content length and limit message; if the value-count limit is genuinely the cause, raise `StatsSubmissionFormValueCountLimit` with measured headroom rather than guessing.
 
 ## Diagnostics & Logging Improvements
 
 > General principle: where a warning/error fires but the cause is *not evident from the message alone*, log a JSON-serialised representation of the request — or, if the full request would be too large, the important parts (requested function, present form keys, account/identity, remote endpoint, user-agent). Keep log-property names flat (no dots) so they remain indexable in Seq. The goal is to make the next occurrence self-diagnosing rather than requiring a repro.
-
-This principle has been applied to the forged-cookie sites (see #9). Apply it to the other not-evident warnings as they are touched — e.g. #5 (unknown server ID `0`) and #13 (stats submission failures).
