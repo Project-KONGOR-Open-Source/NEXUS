@@ -14,8 +14,10 @@ public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousComman
 
         if (matchServer is null)
         {
-            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{MatchServerID}""" + Environment.NewLine + @"Name: ""{MatchServerName}"", Address: ""{MatchServerAddress}:{MatchServerPort}"", HostName: ""{MatchServerHostName}"", MatchID: ""{MatchID}"", SlaveID: ""{SlaveID}"", Status: {Status}",
-                requestData.ServerID, requestData.Name, requestData.Address, requestData.Port, requestData.HostName, requestData.MatchID, requestData.SlaveID, requestData.Status);
+            string? remoteEndPoint = session.Socket.RemoteEndPoint?.ToString();
+
+            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{MatchServerID}""" + Environment.NewLine + @"RemoteEndPoint: ""{RemoteEndPoint}"", Name: ""{MatchServerName}"", Address: ""{MatchServerAddress}:{MatchServerPort}"", HostName: ""{MatchServerHostName}"", MatchID: ""{MatchID}"", SlaveID: ""{SlaveID}"", Status: {Status}",
+                requestData.ServerID, remoteEndPoint, requestData.Name, requestData.Address, requestData.Port, requestData.HostName, requestData.MatchID, requestData.SlaveID, requestData.Status);
 
             return;
         }
