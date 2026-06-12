@@ -39,16 +39,6 @@ public class MatchmakingSettings
     public double DefaultTMR { get; set; } = 1500.0;
 
     /// <summary>
-    ///     The low TMR threshold for outlier detection.
-    /// </summary>
-    public double LowTMROutlier { get; set; } = 1200.0;
-
-    /// <summary>
-    ///     The high TMR threshold for outlier detection.
-    /// </summary>
-    public double HighTMROutlier { get; set; } = 1750.0;
-
-    /// <summary>
     ///     The baseline TMR difference allowed between teams before any queue-time expansion is applied.
     ///     This is the tightest acceptable spread; the pool-size-aware expansion settings widen it over time.
     /// </summary>
@@ -80,6 +70,11 @@ public class MatchmakingSettings
     ///     </list>
     /// </summary>
     public double BaseKFactor { get; set; } = 10.0;
+
+    /// <summary>
+    ///     The upper bound on the magnitude of a single match's rating change, after all K-factor multipliers have been applied.
+    /// </summary>
+    public double MaximumKFactor { get; set; } = 20.0;
 
     /// <summary>
     ///     The K-factor multiplier for provisional players.
