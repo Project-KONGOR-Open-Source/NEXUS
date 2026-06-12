@@ -93,7 +93,8 @@ internal static class MatchmakingTestBuilder
                 GameModeAccess           = string.Empty,
                 TMR                      = memberTMRs[index],
                 CasualTMR                = memberTMRs[index],
-                TotalMatchCount          = totalMatchCount
+                TotalMatchCount          = totalMatchCount,
+                GameTypeMatchCount       = totalMatchCount
             };
 
             members.Add(member);
@@ -122,7 +123,8 @@ internal static class MatchmakingTestBuilder
         string[]? gameRegions = null,
         bool? ranked = null,
         ChatProtocol.TMMType? groupType = null,
-        byte? botDifficulty = null
+        byte? botDifficulty = null,
+        byte? matchFidelity = null
     )
     {
         MatchmakingGroupInformation baseInformation = NormalRankedInformation();
@@ -136,7 +138,7 @@ internal static class MatchmakingTestBuilder
             GameModes       = gameModes     ?? baseInformation.GameModes,
             GameRegions     = gameRegions   ?? baseInformation.GameRegions,
             Ranked          = ranked        ?? baseInformation.Ranked,
-            MatchFidelity   = baseInformation.MatchFidelity,
+            MatchFidelity   = matchFidelity ?? baseInformation.MatchFidelity,
             BotDifficulty   = botDifficulty ?? baseInformation.BotDifficulty,
             RandomizeBots   = baseInformation.RandomizeBots
         };

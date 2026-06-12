@@ -109,6 +109,56 @@ public sealed class TeamFormationPatternTests
     }
 
     [Test]
+    public async Task Non_Anchor_Slots_Prefer_The_Group_Closest_In_Rating_To_The_Partially_Formed_Team()
+    {
+        // The Oldest 4-Stack Anchors The Team; The Younger Solo At 1690 Is Much Closer In Rating To The 1700 Anchor Than The Older Solo At 1500, So Rating Proximity Beats Queue Time For The Final Slot
+
+        const double AnchorTMR     = 1700.0;
+        const double FarSoloTMR    = 1500.0;
+        const double CloseSoloTMR  = 1690.0;
+
+        MatchmakingGroup fourStack = MatchmakingTestBuilder.BuildGroup([AnchorTMR, AnchorTMR, AnchorTMR, AnchorTMR], queuedMinutesAgo: 5);
+        MatchmakingGroup farSolo   = MatchmakingTestBuilder.BuildSoloGroup(FarSoloTMR, queuedMinutesAgo: 10);
+        MatchmakingGroup closeSolo = MatchmakingTestBuilder.BuildSoloGroup(CloseSoloTMR, queuedMinutesAgo: 1);
+
+        List<MatchmakingGroup> queue = [farSolo, fourStack, closeSolo];
+
+        IReadOnlyList<MatchmakingTeam> teams = MatchmakingAlgorithm.FormTeams(queue, playersPerTeam: 5);
+
+        MatchmakingTeam fourPlusOne = teams.Single(team => team.GroupMakeupString == "4+1");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(fourPlusOne.Groups.Any(group => group.GUID == closeSolo.GUID)).IsTrue();
+            await Assert.That(fourPlusOne.Groups.Any(group => group.GUID == farSolo.GUID)).IsFalse();
+        }
+    }
+
+    [Test]
+    public async Task An_Incompatible_Group_At_The_Head_Of_The_Queue_Does_Not_Block_Team_Formation()
+    {
+        // The Oldest Solo Is Unranked While Every Other Solo Is Ranked; The Pattern Must Advance Past The Unranked Anchor And Still Form The Ranked Team
+
+        MatchmakingGroupInformation unranked = MatchmakingTestBuilder.Information(ranked: false);
+
+        MatchmakingGroup unrankedSolo = MatchmakingTestBuilder.BuildGroup([MatchmakingTestBuilder.BaselineTMR], queuedMinutesAgo: 10, information: unranked);
+
+        List<MatchmakingGroup> queue = [unrankedSolo];
+
+        for (int index = 0; index < 5; index++)
+            queue.Add(MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR, queuedMinutesAgo: 5 - index));
+
+        IReadOnlyList<MatchmakingTeam> teams = MatchmakingAlgorithm.FormTeams(queue, playersPerTeam: 5);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(teams.Count).IsEqualTo(1);
+            await Assert.That(teams[0].IsRanked).IsTrue();
+            await Assert.That(teams[0].Groups.Any(group => group.GUID == unrankedSolo.GUID)).IsFalse();
+        }
+    }
+
+    [Test]
     public async Task Incomplete_Pattern_Leaves_Groups_Unused()
     {
         // One Trio Plus One Solo; No Way To Form A 5-Player Team With This Composition

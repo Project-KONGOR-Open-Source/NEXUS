@@ -195,16 +195,205 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
-    [Arguments(MatchType.AM_PUBLIC,               false, AccountStatisticsType.Public)]
-    [Arguments(MatchType.AM_MATCHMAKING,          false, AccountStatisticsType.Matchmaking)]
-    [Arguments(MatchType.AM_MATCHMAKING,          true,  AccountStatisticsType.MatchmakingCasual)]
-    [Arguments(MatchType.AM_UNRANKED_MATCHMAKING, false, AccountStatisticsType.MatchmakingCasual)]
-    [Arguments(MatchType.AM_MATCHMAKING_BOTMATCH, false, AccountStatisticsType.Cooperative)]
-    [Arguments(MatchType.AM_MATCHMAKING_MIDWARS,  false, AccountStatisticsType.MidWars)]
-    [Arguments(MatchType.AM_MATCHMAKING_RIFTWARS, false, AccountStatisticsType.RiftWars)]
-    public async Task Resolve_Account_Statistics_Type_Maps_Match_Type_Correctly(MatchType matchType, bool isCasual, AccountStatisticsType expected)
+    public async Task Apply_Ranked_Rating_Change_Adjusts_The_Matchmaking_Skill_Rating()
     {
-        MatchInformation matchInformation = BuildMatchInformation(matchType, isCasual);
+        Account account = await SeedMainAccount("ranked.gain@kongor.com", "RankedGain");
+
+        MatchInformation matchInformation = BuildMatchInformation(MatchType.AM_MATCHMAKING);
+        MatchParticipantStatistics participant = BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, publicMatch: 0, rankedMatch: 1, rankedSkillRatingChange: 5.5);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, participant);
+        await databaseContext.SaveChangesAsync();
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Matchmaking);
+
+        await Assert.That(statistics.SkillRating).IsEqualTo(1505.5);
+    }
+
+    [Test]
+    public async Task Apply_Ranked_Rating_Loss_Does_Not_Drop_The_Skill_Rating_Below_The_Minimum()
+    {
+        Account account = await SeedMainAccount("ranked.floor@kongor.com", "RankedFloor");
+
+        MatchInformation matchInformation = BuildMatchInformation(MatchType.AM_MATCHMAKING);
+        MatchParticipantStatistics participant = BuildParticipant(account.ID, account.Name, groupNumber: 1, loss: 1, publicMatch: 0, rankedMatch: 1, rankedSkillRatingChange: -501.0);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, participant);
+        await databaseContext.SaveChangesAsync();
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Matchmaking);
+
+        // A Default Rating Of 1500 Minus 501 Would Fall Below The Floor Of 1000, So The Rating Is Clamped
+        await Assert.That(statistics.SkillRating).IsEqualTo(1000.0);
+    }
+
+    [Test]
+    public async Task Apply_Public_Rating_Change_Adjusts_The_Public_Skill_Rating()
+    {
+        Account account = await SeedMainAccount("public.gain@kongor.com", "PublicGain");
+
+        MatchInformation matchInformation = BuildMatchInformation(MatchType.AM_PUBLIC);
+        MatchParticipantStatistics participant = BuildParticipant(account.ID, account.Name, groupNumber: -1, win: 1, publicSkillRatingChange: 3.25);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, participant);
+        await databaseContext.SaveChangesAsync();
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Public);
+
+        await Assert.That(statistics.SkillRating).IsEqualTo(1503.25);
+    }
+
+    [Test]
+    public async Task Apply_Ranked_Rating_Change_Is_Not_Applied_To_The_Public_Row()
+    {
+        Account account = await SeedMainAccount("ranked.fallback@kongor.com", "RankedFallback");
+
+        // A Resubmission Without Match Information Falls Back To The Public Row, Which Must Not Absorb A Ranked Rating Change
+        MatchParticipantStatistics participant = BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, publicMatch: 0, rankedMatch: 1, rankedSkillRatingChange: 7.0);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation: null, participant);
+        await databaseContext.SaveChangesAsync();
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Public);
+
+        await Assert.That(statistics.SkillRating).IsEqualTo(1500.0);
+    }
+
+    [Test]
+    public async Task Apply_Records_A_Placement_Result_During_The_Placement_Phase()
+    {
+        Account account = await SeedMainAccount("placement.record@kongor.com", "PlacementRecord");
+
+        MatchInformation matchInformation = BuildMatchInformation(MatchType.AM_MATCHMAKING);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        MatchParticipantStatistics winParticipant  = BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, matchID: 1, publicMatch: 0, rankedMatch: 1);
+        MatchParticipantStatistics lossParticipant = BuildParticipant(account.ID, account.Name, groupNumber: 1, loss: 1, matchID: 2, publicMatch: 0, rankedMatch: 1);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, winParticipant);
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, lossParticipant);
+        await databaseContext.SaveChangesAsync();
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Matchmaking);
+
+        await Assert.That(statistics.PlacementMatchesData).IsEqualTo("10");
+    }
+
+    [Test]
+    public async Task Apply_Does_Not_Record_A_Placement_Result_Beyond_The_Placement_Phase()
+    {
+        Account account = await SeedMainAccount("placement.complete@kongor.com", "PlacementDone");
+
+        MatchInformation matchInformation = BuildMatchInformation(MatchType.AM_MATCHMAKING);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Matchmaking);
+
+        statistics.PlacementMatchesData = "110100";
+
+        await databaseContext.SaveChangesAsync();
+
+        MatchParticipantStatistics participant = BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, publicMatch: 0, rankedMatch: 1);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, participant);
+        await databaseContext.SaveChangesAsync();
+
+        await Assert.That(statistics.PlacementMatchesData).IsEqualTo("110100");
+    }
+
+    [Test]
+    public async Task Apply_Does_Not_Record_A_Placement_Result_For_A_Disconnected_Participant()
+    {
+        Account account = await SeedMainAccount("placement.leaver@kongor.com", "PlacementLeaver");
+
+        MatchInformation matchInformation = BuildMatchInformation(MatchType.AM_MATCHMAKING);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        MatchParticipantStatistics participant = BuildParticipant(account.ID, account.Name, groupNumber: 1, loss: 1, publicMatch: 0, rankedMatch: 1, disconnected: 1);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, participant);
+        await databaseContext.SaveChangesAsync();
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Matchmaking);
+
+        await Assert.That(statistics.PlacementMatchesData).IsEqualTo(string.Empty);
+    }
+
+    [Test]
+    public async Task Apply_Does_Not_Record_Placement_Data_For_An_Untracked_Queue()
+    {
+        Account account = await SeedMainAccount("placement.untracked@kongor.com", "PlacementNone");
+
+        MatchInformation matchInformation = BuildMatchInformation(MatchType.AM_MATCHMAKING_MIDWARS, map: "midwars");
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        MatchParticipantStatistics participant = BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, publicMatch: 0, rankedMatch: 1);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, participant);
+        await databaseContext.SaveChangesAsync();
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.MidWars);
+
+        await Assert.That(statistics.PlacementMatchesData).IsNull();
+    }
+
+    [Test]
+    [Arguments(MatchType.AM_PUBLIC,               false, "caldavar",        AccountStatisticsType.Public)]
+    [Arguments(MatchType.AM_MATCHMAKING,          false, "caldavar",        AccountStatisticsType.Matchmaking)]
+    [Arguments(MatchType.AM_MATCHMAKING,          true,  "caldavar",        AccountStatisticsType.MatchmakingCasual)]
+    [Arguments(MatchType.AM_UNRANKED_MATCHMAKING, false, "caldavar",        AccountStatisticsType.MatchmakingCasual)]
+    [Arguments(MatchType.AM_MATCHMAKING_BOTMATCH, false, "caldavar",        AccountStatisticsType.Cooperative)]
+    [Arguments(MatchType.AM_MATCHMAKING_MIDWARS,  false, "midwars",         AccountStatisticsType.MidWars)]
+    [Arguments(MatchType.AM_MATCHMAKING_MIDWARS,  false, "caldavar_reborn", AccountStatisticsType.Matchmaking)]
+    [Arguments(MatchType.AM_MATCHMAKING_MIDWARS,  true,  "caldavar_reborn", AccountStatisticsType.MatchmakingCasual)]
+    [Arguments(MatchType.AM_MATCHMAKING_RIFTWARS, false, "riftwars",        AccountStatisticsType.RiftWars)]
+    public async Task Resolve_Account_Statistics_Type_Maps_Match_Type_Correctly(MatchType matchType, bool isCasual, string map, AccountStatisticsType expected)
+    {
+        MatchInformation matchInformation = BuildMatchInformation(matchType, isCasual, map);
 
         AccountStatisticsType resolved = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
 
@@ -249,7 +438,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
         return altAccount;
     }
 
-    private static MatchInformation BuildMatchInformation(MatchType matchType, bool isCasual = false)
+    private static MatchInformation BuildMatchInformation(MatchType matchType, bool isCasual = false, string map = "caldavar")
     {
         return new MatchInformation
         {
@@ -258,7 +447,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
             ServerID = 1,
             ServerName = "Test Server",
             HostAccountName = "TestHost",
-            Map = "caldavar",
+            Map = map,
             Version = "4.10.1.0",
             IsCasual = isCasual,
             MatchType = matchType,
@@ -266,7 +455,8 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
         };
     }
 
-    private static MatchParticipantStatistics BuildParticipant(int accountID, string accountName, int groupNumber, int win = 0, int loss = 0, int matchID = 1)
+    private static MatchParticipantStatistics BuildParticipant(int accountID, string accountName, int groupNumber, int win = 0, int loss = 0, int matchID = 1,
+        int publicMatch = 1, double publicSkillRatingChange = 0, int rankedMatch = 0, double rankedSkillRatingChange = 0, int disconnected = 0)
     {
         return new MatchParticipantStatistics
         {
@@ -284,13 +474,13 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
             Inventory                   = [],
             Win                         = win,
             Loss                        = loss,
-            Disconnected                = 0,
+            Disconnected                = disconnected,
             Conceded                    = 0,
             Kicked                      = 0,
-            PublicMatch                 = 1,
-            PublicSkillRatingChange     = 0,
-            RankedMatch                 = 0,
-            RankedSkillRatingChange     = 0,
+            PublicMatch                 = publicMatch,
+            PublicSkillRatingChange     = publicSkillRatingChange,
+            RankedMatch                 = rankedMatch,
+            RankedSkillRatingChange     = rankedSkillRatingChange,
             SocialBonus                 = 0,
             UsedToken                   = 0,
             ConcedeVotes                = 0,

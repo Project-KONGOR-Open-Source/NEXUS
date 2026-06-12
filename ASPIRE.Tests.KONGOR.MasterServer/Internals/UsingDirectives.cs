@@ -1,3 +1,4 @@
+global using ASPIRE.Common;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Enumerations.Statistics;
@@ -21,6 +22,7 @@ global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Helpers.Stats;
 global using KONGOR.MasterServer.Internals;
+global using KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 global using KONGOR.MasterServer.Models.RequestResponse.SRP;
 global using KONGOR.MasterServer.Models.RequestResponse.Store;
 global using KONGOR.MasterServer.Models.ServerManagement;

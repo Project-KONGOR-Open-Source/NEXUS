@@ -63,23 +63,18 @@ public sealed class MicroPoolMatchmakingTests
     [Test]
     public async Task Plus_Zero_Minus_One_Check_Is_Disabled_In_Micro_Pools()
     {
-        // Build A Team Whose Highest Player Is 700 Above The Average; Would Be Rejected In Medium Or Above, But Allowed Here
+        // Build Teams Whose Highest Player Is 700 Above The Average; Would Be Rejected In Medium Or Above, But Allowed Here
+        // The Outlier Sits Inside A Premade 4-Stack So That The Rating-Proximity Slot Filling Cannot Separate The Outliers Into Better-Balanced Teams
 
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
         List<MatchmakingGroup> queue =
         [
+            MatchmakingTestBuilder.BuildGroup([MatchmakingTestBuilder.BaselineTMR, MatchmakingTestBuilder.BaselineTMR, MatchmakingTestBuilder.BaselineTMR, MatchmakingTestBuilder.OutlierHighTMR]),
             MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.OutlierHighTMR),
 
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR),
-            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.OutlierHighTMR)
+            MatchmakingTestBuilder.BuildGroup([MatchmakingTestBuilder.BaselineTMR, MatchmakingTestBuilder.BaselineTMR, MatchmakingTestBuilder.BaselineTMR, MatchmakingTestBuilder.OutlierHighTMR]),
+            MatchmakingTestBuilder.BuildSoloGroup(MatchmakingTestBuilder.BaselineTMR)
         ];
 
         IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(queue, settings);
@@ -144,11 +139,10 @@ public sealed class MicroPoolMatchmakingTests
     }
 
     [Test]
-    public async Task Region_Filtering_Applies_At_Pattern_Level_Only_Not_Team_Pairing_Level()
+    public async Task Region_Filtering_Applies_At_Team_Pairing_Level()
     {
-        // Documents A Subtle Behaviour: Region Compatibility Is Only Enforced When Multiple Groups Are Stitched Onto One Team Inside "FormTeamsWithPattern"
-        // For 1v1 Or Same-Sized-Solo Pairings, Each Group Becomes Its Own Team, And Team-Level "IsCompatibleWith" Checks Only Player Count And The (Always-Zero) Region Flags
-        // The Result: Two 1v1 Solos In Disjoint Regions Without The NEWERTH Wildcard Will Still Match; If The Algorithm Is Ever Tightened To Filter Regions At Pairing Level, This Test Will Need Updating
+        // Region Compatibility Is Enforced Both When Stitching Groups Onto A Team And When Pairing Teams
+        // Two 1v1 Solos In Disjoint Regions Without The NEWERTH Wildcard Each Become Their Own Team And Must Not Be Paired
 
         MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
 
@@ -165,7 +159,7 @@ public sealed class MicroPoolMatchmakingTests
 
         IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(queue, settings);
 
-        await Assert.That(matches.Count).IsEqualTo(1);
+        await Assert.That(matches.Count).IsEqualTo(0);
     }
 
     [Test]
