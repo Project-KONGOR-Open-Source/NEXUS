@@ -1721,14 +1721,18 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     </code>
     /// </summary>
     [PHPProperty("medal_before")]
-    public string MedalBefore { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange)).ToString();
+    public string MedalBefore { get; init; } = matchmakingStatistics.IsInPlacementPhase
+        ? ((int) Rank.NO_MEDAL).ToString()
+        : ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange)).ToString();
 
     /// <summary>
     ///     The player's medal rank after the match.
     ///     Uses the same medal ranking system as "medal_before".
     /// </summary>
     [PHPProperty("medal_after")]
-    public string MedalAfter { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating)).ToString();
+    public string MedalAfter { get; init; } = matchmakingStatistics.IsInPlacementPhase
+        ? ((int) Rank.NO_MEDAL).ToString()
+        : ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating)).ToString();
 
     /// <summary>
     ///     The seasonal campaign identifier.
@@ -1744,11 +1748,8 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     The number of placement matches the player has completed in the current season.
     ///     Players must complete placement matches before receiving their seasonal medal rank.
     /// </summary>
-    /// <remarks>
-    ///     The total expected number of placement matches is 6.
-    /// </remarks>
     [PHPProperty("placement_matches")]
-    public int PlacementMatches { get; init; } = 6;
+    public int PlacementMatches { get; init; } = AccountStatistics.ExpectedPlacementMatchCount;
 
     /// <summary>
     ///     The number of placement matches won by the player in the current season.

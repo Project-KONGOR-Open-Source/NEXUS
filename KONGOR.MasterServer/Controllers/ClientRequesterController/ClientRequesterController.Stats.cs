@@ -220,7 +220,7 @@ public partial class ClientRequesterController
                 RankedMatchesWon = rankedWins,
                 RankedMatchesLost = rankedLosses,
                 WinStreak = 0, // TODO: Implement Win Streak Tracking
-                InPlacementPhase = 0, // TODO: Implement Placement Match Tracking
+                InPlacementPhase = (rankedStatistics?.IsInPlacementPhase ?? false) ? 1 : 0,
                 LevelsGainedThisSeason = account.User.TotalLevel
             },
             SimpleCasualSeasonStats = new SimpleSeasonStats
@@ -228,7 +228,7 @@ public partial class ClientRequesterController
                 RankedMatchesWon = casualWins,
                 RankedMatchesLost = casualLosses,
                 WinStreak = 0, // TODO: Implement Win Streak Tracking
-                InPlacementPhase = 0, // TODO: Implement Placement Match Tracking
+                InPlacementPhase = (casualStatistics?.IsInPlacementPhase ?? false) ? 1 : 0,
                 LevelsGainedThisSeason = account.User.TotalLevel
             },
             MVPAwardsCount = aggregatedAwards.MVPAwards,
