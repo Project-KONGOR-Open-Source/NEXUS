@@ -552,6 +552,9 @@ public class MatchmakingGroup
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(queueUpdateBroadcast);
 
+        // Broadcast Queue Join To Terminal
+        Terminal.Broadcast(@$"{Members.Count} Player(s) Joined The Matchmaking Queue For Region(s) ""{string.Join('|', Information.GameRegions)}""", Terminal.UsersInQueuePerRegion());
+
         Log.Debug(@"Group GUID ""{GroupGUID}"" Joined Queue With {MemberCount} Member(s)", GUID, Members.Count);
     }
 
@@ -878,6 +881,9 @@ public class MatchmakingGroup
 
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(leaveQueueBroadcast);
+
+        // A Group Disbanded By Its Last Member Disconnecting Reaches This Point With No Remaining Members
+        Terminal.Broadcast(Members.Count > 0 ? $"{Members.Count} Player(s) Left The Matchmaking Queue" : "A Disbanded Group Left The Matchmaking Queue", Terminal.UsersInQueuePerRegion());
 
         return true;
     }

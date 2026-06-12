@@ -305,6 +305,10 @@ public class ChatChannel
         // Track This Channel In The Client's Current Channels List
         session.CurrentChannels.Add(ID);
 
+        // Announce The Synthetic TERMINAL Member To The Joining Client, So That It Can Render The Operational Log Messages Broadcast By <see cref="Terminal.Broadcast"/>
+        if (Name == ChatChannels.StaffChannel)
+            Terminal.AnnounceSyntheticMember(session);
+
         return this;
     }
 

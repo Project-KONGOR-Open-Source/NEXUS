@@ -206,6 +206,8 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
         {
             Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Was Removed From The Match Server Manager Pool", Metadata.ServerManagerID);
 
+            Terminal.Broadcast($"Match Server Manager {Metadata.ServerManagerID} Terminated", Terminal.ManagersPerRegion());
+
             return true;
         }
 

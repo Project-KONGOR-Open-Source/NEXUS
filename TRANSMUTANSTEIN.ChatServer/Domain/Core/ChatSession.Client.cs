@@ -141,6 +141,11 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // The Match Server Should Already Be Set From PrepareToJoinMatch
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME, Metadata.MatchServerConnectedTo);
 
+        string matchDescription = matchID >= 0 ? $"Match {matchID}" : "A Match";
+
+        // Broadcast A Join Message To The Terminal, With The Player's Name, The Match They Joined, And The Region They Are In
+        Terminal.Broadcast(@$"Player ""{Account.Name}"" Joined {matchDescription} In Region ""{GameRegions.NormaliseServerLocation(Metadata.MatchServerConnectedTo?.Location ?? string.Empty)}""", Terminal.UsersInMatchesPerRegion());
+
         return this;
     }
 
@@ -182,6 +187,9 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             RejoinDefaultChannel();
 
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+
+        // Broadcast A Leave Message To The Terminal, With The Player's Name And The Region They Are In
+        Terminal.Broadcast(@$"Player ""{Account.Name}"" Left A Match", Terminal.UsersInMatchesPerRegion());
 
         return this;
     }

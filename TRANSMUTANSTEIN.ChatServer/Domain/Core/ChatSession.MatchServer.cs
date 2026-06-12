@@ -260,6 +260,8 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
         {
             Log.Information(@"Match Server ID ""{MatchServerID}"" Was Removed From The Match Server Pool", Metadata.ServerID);
 
+            Terminal.Broadcast($"Match Server {Metadata.ServerID} Terminated", Terminal.ServersPerRegion());
+
             return true;
         }
 

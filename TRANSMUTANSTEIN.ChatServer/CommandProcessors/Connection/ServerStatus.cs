@@ -47,6 +47,9 @@ public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousComman
             return;
         }
 
+        // Broadcast The Status Update To The Terminal
+        Terminal.Broadcast(@$"Match Server {requestData.ServerID} Heartbeat With Status ""{requestData.Status}"" In Region ""{GameRegions.NormaliseServerLocation(requestData.Location)}""", Terminal.ServersPerRegion());
+
         /*
             Availability For Match Allocation Is Driven By The Recorded Status
             Matchmaking Only Selects Match Servers Reported As IDLE (See "FindAvailableServerWithSession")

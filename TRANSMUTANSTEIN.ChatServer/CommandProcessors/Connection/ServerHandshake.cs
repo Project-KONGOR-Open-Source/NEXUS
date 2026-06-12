@@ -131,8 +131,14 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             existingSession.Supersede();
         }
 
+        // Hydrate The Session Metadata With The Server's Advertised Location From The Distributed Cache, So That Operational Telemetry Can Aggregate Servers Per Region Before The First Status Update Arrives
+        session.Metadata.Location = server.Location;
+
         Log.Information(@"Match Server Connection Accepted - Server ID: ""{MatchServerID}"", Host Account: ""{HostAccountName}"", Address: ""{MatchServerAddress}:{MatchServerPort}"", Location: ""{Location}""",
             requestData.ServerID, server.HostAccountName, server.IPAddress, server.Port, server.Location);
+
+        // Broadcast Updated Server Counts Per Region To Terminal
+        Terminal.Broadcast(@$"Match Server {requestData.ServerID} Registered In Region ""{GameRegions.NormaliseServerLocation(server.Location)}""", Terminal.ServersPerRegion());
 
         string uniqueServerName = Random.Shared.Next().ToString("X8"); // TODO: Use The Original Name As Identifier, To Verify Server Binaries Checksum
 
