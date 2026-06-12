@@ -12,28 +12,12 @@ public class GroupLeaveQueue : ISynchronousCommandProcessor<ClientChatSession>
         if (group is null)
             return;
 
-        // Validate That The Group Is Actually Queued
-        if (group.QueueStartTime is null)
+        // Leave The Queue; The Request Is Refused When The Group Is Not Queued Or Is Already Committed To A Match
+        if (group.LeaveQueue() is false)
             return;
 
-        // Remove Group From Queue
-        group.QueueStartTime = null;
-
-        // Unready The Group Leader And Unload All Members
-        // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
-        foreach (MatchmakingGroupMember member in group.Members)
-        {
-            member.IsReady = member.IsLeader is false;
-            member.LoadingPercent = 0;
-        }
-
-        // Broadcast Leave Queue To All Group Members
-        ChatBuffer leaveQueueBroadcast = new ();
-
-        leaveQueueBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE);
-
-        foreach (MatchmakingGroupMember member in group.Members)
-            member.Session.Send(leaveQueueBroadcast);
+        // Unready The Group Leader And Unload All Members, So That Group Readiness Is Again Determined Solely By The Leader
+        group.UnloadAndUnreadyMembers();
 
         // Send Full Group Update To Reflect New Player States
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);

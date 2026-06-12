@@ -1,15 +1,15 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN)]
-public class GroupJoin : ISynchronousCommandProcessor<ClientChatSession>
+public class GroupJoin(MerrickContext merrick) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupJoinRequestData requestData = new (buffer);
 
-        MatchmakingGroup
+        await MatchmakingGroup
             .GetByMemberAccountName(requestData.InviteIssuerName)
-            .Join(session);
+            .Join(session, merrick);
     }
 }
 

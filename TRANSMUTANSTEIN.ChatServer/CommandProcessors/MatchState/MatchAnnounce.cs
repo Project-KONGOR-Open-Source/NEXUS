@@ -25,14 +25,16 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
         // Update Match State
         pendingMatch.State = MatchmakingMatchState.ServerAllocated;
 
-        // Use The Server Address And Port That Were Set When The Match Was Spawned
-        // These Come From The MatchServer Cache Entry And Represent The Game Server's Address
-        string serverAddress = pendingMatch.ServerAddress ?? throw new NullReferenceException("Pending Match Server Address Is NULL");
-        ushort serverPort = pendingMatch.ServerPort ?? throw new NullReferenceException("Pending Match Server Port Is NULL");
+        // Use The Server Address That Was Set When The Match Was Spawned (From The MatchServer Cache Entry), Falling Back To The Session's Remote Endpoint When It Is Missing
+        string? serverAddress = pendingMatch.ServerAddress;
 
-        // If The Match Doesn't Have The Server Address, Try To Get It From The Session's Remote Endpoint
-        if (string.IsNullOrEmpty(pendingMatch.ServerAddress) && session.Socket.RemoteEndPoint is IPEndPoint remoteEndPoint)
+        if (string.IsNullOrEmpty(serverAddress) && session.Socket.RemoteEndPoint is IPEndPoint remoteEndPoint)
             serverAddress = remoteEndPoint.Address.ToString();
+
+        if (string.IsNullOrEmpty(serverAddress))
+            throw new NullReferenceException("Pending Match Server Address Is NULL");
+
+        ushort serverPort = pendingMatch.ServerPort ?? throw new NullReferenceException("Pending Match Server Port Is NULL");
 
         // Create MatchInformation Now That We Have The Real Match ID From The Game Server
         MatchServer? server = await distributedCacheStore.GetMatchServerByID(pendingMatch.AssignedServerID ?? 0);

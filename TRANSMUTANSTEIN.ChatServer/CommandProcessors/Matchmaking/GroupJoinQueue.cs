@@ -6,9 +6,9 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 ///     Both paths validate the same conditions.
 /// </summary>
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE)]
-public class GroupJoinQueue : ISynchronousCommandProcessor<ClientChatSession>
+public class GroupJoinQueue(MerrickContext merrick) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupJoinQueueRequestData requestData = new (buffer);
 
@@ -30,7 +30,7 @@ public class GroupJoinQueue : ISynchronousCommandProcessor<ClientChatSession>
         }
 
         // Call The Group's Queue Join Method Which Validates All Conditions
-        group.JoinQueue();
+        await group.JoinQueue(merrick);
     }
 }
 
