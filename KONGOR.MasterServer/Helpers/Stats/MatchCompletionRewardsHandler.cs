@@ -4,12 +4,18 @@ namespace KONGOR.MasterServer.Helpers.Stats;
 ///     Applies the match-completion side-effects for a single participant.
 ///     Currency rewards come from <see cref="EconomyConfiguration.MatchRewards"/>.
 ///     An additive bonus from <see cref="EconomyConfiguration.EventRewards"/> is also paid out while the player is still within the first <see cref="PostSignupBonus.MatchesCount"/> matches.
-///     The corresponding <see cref="AccountStatistics"/> row is incremented for the match type.
+///     The corresponding <see cref="AccountStatistics"/> row is incremented for the match type, and its skill rating is adjusted by the rating change submitted by the match server.
 /// </summary>
 public static class MatchCompletionRewardsHandler
 {
     /// <summary>
-    ///     Applies match rewards, the post-signup bonus (if applicable), and match-counter increments for the given participant.
+    ///     The floor below which a skill rating cannot drop.
+    ///     Mirrors the minimum TMR protected by the chat server's pre-calculated loss values, catching the adjustments the chat server cannot pre-empt (for example the match server doubling the loss value for leavers).
+    /// </summary>
+    private const double MinimumSkillRating = 1000.0;
+
+    /// <summary>
+    ///     Applies match rewards, the post-signup bonus (if applicable), match-counter increments, and the skill rating change for the given participant.
     ///     The caller is responsible for calling <see cref="MerrickContext.SaveChangesAsync"/> after all participants have been processed.
     /// </summary>
     public static async Task Apply(MerrickContext databaseContext, ILogger logger, Account account, MatchInformation? matchInformation, MatchParticipantStatistics matchParticipantStatistics)
@@ -63,6 +69,46 @@ public static class MatchCompletionRewardsHandler
         if (matchParticipantStatistics.Disconnected is 1) statistics.MatchesDisconnected++;
         if (matchParticipantStatistics.Conceded     is 1) statistics.MatchesConceded++;
         if (matchParticipantStatistics.Kicked       is 1) statistics.MatchesKicked++;
+
+        RecordPlacementMatchResult(statistics, matchParticipantStatistics);
+
+        ApplySkillRatingChange(statistics, matchParticipantStatistics);
+    }
+
+    /// <summary>
+    ///     Records the participant's win or loss in the statistics row's placement data while the placement phase is incomplete.
+    ///     Placement data is only maintained for queues that track placements (the row's data is <see langword="null"/> otherwise), and a disconnected participant does not consume a placement match.
+    /// </summary>
+    private static void RecordPlacementMatchResult(AccountStatistics statistics, MatchParticipantStatistics matchParticipantStatistics)
+    {
+        if (statistics.PlacementMatchesData is null || statistics.PlacementMatchesData.Length >= AccountStatistics.ExpectedPlacementMatchCount)
+            return;
+
+        if (matchParticipantStatistics.Disconnected is 1)
+            return;
+
+        statistics.PlacementMatchesData += matchParticipantStatistics.Win is 1 ? "1" : "0";
+    }
+
+    /// <summary>
+    ///     Applies the rating change submitted by the match server to the resolved statistics row.
+    ///     The match server submits a ranked rating change for arranged matches and a public one for public matches, and the change is only applied when it targets the same rating family as the resolved row, so that a fallback resolution (for example a resubmission without match information) cannot mutate an unrelated rating.
+    ///     A rating loss never takes the rating below <see cref="MinimumSkillRating"/>.
+    /// </summary>
+    private static void ApplySkillRatingChange(AccountStatistics statistics, MatchParticipantStatistics matchParticipantStatistics)
+    {
+        double ratingChange;
+
+        if (statistics.Type is AccountStatisticsType.Public)
+            ratingChange = matchParticipantStatistics.PublicMatch is 1 ? matchParticipantStatistics.PublicSkillRatingChange : 0.0;
+
+        else
+            ratingChange = matchParticipantStatistics.RankedMatch is 1 ? matchParticipantStatistics.RankedSkillRatingChange : 0.0;
+
+        if (ratingChange is 0.0)
+            return;
+
+        statistics.SkillRating = Math.Max(statistics.SkillRating + ratingChange, MinimumSkillRating);
     }
 
     /// <summary>
@@ -73,6 +119,10 @@ public static class MatchCompletionRewardsHandler
     {
         if (matchInformation is null)
             return AccountStatisticsType.Public;
+
+        // Reborn Matches Share The MIDWARS Arranged Match Type Purely For The Match Server Binary's Benefit, So The Map Name Distinguishes Actual MidWars Matches
+        if (matchInformation.MatchType is MatchType.AM_MATCHMAKING_MIDWARS && matchInformation.Map.Equals("midwars", StringComparison.OrdinalIgnoreCase) is false)
+            return matchInformation.IsCasual ? AccountStatisticsType.MatchmakingCasual : AccountStatisticsType.Matchmaking;
 
         return matchInformation.MatchType switch
         {
