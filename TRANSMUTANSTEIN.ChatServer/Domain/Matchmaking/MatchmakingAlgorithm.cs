@@ -10,24 +10,9 @@ internal static class MatchmakingAlgorithm
     /// <summary>
     ///     Runs a single match broker cycle against the supplied queued groups, returning the matches that should be spawned.
     ///     The caller is responsible for filtering out co-op (bot) groups and groups that have already been matched.
+    ///     The pool size parameters are resolved per game type from that game type's own queued player count, unless explicit parameters are supplied, in which case they apply to every game type.
     /// </summary>
-    public static IReadOnlyList<MatchmakingMatch> RunMatchBrokerCycle(IReadOnlyList<MatchmakingGroup> queuedGroups, MatchmakingSettings settings)
-    {
-        if (queuedGroups.Count == 0)
-            return [];
-
-        int queuedPlayerCount = queuedGroups.Sum(group => group.Members.Count);
-
-        PoolSizeParameters poolSizeParameters = ResolvePoolSizeParameters(queuedPlayerCount, settings);
-
-        return RunMatchBrokerCycle(queuedGroups, settings, poolSizeParameters);
-    }
-
-    /// <summary>
-    ///     Runs a single match broker cycle with the supplied pool size parameters, returning the matches that should be spawned.
-    ///     Uses adaptive TMR spread based on queue time, pool size, and group makeup rules.
-    /// </summary>
-    public static IReadOnlyList<MatchmakingMatch> RunMatchBrokerCycle(IReadOnlyList<MatchmakingGroup> queuedGroups, MatchmakingSettings settings, PoolSizeParameters poolSizeParameters)
+    public static IReadOnlyList<MatchmakingMatch> RunMatchBrokerCycle(IReadOnlyList<MatchmakingGroup> queuedGroups, MatchmakingSettings settings, PoolSizeParameters? poolSizeParameters = null)
     {
         List<MatchmakingMatch> matches = [];
 
@@ -41,6 +26,13 @@ internal static class MatchmakingAlgorithm
 
         foreach ((ChatProtocol.TMMGameType gameType, List<MatchmakingGroup> typeGroups) in groupsByGameType)
         {
+            // Each Game Type Matches Within Its Own Player Pool, So The Pool Size Tier Reflects The Players Actually Available To Match Against
+            int gameTypePlayerCount = typeGroups.Sum(group => group.Members.Count);
+
+            PoolSizeParameters gameTypeParameters = poolSizeParameters ?? ResolvePoolSizeParameters(gameTypePlayerCount, settings);
+
+            Log.Debug(@"Broker Cycle: GameType = {GameType}, {QueuedPlayerCount} Queued Player(s), Pool Tier = {PoolTier}", gameType, gameTypePlayerCount, gameTypeParameters.Tier);
+
             // Form Teams From Groups (Using TMR-Aware Grouping)
             List<MatchmakingTeam> teams = [.. FormTeams(typeGroups, playersPerTeam)];
 
@@ -78,7 +70,7 @@ internal static class MatchmakingAlgorithm
                     double tmrDifference = Math.Abs(legionTeam.EffectiveTeamRating - candidateOpponent.EffectiveTeamRating);
 
                     // Get Maximum Acceptable TMR Spread Based On Queue Time And Pool Size
-                    double maxAcceptableSpread = GetMaxAcceptableTMRSpread(legionTeam, candidateOpponent, maxTMRDifference, poolSizeParameters);
+                    double maxAcceptableSpread = GetMaxAcceptableTMRSpread(legionTeam, candidateOpponent, maxTMRDifference, gameTypeParameters);
 
                     if (tmrDifference > maxAcceptableSpread)
                         continue;
@@ -86,16 +78,16 @@ internal static class MatchmakingAlgorithm
                     // Check Group Makeup Difference (Pool-Size-Aware Tolerance)
                     int groupMakeupDifference = Math.Abs(legionTeam.GroupMakeup - candidateOpponent.GroupMakeup);
 
-                    if (groupMakeupDifference > poolSizeParameters.GroupMakeupTolerance)
+                    if (groupMakeupDifference > gameTypeParameters.GroupMakeupTolerance)
                     {
                         Log.Debug(@"Skipping Match Due To Group Makeup Mismatch: {Legion} vs {Hellbourne} (Diff: {Diff}, Tolerance: {Tolerance})",
-                            legionTeam.GroupMakeupString, candidateOpponent.GroupMakeupString, groupMakeupDifference, poolSizeParameters.GroupMakeupTolerance);
+                            legionTeam.GroupMakeupString, candidateOpponent.GroupMakeupString, groupMakeupDifference, gameTypeParameters.GroupMakeupTolerance);
 
                         continue;
                     }
 
                     // Check For +0/-1 Rating Outcomes (Skipped In Small Pools Where Finding Any Match Is Prioritised)
-                    if (poolSizeParameters.EnforcePlusZeroMinusOneCheck && (ProducesPlusZeroMinusOne(legionTeam) || ProducesPlusZeroMinusOne(candidateOpponent)))
+                    if (gameTypeParameters.EnforcePlusZeroMinusOneCheck && (ProducesPlusZeroMinusOne(legionTeam) || ProducesPlusZeroMinusOne(candidateOpponent)))
                     {
                         Log.Debug(@"Skipping Match Due To +0/-1 Rating Outcome Risk");
 
@@ -118,16 +110,22 @@ internal static class MatchmakingAlgorithm
                 matchedTeamIndices.Add(bestOpponentIndex);
 
                 // Create The Match (Pool-Aware Group Makeup Tolerance Is Plumbed Into "MismatchedGroupMakeup")
-                MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, bestOpponent, settings.LogisticPredictionScale, poolSizeParameters.GroupMakeupTolerance);
+                MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, bestOpponent, settings.LogisticPredictionScale, gameTypeParameters.GroupMakeupTolerance);
 
-                // Set Match Details From First Group's Information
-                MatchmakingGroupInformation information = legionTeam.Groups[0].Information;
+                // Select The Mode And Region From The Preferences Shared By Both Teams (Team Compatibility Guarantees At Least One Of Each)
+                string[] commonGameModes = MatchmakingTeam.IntersectGameModes(legionTeam.CommonGameModes, bestOpponent.CommonGameModes);
+                string[] commonGameRegions = MatchmakingTeam.IntersectGameRegions(legionTeam.CommonGameRegions, bestOpponent.CommonGameRegions);
+
                 match.GameType = gameType;
-                match.SelectedMap = information.MapName;
-                match.SelectedMode = information.GameModes.Length > 0 ? information.GameModes[0] : "ap";
-                match.SelectedRegion = information.GameRegions.Length > 0 ? information.GameRegions[0] : "NEWERTH";
-                match.IsRanked = information.Ranked;
+                match.SelectedMap = legionTeam.Groups[0].Information.MapName;
+                match.SelectedMode = commonGameModes.Length > 0 ? commonGameModes.RandomElement() : "ap";
+                match.SelectedRegion = commonGameRegions.Length > 0 ? commonGameRegions.RandomElement() : "NEWERTH";
+                match.CommonGameRegions = commonGameRegions;
+                match.IsRanked = legionTeam.IsRanked;
                 match.CombineMethod = MatchmakingCombineMethod.FirstInFirstOut;
+
+                // Pre-Calculate Each Player's Win/Loss Rating Point Values; The Match Server Adjusts These For In-Game Events And Submits The Final Value With The Match Statistics
+                match.AssignMatchPointValues(settings);
 
                 matches.Add(match);
 
@@ -151,9 +149,13 @@ internal static class MatchmakingAlgorithm
     /// <summary>
     ///     Gets the maximum acceptable TMR spread for matching two teams.
     ///     Uses the adaptive spread based on the longest-waiting group and the current pool size tier.
+    ///     A team that prefers match fidelity only ever matches within the base spread, trading longer queues for fairer matches.
     /// </summary>
     public static double GetMaxAcceptableTMRSpread(MatchmakingTeam team1, MatchmakingTeam team2, double baseMaxDifference, PoolSizeParameters poolSizeParameters)
     {
+        if (team1.PrefersMatchFidelity || team2.PrefersMatchFidelity)
+            return Math.Min(baseMaxDifference, poolSizeParameters.MaximumTMRSpread);
+
         // Get The Longest Queue Time From Either Team
         double longestQueueMinutes = Math.Max(team1.Groups.Max(group => group.QueuedTimeInMinutes), team2.Groups.Max(group => group.QueuedTimeInMinutes));
 
@@ -253,24 +255,70 @@ internal static class MatchmakingAlgorithm
         // Sort Pattern Descending For Greedy Matching
         int[] sortedPattern = [.. pattern.OrderByDescending(size => size)];
 
+        // Anchors That Could Not Complete The Pattern Are Excluded From The Anchor Slot On Subsequent Iterations, So One Incompatible Group At The Head Of The Queue Cannot Block The Whole Pattern
+        List<MatchmakingGroup> failedAnchorGroups = [];
+
         while (true)
         {
             List<MatchmakingGroup> teamGroups = [];
             List<MatchmakingGroup> usedGroups = [];
 
+            // The Queue Preferences Shared By Every Group Added To The Team So Far; Narrowed As Each Group Joins So That Compatibility Holds Across The Whole Team Rather Than Only Against The First Group
+            string[] commonGameModes = [];
+            string[] commonGameRegions = [];
+            bool ranked = false;
+
+            // The Running Rating Of The Partially-Formed Team, Used To Select Rating-Adjacent Groups For The Remaining Slots
+            double teamTotalTMR = 0;
+            int teamMemberCount = 0;
+
             // Try To Find Groups Matching Each Size In The Pattern
             foreach (int requiredSize in sortedPattern)
             {
-                // Find A Group With Exactly This Size (That Hasn't Been Used Yet And Is Compatible With Existing Team Groups)
-                MatchmakingGroup? matchingGroup = availableGroups
-                    .Except(usedGroups)
-                    .Where(group => group.Members.Count == requiredSize)
-                    .Where(group => teamGroups.Count == 0 || HasCompatibleQueuePreferences(teamGroups.First(), group))
-                    .OrderBy(group => group.QueueStartTime) // FIFO Within Same Size
-                    .FirstOrDefault();
+                MatchmakingGroup? matchingGroup;
+
+                if (teamGroups.Count == 0)
+                {
+                    // The Anchor Slot Is Filled Strictly By Queue Time, So A Team Is Always Built Around The Longest-Waiting Group
+                    matchingGroup = availableGroups
+                        .Except(failedAnchorGroups)
+                        .Where(group => group.Members.Count == requiredSize)
+                        .OrderBy(group => group.QueueStartTime)
+                        .FirstOrDefault();
+                }
+
+                else
+                {
+                    double teamAverageTMR = teamTotalTMR / teamMemberCount;
+
+                    // The Remaining Slots Prefer The Compatible Group Closest In Rating To The Partially-Formed Team, With Queue Time As The Tiebreak
+                    matchingGroup = availableGroups
+                        .Except(usedGroups)
+                        .Where(group => group.Members.Count == requiredSize)
+                        .Where(group => HasCompatibleQueuePreferences(commonGameModes, commonGameRegions, ranked, group))
+                        .OrderBy(group => Math.Abs(group.AverageTMR - teamAverageTMR))
+                        .ThenBy(group => group.QueueStartTime)
+                        .FirstOrDefault();
+                }
 
                 if (matchingGroup is null)
                     break; // Can't Complete This Pattern
+
+                if (teamGroups.Count == 0)
+                {
+                    commonGameModes = matchingGroup.Information.GameModes;
+                    commonGameRegions = matchingGroup.Information.GameRegions;
+                    ranked = matchingGroup.Information.Ranked;
+                }
+
+                else
+                {
+                    commonGameModes = MatchmakingTeam.IntersectGameModes(commonGameModes, matchingGroup.Information.GameModes);
+                    commonGameRegions = MatchmakingTeam.IntersectGameRegions(commonGameRegions, matchingGroup.Information.GameRegions);
+                }
+
+                teamTotalTMR += matchingGroup.TotalTMR;
+                teamMemberCount += matchingGroup.Members.Count;
 
                 teamGroups.Add(matchingGroup);
                 usedGroups.Add(matchingGroup);
@@ -294,9 +342,15 @@ internal static class MatchmakingAlgorithm
                     patternString, teamGroups.Count, team.PlayerCount);
             }
 
+            else if (teamGroups.Count > 0)
+            {
+                // The Anchor Cannot Complete This Pattern With The Currently Available Groups; Advance To The Next Anchor
+                failedAnchorGroups.Add(teamGroups[0]);
+            }
+
             else
             {
-                // Can't Form More Teams With This Pattern
+                // No Anchor Group Is Left For This Pattern
                 break;
             }
         }
@@ -310,20 +364,24 @@ internal static class MatchmakingAlgorithm
     ///     This is a subset of <see cref="MatchmakingGroup.IsCompatibleWith"/> that excludes size and TMR checks.
     /// </summary>
     public static bool HasCompatibleQueuePreferences(MatchmakingGroup reference, MatchmakingGroup candidate)
+        => HasCompatibleQueuePreferences(reference.Information.GameModes, reference.Information.GameRegions, reference.Information.Ranked, candidate);
+
+    /// <summary>
+    ///     Checks if a candidate group's queue preferences overlap the preferences shared by every group already added to a team.
+    ///     Verifies overlapping game modes, overlapping regions, and matching ranked status.
+    /// </summary>
+    public static bool HasCompatibleQueuePreferences(string[] commonGameModes, string[] commonGameRegions, bool ranked, MatchmakingGroup candidate)
     {
         // Must Have Overlapping Game Modes
-        if (reference.Information.GameModes.Intersect(candidate.Information.GameModes).Any() is false)
+        if (MatchmakingTeam.IntersectGameModes(commonGameModes, candidate.Information.GameModes).Length == 0)
             return false;
 
-        // Must Have Overlapping Regions (NEWERTH Is A Wildcard That Matches All Regions)
-        bool eitherHasAutoRegion = reference.Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase)
-            || candidate.Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase);
-
-        if (eitherHasAutoRegion is false && reference.Information.GameRegions.Intersect(candidate.Information.GameRegions).Any() is false)
+        // Must Have Overlapping Regions ("NEWERTH" Is A Wildcard That Matches All Regions)
+        if (MatchmakingTeam.IntersectGameRegions(commonGameRegions, candidate.Information.GameRegions).Length == 0)
             return false;
 
         // Must Be Same Ranked Status
-        if (reference.Information.Ranked != candidate.Information.Ranked)
+        if (ranked != candidate.Information.Ranked)
             return false;
 
         return true;

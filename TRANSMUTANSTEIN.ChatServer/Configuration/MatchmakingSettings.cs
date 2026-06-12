@@ -85,6 +85,10 @@ public class MatchmakingSettings
     /// <summary>
     ///     The number of matches required before a player is no longer considered provisional.
     /// </summary>
+    /// <remarks>
+    ///     The provisional period is a hidden rating-convergence mechanic, and is distinct from placement matches.
+    ///     Placement matches (<see cref="AccountStatistics.PlacementMatchesData"/>) are counted separately by the master server and only gate the visible medal, while the provisional period amplifies rating changes and also ends early once the player's rating reaches <see cref="ProvisionalTMRCutoff"/>.
+    /// </remarks>
     public int ProvisionalMatchCount { get; set; } = 10;
 
     /// <summary>

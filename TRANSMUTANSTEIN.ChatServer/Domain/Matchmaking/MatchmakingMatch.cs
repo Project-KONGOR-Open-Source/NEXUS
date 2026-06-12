@@ -33,29 +33,9 @@ public class MatchmakingMatch
     public double MatchupPrediction { get; set; }
 
     /// <summary>
-    ///     The win percentage threshold that was acceptable for this match.
-    /// </summary>
-    public double WinPercentThreshold { get; set; }
-
-    /// <summary>
-    ///     The loss percentage threshold that was acceptable for this match.
-    /// </summary>
-    public double LossPercentThreshold { get; set; }
-
-    /// <summary>
     ///     Whether the teams have mismatched group compositions.
     /// </summary>
     public bool MismatchedGroupMakeup { get; set; }
-
-    /// <summary>
-    ///     Whether the match was balanced in the first pass.
-    /// </summary>
-    public bool FirstPassBalanced { get; set; }
-
-    /// <summary>
-    ///     Whether the match was balanced in the second pass.
-    /// </summary>
-    public bool SecondPassBalanced { get; set; }
 
     /// <summary>
     ///     The method used to combine groups into this match.
@@ -76,6 +56,12 @@ public class MatchmakingMatch
     ///     The selected region for this match.
     /// </summary>
     public string SelectedRegion { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     The regions acceptable to every player in this match, where "NEWERTH" is a wildcard that matches all regions.
+    ///     Used to allocate a match server in (or as close as possible to) a requested region.
+    /// </summary>
+    public string[] CommonGameRegions { get; set; } = [];
 
     /// <summary>
     ///     The game type for this match.
@@ -100,9 +86,9 @@ public class MatchmakingMatch
     public byte BotDifficulty { get; set; }
 
     /// <summary>
-    ///     The arranged match type derived from the game type and ranked status.
+    ///     The arranged match type derived from the bot-match status, the game type, and the ranked status.
     /// </summary>
-    public MatchType ArrangedMatchType => GameType switch
+    public MatchType ArrangedMatchType => IsBotMatch ? MatchType.AM_MATCHMAKING_BOTMATCH : GameType switch
     {
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => IsRanked ? MatchType.AM_MATCHMAKING : MatchType.AM_UNRANKED_MATCHMAKING,
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => IsRanked ? MatchType.AM_MATCHMAKING : MatchType.AM_UNRANKED_MATCHMAKING,
@@ -123,11 +109,6 @@ public class MatchmakingMatch
 
         _                                                      => throw new ArgumentOutOfRangeException(nameof(GameType), $@"Unsupported Game Type ""{GameType}""")
     };
-
-    /// <summary>
-    ///     Pre-calculated rating changes per player (AccountID -> (WinValue, LossValue)).
-    /// </summary>
-    public Dictionary<int, (double WinValue, double LossValue)> MatchPointValues { get; set; } = [];
 
     /// <summary>
     ///     The ID of the assigned game server, if any.
@@ -188,6 +169,94 @@ public class MatchmakingMatch
         => 1.0 / (1.0 + Math.Exp(-(legionTMR - hellbourneTMR) / scale));
 
     /// <summary>
+    ///     The width of the TMR band over which the high-rating K-factor reduction ramps from zero to the full <see cref="MatchmakingSettings.ReducedKFactorMultiplier"/>.
+    /// </summary>
+    private const double ReducedKFactorRampRange = 300.0;
+
+    /// <summary>
+    ///     Pre-calculates each player's rating point values for winning and for losing this match, and flags provisional players.
+    ///     The match server adjusts these values for in-game events (for example leavers, terminations, and rating-exempt modes) and submits the final value with the match statistics.
+    /// </summary>
+    public void AssignMatchPointValues(MatchmakingSettings settings)
+    {
+        // Bot Matches Have No Opposing Team And Do Not Affect Ratings
+        if (HellbourneTeam is null)
+            return;
+
+        AssignTeamMatchPointValues(LegionTeam, MatchupPrediction, settings);
+        AssignTeamMatchPointValues(HellbourneTeam, 1.0 - MatchupPrediction, settings);
+    }
+
+    private void AssignTeamMatchPointValues(MatchmakingTeam team, double winPrediction, MatchmakingSettings settings)
+    {
+        foreach (MatchmakingGroupMember member in team.GetAllMembers())
+        {
+            member.IsProvisional = IsProvisionalPlayer(member, settings);
+
+            double kFactor = CalculateKFactor(member, settings);
+
+            member.MatchWinValue = Math.Clamp((1.0 - winPrediction) * kFactor, 0.0, settings.MaximumKFactor);
+            member.MatchLossValue = CalculateMatchLossValue(member, winPrediction, kFactor, settings);
+        }
+    }
+
+    /// <summary>
+    ///     A player is provisional while their rating for the queued game type is still converging: fewer than <see cref="MatchmakingSettings.ProvisionalMatchCount"/> matches played and a rating below <see cref="MatchmakingSettings.ProvisionalTMRCutoff"/>.
+    ///     MidWars and RiftWars ratings have no provisional phase, matching the original implementation.
+    ///     The provisional phase is distinct from placement matches (<see cref="AccountStatistics.IsInPlacementPhase"/>), which are counted separately by the master server and only gate the visible medal.
+    /// </summary>
+    private bool IsProvisionalPlayer(MatchmakingGroupMember member, MatchmakingSettings settings)
+    {
+        bool gameTypeHasNoProvisionalPhase = GameType
+            is ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS
+            or ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS_REBORN
+            or ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS;
+
+        if (gameTypeHasNoProvisionalPhase)
+            return false;
+
+        return member.TMR < settings.ProvisionalTMRCutoff && member.GameTypeMatchCount < settings.ProvisionalMatchCount;
+    }
+
+    /// <summary>
+    ///     Calculates the player's K-factor: the base value, multiplied by <see cref="MatchmakingSettings.ProvisionalKFactorMultiplier"/> for provisional players, and reduced for highly-rated players to counter rating inflation.
+    ///     The high-rating reduction ramps linearly from zero at <see cref="MatchmakingSettings.ReducedKFactorTMRCutoff"/> to the full <see cref="MatchmakingSettings.ReducedKFactorMultiplier"/> over <see cref="ReducedKFactorRampRange"/> TMR.
+    /// </summary>
+    private static double CalculateKFactor(MatchmakingGroupMember member, MatchmakingSettings settings)
+    {
+        if (member.IsProvisional)
+            return settings.BaseKFactor * settings.ProvisionalKFactorMultiplier;
+
+        if (member.TMR > settings.ReducedKFactorTMRCutoff)
+        {
+            double reduction = Math.Clamp((member.TMR - settings.ReducedKFactorTMRCutoff) / ReducedKFactorRampRange, 0.0, 1.0);
+
+            return settings.BaseKFactor - settings.BaseKFactor * reduction * settings.ReducedKFactorMultiplier;
+        }
+
+        return settings.BaseKFactor;
+    }
+
+    /// <summary>
+    ///     Calculates the rating point value for losing this match, which is always zero or negative.
+    ///     A player already at the minimum TMR loses nothing, and a loss never takes a player below the minimum TMR.
+    /// </summary>
+    private static double CalculateMatchLossValue(MatchmakingGroupMember member, double winPrediction, double kFactor, MatchmakingSettings settings)
+    {
+        double basePointValue = -winPrediction * kFactor;
+
+        if (member.TMR < settings.MinimumTMR + 0.01)
+            return 0.0;
+
+        double preliminaryLossValue = Math.Clamp(basePointValue, -settings.BaseKFactor, 0.0);
+
+        if (member.TMR + preliminaryLossValue < settings.MinimumTMR)
+            return Math.Clamp(settings.MinimumTMR - member.TMR, -settings.MaximumKFactor, 0.0);
+
+        return Math.Clamp(basePointValue, -settings.MaximumKFactor, 0.0);
+    }
+
+    /// <summary>
     ///     Creates a bot (co-op) match from a single group.
     ///     The group is placed on the Legion team; the game server fills remaining slots with bots.
     ///     In the original implementation, bot matches force the game type to <see cref="ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL"/> and the map to "caldavar".
@@ -207,6 +276,7 @@ public class MatchmakingMatch
             SelectedMap = "caldavar",
             SelectedMode = "botmatch",
             SelectedRegion = group.Information.GameRegions.Length > 0 ? group.Information.GameRegions.RandomElement() : "NEWERTH",
+            CommonGameRegions = group.Information.GameRegions,
             GameType = ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL,
             IsRanked = false
         };
