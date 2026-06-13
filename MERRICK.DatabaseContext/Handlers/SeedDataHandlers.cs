@@ -44,7 +44,7 @@ public static class SeedDataHandlers
 
         User userGuest = new ()
         {
-            EmailAddress = "guest@project.kongor",
+            EmailAddress = OOTB.Accounts.GUEST.EmailAddress,
             Role = roleGuest,
             SRPPasswordSalt = "81c278a3ed03cf4549e787feac5ffe1d051029e15159b1cf0b087b4f8a85cb69",
             SRPPasswordHash = "bfad34f4dc65064dcae6e2064e12d63b299909b6c0cdb33306a91f26bb624e35",
@@ -335,8 +335,8 @@ public static class SeedDataHandlers
 
     public static async Task SeedOperator(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        const string operatorEmailAddress = "operator@project.kongor";
-        const string operatorAccountName = "OPERATOR";
+        const string operatorEmailAddress = OOTB.Accounts.OPERATOR.EmailAddress;
+        const string operatorAccountName = OOTB.Accounts.OPERATOR.Name;
 
         if (await context.Users.AnyAsync(user => user.EmailAddress.Equals(operatorEmailAddress), cancellationToken))
         {
