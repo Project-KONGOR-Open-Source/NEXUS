@@ -17,7 +17,6 @@ global using KONGOR.MasterServer.Configuration.Plinko;
 global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
-global using KONGOR.MasterServer.Filters;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Helpers.Serialisation;
