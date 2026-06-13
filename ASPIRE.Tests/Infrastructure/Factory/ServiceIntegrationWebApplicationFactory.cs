@@ -48,6 +48,12 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     protected bool UseWireMockContainer { get; private set; } = false;
 
+    /// <summary>
+    ///     The ASP.NET Core environment name the test host runs under.
+    ///     Defaults to "Development"; override via <see cref="WithEnvironment"/> to exercise environment-gated behaviour such as production-only guards.
+    /// </summary>
+    private string EnvironmentName { get; set; } = "Development";
+
     private AsynchronousLock Lock { get; } = new();
 
     private bool IsInitialised { get; set; } = false;
@@ -117,6 +123,19 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     }
 
     /// <summary>
+    ///     Sets the ASP.NET Core environment name the test host runs under.
+    ///     Must be called before <see cref="InitialiseAsync"/>.
+    /// </summary>
+    public TSelf WithEnvironment(string environmentName)
+    {
+        ThrowIfInitialised();
+
+        EnvironmentName = environmentName;
+
+        return (TSelf) this;
+    }
+
+    /// <summary>
     ///     Starts the requested containers and, if a SQL Server container is enabled, creates the per-test database and runs all Entity Framework Core migrations.
     ///     Idempotent and thread-safe: concurrent callers will await the same initialisation work.
     /// </summary>
@@ -182,7 +201,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Development");
+        builder.UseEnvironment(EnvironmentName);
 
         ConfigureEnvironment(builder);
 
