@@ -6,11 +6,11 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 /// </summary>
 public class MatchmakingService : BackgroundService, IDisposable
 {
-    private readonly IOptions<MatchmakingSettings> _settings;
+    private readonly IOptionsMonitor<MatchmakingSettings> _settings;
     private readonly IDatabase _distributedCacheStore;
     private readonly ILogger<MatchmakingService> _logger;
 
-    public MatchmakingService(IOptions<MatchmakingSettings> settings, IDatabase distributedCacheStore, ILogger<MatchmakingService> logger)
+    public MatchmakingService(IOptionsMonitor<MatchmakingSettings> settings, IDatabase distributedCacheStore, ILogger<MatchmakingService> logger)
     {
         _settings = settings;
         _distributedCacheStore = distributedCacheStore;
@@ -95,7 +95,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         {
             try
             {
-                await Task.Delay(_settings.Value.MatchmakingCycleInterval, cancellationToken);
+                await Task.Delay(_settings.CurrentValue.MatchmakingCycleInterval, cancellationToken);
             }
 
             catch (OperationCanceledException)
@@ -128,7 +128,9 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     private async Task ProcessBrokerCycle()
     {
-        if (_settings.Value.Enabled is false)
+        MatchmakingSettings settings = _settings.CurrentValue;
+
+        if (settings.Enabled is false)
             return;
 
         // Get All Queued Groups (Groups With A Non-NULL QueueStartTime And Not Already Matched)
@@ -152,7 +154,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         if (regularGroups.Count == 0)
             return;
 
-        IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(regularGroups, _settings.Value);
+        IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(regularGroups, settings);
 
         // Spawn Each Match In Isolation
         int spawnedMatchCount = 0;
