@@ -1,10 +1,10 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
+namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 
 public class ServerForCreateListResponse(List<MatchServer> servers, string? region, string cookie) : ServerListResponse(cookie)
 {
     [PHPProperty("server_list")]
     public Dictionary<int, ServerForCreate> Servers { get; set; } = servers.Any() is false ? []
-        : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_SLEEPING or ServerStatus.SERVER_STATUS_IDLE)
+        : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_IDLE)
             .Where(server => MatchesRegion(server.Location, region))
             .ToDictionary(server => server.ID, server => new ServerForCreate(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
 

@@ -223,7 +223,7 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
     /// </summary>
     public bool IsAvailable()
     {
-        return (Metadata.Status is ChatProtocol.ServerStatus.SERVER_STATUS_SLEEPING or ChatProtocol.ServerStatus.SERVER_STATUS_IDLE) && WasRecentlyUsed() is false;
+        return Metadata.Status is ChatProtocol.ServerStatus.SERVER_STATUS_IDLE && WasRecentlyUsed() is false;
     }
 
     /// <summary>

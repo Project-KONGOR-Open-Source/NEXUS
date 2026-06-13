@@ -587,10 +587,10 @@ public class MatchmakingService : BackgroundService, IDisposable
     private static readonly TimeSpan MatchServerStatusFreshnessThreshold = TimeSpan.FromSeconds(150);
 
     /// <summary>
-    ///     Finds an available server for a match along with its chat session.
-    ///     Servers already assigned to an active match are excluded, because the cached server status only changes once the server reports its new state, so without this exclusion two matches spawned in close succession would select the same available server.
-    ///     Candidates are ranked by regional proximity to the match's requested regions, so the closest available region is used when no requested region has an available server.
-    ///     Returns <see langword="null"/> if no unassigned, available (idle or sleeping) server with an active and recently-active session is found.
+    ///     Finds an idle server for a match along with its chat session.
+    ///     Servers already assigned to an active match are excluded, because the cached server status only changes once the server reports its new state, so without this exclusion two matches spawned in close succession would select the same idle server.
+    ///     Candidates are ranked by regional proximity to the match's requested regions, so the closest available region is used when no requested region has an idle server.
+    ///     Returns <see langword="null"/> if no unassigned, idle server with an active and recently-active session is found.
     /// </summary>
     private async Task<(MatchServer? Server, MatchServerChatSession? Session)> FindAvailableServerWithSession(MatchmakingMatch match)
     {
@@ -598,9 +598,9 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         HashSet<int> assignedServerIDs = [.. ActiveMatches.Values.Select(activeMatch => activeMatch.AssignedServerID).OfType<int>()];
 
-        // Rank Unassigned, Available Servers (Idle Or Sleeping) By Regional Proximity To The Match's Requested Regions
+        // Rank Unassigned, Idle Servers By Regional Proximity To The Match's Requested Regions
         List<MatchServer> candidateServers = [.. servers
-            .Where(server => (server.Status is ServerStatus.SERVER_STATUS_SLEEPING or ServerStatus.SERVER_STATUS_IDLE) && assignedServerIDs.Contains(server.ID) is false)
+            .Where(server => server.Status is ServerStatus.SERVER_STATUS_IDLE && assignedServerIDs.Contains(server.ID) is false)
             .OrderBy(server => RegionProximity.GetDistance(match.CommonGameRegions, server.Location))];
 
         // Find The Closest Candidate Server That Also Has An Active Chat Session
@@ -611,29 +611,29 @@ public class MatchmakingService : BackgroundService, IDisposable
                 // Skip A Server Whose Chat Session Has Gone Quiet (No Recent Status Heartbeat), Which Indicates A Stale Connection Not Yet Detected At The Transport Level
                 if (DateTimeOffset.UtcNow - session.Metadata.LastStatusUpdate > MatchServerStatusFreshnessThreshold)
                 {
-                    _logger.LogWarning(@"Skipping Available Server With A Stale Chat Session: ServerID={MatchServerID}, LastStatusUpdate={LastStatusUpdate}", server.ID, session.Metadata.LastStatusUpdate);
+                    _logger.LogWarning(@"Skipping Idle Server With A Stale Chat Session: ServerID={MatchServerID}, LastStatusUpdate={LastStatusUpdate}", server.ID, session.Metadata.LastStatusUpdate);
 
                     continue;
                 }
 
                 if (RegionProximity.GetDistance(match.CommonGameRegions, server.Location) > 0)
-                    _logger.LogInformation(@"No Available Server In Requested Regions {RequestedRegions}; Allocating Closest Available Server In Region {MatchServerLocation} For Match GUID {MatchGUID}",
+                    _logger.LogInformation(@"No Idle Server In Requested Regions {RequestedRegions}; Allocating Closest Idle Server In Region {MatchServerLocation} For Match GUID {MatchGUID}",
                         string.Join("|", match.CommonGameRegions), server.Location, match.GUID);
 
-                _logger.LogDebug(@"Found Available Server With Session: ServerID={MatchServerID}, ServerName={MatchServerName}", server.ID, server.Name);
+                _logger.LogDebug(@"Found Idle Server With Session: ServerID={MatchServerID}, ServerName={MatchServerName}", server.ID, server.Name);
 
                 return (server, session);
             }
 
-            _logger.LogDebug(@"Available Server Has No Active Chat Session: ServerID={MatchServerID}", server.ID);
+            _logger.LogDebug(@"Idle Server Has No Active Chat Session: ServerID={MatchServerID}", server.ID);
         }
 
-        // No Available Server With Active Session Found
+        // No Idle Server With Active Session Found
         if (servers.Count == 0)
-            _logger.LogWarning(@"No Servers Available For Match GUID {MatchGUID}", match.GUID);
+            _logger.LogWarning(@"No Idle Servers For Match GUID {MatchGUID}", match.GUID);
 
         else
-            _logger.LogWarning(@"No Available Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {MatchServerCount})", match.GUID, servers.Count);
+            _logger.LogWarning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {MatchServerCount})", match.GUID, servers.Count);
 
         return (null, null);
     }
