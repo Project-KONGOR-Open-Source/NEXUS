@@ -12,10 +12,10 @@
         <PackageReference Include="Testcontainers.MsSql" Version="4.12.0" />
         <PackageReference Include="Testcontainers.Redis" Version="4.12.0" />
         <!-- The base library only needs the IClassConstructor / TestContext / ITestEndEventReceiver abstractions. TUnit.Core is the runner-less sub-package, which avoids pulling in the MSBuild targets that would otherwise mark this library as an MTP test application and trigger a spurious ZeroTests error at solution level. -->
-        <PackageReference Include="TUnit.Core" Version="1.53.0" />
-        <PackageReference Include="WireMock.Net" Version="2.10.0" />
-        <PackageReference Include="WireMock.Net.RestClient" Version="2.10.0" />
-        <PackageReference Include="WireMock.Net.Testcontainers" Version="2.10.0" />
+        <PackageReference Include="TUnit.Core" Version="1.54.0" />
+        <PackageReference Include="WireMock.Net" Version="2.11.0" />
+        <PackageReference Include="WireMock.Net.RestClient" Version="2.11.0" />
+        <PackageReference Include="WireMock.Net.Testcontainers" Version="2.11.0" />
     </ItemGroup>
 
     <ItemGroup>
