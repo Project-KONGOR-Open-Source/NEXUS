@@ -123,17 +123,13 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         Context.MatchServerManagerChatSessions[requestData.ServerManagerID] = session;
 
         // Supersede Any Existing Session For This Match Server Manager
-        // The Host Is Reconnecting With Its Reused Session Cookie, So The Stale Socket Is Torn Down But The Shared Host State (Cache Entry And Hosting Lease) Is Preserved For This New Session
-        // The Hosting Lease Enforced At Authentication Guarantees Only The Legitimate Holder Can Present A Valid Cookie, So Any Connection Reaching This Point Is That Holder
+        // The Host Is Reconnecting With Its Reused Session Cookie, So The Stale Socket Is Torn Down But The Shared Host State (The Distributed Cache Entry) Is Preserved For This New Session
         if (existingSession is not null)
         {
             Log.Information(@"Superseding Existing Match Server Manager Session With ID ""{MatchServerManagerID}"" And Address ""{MatchServerManagerAddress}""", requestData.ServerManagerID, manager.IPAddress);
 
             existingSession.Supersede();
         }
-
-        // Renew The Single-Holder Hosting Lease On Every (Re)Connection So An Actively-Connected Manager Retains The Account
-        await distributedCacheStore.RenewHostLease(hostAccount.Name);
 
         Log.Information(@"Match Server Manager Connection Accepted - Manager ID: ""{MatchServerManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{MatchServerManagerAddress}""",
             requestData.ServerManagerID, manager.HostAccountName, manager.IPAddress);

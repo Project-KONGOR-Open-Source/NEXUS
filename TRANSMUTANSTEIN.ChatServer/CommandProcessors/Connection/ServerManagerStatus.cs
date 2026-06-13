@@ -11,7 +11,7 @@ public class ServerManagerStatus(IDatabase distributedCacheStore) : IAsynchronou
             requestData.ServerManagerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Version, requestData.ShuttingDown);
 
         // A Match Server Manager Announcing That It Is Shutting Down Is A Graceful Departure
-        // So We Terminate The Session, Which Removes It From The Pool And Distributed Cache And Releases Its Hosting Lease
+        // So We Terminate The Session, Which Removes It From The Pool And Distributed Cache
         if (requestData.ShuttingDown)
         {
             Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Reported That It Is Shutting Down And Will Be Removed", requestData.ServerManagerID);
@@ -32,7 +32,7 @@ public class ServerManagerStatus(IDatabase distributedCacheStore) : IAsynchronou
         Terminal.Broadcast(@$"Match Server Manager {requestData.ServerManagerID} (""{requestData.Name}"") Registered In Region ""{GameRegions.NormaliseServerLocation(requestData.Location)}""", Terminal.ManagersPerRegion());
 
         // The Match Server Manager Sends "NET_CHAT_SM_STATUS" Only Once On Connect Via "CManagerChatConnection", There Is No Periodic Manager Status Heartbeat; The Connection Is Kept Alive By PING/PONG, Not Status Updates
-        // So This Handler Is Effectively One-Shot And Is Not A Lease-Renewal Point; Manager Liveness (And Therefore Its Hosting Lease) Is Tracked Via The In-Memory Session Pool And Renewed Each Sweep By <see cref="StaleHostReaper"/>
+        // So This Handler Is Effectively One-Shot; Manager Liveness Is Tracked Via The In-Memory Session Pool, Which <see cref="StaleHostReaper"/> Reconciles Against The Distributed Cache Each Sweep
     }
 }
 

@@ -89,22 +89,10 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
 
         foreach (int matchServerManagerID in staleMatchServerManagerIDs)
         {
-            MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(candidate => candidate.ID == matchServerManagerID);
-
             logger.LogInformation(@"Reaping Stale Match Server Manager ID ""{MatchServerManagerID}"" Which Has Had No Live Chat Session For Longer Than The Grace Period", matchServerManagerID);
 
             await distributedCacheStore.RemoveMatchServerManagerByID(matchServerManagerID);
-
-            // Release The Hosting Lease For A Reaped Manager So The Account Becomes Claimable Again Without Waiting For The Lease To Expire
-            if (matchServerManager is not null)
-                await distributedCacheStore.ReleaseHostLease(matchServerManager.HostAccountName);
         }
-
-        // Keep The Single-Holder Hosting Lease Fresh For Every Match Server Manager That Still Has A Live Chat Session
-        // The Match Servers' "set_online" Heartbeats Also Renew The Lease, But Only While A Server Happens To Be Alive And Broadcasting
-        // Because The Match Server Manager Is The Lease Holder, Tying Renewal To Its Own Liveness Keeps The Lease Alive Well Within Its Time-To-Live For As Long As The Manager Remains Connected
-        foreach (MatchServerManager liveMatchServerManager in matchServerManagers.Where(candidate => Context.MatchServerManagerChatSessions.ContainsKey(candidate.ID)))
-            await distributedCacheStore.RenewHostLease(liveMatchServerManager.HostAccountName);
     }
 
     /// <summary>

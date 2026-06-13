@@ -38,14 +38,12 @@ public partial class ServerRequesterController
             return BadRequest("Unable To Resolve Remote IP Address");
         }
 
-        // A Host Account May Only Host From A Single Machine At A Time; The Server Manager Is The Single-Holder Unit, So The First Manager To Authenticate Claims The Lease And Any Other Manager For The Same Account Is Rejected Until It Is Released Or Expires
-        bool leaseClaimed = await DistributedCache.TryClaimHostLease(account.Name);
-
-        if (leaseClaimed is false)
+        // The Built-In OPERATOR Account Ships With A Publicly-Known Open Password For Self-Hosters, So It Must Not Be Used To Host On The Production Server
+        if (HostEnvironment.IsProduction() && account.Name.Equals(OOTBHostAccount.Name))
         {
-            Logger.LogWarning(@"Rejected Server Manager Authentication For Host Account ""{HostAccountName}"": The Account Is Already In Use By Another Host", account.Name);
+            Logger.LogWarning(@"Rejected Server Manager Authentication For Host Account ""{HostAccountName}"": The Built-In OPERATOR Account Cannot Host On The Production Server", account.Name);
 
-            return Unauthorized($@"The ""{account.Name}"" Hosting Account Is Currently In Use By Another Host");
+            return Unauthorized("The Built-In OPERATOR Account Cannot Host On The Production Server; Create A Dedicated Host Account");
         }
 
         MatchServerManager matchServerManager = new ()
@@ -141,16 +139,13 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        // A Host Account's Match Servers Require An Active Match Server Manager Holding The Hosting Lease
-        // A Manager-Less Server Is A Bug, So Reject It, Otherwise Renew The Lease To Keep The Active Host's Claim Fresh
-        if (await DistributedCache.IsHostLeaseHeld(account.Name) is false)
+        // The Built-In OPERATOR Account Ships With A Publicly-Known Open Password For Self-Hosters, So It Must Not Be Used To Host On The Production Server
+        if (HostEnvironment.IsProduction() && account.Name.Equals(OOTBHostAccount.Name))
         {
-            Logger.LogWarning(@"Rejected Server Authentication For Host Account ""{HostAccountName}"": No Server Manager Holds The Hosting Lease", account.Name);
+            Logger.LogWarning(@"Rejected Server Authentication For Host Account ""{HostAccountName}"": The Built-In OPERATOR Account Cannot Host On The Production Server", account.Name);
 
-            return Unauthorized($@"The ""{account.Name}"" Hosting Account Requires An Active Server Manager");
+            return Unauthorized("The Built-In OPERATOR Account Cannot Host On The Production Server; Create A Dedicated Host Account");
         }
-
-        await DistributedCache.RenewHostLease(account.Name);
 
         MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
@@ -439,9 +434,6 @@ public partial class ServerRequesterController
 
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
-
-        // Keep The Single-Holder Hosting Lease Fresh While The Host Is Actively Hosting
-        await DistributedCache.RenewHostLease(matchServer.HostAccountName);
 
         matchServer.Status = (ServerStatus) int.Parse(connectionState);
 

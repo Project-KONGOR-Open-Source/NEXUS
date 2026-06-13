@@ -188,7 +188,7 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
     /// <summary>
     ///     Removes this session from the in-memory pool, but only if the pool entry still maps to this exact session.
-    ///     Returns whether this session was the current pool holder, so the caller tears down the shared host state (the distributed cache entry and the hosting lease) only when this session genuinely owned it.
+    ///     Returns whether this session was the current pool holder, so the caller tears down the shared host state (the distributed cache entry) only when this session genuinely owned it.
     ///     A session that has been superseded by a reconnecting one returns <see langword="false"/> and leaves the shared host state for its replacement.
     /// </summary>
     private bool RemoveFromPoolIfCurrentHolder()
@@ -219,7 +219,7 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
     /// <summary>
     ///     Tears down this session because the host is reconnecting and a replacement session has taken over its entry in the pool.
-    ///     The socket is closed, but the shared host state (the distributed cache entry and the hosting lease) is deliberately preserved for the replacement session, because the reconnecting host reuses its session cookie and the cache entry is what validates it.
+    ///     The socket is closed, but the shared host state (the distributed cache entry) is deliberately preserved for the replacement session, because the reconnecting host reuses its session cookie and the cache entry is what validates it.
     /// </summary>
     public void Supersede()
     {
@@ -232,7 +232,7 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
     /// <summary>
     ///     Performs an immediate, authoritative teardown of this session, reached on a graceful shutdown or a rejected handshake.
-    ///     The distributed cache entry is removed and the hosting lease released right away, whereas the dropped-connection path (<see cref="OnDisconnected"/>) leaves them for the <see cref="StaleHostReaper"/> to reconcile after their grace period.
+    ///     The distributed cache entry is removed right away, whereas the dropped-connection path (<see cref="OnDisconnected"/>) leaves it for the <see cref="StaleHostReaper"/> to reconcile after its grace period.
     /// </summary>
     public async Task Terminate(IDatabase distributedCacheStore)
     {
@@ -254,7 +254,7 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
     /// <summary>
     ///     Invoked by the TCP transport after the underlying socket has been closed (graceful disconnect, network drop, crash, or keep-alive timeout).
-    ///     On a dropped connection, it removes the in-memory session, but deliberately leaves the distributed cache entry and the hosting lease in place for the <see cref="StaleHostReaper"/> to reconcile.
+    ///     On a dropped connection, it removes the in-memory session, but deliberately leaves the distributed cache entry in place for the <see cref="StaleHostReaper"/> to reconcile.
     ///     When the disconnect is graceful, <see cref="Terminate"/> has already torn the session down, so there is nothing left for this method to do.
     /// </summary>
     protected override void OnDisconnected()
@@ -262,10 +262,10 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
         RemoveFromPoolIfCurrentHolder();
 
         /*
-            The Session Is Removed From The In-Memory Pool, But The Distributed Cache Entry And The Hosting Lease Are Left In Place
-            A Dropped Connection Is Frequently A Brief Reconnect (The Host Reuses Its Session Cookie)
-            Releasing The Lease Here Would Lock Out Every Match Server Sharing This Host Account Until The Manager Fully Re-Authenticated
-            If The Manager Does Not Reconnect, <see cref="StaleHostReaper"/> Reaps The Cache Entry And Releases The Lease After Its Grace Period
+            The Session Is Removed From The In-Memory Pool, But The Distributed Cache Entry Is Left In Place
+            A Dropped Connection Is Frequently A Brief Reconnect (The Host Reuses Its Session Cookie), And The Cache Entry Is What Validates That Reused Cookie On The Reconnecting Handshake
+            Tearing The Cache Entry Down Here Would Reject The Reconnect
+            If The Manager Does Not Reconnect, <see cref="StaleHostReaper"/> Reaps The Cache Entry After Its Grace Period
             A Graceful Shutdown Still Tears Down Immediately Via "Terminate"
          */
 
@@ -277,11 +277,5 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
         // Remove Match Server Manager From The Distributed Cache
         // Match Server Children Are Also Implicitly Removed From The Distributed Cache
         await distributedCacheStore.RemoveMatchServerManagerByID(Metadata.ServerManagerID);
-
-        // Release The Single-Holder Hosting Lease
-        // This Method Is Reached Only From "Terminate", The Intentional Teardown Path, So Releasing The Lease Here Reflects A Definitive "Host Gone" Signal With No Reconnect Expected
-        // A Dropped Or Crashed Session Does Not Reach Here, As <see cref="StaleHostReaper"/> Releases Its Lease After The Grace Period Instead
-        if (Account is not null)
-            await distributedCacheStore.ReleaseHostLease(Account.Name);
     }
 }
