@@ -38,12 +38,12 @@ public partial class ServerRequesterController
             return BadRequest("Unable To Resolve Remote IP Address");
         }
 
-        // The Built-In OPERATOR Account Ships With A Publicly-Known Open Password For Self-Hosters, So It Must Not Be Used To Host On The Production Server
+        // The Built-In Host Account Which Ships With A Publicly-Known Password And Is Intended For Usage By Self-Hosters Must Not Be Used To Host On The Production Server
         if (HostEnvironment.IsProduction() && account.Name.Equals(OOTBHostAccount.Name))
         {
-            Logger.LogWarning(@"Rejected Server Manager Authentication For Host Account ""{HostAccountName}"": The Built-In OPERATOR Account Cannot Host On The Production Server", account.Name);
+            Logger.LogWarning(@"Rejected Server Manager Authentication For Host Account ""{HostAccountName}"": The Built-In ""{OOTBHostAccountName}"" Account Cannot Host On The Production Server", account.Name, OOTBHostAccount.Name);
 
-            return Unauthorized("The Built-In OPERATOR Account Cannot Host On The Production Server; Create A Dedicated Host Account");
+            return Unauthorized($@"The Built-In ""{OOTBHostAccount.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
         }
 
         MatchServerManager matchServerManager = new ()
@@ -139,12 +139,12 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        // The Built-In OPERATOR Account Ships With A Publicly-Known Open Password For Self-Hosters, So It Must Not Be Used To Host On The Production Server
+        // The Built-In Host Account Which Ships With A Publicly-Known Password And Is Intended For Usage By Self-Hosters Must Not Be Used To Host On The Production Server
         if (HostEnvironment.IsProduction() && account.Name.Equals(OOTBHostAccount.Name))
         {
-            Logger.LogWarning(@"Rejected Server Authentication For Host Account ""{HostAccountName}"": The Built-In OPERATOR Account Cannot Host On The Production Server", account.Name);
+            Logger.LogWarning(@"Rejected Server Authentication For Host Account ""{HostAccountName}"": The Built-In ""{OOTBHostAccountName}"" Account Cannot Host On The Production Server", account.Name, OOTBHostAccount.Name);
 
-            return Unauthorized("The Built-In OPERATOR Account Cannot Host On The Production Server; Create A Dedicated Host Account");
+            return Unauthorized($@"The Built-In ""{OOTBHostAccount.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
         }
 
         MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
