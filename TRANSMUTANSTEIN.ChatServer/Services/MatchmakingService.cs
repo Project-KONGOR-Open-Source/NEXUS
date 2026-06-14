@@ -84,6 +84,9 @@ public class MatchmakingService : BackgroundService, IDisposable
         Groups.Clear();
         ActiveMatches.Clear();
 
+        foreach (ConcurrentQueue<double> queue in RecentQueueDurationSecondsSamplesPerPartition.Values)
+            queue.Clear();
+
         base.Dispose();
 
         GC.SuppressFinalize(this);
@@ -169,7 +172,7 @@ public class MatchmakingService : BackgroundService, IDisposable
             _logger.LogInformation(@"Broker Cycle Complete: {SpawnedMatchCount} Of {MatchCount} Match(es) Spawned", spawnedMatchCount, matches.Count);
 
         // Send A Queue Time Update To All Still-Queued Groups
-        BroadcastQueueTimeUpdates(queuedGroups.Where(group => group.MatchedUp is false).ToList());
+        BroadcastQueueDurationEstimate(queuedGroups.Where(group => group.MatchedUp is false).ToList());
     }
 
     /// <summary>
@@ -193,7 +196,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
             // Record The Matched Groups' Waits For The Queue Time Estimate (Bot Matches Spawn Instantly And Would Skew It)
             if (match.IsBotMatch is false)
-                RecordMatchWaitTimes(match);
+                RecordQueueDuration(match);
 
             bool spawned = await SpawnMatch(match);
 
@@ -220,32 +223,83 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     The maximum number of recent match wait samples retained for the queue time estimate.
+    ///     The maximum number of recent queue duration samples retained for the queue time estimate.
     /// </summary>
-    private const int MaximumRecentMatchWaitSamples = 20;
+    private const int MaximumRecentQueueDurationSamples = 20;
 
     /// <summary>
-    ///     The queue durations of the most recently matched groups, used to estimate the queue time reported to clients.
+    ///     The queue durations of the most recently matched groups per queue type partition, used to estimate the queue time reported to clients.
     /// </summary>
-    private static readonly ConcurrentQueue<double> RecentMatchWaitSecondsSamples = new ();
-
-    /// <summary>
-    ///     The estimated queue time in seconds, calculated as the average wait of the most recently matched groups.
-    ///     Zero when no match has been made yet.
-    /// </summary>
-    public static int EstimatedQueueTimeSeconds => RecentMatchWaitSecondsSamples.IsEmpty ? 0 : (int)RecentMatchWaitSecondsSamples.Average();
-
-    /// <summary>
-    ///     Records the queue duration of each group in a spawned match for the queue time estimate.
-    /// </summary>
-    private static void RecordMatchWaitTimes(MatchmakingMatch match)
+    internal static readonly ConcurrentDictionary<QueueType, ConcurrentQueue<double>> RecentQueueDurationSecondsSamplesPerPartition = new ()
     {
-        foreach (MatchmakingGroup group in match.GetAllGroups())
-        {
-            RecentMatchWaitSecondsSamples.Enqueue(group.QueueDuration.TotalSeconds);
+        [QueueType.COOP]     = new (),
+        [QueueType.Caldavar] = new (),
+        [QueueType.MidWars]  = new (),
+        [QueueType.RiftWars] = new ()
+    };
 
-            while (RecentMatchWaitSecondsSamples.Count > MaximumRecentMatchWaitSamples)
-                RecentMatchWaitSecondsSamples.TryDequeue(out _);
+    /// <summary>
+    ///     Resolves the matchmaking queue type partition for a group from its group type and game type.
+    ///     Only the game modes that are queueable on this deployment are mapped.
+    ///     The game types are those declared for the configured maps ("caldavar", "midwars", "riftwars") in "MatchmakingConfiguration.json", plus co-op bot matches via the group type.
+    ///     Any other game type has no queue time and is rejected.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Thrown when the game type does not correspond to a queue type partition.
+    /// </exception>
+    public static QueueType GetQueueTypePartition(ChatProtocol.TMMType groupType, ChatProtocol.TMMGameType gameType)
+    {
+        if (groupType is ChatProtocol.TMMType.TMM_TYPE_COOP)
+            return QueueType.COOP;
+
+        // The Arms Mirror The Per-Map "GameTypes" Declared In "MatchmakingConfiguration.json"; Any Game Type Not Queueable There Has No Queue Time And Is Rejected
+        return gameType switch
+        {
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL or
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => QueueType.Caldavar,
+
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => QueueType.MidWars,
+
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => QueueType.RiftWars,
+
+            _                                                      => throw new ArgumentOutOfRangeException(nameof(gameType), @$"Unsupported Game Type ""{gameType}""")
+        };
+    }
+
+    /// <summary>
+    ///     Calculates the estimated queue duration in seconds for a specific queue type partition.
+    ///     Uses the average of the most recently matched groups (up to <see cref="MaximumRecentQueueDurationSamples"/>, falling back to the average wait time of groups currently in the queue if no history is available.
+    /// </summary>
+    public static int GetEstimatedQueueDurationSeconds(QueueType partition)
+    {
+        if (RecentQueueDurationSecondsSamplesPerPartition.TryGetValue(partition, out ConcurrentQueue<double>? samples) && samples.IsEmpty is false)
+            return (int) samples.Average();
+
+        List<MatchmakingGroup> activeQueuedGroups = [.. Groups.Values
+            .Where(group => group.QueueStartTime is not null && GetQueueTypePartition(group.Information.GroupType, group.Information.GameType) == partition)];
+
+        if (activeQueuedGroups.Count > 0)
+            return (int) activeQueuedGroups.Average(group => group.QueueDuration.TotalSeconds);
+
+        return 0;
+    }
+
+    /// <summary>
+    ///     Records the queue duration of each group in a spawned match for the queue duration estimate.
+    /// </summary>
+    internal static void RecordQueueDuration(MatchmakingMatch match)
+    {
+        QueueType partition = GetQueueTypePartition(match.IsBotMatch ? ChatProtocol.TMMType.TMM_TYPE_COOP : ChatProtocol.TMMType.TMM_TYPE_PVP, match.GameType);
+
+        if (RecentQueueDurationSecondsSamplesPerPartition.TryGetValue(partition, out ConcurrentQueue<double>? samples))
+        {
+            foreach (MatchmakingGroup group in match.GetAllGroups())
+            {
+                samples.Enqueue(group.QueueDuration.TotalSeconds);
+
+                while (samples.Count > MaximumRecentQueueDurationSamples)
+                    samples.TryDequeue(out _);
+            }
         }
     }
 
@@ -653,22 +707,28 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Broadcasts the estimated queue time to all queued groups.
+    ///     Broadcasts the estimated queue duration to all queued groups.
     /// </summary>
-    private static void BroadcastQueueTimeUpdates(List<MatchmakingGroup> queuedGroups)
+    private static void BroadcastQueueDurationEstimate(List<MatchmakingGroup> queuedGroups)
     {
         if (queuedGroups.Count == 0)
             return;
 
-        ChatBuffer update = new ();
-
-        update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-        update.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
-        update.WriteInt32(EstimatedQueueTimeSeconds);
-
         foreach (MatchmakingGroup group in queuedGroups)
+        {
+            QueueType partition = GetQueueTypePartition(group.Information.GroupType, group.Information.GameType);
+
+            int estimatedQueueDurationSeconds = GetEstimatedQueueDurationSeconds(partition);
+
+            ChatBuffer update = new ();
+
+            update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+            update.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
+            update.WriteInt32(estimatedQueueDurationSeconds);
+
             foreach (MatchmakingGroupMember member in group.Members)
                 member.Session.Send(update);
+        }
     }
 
     /// <summary>

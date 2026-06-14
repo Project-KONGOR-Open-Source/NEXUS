@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 public class MatchmakingGroup
 {
@@ -547,7 +547,12 @@ public class MatchmakingGroup
 
         queueUpdateBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
         queueUpdateBroadcast.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
-        queueUpdateBroadcast.WriteInt32(MatchmakingService.EstimatedQueueTimeSeconds);
+
+        QueueType partition = MatchmakingService.GetQueueTypePartition(Information.GroupType, Information.GameType);
+
+        int estimatedQueueDurationSeconds = MatchmakingService.GetEstimatedQueueDurationSeconds(partition);
+
+        queueUpdateBroadcast.WriteInt32(estimatedQueueDurationSeconds);
 
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(queueUpdateBroadcast);
