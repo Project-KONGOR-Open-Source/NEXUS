@@ -39,7 +39,8 @@ internal static class RegionProximity
         if (regions.Contains(GameRegions.Wildcard, StringComparer.OrdinalIgnoreCase))
             return 0.0;
 
-        double serverOffset = AggregateUTCOffsets[serverAggregate];
+        if (AggregateUTCOffsets.TryGetValue(serverAggregate, out double serverOffset) is false)
+            return UnknownRegionDistance;
 
         double closestDistance = UnknownRegionDistance;
 
