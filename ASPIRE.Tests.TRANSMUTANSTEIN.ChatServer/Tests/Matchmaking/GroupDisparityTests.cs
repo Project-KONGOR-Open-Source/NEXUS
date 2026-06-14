@@ -31,10 +31,7 @@ public sealed class GroupDisparityTests
     [Test]
     public async Task Has_Excessive_TMR_Disparity_Three_Stack_With_One_Far_Outlier_Returns_True()
     {
-        // For A 3-Stack At [1900, 1500, 1500] Extrapolated To Team Size 5:
-        //     Total = 4900, AverageTMR = 1633.33, TeamApproximation = 4900 + 1633.33 * 2 = 8166.66
-        //     Bottom-Four-Average = (8166.66 - 1900) / 4 = 1566.67
-        //     Disparity = 1900 - 1566.67 ≈ 333.3 ≥ 150 (Threshold)
+        // For A 3-Stack At [1900, 1500, 1500]: Average Of Others = 1500, Disparity = 1900 - 1500 = 400 ≥ 150 (Threshold)
 
         const double OutlierWithinGroup = 1900.0;
 
@@ -49,11 +46,9 @@ public sealed class GroupDisparityTests
     [Test]
     public async Task Has_Excessive_TMR_Disparity_Three_Stack_Just_Below_Threshold_Returns_False()
     {
-        // For A 3-Stack [Highest, Baseline, Baseline] Extrapolated To Team Size 5, Algebra Gives:
-        //     Disparity = (10 * Highest - 10 * Baseline) / 12
-        // Solving "Disparity &lt; 150" With Baseline = 1500 Yields "Highest &lt; 1680". We Use 1670 (Disparity ≈ 141.7)
+        // For A 3-Stack [1640, 1500, 1500]: Average Of Others = 1500, Disparity = 1640 - 1500 = 140 < 150 (Threshold)
 
-        const double JustBelowThresholdHigh = 1670.0;
+        const double JustBelowThresholdHigh = 1640.0;
 
         MatchmakingGroup borderline = MatchmakingTestBuilder.BuildGroup
         (
@@ -61,5 +56,19 @@ public sealed class GroupDisparityTests
         );
 
         await Assert.That(borderline.HasExcessiveTMRDisparity()).IsFalse();
+    }
+
+    [Test]
+    public async Task Has_Excessive_TMR_Disparity_Duo_Beyond_Threshold_Returns_True()
+    {
+        // The Cap Applies To The Actual Group Regardless Of Size: A Duo [1700, 1500] Has Disparity 200 ≥ 150 (Threshold)
+        // A Prior Full-Team Extrapolation Diluted This To 125 For A Duo, Letting Such A Pair Queue Despite The 150 Cap
+
+        MatchmakingGroup duo = MatchmakingTestBuilder.BuildGroup
+        (
+            [1700.0, MatchmakingTestBuilder.BaselineTMR]
+        );
+
+        await Assert.That(duo.HasExcessiveTMRDisparity()).IsTrue();
     }
 }
