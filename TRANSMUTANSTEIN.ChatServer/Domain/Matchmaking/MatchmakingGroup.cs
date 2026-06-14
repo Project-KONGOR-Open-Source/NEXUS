@@ -942,19 +942,8 @@ public class MatchmakingGroup
         if (Members.Count <= 1)
             return false;
 
-        // Calculate The Team Approximation (Extrapolate To Full Team Size)
-        double combinedTMR = TotalTMR;
-        double averageTMR = AverageTMR;
-        int teamSize = Information.TeamSize;
-
-        // Approximate What The Full Team's TMR Would Be
-        double teamApproximation = combinedTMR + averageTMR * (teamSize - Members.Count);
-
-        // Calculate The Bottom N-1 Players' Combined TMR
-        double bottomMembersTMR = teamApproximation - HighestTMR;
-
-        // Check If The Highest Player Is Too Far Above The Average Of The Rest
-        double averageOfOthers = bottomMembersTMR / (teamSize - 1);
+        // Compare The Highest-Rated Member Against The Average Of The Remaining Members, So The Cap Applies To The Actual Group Regardless Of Its Size
+        double averageOfOthers = (TotalTMR - HighestTMR) / (Members.Count - 1);
         double disparity = HighestTMR - averageOfOthers;
 
         return disparity >= MaximumGroupTMRDisparity;

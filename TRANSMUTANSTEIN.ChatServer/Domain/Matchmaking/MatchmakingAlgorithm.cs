@@ -109,6 +109,9 @@ internal static class MatchmakingAlgorithm
                 matchedTeamIndices.Add(teamIndex);
                 matchedTeamIndices.Add(bestOpponentIndex);
 
+                // Balance The Paired Teams By Swapping Same-Sized Groups, Bringing The Matchup Closer To Even Before The Match Is Created
+                BalanceTeams(legionTeam, bestOpponent, settings.LogisticPredictionScale);
+
                 // Create The Match (Pool-Aware Group Makeup Tolerance Is Plumbed Into "MismatchedGroupMakeup")
                 MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, bestOpponent, settings.LogisticPredictionScale, gameTypeParameters.GroupMakeupTolerance);
 
@@ -144,6 +147,88 @@ internal static class MatchmakingAlgorithm
         }
 
         return matches;
+    }
+
+    /// <summary>
+    ///     The number of times <see cref="BalanceTeams"/> sweeps the same-sized groups looking for improving swaps before giving up.
+    /// </summary>
+    private const int MaximumBalancingPasses = 3;
+
+    /// <summary>
+    ///     How close to an even 50/50 the matchup prediction must be for <see cref="BalanceTeams"/> to consider the teams balanced and stop early.
+    /// </summary>
+    private const double BalancedPredictionTolerance = 0.005;
+
+    /// <summary>
+    ///     Balances two paired teams by swapping same-sized groups between them whenever a swap brings the matchup prediction closer to an even 50/50.
+    ///     Mirrors the original chat server's first-pass team balancing. Swapping equal-sized groups preserves each team's size and group makeup, so it never changes which compositions are matched, only how evenly the queued players are split between the two sides.
+    /// </summary>
+    public static void BalanceTeams(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam, double logisticPredictionScale)
+    {
+        // Only Group Sizes Present On Both Teams Can Be Swapped; They Are Tried Largest First
+        int[] swappableGroupSizes = [.. legionTeam.Groups.Select(group => group.Members.Count)
+            .Intersect(hellbourneTeam.Groups.Select(group => group.Members.Count))
+            .OrderByDescending(size => size)];
+
+        if (swappableGroupSizes.Length is 0)
+            return;
+
+        for (int pass = 0; pass < MaximumBalancingPasses; pass++)
+        {
+            foreach (int groupSize in swappableGroupSizes)
+            {
+                // Snapshot The Candidates For This Size; The Per-Swap Guard Skips Any Group A Prior Swap Has Already Moved Off Its Team
+                List<MatchmakingGroup> legionCandidates = [.. legionTeam.Groups.Where(group => group.Members.Count == groupSize)];
+                List<MatchmakingGroup> hellbourneCandidates = [.. hellbourneTeam.Groups.Where(group => group.Members.Count == groupSize)];
+
+                foreach (MatchmakingGroup legionGroup in legionCandidates)
+                {
+                    foreach (MatchmakingGroup hellbourneGroup in hellbourneCandidates)
+                        TrySwapGroupsForBalance(legionTeam, hellbourneTeam, legionGroup, hellbourneGroup, logisticPredictionScale);
+                }
+            }
+
+            double prediction = MatchmakingMatch.CalculateMatchupPrediction(legionTeam.EffectiveTeamRating, hellbourneTeam.EffectiveTeamRating, logisticPredictionScale);
+
+            if (Math.Abs(prediction - 0.5) < BalancedPredictionTolerance)
+                break;
+        }
+
+        // Keep The Derived Per-Team Fields (Group Makeup, Common Modes And Regions) Consistent With The Possibly-Repartitioned Groups
+        legionTeam.RecalculateStatistics();
+        hellbourneTeam.RecalculateStatistics();
+    }
+
+    /// <summary>
+    ///     Tentatively swaps one group between the two teams and keeps the swap only when it leaves the matchup prediction at least as close to an even 50/50, reverting it otherwise.
+    /// </summary>
+    private static void TrySwapGroupsForBalance(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam, MatchmakingGroup legionGroup, MatchmakingGroup hellbourneGroup, double logisticPredictionScale)
+    {
+        // A Prior Swap In This Sweep May Have Already Moved One Of These Groups To The Other Team
+        if (legionTeam.Groups.Contains(legionGroup) is false || hellbourneTeam.Groups.Contains(hellbourneGroup) is false)
+            return;
+
+        double distanceBefore = Math.Abs(MatchmakingMatch.CalculateMatchupPrediction(legionTeam.EffectiveTeamRating, hellbourneTeam.EffectiveTeamRating, logisticPredictionScale) - 0.5);
+
+        SwapGroups(legionTeam, hellbourneTeam, legionGroup, hellbourneGroup);
+
+        double distanceAfter = Math.Abs(MatchmakingMatch.CalculateMatchupPrediction(legionTeam.EffectiveTeamRating, hellbourneTeam.EffectiveTeamRating, logisticPredictionScale) - 0.5);
+
+        // Revert When The Swap Moved The Matchup Further From Even; Equal-Or-Closer Swaps Are Kept
+        if (distanceAfter > distanceBefore)
+            SwapGroups(legionTeam, hellbourneTeam, hellbourneGroup, legionGroup);
+    }
+
+    /// <summary>
+    ///     Moves <paramref name="legionGroup"/> to the Hellbourne team and <paramref name="hellbourneGroup"/> to the Legion team.
+    /// </summary>
+    private static void SwapGroups(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam, MatchmakingGroup legionGroup, MatchmakingGroup hellbourneGroup)
+    {
+        legionTeam.Groups.Remove(legionGroup);
+        hellbourneTeam.Groups.Remove(hellbourneGroup);
+
+        legionTeam.Groups.Add(hellbourneGroup);
+        hellbourneTeam.Groups.Add(legionGroup);
     }
 
     /// <summary>

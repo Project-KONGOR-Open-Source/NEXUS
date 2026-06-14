@@ -183,21 +183,58 @@ public class MatchmakingMatch
         if (HellbourneTeam is null)
             return;
 
-        AssignTeamMatchPointValues(LegionTeam, MatchupPrediction, settings);
-        AssignTeamMatchPointValues(HellbourneTeam, 1.0 - MatchupPrediction, settings);
+        AssignTeamMatchPointValues(LegionTeam, HellbourneTeam, MatchupPrediction, settings);
+        AssignTeamMatchPointValues(HellbourneTeam, LegionTeam, 1.0 - MatchupPrediction, settings);
     }
 
-    private void AssignTeamMatchPointValues(MatchmakingTeam team, double winPrediction, MatchmakingSettings settings)
+    private void AssignTeamMatchPointValues(MatchmakingTeam team, MatchmakingTeam opposingTeam, double winPrediction, MatchmakingSettings settings)
     {
-        foreach (MatchmakingGroupMember member in team.GetAllMembers())
+        double lossMultiplier = GetSmallGroupLossMultiplier(team, opposingTeam, settings);
+        double teamAverageTMR = team.AverageTMR;
+
+        foreach (MatchmakingGroup group in team.Groups)
         {
-            member.IsProvisional = IsProvisionalPlayer(member, settings);
+            // The Coordination Penalty Only Engages For A Pre-Made Group With A Wide Internal Rating Spread (The Boosting Signature)
+            bool groupIncursCoordinationPenalty = settings.CoordinationPenaltyEnabled && group.Members.Count > 1 && group.TMRRange > GammaCurveRange;
 
-            double kFactor = CalculateKFactor(member, settings);
+            foreach (MatchmakingGroupMember member in group.Members)
+            {
+                member.IsProvisional = IsProvisionalPlayer(member, settings);
 
-            member.MatchWinValue = Math.Clamp((1.0 - winPrediction) * kFactor, 0.0, settings.MaximumKFactor);
-            member.MatchLossValue = CalculateMatchLossValue(member, winPrediction, kFactor, settings);
+                double kFactor = CalculateKFactor(member, settings);
+
+                // The Penalty Scales With How Far The Member's Rating Sits From Their Team's Average, Damping Both Gains And Losses Down To A Tenth
+                double coordinationMultiplier = groupIncursCoordinationPenalty ? CalculateSkillDifferenceAdjustment(member.TMR, teamAverageTMR) : 1.0;
+
+                member.MatchWinValue = Math.Clamp((1.0 - winPrediction) * kFactor * coordinationMultiplier, 0.0, settings.MaximumKFactor);
+                member.MatchLossValue = CalculateMatchLossValue(member, winPrediction, kFactor, coordinationMultiplier, lossMultiplier, settings);
+            }
         }
+    }
+
+    /// <summary>
+    ///     The highest group makeup score (see <see cref="MatchmakingTeam.GroupMakeup"/>) still considered a team of small groups, equal to the "2+2+1" composition.
+    /// </summary>
+    private const int SmallGroupMakeupCeiling = 9;
+
+    /// <summary>
+    ///     The lowest group makeup score (see <see cref="MatchmakingTeam.GroupMakeup"/>) considered a large pre-made stack, equal to the "4+1" composition.
+    /// </summary>
+    private const int LargeStackMakeupFloor = 17;
+
+    /// <summary>
+    ///     Gets the rating-loss multiplier for a team, halving the loss when a team of only small groups (the "2+2+1" composition or smaller) faces a large pre-made stack (the "4+1" composition or a full team), to compensate for the opponent's coordination advantage.
+    ///     Only applies to full five-player teams, matching the original composition constants, and only when <see cref="MatchmakingSettings.ReducedLossForSmallGroupsEnabled"/> is set.
+    /// </summary>
+    private static double GetSmallGroupLossMultiplier(MatchmakingTeam team, MatchmakingTeam opposingTeam, MatchmakingSettings settings)
+    {
+        if (settings.ReducedLossForSmallGroupsEnabled is false || team.TeamSize is not 5)
+            return 1.0;
+
+        bool teamIsSmallGroups = team.GroupMakeup <= SmallGroupMakeupCeiling;
+        bool opponentIsLargeStack = opposingTeam.GroupMakeup >= LargeStackMakeupFloor;
+
+        return teamIsSmallGroups && opponentIsLargeStack ? 0.5 : 1.0;
     }
 
     /// <summary>
@@ -241,19 +278,58 @@ public class MatchmakingMatch
     ///     Calculates the rating point value for losing this match, which is always zero or negative.
     ///     A player already at the minimum TMR loses nothing, and a loss never takes a player below the minimum TMR.
     /// </summary>
-    private static double CalculateMatchLossValue(MatchmakingGroupMember member, double winPrediction, double kFactor, MatchmakingSettings settings)
+    private static double CalculateMatchLossValue(MatchmakingGroupMember member, double winPrediction, double kFactor, double coordinationMultiplier, double lossMultiplier, MatchmakingSettings settings)
     {
-        double basePointValue = -winPrediction * kFactor;
-
         if (member.TMR < settings.MinimumTMR + 0.01)
             return 0.0;
 
-        double preliminaryLossValue = Math.Clamp(basePointValue, -settings.BaseKFactor, 0.0);
+        // Clamp To The Same Bound As The Returned Value So The Below-Minimum Check Tests The Loss That Is Actually Applied
+        // A Static -BaseKFactor Bound Here Would Underestimate A Provisional Player's Loss (Whose kFactor Can Reach MaximumKFactor) And Let It Drop Below MinimumTMR
+        double lossValue = Math.Clamp(-winPrediction * kFactor * coordinationMultiplier, -settings.MaximumKFactor, 0.0);
 
-        if (member.TMR + preliminaryLossValue < settings.MinimumTMR)
+        // The Below-Minimum Floor Is Tested Against The Coordination-Adjusted Loss, Then The Small-Group Reduction Is Applied To The Final Value (Matching The Original Order)
+        if (member.TMR + lossValue < settings.MinimumTMR)
             return Math.Clamp(settings.MinimumTMR - member.TMR, -settings.MaximumKFactor, 0.0);
 
-        return Math.Clamp(basePointValue, -settings.MaximumKFactor, 0.0);
+        return lossValue * lossMultiplier;
+    }
+
+    /// <summary>
+    ///     The rating spread (around a team's average) over which the coordination penalty ramps in, and the shape and scale of the gamma distribution that defines the ramp.
+    ///     A member exactly at their team's average is unpenalised; one a full <see cref="GammaCurveRange"/> above or below has their gains and losses reduced to a tenth.
+    /// </summary>
+    private const double GammaCurveRange = 175.0;
+    private const int GammaCurveShape = 18;
+    private const double GammaCurveScale = 5.0;
+
+    /// <summary>
+    ///     Calculates the coordination-penalty multiplier (between 0.1 and 1.0) for a member, based on how far their rating sits from their team's average.
+    ///     The further the member is from the average in either direction, the smaller the multiplier, so that a high-rated player boosting far-lower-rated friends (and the boosted friends themselves) gain and lose very little rating.
+    /// </summary>
+    private static double CalculateSkillDifferenceAdjustment(double playerTMR, double teamAverageTMR)
+    {
+        double skillDifference = Math.Max(GammaCurveRange - Math.Abs(playerTMR - teamAverageTMR), 0.1);
+
+        return Math.Clamp(GammaDistribution(skillDifference, GammaCurveShape, GammaCurveScale), 0.1, 1.0);
+    }
+
+    /// <summary>
+    ///     Evaluates the cumulative distribution function of a gamma (Erlang) distribution with the given integer shape and scale at the supplied value.
+    /// </summary>
+    private static double GammaDistribution(double value, int shape, double scale)
+    {
+        double scaledValue = value / scale;
+
+        double cumulative = 0.0;
+        long factorial = 1;
+
+        for (int term = 0; term < shape; term++)
+        {
+            cumulative += Math.Exp(-scaledValue) * (Math.Pow(scaledValue, term) / factorial);
+            factorial *= term + 1;
+        }
+
+        return 1.0 - cumulative;
     }
 
     /// <summary>

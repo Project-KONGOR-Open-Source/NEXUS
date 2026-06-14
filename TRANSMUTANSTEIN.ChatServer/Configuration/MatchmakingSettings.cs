@@ -109,6 +109,17 @@ public class MatchmakingSettings
     public double ReducedKFactorTMRCutoff { get; set; } = 1600.0;
 
     /// <summary>
+    ///     Whether a team composed only of small groups (the "2+2+1" composition or smaller) suffers half the rating loss when it faces a large pre-made stack (the "4+1" composition or a full team), compensating for the opponent's coordination advantage.
+    /// </summary>
+    public bool ReducedLossForSmallGroupsEnabled { get; set; } = true;
+
+    /// <summary>
+    ///     Whether the anti-boosting coordination penalty is applied. Members of a pre-made group with a wide internal rating spread have both their rating gains and losses reduced the further their rating sits from their team's average, so that boosting a far-lower-rated friend earns little rating.
+    ///     Unlike the original, this does not exempt players on a recent win streak, because a successful boost is indistinguishable from a genuine climb by win rate alone.
+    /// </summary>
+    public bool CoordinationPenaltyEnabled { get; set; } = true;
+
+    /// <summary>
     ///     Whether matchmaking is currently enabled.
     /// </summary>
     public bool Enabled { get; set; } = true;
