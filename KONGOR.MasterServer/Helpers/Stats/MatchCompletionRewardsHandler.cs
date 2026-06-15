@@ -4,7 +4,7 @@ namespace KONGOR.MasterServer.Helpers.Stats;
 ///     Applies the match-completion side-effects for a single participant.
 ///     Currency rewards come from <see cref="EconomyConfiguration.MatchRewards"/>.
 ///     An additive bonus from <see cref="EconomyConfiguration.EventRewards"/> is also paid out while the player is still within the first <see cref="PostSignupBonus.MatchesCount"/> matches.
-///     The corresponding <see cref="AccountStatistics"/> row is incremented for the match type, and its skill rating is adjusted by the rating change submitted by the match server.
+///     The corresponding <see cref="AccountStatistics"/> row for the match type is the single sink for every accumulated statistic. The aggregate counters, the per-hero summary, the award counts, and the skill rating adjusted by the rating change submitted by the match server.
 /// </summary>
 public static class MatchCompletionRewardsHandler
 {
@@ -15,10 +15,11 @@ public static class MatchCompletionRewardsHandler
     private const double MinimumSkillRating = 1000.0;
 
     /// <summary>
-    ///     Applies match rewards, the post-signup bonus (if applicable), match-counter increments, and the skill rating change for the given participant.
+    ///     Applies match rewards, the post-signup bonus (if applicable), the aggregate and per-hero counters, the award counts, and the skill rating change for the given participant.
+    ///     All of these accumulate into the single <see cref="AccountStatistics"/> row resolved for the match's game mode, so they are never split across game modes.
     ///     The caller is responsible for calling <see cref="MerrickContext.SaveChangesAsync"/> after all participants have been processed.
     /// </summary>
-    public static async Task Apply(MerrickContext databaseContext, ILogger logger, Account account, MatchInformation? matchInformation, MatchParticipantStatistics matchParticipantStatistics)
+    public static async Task Apply(MerrickContext databaseContext, ILogger logger, Account account, MatchInformation? matchInformation, MatchStatistics matchStatistics, MatchParticipantStatistics matchParticipantStatistics)
     {
         MatchRewards matchRewards = JSONConfiguration.EconomyConfiguration.MatchRewards;
 
@@ -49,7 +50,7 @@ public static class MatchCompletionRewardsHandler
             }
         }
 
-        AccountStatisticsType statisticsType = ResolveAccountStatisticsType(matchInformation);
+        AccountStatisticsType statisticsType = ResolveStatisticsType(matchInformation, matchStatistics, matchParticipantStatistics);
 
         AccountStatistics? statistics = await databaseContext.AccountStatistics
             .SingleOrDefaultAsync(record => record.AccountID == account.ID && record.Type == statisticsType);
@@ -70,9 +71,135 @@ public static class MatchCompletionRewardsHandler
         if (matchParticipantStatistics.Conceded     is 1) statistics.MatchesConceded++;
         if (matchParticipantStatistics.Kicked       is 1) statistics.MatchesKicked++;
 
+        statistics.HeroKills   += matchParticipantStatistics.HeroKills;
+        statistics.HeroAssists += matchParticipantStatistics.HeroAssists;
+        statistics.HeroDeaths  += matchParticipantStatistics.HeroDeaths;
+        statistics.WardsPlaced += matchParticipantStatistics.WardsPlaced;
+        statistics.Smackdowns  += matchParticipantStatistics.Smackdown;
+
+        AccumulateHeroStatistics(statistics, matchParticipantStatistics);
+
+        AccumulateAwardStatistics(statistics, matchStatistics, matchParticipantStatistics);
+
         RecordPlacementMatchResult(statistics, matchParticipantStatistics);
 
         ApplySkillRatingChange(statistics, matchParticipantStatistics);
+    }
+
+    /// <summary>
+    ///     Accumulates a single match's participant statistics into the running per-hero summary totals on the resolved statistics row, creating the per-hero entry on first use.
+    /// </summary>
+    private static void AccumulateHeroStatistics(AccountStatistics statistics, MatchParticipantStatistics match)
+    {
+        HeroStats? heroStats = statistics.HeroStatistics.Heroes
+            .SingleOrDefault(hero => hero.HeroIdentifier == match.HeroIdentifier);
+
+        if (heroStats is null)
+        {
+            heroStats = new HeroStats { HeroIdentifier = match.HeroIdentifier };
+
+            statistics.HeroStatistics.Heroes.Add(heroStats);
+        }
+
+        heroStats.GamesPlayed++;
+        heroStats.Wins += match.Win;
+        heroStats.Losses += match.Loss;
+        heroStats.Concedes += match.Conceded;
+        heroStats.ConcedeVotes += match.ConcedeVotes;
+        heroStats.Buybacks += match.Buybacks;
+        heroStats.Disconnections += match.Disconnected;
+        heroStats.Kicks += match.Kicked;
+        heroStats.ScoreTotal += match.Score;
+        heroStats.HeroKills += match.HeroKills;
+        heroStats.HeroDamage += match.HeroDamage;
+        heroStats.HeroExperience += match.HeroExperience;
+        heroStats.GoldFromHeroKills += match.GoldFromHeroKills;
+        heroStats.HeroAssists += match.HeroAssists;
+        heroStats.HeroDeaths += match.HeroDeaths;
+        heroStats.GoldLostToDeath += match.GoldLostToDeath;
+        heroStats.SecondsDead += match.SecondsDead;
+        heroStats.TeamCreepKills += match.TeamCreepKills;
+        heroStats.TeamCreepDamage += match.TeamCreepDamage;
+        heroStats.TeamCreepExperience += match.TeamCreepExperience;
+        heroStats.TeamCreepGold += match.TeamCreepGold;
+        heroStats.NeutralCreepKills += match.NeutralCreepKills;
+        heroStats.NeutralCreepDamage += match.NeutralCreepDamage;
+        heroStats.NeutralCreepExperience += match.NeutralCreepExperience;
+        heroStats.NeutralCreepGold += match.NeutralCreepGold;
+        heroStats.BuildingDamage += match.BuildingDamage;
+        heroStats.ExperienceFromBuildings += match.ExperienceFromBuildings;
+        heroStats.BuildingsRazed += match.BuildingsRazed;
+        heroStats.GoldFromBuildings += match.GoldFromBuildings;
+        heroStats.Denies += match.Denies;
+        heroStats.ExperienceDenied += match.ExperienceDenied;
+        heroStats.Gold += match.Gold;
+        heroStats.GoldSpent += match.GoldSpent;
+        heroStats.Experience += match.Experience;
+        heroStats.Actions += match.Actions;
+        heroStats.SecondsPlayed += match.SecondsPlayed;
+        heroStats.ConsumablesPurchased += match.ConsumablesPurchased;
+        heroStats.WardsPlaced += match.WardsPlaced;
+        heroStats.TimeEarningExperience += match.TimeEarningExperience;
+        heroStats.FirstBloods += match.FirstBlood;
+        heroStats.DoubleKills += match.DoubleKill;
+        heroStats.TripleKills += match.TripleKill;
+        heroStats.QuadKills += match.QuadKill;
+        heroStats.Annihilations += match.Annihilation;
+        heroStats.KillStreak03 += match.KillStreak03;
+        heroStats.KillStreak04 += match.KillStreak04;
+        heroStats.KillStreak05 += match.KillStreak05;
+        heroStats.KillStreak06 += match.KillStreak06;
+        heroStats.KillStreak07 += match.KillStreak07;
+        heroStats.KillStreak08 += match.KillStreak08;
+        heroStats.KillStreak09 += match.KillStreak09;
+        heroStats.KillStreak10 += match.KillStreak10;
+        heroStats.KillStreak15 += match.KillStreak15;
+        heroStats.Smackdowns += match.Smackdown;
+        heroStats.Humiliations += match.Humiliation;
+        heroStats.Nemeses += match.Nemesis;
+        heroStats.Retributions += match.Retribution;
+    }
+
+    /// <summary>
+    ///     Increments the award counts on the resolved statistics row for each per-match award the participant won.
+    /// </summary>
+    private static void AccumulateAwardStatistics(AccountStatistics statistics, MatchStatistics matchStatistics, MatchParticipantStatistics match)
+    {
+        if (matchStatistics.MVPAccountID == match.AccountID)
+            statistics.AwardStatistics.MVPAwards++;
+
+        if (matchStatistics.AwardMostAnnihilations == match.AccountID)
+            statistics.AwardStatistics.AnnihilationAwards++;
+
+        if (matchStatistics.AwardMostQuadKills == match.AccountID)
+            statistics.AwardStatistics.QuadKillAwards++;
+
+        if (matchStatistics.AwardLargestKillStreak == match.AccountID)
+            statistics.AwardStatistics.LongestKillStreakAwards++;
+
+        if (matchStatistics.AwardMostSmackdowns == match.AccountID)
+            statistics.AwardStatistics.SmackdownAwards++;
+
+        if (matchStatistics.AwardMostKills == match.AccountID)
+            statistics.AwardStatistics.MostKillsAwards++;
+
+        if (matchStatistics.AwardMostAssists == match.AccountID)
+            statistics.AwardStatistics.MostAssistsAwards++;
+
+        if (matchStatistics.AwardLeastDeaths == match.AccountID)
+            statistics.AwardStatistics.LeastDeathsAwards++;
+
+        if (matchStatistics.AwardMostBuildingDamage == match.AccountID)
+            statistics.AwardStatistics.MostBuildingDamageAwards++;
+
+        if (matchStatistics.AwardMostWardsKilled == match.AccountID)
+            statistics.AwardStatistics.MostWardsDestroyedAwards++;
+
+        if (matchStatistics.AwardMostHeroDamageDealt == match.AccountID)
+            statistics.AwardStatistics.MostHeroDamageDealtAwards++;
+
+        if (matchStatistics.AwardHighestCreepScore == match.AccountID)
+            statistics.AwardStatistics.HighestCreepScoreAwards++;
     }
 
     /// <summary>
@@ -112,8 +239,50 @@ public static class MatchCompletionRewardsHandler
     }
 
     /// <summary>
-    ///     Resolves the <see cref="AccountStatisticsType"/> that the match-count increment should target, based on the cached <see cref="MatchInformation"/>.
-    ///     Falls back to <see cref="AccountStatisticsType.Public"/> when no match information is available (e.g. during a resubmission after the Redis entry has been purged).
+    ///     Resolves the single <see cref="AccountStatisticsType"/> that every statistic for this match should accumulate into.
+    ///     The cached <see cref="MatchInformation"/> is the authoritative signal when present.
+    ///     During a resubmission (after the distributed cache entry has been purged) it is unavailable, so the type is derived from the submitted match details instead.
+    /// </summary>
+    private static AccountStatisticsType ResolveStatisticsType(MatchInformation? matchInformation, MatchStatistics matchStatistics, MatchParticipantStatistics matchParticipantStatistics)
+    {
+        if (matchInformation is not null)
+            return ResolveAccountStatisticsType(matchInformation);
+
+        return ResolveStatisticsTypeFromSubmission(matchStatistics.Map, matchParticipantStatistics);
+    }
+
+    /// <summary>
+    ///     Derives the <see cref="AccountStatisticsType"/> from the submitted match details when no <see cref="MatchInformation"/> snapshot is available.
+    ///     Mirrors the original API's classification (the public/ranked flags plus the map name) and never throws, defaulting to <see cref="AccountStatisticsType.Public"/>.
+    ///     The cooperative and reborn distinctions live only in the <see cref="MatchInformation.MatchType"/> enumeration, so a resubmission of one of those collapses to its closest flag-based equivalent.
+    /// </summary>
+    private static AccountStatisticsType ResolveStatisticsTypeFromSubmission(string map, MatchParticipantStatistics matchParticipantStatistics)
+    {
+        if (map.Equals("midwars", StringComparison.OrdinalIgnoreCase))
+            return AccountStatisticsType.MidWars;
+
+        if (map.Equals("riftwars", StringComparison.OrdinalIgnoreCase))
+            return AccountStatisticsType.RiftWars;
+
+        if (matchParticipantStatistics.RankedMatch is 1)
+        {
+            // Ranked Matches On "caldavar" Are Normal Matchmaking, While "caldavar_old" Is Casual Matchmaking
+            if (map.Equals("caldavar", StringComparison.OrdinalIgnoreCase))
+                return AccountStatisticsType.Matchmaking;
+
+            if (map.Equals("caldavar_old", StringComparison.OrdinalIgnoreCase))
+                return AccountStatisticsType.MatchmakingCasual;
+
+            // Any Other Ranked Map Falls Back To Normal Matchmaking Rather Than Throwing
+            return AccountStatisticsType.Matchmaking;
+        }
+
+        return AccountStatisticsType.Public;
+    }
+
+    /// <summary>
+    ///     Resolves the <see cref="AccountStatisticsType"/> from the cached <see cref="MatchInformation"/>, used both during stat accumulation and when reading back the statistics row for the match summary.
+    ///     Falls back to <see cref="AccountStatisticsType.Public"/> when no match information is available.
     /// </summary>
     public static AccountStatisticsType ResolveAccountStatisticsType(MatchInformation? matchInformation)
     {
