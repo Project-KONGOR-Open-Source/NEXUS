@@ -22,16 +22,23 @@ public partial class StatsRequesterController
 
         MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
 
+        MatchStatistics matchStatistics;
+
         if (existingMatchStatistics is null)
         {
-            MatchStatistics matchStatistics = form.ToMatchStatistics(matchServer.ID, matchServer.HostAccountName);
+            matchStatistics = form.ToMatchStatistics(matchServer.ID, matchServer.HostAccountName);
 
             matchStatistics.MatchInformationSnapshot = matchInformationSnapshot;
 
             await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
         }
 
-        else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+        else
+        {
+            Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+
+            matchStatistics = existingMatchStatistics;
+        }
 
         foreach (int playerIndex in form.PlayerStats.Keys)
         {
@@ -59,7 +66,7 @@ public partial class StatsRequesterController
 
                 await MerrickContext.MatchParticipantStatistics.AddAsync(matchParticipantStatistics);
 
-                await MatchCompletionRewardsHandler.Apply(MerrickContext, Logger, account, matchInformation, matchParticipantStatistics);
+                await MatchCompletionRewardsHandler.Apply(MerrickContext, Logger, account, matchInformation, matchStatistics, matchParticipantStatistics);
             }
 
             else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
@@ -115,14 +122,21 @@ public partial class StatsRequesterController
 
         MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
 
+        MatchStatistics matchStatistics;
+
         if (existingMatchStatistics is null)
         {
-            MatchStatistics matchStatistics = form.ToMatchStatistics();
+            matchStatistics = form.ToMatchStatistics();
 
             await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
         }
 
-        else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+        else
+        {
+            Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+
+            matchStatistics = existingMatchStatistics;
+        }
 
         foreach (int playerIndex in form.PlayerStats.Keys)
         {
@@ -150,7 +164,7 @@ public partial class StatsRequesterController
 
                 await MerrickContext.MatchParticipantStatistics.AddAsync(matchParticipantStatistics);
 
-                await MatchCompletionRewardsHandler.Apply(MerrickContext, Logger, account, matchInformation: null, matchParticipantStatistics);
+                await MatchCompletionRewardsHandler.Apply(MerrickContext, Logger, account, matchInformation: null, matchStatistics, matchParticipantStatistics);
             }
 
             else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
