@@ -9,6 +9,11 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     // TODO: Implement Favourite Heroes Calculation (Requires Aggregating Hero Play Time Across All Matches)
 
     /// <summary>
+    ///     The per-hero statistics totals for this game mode, aggregated across every hero the account has played.
+    /// </summary>
+    private HeroStats Totals { get; } = statistics.HeroStatistics.AggregateTotals();
+
+    /// <summary>
     ///     The account's super ID (main account ID).
     /// </summary>
     [PHPProperty("super_id")]
@@ -116,7 +121,7 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     ///     Total seconds played.
     /// </summary>
     [PHPProperty("acc_secs")]
-    public string SecondsPlayed { get; init; } = "0"; // TODO: Implement Seconds Tracking
+    public string SecondsPlayed => Totals.SecondsPlayed.ToString();
 
     /// <summary>
     ///     Total hero kills.
@@ -152,157 +157,157 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     ///     Total number of times the player voted to concede.
     /// </summary>
     [PHPProperty("acc_concedevotes")]
-    public string ConcedeVotes { get; init; } = "0"; // TODO: Implement Concede Vote Tracking
+    public string ConcedeVotes => Totals.ConcedeVotes.ToString();
 
     /// <summary>
     ///     Total number of buybacks (respawning early by spending gold).
     /// </summary>
     [PHPProperty("acc_buybacks")]
-    public string Buybacks { get; init; } = "0"; // TODO: Implement Buyback Tracking
+    public string Buybacks => Totals.Buybacks.ToString();
 
     /// <summary>
     ///     Total damage dealt to enemy heroes.
     /// </summary>
     [PHPProperty("acc_herodmg")]
-    public string HeroDamage { get; init; } = "0"; // TODO: Implement Hero Damage Tracking
+    public string HeroDamage => Totals.HeroDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from hero kills.
     /// </summary>
     [PHPProperty("acc_heroexp")]
-    public string HeroExperience { get; init; } = "0"; // TODO: Implement Hero Experience Tracking
+    public string HeroExperience => Totals.HeroExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from hero kills.
     /// </summary>
     [PHPProperty("acc_herokillsgold")]
-    public string HeroKillsGold { get; init; } = "0"; // TODO: Implement Hero Kill Gold Tracking
+    public string HeroKillsGold => Totals.GoldFromHeroKills.ToString();
 
     /// <summary>
     ///     Total gold lost due to dying.
     /// </summary>
     [PHPProperty("acc_goldlost2death")]
-    public string GoldLostToDeath { get; init; } = "0"; // TODO: Implement Gold Lost To Death Tracking
+    public string GoldLostToDeath => Totals.GoldLostToDeath.ToString();
 
     /// <summary>
     ///     Total seconds spent dead (respawn timer).
     /// </summary>
     [PHPProperty("acc_secs_dead")]
-    public string SecondsDead { get; init; } = "0"; // TODO: Implement Seconds Dead Tracking
+    public string SecondsDead => Totals.SecondsDead.ToString();
 
     /// <summary>
     ///     Total lane creeps killed.
     /// </summary>
     [PHPProperty("acc_teamcreepkills")]
-    public string TeamCreepKills { get; init; } = "0"; // TODO: Implement Lane Creep Kill Tracking
+    public string TeamCreepKills => Totals.TeamCreepKills.ToString();
 
     /// <summary>
     ///     Total damage dealt to lane creeps.
     /// </summary>
     [PHPProperty("acc_teamcreepdmg")]
-    public string TeamCreepDamage { get; init; } = "0"; // TODO: Implement Lane Creep Damage Tracking
+    public string TeamCreepDamage => Totals.TeamCreepDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from lane creeps.
     /// </summary>
     [PHPProperty("acc_teamcreepexp")]
-    public string TeamCreepExperience { get; init; } = "0"; // TODO: Implement Lane Creep Experience Tracking
+    public string TeamCreepExperience => Totals.TeamCreepExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from lane creeps.
     /// </summary>
     [PHPProperty("acc_teamcreepgold")]
-    public string TeamCreepGold { get; init; } = "0"; // TODO: Implement Lane Creep Gold Tracking
+    public string TeamCreepGold => Totals.TeamCreepGold.ToString();
 
     /// <summary>
     ///     Total neutral creeps killed (jungle camps).
     /// </summary>
     [PHPProperty("acc_neutralcreepkills")]
-    public string NeutralCreepKills { get; init; } = "0"; // TODO: Implement Neutral Creep Kill Tracking
+    public string NeutralCreepKills => Totals.NeutralCreepKills.ToString();
 
     /// <summary>
     ///     Total damage dealt to neutral creeps.
     /// </summary>
     [PHPProperty("acc_neutralcreepdmg")]
-    public string NeutralCreepDamage { get; init; } = "0"; // TODO: Implement Neutral Creep Damage Tracking
+    public string NeutralCreepDamage => Totals.NeutralCreepDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from neutral creeps.
     /// </summary>
     [PHPProperty("acc_neutralcreepexp")]
-    public string NeutralCreepExperience { get; init; } = "0"; // TODO: Implement Neutral Creep Experience Tracking
+    public string NeutralCreepExperience => Totals.NeutralCreepExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from neutral creeps.
     /// </summary>
     [PHPProperty("acc_neutralcreepgold")]
-    public string NeutralCreepGold { get; init; } = "0"; // TODO: Implement Neutral Creep Gold Tracking
+    public string NeutralCreepGold => Totals.NeutralCreepGold.ToString();
 
     /// <summary>
     ///     Total damage dealt to buildings (towers, barracks, etc.).
     /// </summary>
     [PHPProperty("acc_bdmg")]
-    public string BuildingDamage { get; init; } = "0"; // TODO: Implement Building Damage Tracking
+    public string BuildingDamage => Totals.BuildingDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from destroying buildings.
     /// </summary>
     [PHPProperty("acc_bdmgexp")]
-    public string BuildingExperience { get; init; } = "0"; // TODO: Implement Building Experience Tracking
+    public string BuildingExperience => Totals.ExperienceFromBuildings.ToString();
 
     /// <summary>
     ///     Total buildings destroyed (towers, barracks, etc.).
     /// </summary>
     [PHPProperty("acc_razed")]
-    public string BuildingsRazed { get; init; } = "0"; // TODO: Implement Buildings Razed Tracking
+    public string BuildingsRazed => Totals.BuildingsRazed.ToString();
 
     /// <summary>
     ///     Total gold earned from destroying buildings.
     /// </summary>
     [PHPProperty("acc_bgold")]
-    public string BuildingGold { get; init; } = "0"; // TODO: Implement Building Gold Tracking
+    public string BuildingGold => Totals.GoldFromBuildings.ToString();
 
     /// <summary>
     ///     Total allied creeps denied (last-hitting own creeps to prevent enemy gold/XP).
     /// </summary>
     [PHPProperty("acc_denies")]
-    public string Denies { get; init; } = "0"; // TODO: Implement Deny Tracking
+    public string Denies => Totals.Denies.ToString();
 
     /// <summary>
     ///     Total experience denied to enemies through denies.
     /// </summary>
     [PHPProperty("acc_exp_denied")]
-    public string ExperienceDenied { get; init; } = "0"; // TODO: Implement Experience Denied Tracking
+    public string ExperienceDenied => Totals.ExperienceDenied.ToString();
 
     /// <summary>
     ///     Total gold earned.
     /// </summary>
     [PHPProperty("acc_gold")]
-    public string Gold { get; init; } = "0"; // TODO: Implement Gold Earned Tracking
+    public string Gold => Totals.Gold.ToString();
 
     /// <summary>
     ///     Total gold spent on items.
     /// </summary>
     [PHPProperty("acc_gold_spent")]
-    public string GoldSpent { get; init; } = "0"; // TODO: Implement Gold Spent Tracking
+    public string GoldSpent => Totals.GoldSpent.ToString();
 
     /// <summary>
     ///     Total experience earned.
     /// </summary>
     [PHPProperty("acc_exp")]
-    public string Experience { get; init; } = "0"; // TODO: Implement Experience Earned Tracking
+    public string Experience => Totals.Experience.ToString();
 
     /// <summary>
     ///     Total actions performed (clicks, ability uses, etc.).
     /// </summary>
     [PHPProperty("acc_actions")]
-    public string Actions { get; init; } = "0"; // TODO: Implement Actions Tracking
+    public string Actions => Totals.Actions.ToString();
 
     /// <summary>
     ///     Total consumable items used (potions, wards, etc.).
     /// </summary>
     [PHPProperty("acc_consumables")]
-    public string Consumables { get; init; } = "0"; // TODO: Implement Consumables Tracking
+    public string Consumables => Totals.ConsumablesPurchased.ToString();
 
     /// <summary>
     ///     Total Easy Mode matches played.
@@ -314,109 +319,109 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     ///     Total time spent earning experience (seconds).
     /// </summary>
     [PHPProperty("acc_time_earning_exp")]
-    public string TimeEarningExperience { get; init; } = "0"; // TODO: Implement Time Earning Experience Tracking
+    public string TimeEarningExperience => Totals.TimeEarningExperience.ToString();
 
     /// <summary>
     ///     Total first blood kills achieved.
     /// </summary>
     [PHPProperty("acc_bloodlust")]
-    public string Bloodlust { get; init; } = "0"; // TODO: Implement First Blood Tracking
+    public string Bloodlust => Totals.FirstBloods.ToString();
 
     /// <summary>
     ///     Total double kills (two kills within a short time).
     /// </summary>
     [PHPProperty("acc_doublekill")]
-    public string DoubleKills { get; init; } = "0"; // TODO: Implement Multi-Kill Tracking
+    public string DoubleKills => Totals.DoubleKills.ToString();
 
     /// <summary>
     ///     Total triple kills (three kills within a short time).
     /// </summary>
     [PHPProperty("acc_triplekill")]
-    public string TripleKills { get; init; } = "0"; // TODO: Implement Multi-Kill Tracking
+    public string TripleKills => Totals.TripleKills.ToString();
 
     /// <summary>
     ///     Total quad kills (four kills within a short time).
     /// </summary>
     [PHPProperty("acc_quadkill")]
-    public string QuadKills { get; init; } = "0"; // TODO: Implement Multi-Kill Tracking
+    public string QuadKills => Totals.QuadKills.ToString();
 
     /// <summary>
     ///     Total annihilations (killing all five enemy heroes within a short time).
     /// </summary>
     [PHPProperty("acc_annihilation")]
-    public string Annihilations { get; init; } = "0"; // TODO: Implement Multi-Kill Tracking
+    public string Annihilations => Totals.Annihilations.ToString();
 
     /// <summary>
     ///     Total kill streaks of 3 (Serial Killer).
     /// </summary>
     [PHPProperty("acc_ks3")]
-    public string KillStreak3 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak3 => Totals.KillStreak03.ToString();
 
     /// <summary>
     ///     Total kill streaks of 4 (Ultimate Warrior).
     /// </summary>
     [PHPProperty("acc_ks4")]
-    public string KillStreak4 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak4 => Totals.KillStreak04.ToString();
 
     /// <summary>
     ///     Total kill streaks of 5 (Legendary).
     /// </summary>
     [PHPProperty("acc_ks5")]
-    public string KillStreak5 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak5 => Totals.KillStreak05.ToString();
 
     /// <summary>
     ///     Total kill streaks of 6 (Onslaught).
     /// </summary>
     [PHPProperty("acc_ks6")]
-    public string KillStreak6 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak6 => Totals.KillStreak06.ToString();
 
     /// <summary>
     ///     Total kill streaks of 7 (Savage Sick).
     /// </summary>
     [PHPProperty("acc_ks7")]
-    public string KillStreak7 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak7 => Totals.KillStreak07.ToString();
 
     /// <summary>
     ///     Total kill streaks of 8 (Dominating).
     /// </summary>
     [PHPProperty("acc_ks8")]
-    public string KillStreak8 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak8 => Totals.KillStreak08.ToString();
 
     /// <summary>
     ///     Total kill streaks of 9 (Champion).
     /// </summary>
     [PHPProperty("acc_ks9")]
-    public string KillStreak9 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak9 => Totals.KillStreak09.ToString();
 
     /// <summary>
     ///     Total kill streaks of 10 (Bloodbath).
     /// </summary>
     [PHPProperty("acc_ks10")]
-    public string KillStreak10 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak10 => Totals.KillStreak10.ToString();
 
     /// <summary>
     ///     Total kill streaks of 15 (Immortal).
     /// </summary>
     [PHPProperty("acc_ks15")]
-    public string KillStreak15 { get; init; } = "0"; // TODO: Implement Kill Streak Tracking
+    public string KillStreak15 => Totals.KillStreak15.ToString();
 
     /// <summary>
     ///     Total times killed while on a killing spree (3+ streak ended by enemy).
     /// </summary>
     [PHPProperty("acc_humiliation")]
-    public string Humiliations { get; init; } = "0"; // TODO: Implement Humiliation Tracking
+    public string Humiliations => Totals.Humiliations.ToString();
 
     /// <summary>
     ///     Total times dying to the same enemy consecutively (making them your nemesis).
     /// </summary>
     [PHPProperty("acc_nemesis")]
-    public string Nemesis { get; init; } = "0"; // TODO: Implement Nemesis Tracking
+    public string Nemesis => Totals.Nemeses.ToString();
 
     /// <summary>
     ///     Total times killing your nemesis (payback kill).
     /// </summary>
     [PHPProperty("acc_retribution")]
-    public string Retributions { get; init; } = "0"; // TODO: Implement Retribution Tracking
+    public string Retributions => Totals.Retributions.ToString();
 
     # endregion
 
@@ -466,7 +471,7 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     ///     Total seconds played in ranked matchmaking matches.
     /// </summary>
     [PHPProperty("rnk_secs")]
-    public string RankedSecondsPlayed { get; init; } = "0"; // TODO: Implement Seconds Played Tracking
+    public string RankedSecondsPlayed => aggregates.RankedSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total ranked matchmaking matches played.
@@ -484,7 +489,7 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     ///     Total seconds played in casual matchmaking matches.
     /// </summary>
     [PHPProperty("cs_secs")]
-    public string CasualSecondsPlayed { get; init; } = "0"; // TODO: Implement Seconds Played Tracking
+    public string CasualSecondsPlayed => aggregates.CasualSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total casual matchmaking matches played.

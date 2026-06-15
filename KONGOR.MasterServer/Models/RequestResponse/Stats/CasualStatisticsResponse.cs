@@ -5,6 +5,11 @@ namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 /// </summary>
 public class CasualStatisticsResponse(Account account, AccountStatistics statistics, AggregateStatistics aggregates)
 {
+    /// <summary>
+    ///     The per-hero statistics totals for this game mode, aggregated across every hero the account has played.
+    /// </summary>
+    private HeroStats Totals { get; } = statistics.HeroStatistics.AggregateTotals();
+
     # region Account Information
 
     /// <summary>
@@ -69,13 +74,13 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Total times voted to concede in casual matches.
     /// </summary>
     [PHPProperty("cs_concedevotes")]
-    public string ConcedeVotes { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string ConcedeVotes => Totals.ConcedeVotes.ToString();
 
     /// <summary>
     ///     Total buybacks in casual matches.
     /// </summary>
     [PHPProperty("cs_buybacks")]
-    public string Buybacks { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Buybacks => Totals.Buybacks.ToString();
 
     /// <summary>
     ///     Total disconnections in casual matches.
@@ -159,19 +164,19 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Total damage dealt to enemy heroes in casual matches.
     /// </summary>
     [PHPProperty("cs_herodmg")]
-    public string HeroDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string HeroDamage => Totals.HeroDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from hero kills in casual matches.
     /// </summary>
     [PHPProperty("cs_heroexp")]
-    public string HeroExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string HeroExperience => Totals.HeroExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from hero kills in casual matches.
     /// </summary>
     [PHPProperty("cs_herokillsgold")]
-    public string HeroKillsGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string HeroKillsGold => Totals.GoldFromHeroKills.ToString();
 
     /// <summary>
     ///     Total hero assists in casual matches.
@@ -189,133 +194,133 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Total gold lost to deaths in casual matches.
     /// </summary>
     [PHPProperty("cs_goldlost2death")]
-    public string GoldLostToDeath { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string GoldLostToDeath => Totals.GoldLostToDeath.ToString();
 
     /// <summary>
     ///     Total seconds spent dead in casual matches.
     /// </summary>
     [PHPProperty("cs_secs_dead")]
-    public string SecondsDead { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string SecondsDead => Totals.SecondsDead.ToString();
 
     /// <summary>
     ///     Total enemy lane creeps killed in casual matches.
     /// </summary>
     [PHPProperty("cs_teamcreepkills")]
-    public string TeamCreepKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepKills => Totals.TeamCreepKills.ToString();
 
     /// <summary>
     ///     Total damage dealt to enemy lane creeps in casual matches.
     /// </summary>
     [PHPProperty("cs_teamcreepdmg")]
-    public string TeamCreepDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepDamage => Totals.TeamCreepDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from enemy lane creeps in casual matches.
     /// </summary>
     [PHPProperty("cs_teamcreepexp")]
-    public string TeamCreepExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepExperience => Totals.TeamCreepExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from enemy lane creeps in casual matches.
     /// </summary>
     [PHPProperty("cs_teamcreepgold")]
-    public string TeamCreepGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepGold => Totals.TeamCreepGold.ToString();
 
     /// <summary>
     ///     Total neutral creeps killed in casual matches.
     /// </summary>
     [PHPProperty("cs_neutralcreepkills")]
-    public string NeutralCreepKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepKills => Totals.NeutralCreepKills.ToString();
 
     /// <summary>
     ///     Total damage dealt to neutral creeps in casual matches.
     /// </summary>
     [PHPProperty("cs_neutralcreepdmg")]
-    public string NeutralCreepDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepDamage => Totals.NeutralCreepDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from neutral creeps in casual matches.
     /// </summary>
     [PHPProperty("cs_neutralcreepexp")]
-    public string NeutralCreepExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepExperience => Totals.NeutralCreepExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from neutral creeps in casual matches.
     /// </summary>
     [PHPProperty("cs_neutralcreepgold")]
-    public string NeutralCreepGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepGold => Totals.NeutralCreepGold.ToString();
 
     /// <summary>
     ///     Total damage dealt to buildings in casual matches.
     /// </summary>
     [PHPProperty("cs_bdmg")]
-    public string BuildingDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingDamage => Totals.BuildingDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from destroying buildings in casual matches.
     /// </summary>
     [PHPProperty("cs_bdmgexp")]
-    public string BuildingExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingExperience => Totals.ExperienceFromBuildings.ToString();
 
     /// <summary>
     ///     Total buildings destroyed in casual matches.
     /// </summary>
     [PHPProperty("cs_razed")]
-    public string BuildingsRazed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingsRazed => Totals.BuildingsRazed.ToString();
 
     /// <summary>
     ///     Total gold earned from destroying buildings in casual matches.
     /// </summary>
     [PHPProperty("cs_bgold")]
-    public string BuildingGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingGold => Totals.GoldFromBuildings.ToString();
 
     /// <summary>
     ///     Total allied creeps denied in casual matches.
     /// </summary>
     [PHPProperty("cs_denies")]
-    public string Denies { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Denies => Totals.Denies.ToString();
 
     /// <summary>
     ///     Total experience denied to enemies through denies in casual matches.
     /// </summary>
     [PHPProperty("cs_exp_denied")]
-    public string ExperienceDenied { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string ExperienceDenied => Totals.ExperienceDenied.ToString();
 
     /// <summary>
     ///     Total gold earned in casual matches.
     /// </summary>
     [PHPProperty("cs_gold")]
-    public string Gold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Gold => Totals.Gold.ToString();
 
     /// <summary>
     ///     Total gold spent on items in casual matches.
     /// </summary>
     [PHPProperty("cs_gold_spent")]
-    public string GoldSpent { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string GoldSpent => Totals.GoldSpent.ToString();
 
     /// <summary>
     ///     Total experience earned in casual matches.
     /// </summary>
     [PHPProperty("cs_exp")]
-    public string Experience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Experience => Totals.Experience.ToString();
 
     /// <summary>
     ///     Total actions (commands issued) in casual matches.
     /// </summary>
     [PHPProperty("cs_actions")]
-    public string Actions { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Actions => Totals.Actions.ToString();
 
     /// <summary>
     ///     Total seconds played in casual matches.
     /// </summary>
     [PHPProperty("cs_secs")]
-    public string SecondsPlayed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string SecondsPlayed => aggregates.CasualSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total consumable items used in casual matches.
     /// </summary>
     [PHPProperty("cs_consumables")]
-    public string Consumables { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Consumables => Totals.ConsumablesPurchased.ToString();
 
     /// <summary>
     ///     Total wards placed in casual matches.
@@ -357,91 +362,91 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Total time (in seconds) spent earning experience in casual matches.
     /// </summary>
     [PHPProperty("cs_time_earning_exp")]
-    public string TimeEarningExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TimeEarningExperience => Totals.TimeEarningExperience.ToString();
 
     /// <summary>
     ///     Total bloodlust kills (first blood) in casual matches.
     /// </summary>
     [PHPProperty("cs_bloodlust")]
-    public string Bloodlust { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Bloodlust => Totals.FirstBloods.ToString();
 
     /// <summary>
     ///     Total double kills (2 kills in quick succession) in casual matches.
     /// </summary>
     [PHPProperty("cs_doublekill")]
-    public string DoubleKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string DoubleKills => Totals.DoubleKills.ToString();
 
     /// <summary>
     ///     Total triple kills (3 kills in quick succession) in casual matches.
     /// </summary>
     [PHPProperty("cs_triplekill")]
-    public string TripleKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TripleKills => Totals.TripleKills.ToString();
 
     /// <summary>
     ///     Total quad kills (4 kills in quick succession) in casual matches.
     /// </summary>
     [PHPProperty("cs_quadkill")]
-    public string QuadKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string QuadKills => Totals.QuadKills.ToString();
 
     /// <summary>
     ///     Total annihilations (5 kills, entire enemy team) in casual matches.
     /// </summary>
     [PHPProperty("cs_annihilation")]
-    public string Annihilations { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Annihilations => Totals.Annihilations.ToString();
 
     /// <summary>
     ///     Total 3-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks3")]
-    public string KillStreak3 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak3 => Totals.KillStreak03.ToString();
 
     /// <summary>
     ///     Total 4-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks4")]
-    public string KillStreak4 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak4 => Totals.KillStreak04.ToString();
 
     /// <summary>
     ///     Total 5-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks5")]
-    public string KillStreak5 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak5 => Totals.KillStreak05.ToString();
 
     /// <summary>
     ///     Total 6-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks6")]
-    public string KillStreak6 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak6 => Totals.KillStreak06.ToString();
 
     /// <summary>
     ///     Total 7-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks7")]
-    public string KillStreak7 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak7 => Totals.KillStreak07.ToString();
 
     /// <summary>
     ///     Total 8-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks8")]
-    public string KillStreak8 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak8 => Totals.KillStreak08.ToString();
 
     /// <summary>
     ///     Total 9-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks9")]
-    public string KillStreak9 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak9 => Totals.KillStreak09.ToString();
 
     /// <summary>
     ///     Total 10-kill streaks in casual matches.
     /// </summary>
     [PHPProperty("cs_ks10")]
-    public string KillStreak10 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak10 => Totals.KillStreak10.ToString();
 
     /// <summary>
     ///     Total 15-kill streaks (immortal) in casual matches.
     /// </summary>
     [PHPProperty("cs_ks15")]
-    public string KillStreak15 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak15 => Totals.KillStreak15.ToString();
 
     /// <summary>
     ///     Total smackdowns (killing a player on a 3+ kill streak) in casual matches.
@@ -453,19 +458,19 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Total humiliations (killing a player with 0 kills) in casual matches.
     /// </summary>
     [PHPProperty("cs_humiliation")]
-    public string Humiliations { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Humiliations => Totals.Humiliations.ToString();
 
     /// <summary>
     ///     Total nemesis kills (killing the same enemy 3+ times) in casual matches.
     /// </summary>
     [PHPProperty("cs_nemesis")]
-    public string Nemesis { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Nemesis => Totals.Nemeses.ToString();
 
     /// <summary>
     ///     Total retribution kills (killing your nemesis) in casual matches.
     /// </summary>
     [PHPProperty("cs_retribution")]
-    public string Retributions { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Retributions => Totals.Retributions.ToString();
 
     # endregion
 
@@ -527,7 +532,7 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Total seconds played in public (unranked) matches.
     /// </summary>
     [PHPProperty("acc_secs")]
-    public string PublicSecondsPlayed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string PublicSecondsPlayed => aggregates.PublicSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total public (unranked) matches played.
@@ -545,7 +550,7 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Total seconds played in ranked matches.
     /// </summary>
     [PHPProperty("rnk_secs")]
-    public string RankedSecondsPlayed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string RankedSecondsPlayed => aggregates.RankedSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total ranked matches played.

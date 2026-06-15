@@ -1377,61 +1377,61 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     Custom gameplay statistic 0 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat0")]
-    public string GameplayStatistic0 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic0 { get; init; } = matchParticipantStatistics.GameplayStat0.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 1 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat1")]
-    public string GameplayStatistic1 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic1 { get; init; } = matchParticipantStatistics.GameplayStat1.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 2 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat2")]
-    public string GameplayStatistic2 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic2 { get; init; } = matchParticipantStatistics.GameplayStat2.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 3 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat3")]
-    public string GameplayStatistic3 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic3 { get; init; } = matchParticipantStatistics.GameplayStat3.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 4 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat4")]
-    public string GameplayStatistic4 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic4 { get; init; } = matchParticipantStatistics.GameplayStat4.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 5 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat5")]
-    public string GameplayStatistic5 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic5 { get; init; } = matchParticipantStatistics.GameplayStat5.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 6 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat6")]
-    public string GameplayStatistic6 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic6 { get; init; } = matchParticipantStatistics.GameplayStat6.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 7 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat7")]
-    public string GameplayStatistic7 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic7 { get; init; } = matchParticipantStatistics.GameplayStat7.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 8 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat8")]
-    public string GameplayStatistic8 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic8 { get; init; } = matchParticipantStatistics.GameplayStat8.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Custom gameplay statistic 9 (purpose varies by game mode or event).
     /// </summary>
     [PHPProperty("gameplaystat9")]
-    public string GameplayStatistic9 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+    public string GameplayStatistic9 { get; init; } = matchParticipantStatistics.GameplayStat9.ToString(CultureInfo.InvariantCulture);
 }
 
 public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matchInformation, Account account, MatchParticipantStatistics matchParticipantStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics) : MatchPlayerStatistics(matchInformation, account, matchParticipantStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
@@ -1742,7 +1742,7 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     Consumer-side changes are required to use a higher season number.
     /// </remarks>
     [PHPProperty("season")]
-    public string Season { get; init; } = 12.ToString();
+    public string Season { get; init; } = SeasonInformation.CurrentSeasonIndex.ToString();
 
     /// <summary>
     ///     The number of placement matches the player has completed in the current season.

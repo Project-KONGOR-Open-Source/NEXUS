@@ -12,12 +12,15 @@ public class AggregateStatistics
 
     public int PublicGamesPlayed { get; init; }
     public int PublicDisconnections { get; init; }
+    public int PublicSecondsPlayed { get; init; }
 
     public int RankedGamesPlayed { get; init; }
     public int RankedDisconnections { get; init; }
+    public int RankedSecondsPlayed { get; init; }
 
     public int CasualGamesPlayed { get; init; }
     public int CasualDisconnections { get; init; }
+    public int CasualSecondsPlayed { get; init; }
 
     public int MidWarsGamesPlayed { get; init; }
     public int MidWarsDisconnections { get; init; }
@@ -45,12 +48,15 @@ public class AggregateStatistics
 
         int publicGames = GetValue(AccountStatisticsType.Public, stat => stat.MatchesPlayed);
         int publicDiscos = GetValue(AccountStatisticsType.Public, stat => stat.MatchesDisconnected);
+        int publicSeconds = GetValue(AccountStatisticsType.Public, stat => stat.HeroStatistics.AggregateTotals().SecondsPlayed);
 
         int rankedGames = GetValue(AccountStatisticsType.Matchmaking, stat => stat.MatchesPlayed);
         int rankedDiscos = GetValue(AccountStatisticsType.Matchmaking, stat => stat.MatchesDisconnected);
+        int rankedSeconds = GetValue(AccountStatisticsType.Matchmaking, stat => stat.HeroStatistics.AggregateTotals().SecondsPlayed);
 
         int casualGames = GetValue(AccountStatisticsType.MatchmakingCasual, stat => stat.MatchesPlayed);
         int casualDiscos = GetValue(AccountStatisticsType.MatchmakingCasual, stat => stat.MatchesDisconnected);
+        int casualSeconds = GetValue(AccountStatisticsType.MatchmakingCasual, stat => stat.HeroStatistics.AggregateTotals().SecondsPlayed);
 
         int midWarsGames = GetValue(AccountStatisticsType.MidWars, stat => stat.MatchesPlayed);
         int midWarsDiscos = GetValue(AccountStatisticsType.MidWars, stat => stat.MatchesDisconnected);
@@ -82,12 +88,15 @@ public class AggregateStatistics
 
             PublicGamesPlayed = publicGames,
             PublicDisconnections = publicDiscos,
+            PublicSecondsPlayed = publicSeconds,
 
             RankedGamesPlayed = rankedGames,
             RankedDisconnections = rankedDiscos,
+            RankedSecondsPlayed = rankedSeconds,
 
             CasualGamesPlayed = casualGames,
             CasualDisconnections = casualDiscos,
+            CasualSecondsPlayed = casualSeconds,
 
             MidWarsGamesPlayed = midWarsGames,
             MidWarsDisconnections = midWarsDiscos,

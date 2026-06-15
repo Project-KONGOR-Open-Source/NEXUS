@@ -5,6 +5,11 @@ namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 /// </summary>
 public class RankedStatisticsResponse(Account account, AccountStatistics statistics, AggregateStatistics aggregates)
 {
+    /// <summary>
+    ///     The per-hero statistics totals for this game mode, aggregated across every hero the account has played.
+    /// </summary>
+    private HeroStats Totals { get; } = statistics.HeroStatistics.AggregateTotals();
+
     # region Account Information
 
     /// <summary>
@@ -69,13 +74,13 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Total times voted to concede in ranked matches.
     /// </summary>
     [PHPProperty("rnk_concedevotes")]
-    public string ConcedeVotes { get; init; } = "0"; // TODO: Implement Concede Vote Tracking
+    public string ConcedeVotes => Totals.ConcedeVotes.ToString();
 
     /// <summary>
     ///     Total buybacks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_buybacks")]
-    public string Buybacks { get; init; } = "0"; // TODO: Implement Buyback Tracking
+    public string Buybacks => Totals.Buybacks.ToString();
 
     /// <summary>
     ///     Total disconnections in ranked matches.
@@ -159,19 +164,19 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Total damage dealt to enemy heroes in ranked matches.
     /// </summary>
     [PHPProperty("rnk_herodmg")]
-    public string HeroDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string HeroDamage => Totals.HeroDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from hero kills in ranked matches.
     /// </summary>
     [PHPProperty("rnk_heroexp")]
-    public string HeroExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string HeroExperience => Totals.HeroExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from hero kills in ranked matches.
     /// </summary>
     [PHPProperty("rnk_herokillsgold")]
-    public string HeroKillsGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string HeroKillsGold => Totals.GoldFromHeroKills.ToString();
 
     /// <summary>
     ///     Total hero assists in ranked matches.
@@ -189,133 +194,133 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Total gold lost to deaths in ranked matches.
     /// </summary>
     [PHPProperty("rnk_goldlost2death")]
-    public string GoldLostToDeath { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string GoldLostToDeath => Totals.GoldLostToDeath.ToString();
 
     /// <summary>
     ///     Total seconds spent dead in ranked matches.
     /// </summary>
     [PHPProperty("rnk_secs_dead")]
-    public string SecondsDead { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string SecondsDead => Totals.SecondsDead.ToString();
 
     /// <summary>
     ///     Total enemy lane creeps killed in ranked matches.
     /// </summary>
     [PHPProperty("rnk_teamcreepkills")]
-    public string TeamCreepKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepKills => Totals.TeamCreepKills.ToString();
 
     /// <summary>
     ///     Total damage dealt to enemy lane creeps in ranked matches.
     /// </summary>
     [PHPProperty("rnk_teamcreepdmg")]
-    public string TeamCreepDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepDamage => Totals.TeamCreepDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from enemy lane creeps in ranked matches.
     /// </summary>
     [PHPProperty("rnk_teamcreepexp")]
-    public string TeamCreepExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepExperience => Totals.TeamCreepExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from enemy lane creeps in ranked matches.
     /// </summary>
     [PHPProperty("rnk_teamcreepgold")]
-    public string TeamCreepGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TeamCreepGold => Totals.TeamCreepGold.ToString();
 
     /// <summary>
     ///     Total neutral creeps killed in ranked matches.
     /// </summary>
     [PHPProperty("rnk_neutralcreepkills")]
-    public string NeutralCreepKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepKills => Totals.NeutralCreepKills.ToString();
 
     /// <summary>
     ///     Total damage dealt to neutral creeps in ranked matches.
     /// </summary>
     [PHPProperty("rnk_neutralcreepdmg")]
-    public string NeutralCreepDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepDamage => Totals.NeutralCreepDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from neutral creeps in ranked matches.
     /// </summary>
     [PHPProperty("rnk_neutralcreepexp")]
-    public string NeutralCreepExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepExperience => Totals.NeutralCreepExperience.ToString();
 
     /// <summary>
     ///     Total gold earned from neutral creeps in ranked matches.
     /// </summary>
     [PHPProperty("rnk_neutralcreepgold")]
-    public string NeutralCreepGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string NeutralCreepGold => Totals.NeutralCreepGold.ToString();
 
     /// <summary>
     ///     Total damage dealt to buildings in ranked matches.
     /// </summary>
     [PHPProperty("rnk_bdmg")]
-    public string BuildingDamage { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingDamage => Totals.BuildingDamage.ToString();
 
     /// <summary>
     ///     Total experience gained from destroying buildings in ranked matches.
     /// </summary>
     [PHPProperty("rnk_bdmgexp")]
-    public string BuildingExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingExperience => Totals.ExperienceFromBuildings.ToString();
 
     /// <summary>
     ///     Total buildings destroyed in ranked matches.
     /// </summary>
     [PHPProperty("rnk_razed")]
-    public string BuildingsRazed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingsRazed => Totals.BuildingsRazed.ToString();
 
     /// <summary>
     ///     Total gold earned from destroying buildings in ranked matches.
     /// </summary>
     [PHPProperty("rnk_bgold")]
-    public string BuildingGold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string BuildingGold => Totals.GoldFromBuildings.ToString();
 
     /// <summary>
     ///     Total allied creeps denied in ranked matches.
     /// </summary>
     [PHPProperty("rnk_denies")]
-    public string Denies { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Denies => Totals.Denies.ToString();
 
     /// <summary>
     ///     Total experience denied to enemies through denies in ranked matches.
     /// </summary>
     [PHPProperty("rnk_exp_denied")]
-    public string ExperienceDenied { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string ExperienceDenied => Totals.ExperienceDenied.ToString();
 
     /// <summary>
     ///     Total gold earned in ranked matches.
     /// </summary>
     [PHPProperty("rnk_gold")]
-    public string Gold { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Gold => Totals.Gold.ToString();
 
     /// <summary>
     ///     Total gold spent on items in ranked matches.
     /// </summary>
     [PHPProperty("rnk_gold_spent")]
-    public string GoldSpent { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string GoldSpent => Totals.GoldSpent.ToString();
 
     /// <summary>
     ///     Total experience earned in ranked matches.
     /// </summary>
     [PHPProperty("rnk_exp")]
-    public string Experience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Experience => Totals.Experience.ToString();
 
     /// <summary>
     ///     Total actions (commands issued) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_actions")]
-    public string Actions { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Actions => Totals.Actions.ToString();
 
     /// <summary>
     ///     Total seconds played in ranked matches.
     /// </summary>
     [PHPProperty("rnk_secs")]
-    public string SecondsPlayed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string SecondsPlayed => aggregates.RankedSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total consumable items used in ranked matches.
     /// </summary>
     [PHPProperty("rnk_consumables")]
-    public string Consumables { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Consumables => Totals.ConsumablesPurchased.ToString();
 
     /// <summary>
     ///     Total wards placed in ranked matches.
@@ -357,91 +362,91 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Total time (in seconds) spent earning experience in ranked matches.
     /// </summary>
     [PHPProperty("rnk_time_earning_exp")]
-    public string TimeEarningExperience { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TimeEarningExperience => Totals.TimeEarningExperience.ToString();
 
     /// <summary>
     ///     Total bloodlust kills (first blood) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_bloodlust")]
-    public string Bloodlust { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Bloodlust => Totals.FirstBloods.ToString();
 
     /// <summary>
     ///     Total double kills (2 kills in quick succession) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_doublekill")]
-    public string DoubleKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string DoubleKills => Totals.DoubleKills.ToString();
 
     /// <summary>
     ///     Total triple kills (3 kills in quick succession) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_triplekill")]
-    public string TripleKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string TripleKills => Totals.TripleKills.ToString();
 
     /// <summary>
     ///     Total quad kills (4 kills in quick succession) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_quadkill")]
-    public string QuadKills { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string QuadKills => Totals.QuadKills.ToString();
 
     /// <summary>
     ///     Total annihilations (5 kills, entire enemy team) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_annihilation")]
-    public string Annihilations { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Annihilations => Totals.Annihilations.ToString();
 
     /// <summary>
     ///     Total 3-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks3")]
-    public string KillStreak3 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak3 => Totals.KillStreak03.ToString();
 
     /// <summary>
     ///     Total 4-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks4")]
-    public string KillStreak4 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak4 => Totals.KillStreak04.ToString();
 
     /// <summary>
     ///     Total 5-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks5")]
-    public string KillStreak5 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak5 => Totals.KillStreak05.ToString();
 
     /// <summary>
     ///     Total 6-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks6")]
-    public string KillStreak6 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak6 => Totals.KillStreak06.ToString();
 
     /// <summary>
     ///     Total 7-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks7")]
-    public string KillStreak7 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak7 => Totals.KillStreak07.ToString();
 
     /// <summary>
     ///     Total 8-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks8")]
-    public string KillStreak8 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak8 => Totals.KillStreak08.ToString();
 
     /// <summary>
     ///     Total 9-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks9")]
-    public string KillStreak9 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak9 => Totals.KillStreak09.ToString();
 
     /// <summary>
     ///     Total 10-kill streaks in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks10")]
-    public string KillStreak10 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak10 => Totals.KillStreak10.ToString();
 
     /// <summary>
     ///     Total 15-kill streaks (immortal) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_ks15")]
-    public string KillStreak15 { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string KillStreak15 => Totals.KillStreak15.ToString();
 
     /// <summary>
     ///     Total smackdowns (killing a player on a 3+ kill streak) in ranked matches.
@@ -453,19 +458,19 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Total humiliations (killing a player with 0 kills) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_humiliation")]
-    public string Humiliations { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Humiliations => Totals.Humiliations.ToString();
 
     /// <summary>
     ///     Total nemesis kills (killing the same enemy 3+ times) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_nemesis")]
-    public string Nemesis { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Nemesis => Totals.Nemeses.ToString();
 
     /// <summary>
     ///     Total retribution kills (killing your nemesis) in ranked matches.
     /// </summary>
     [PHPProperty("rnk_retribution")]
-    public string Retributions { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string Retributions => Totals.Retributions.ToString();
 
     # endregion
 
@@ -527,7 +532,7 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Total seconds played in public (unranked) matches.
     /// </summary>
     [PHPProperty("acc_secs")]
-    public string PublicSecondsPlayed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string PublicSecondsPlayed => aggregates.PublicSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total public (unranked) matches played.
@@ -545,7 +550,7 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Total seconds played in casual matches.
     /// </summary>
     [PHPProperty("cs_secs")]
-    public string CasualSecondsPlayed { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string CasualSecondsPlayed => aggregates.CasualSecondsPlayed.ToString();
 
     /// <summary>
     ///     Total casual matches played.
