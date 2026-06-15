@@ -24,6 +24,7 @@ global using KONGOR.MasterServer.Helpers.Stats;
 global using KONGOR.MasterServer.Internals;
 global using KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 global using KONGOR.MasterServer.Models.RequestResponse.SRP;
+global using KONGOR.MasterServer.Models.RequestResponse.Stats;
 global using KONGOR.MasterServer.Models.RequestResponse.Store;
 global using KONGOR.MasterServer.Models.ServerManagement;
 global using KONGOR.MasterServer.Services;
