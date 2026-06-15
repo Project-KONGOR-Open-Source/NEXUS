@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
+namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 public partial class ClientRequesterController
 {
@@ -689,21 +689,13 @@ public partial class ClientRequesterController
 
             List<AccountStatistics> accountStatistics = await MerrickContext.AccountStatistics.Where(statistics => statistics.AccountID == playerStatistics.AccountID).ToListAsync();
 
-            // TODO: Figure Out How To Select Which Statistics To Use (Public Match, Matchmaking, etc.)
-            // INFO: Currently, This Code Logic Assumes A Public Match
-            // INFO: Potential Logic + Switch/Case On Map Name: bool isPublic = form.player_stats.First().Value.First().Value.pub_count == 1;
+            AccountStatisticsType statisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
 
-            AccountStatistics currentMatchTypeStatistics = accountStatistics.Single(statistics => statistics.Type == AccountStatisticsType.Public);
-
-            // TODO: Increment Current Match Type Statistics With Current Match Data
+            AccountStatistics currentMatchTypeStatistics = accountStatistics.Single(statistics => statistics.Type == statisticsType);
 
             AccountStatistics publicMatchStatistics = accountStatistics.Single(statistics => statistics.Type == AccountStatisticsType.Public);
 
-            // TODO: Increment Public Match Statistics With Current Match Data
-
             AccountStatistics matchmakingStatistics = accountStatistics.Single(statistics => statistics.Type == AccountStatisticsType.Matchmaking);
-
-            // TODO: Increment Matchmaking Statistics With Current Match Data
 
             // Use PrimaryMatchPlayerStatistics With Additional Information For The Primary (Requesting) Player And MatchPlayerStatistics With The Standard Amount Of Information For Secondary Players
             matchPlayerStatistics[playerStatistics.AccountID] = playerStatistics.AccountID == account.ID
