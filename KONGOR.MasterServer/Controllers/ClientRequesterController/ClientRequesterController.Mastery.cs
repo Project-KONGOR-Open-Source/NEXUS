@@ -28,8 +28,8 @@ public partial class ClientRequesterController
         Mastery mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID)
             ?? new Mastery { Account = account };
 
-        // The Client Expects The Mastery Information As A Flat Comma-Separated List Of Hero Identifier And Experience Pairs (For Example "Hero_Accursed,1400,Hero_Adrenaline,0")
-        string masteryInformation = string.Join(',', mastery.GetAllMasteriesInfo().Select(entry => $"{entry.Key},{entry.Value}"));
+        // The Client Expects The Mastery Information As A Flat Comma-Separated List Of Hero Identifier And Experience Pairs (For Example "Hero_Accursed,1400,Hero_Adrenaline,0"), Covering Every Hero
+        string masteryInformation = string.Join(',', Heroes.AllHeroIdentifiers().Select(identifier => $"{identifier},{mastery.GetHeroExperienceByHeroIdentifier(identifier)}"));
 
         Dictionary<string, object> response = new ()
         {
@@ -150,6 +150,15 @@ public partial class ClientRequesterController
         if (participant is null)
             return NotFound($@"Match Participant Statistics For Account ID {account.ID} And Match ID {matchID} Could Not Be Found");
 
+        // A Mastery Boost May Only Be Applied To The Account's Most Recent Match, Before Another Game Is Started
+        int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .MaxAsync(statistics => statistics.MatchID);
+
+        // Error Code 5 Is The Client's "Match Is Too Old" Code, Which Shows The Player An Error Modal Rather Than Failing Silently
+        if (matchID != mostRecentMatchID)
+            return Ok(PhpSerialization.Serialize(new Dictionary<string, object> { ["error_code"] = 5, ["error_msg"] = "Mastery boosts may only be applied to your most recent match." }));
+
         MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(statistics => statistics.MatchID == matchID);
 
         if (matchStatistics is null)
@@ -181,7 +190,7 @@ public partial class ClientRequesterController
             if (MasteryConsumables.MasteryBoostsOwned(user) < 1)
                 return BadRequest("Not Enough Mastery Boosts");
 
-            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + mastery.CalculateRegularMasteryBoostExperience(statisticsType, participant.HeroLevel));
+            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + mastery.CalculateRegularMasteryBoostExperience(statisticsType, participant.HeroLevel, Heroes.TotalHeroCount));
 
             MasteryConsumables.RemoveMasteryBoost(user);
         }

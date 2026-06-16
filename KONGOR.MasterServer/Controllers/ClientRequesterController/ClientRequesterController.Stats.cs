@@ -326,8 +326,9 @@ public partial class ClientRequesterController
             MasteryRewards rewards = await MerrickContext.MasteryRewards.SingleOrDefaultAsync(record => record.AccountID == account.ID)
                 ?? new MasteryRewards { Account = account };
 
-            response.MasteryInfo = mastery.GetAllMasteriesInfo()
-                .Select(entry => new HeroMasteryInfo { HeroName = entry.Key, Experience = entry.Value }).ToList();
+            // Every Hero Is Reported (Including Those With No Experience) So The Client Renders The Full Mastery Grid
+            response.MasteryInfo = Heroes.AllHeroIdentifiers()
+                .Select(identifier => new HeroMasteryInfo { HeroName = identifier, Experience = mastery.GetHeroExperienceByHeroIdentifier(identifier) }).ToList();
 
             response.MasteryRewards = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards
                 .Select(configuredReward => new MasteryRewardTier
@@ -753,15 +754,22 @@ public partial class ClientRequesterController
         AccountStatisticsType masteryStatisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
 
         int heroMatchExperience = mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
-        int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType);
+        int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType, Heroes.TotalHeroCount);
         int heroCurrentExperience = mastery.GetHeroExperienceByHeroIdentifier(requestingPlayerStatistics.HeroIdentifier);
 
-        // The Base And Bonus Experience Are Accrued During Statistics Submission, So The Pre-Match Value Is The Current Value Minus This Match's Contribution
-        int heroOriginalExperience = Math.Max(0, heroCurrentExperience - (heroMatchExperience + heroBonusExperience));
+        // A Mastery Boost May Only Be Applied To The Account's Most Recent Match, Before Another Game Is Started
+        // The Boost Is Therefore Disabled When An Older Match Is Viewed In The Match History
+        int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .MaxAsync(statistics => statistics.MatchID);
 
-        bool masteryCanBoost = heroMatchExperience > 0 && Mastery.GetLevelFromExperience(heroCurrentExperience) < Mastery.MaximumMasteryLevel;
+        bool isMostRecentMatch = matchStatistics.MatchID == mostRecentMatchID;
 
-        MatchMastery matchMastery = new (requestingPlayerStatistics.HeroIdentifier, heroOriginalExperience, heroMatchExperience, heroBonusExperience)
+        bool masteryCanBoost = isMostRecentMatch && heroMatchExperience > 0 && Mastery.GetLevelFromExperience(heroCurrentExperience) < Mastery.MaximumMasteryLevel;
+
+        // The Match And Bonus Experience Are Accrued During Statistics Submission, So The Current Persisted Value Is The Post-Match Total
+        // The Client Animates The Bar Up To "mastery_exp_original" And Derives The Pre-Match Value Itself By Subtracting The Match And Bonus Experience, So The Current Total Is Sent Here
+        MatchMastery matchMastery = new (requestingPlayerStatistics.HeroIdentifier, heroCurrentExperience, heroMatchExperience, heroBonusExperience)
         {
             MasteryExperienceMaximumLevelHeroesCount = mastery.HeroesAtMaximumMasteryCount(),
             MasteryExperienceBoostProductCount = MasteryConsumables.MasteryBoostsOwned(account.User),
@@ -769,6 +777,10 @@ public partial class ClientRequesterController
             MasteryExperienceCanBoost = masteryCanBoost,
             MasteryExperienceCanSuperBoost = masteryCanBoost
         };
+
+        // Cache The Post-Match Boost Context So A Subsequent Boost Purchase Is Applied From This Server-Computed Value Rather Than Trusting Client-Supplied Data
+        if (masteryCanBoost)
+            await DistributedCache.SetMasteryBoostContext(Request.Form["cookie"].ToString(), new MasteryBoostContext(requestingPlayerStatistics.HeroIdentifier, matchMastery.MasteryExperienceToBoost));
 
         MatchStatsResponse response = new ()
         {
