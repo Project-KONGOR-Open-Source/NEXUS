@@ -195,6 +195,10 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         if (categoryIDString is null)
             return BadRequest(@"Missing Value For Form Parameter ""category_id""");
 
+        // The Match Stats Screen Injects The Hero And Experience To Boost Into The Category As "MASTERY-{HeroName}-{Experience}", Because These Are Unknown Within The Store Context
+        if (categoryIDString.StartsWith("MASTERY-", StringComparison.Ordinal) && productID == MasteryBoost.Regular.ProductCode)
+            return await PurchaseMasteryBoostFromMatchStatsScreen(account, categoryIDString);
+
         if (int.TryParse(categoryIDString, out int categoryID).Equals(false))
             return BadRequest(@"Invalid Value For Form Parameter ""category_id""");
 
@@ -213,7 +217,10 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
         StoreItem? storeItem = StoreItems.GetByID(productID);
 
-        (Dictionary<string, object> response, bool success) = ExecutePurchase(account, storeItem, currency);
+        // The "discount" Form Parameter Carries The Coupon ID When The Player Chooses To Apply A Mastery Coupon, Or "0" When No Coupon Is Used
+        int.TryParse(Request.Form["discount"], out int discountCode);
+
+        (Dictionary<string, object> response, bool success) = ExecutePurchase(account, storeItem, currency, discountCode);
 
         if (success)
             await MerrickContext.SaveChangesAsync();
@@ -392,7 +399,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     /// <summary>
     ///     Executes a purchase transaction, deducting the appropriate currency and adding the item to the user's owned items.
     /// </summary>
-    private static (Dictionary<string, object> Response, bool Success) ExecutePurchase(Account account, StoreItem? storeItem, string currency)
+    private static (Dictionary<string, object> Response, bool Success) ExecutePurchase(Account account, StoreItem? storeItem, string currency, int discountCode = 0)
     {
         Dictionary<string, object> response = new ();
         User user = account.User;
@@ -404,6 +411,10 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
             return (response, false);
         }
+
+        // Mastery Boost Products Are Consumables: Purchasing One Adds A Counted Consumable Entry Rather Than An Owned Vanity Item, So They Remain Repurchasable
+        if (storeItem.ID is MasteryBoost.Regular.ProductCode or MasteryBoost.Super.ProductCode or MasteryBoost.Bundle.ProductCode)
+            return ExecuteMasteryBoostPurchase(user, storeItem);
 
         if (storeItem.Purchasable.Equals(false) || storeItem.IsEnabled.Equals(false))
         {
@@ -430,9 +441,16 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
             return (response, false);
         }
 
+        // Apply An Owned Mastery Coupon When One Is Specified And Is Valid For The Product Being Purchased
+        MasteryCoupon? appliedCoupon = MasteryCouponHelper.ResolveApplicableCoupon(user, discountCode, storeItem);
+
+        // Mastery Coupons Apply A 25% Discount; Math.Floor Matches The Values Displayed By The Client
+        int goldCost   = appliedCoupon is null ? storeItem.GoldCost   : (int) Math.Floor(storeItem.GoldCost   * 0.75);
+        int silverCost = appliedCoupon is null ? storeItem.SilverCost : (int) Math.Floor(storeItem.SilverCost * 0.75);
+
         if (currency is "0")
         {
-            if (user.GoldCoins < storeItem.GoldCost)
+            if (user.GoldCoins < goldCost)
             {
                 response["popupCode"] = (int) StorePopupCode.POP_UP_ERROR_MESSAGE;
                 response["errorCode"] = (int) StoreErrorCode.STORE_PURCHASE_POINT_ERROR;
@@ -440,12 +458,12 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
                 return (response, false);
             }
 
-            user.GoldCoins -= storeItem.GoldCost;
+            user.GoldCoins -= goldCost;
         }
 
         else if (currency is "1")
         {
-            if (user.SilverCoins < storeItem.SilverCost)
+            if (user.SilverCoins < silverCost)
             {
                 response["popupCode"] = (int) StorePopupCode.POP_UP_ERROR_MESSAGE;
                 response["errorCode"] = (int) StoreErrorCode.STORE_PURCHASE_POINT_ERROR;
@@ -453,7 +471,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
                 return (response, false);
             }
 
-            user.SilverCoins -= storeItem.SilverCost;
+            user.SilverCoins -= silverCost;
         }
 
         else
@@ -466,6 +484,10 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
         user.OwnedStoreItems.Add(storeItem.PrefixedCode);
 
+        // Consume The Mastery Coupon Once The Discounted Purchase Has Succeeded
+        if (appliedCoupon is not null)
+            MasteryConsumables.RemoveMasteryCoupon(user, appliedCoupon.Hero);
+
         // If The Purchased Item Is A Featured Bundle, Also Grant The Individual Products It Contains
         GrantFeaturedBundleContents(user, storeItem);
 
@@ -476,6 +498,107 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         response["errorCode"] = 0;
 
         return (response, true);
+    }
+
+    /// <summary>
+    ///     Purchases a mastery boost consumable, deducting its gold cost and adding the corresponding counted consumable entry to the user's owned items.
+    /// </summary>
+    private static (Dictionary<string, object> Response, bool Success) ExecuteMasteryBoostPurchase(User user, StoreItem storeItem)
+    {
+        Dictionary<string, object> response = new ();
+
+        if (user.GoldCoins < storeItem.GoldCost)
+        {
+            response["popupCode"] = (int) StorePopupCode.POP_UP_ERROR_MESSAGE;
+            response["errorCode"] = (int) StoreErrorCode.STORE_PURCHASE_POINT_ERROR;
+
+            return (response, false);
+        }
+
+        user.GoldCoins -= storeItem.GoldCost;
+
+        if (storeItem.ID == MasteryBoost.Super.ProductCode)
+            MasteryConsumables.AddSuperMasteryBoost(user);
+
+        else if (storeItem.ID == MasteryBoost.Bundle.ProductCode)
+            MasteryConsumables.AddMasteryBoost(user, 10);
+
+        else
+            MasteryConsumables.AddMasteryBoost(user);
+
+        response["popupCode"] = (int) StorePopupCode.POP_UP_PRODUCT_PURCHASE_SUCCESS;
+        response["errorCode"] = 0;
+
+        return (response, true);
+    }
+
+    /// <summary>
+    ///     Purchases and immediately applies a regular mastery boost from the post-match stats screen.
+    ///     The hero and the experience to award are parsed from the injected category in the format "MASTERY-{HeroName}-{Experience}".
+    /// </summary>
+    private async Task<IActionResult> PurchaseMasteryBoostFromMatchStatsScreen(Account account, string categoryID)
+    {
+        // The Hero Name May Contain Hyphens (For Example "Amun-Ra"), So Split Off The Trailing Experience Rather Than Splitting On Every Hyphen
+        string context = categoryID["MASTERY-".Length..];
+        int experienceSeparatorIndex = context.LastIndexOf('-');
+
+        if (experienceSeparatorIndex < 1)
+            return UnprocessableEntity("Mastery Boost Context Is Missing Or Not In The Expected Format");
+
+        string heroName = context[..experienceSeparatorIndex];
+
+        if (int.TryParse(context[(experienceSeparatorIndex + 1)..], out int boostExperience).Equals(false))
+            return BadRequest("Invalid Mastery Boost Experience Amount");
+
+        // The Client Sends The Hero's Display Name; Resolve It To Its Identifier, Falling Back To The Mastery Coupon Definitions Or An Identifier Sent Verbatim
+        string? heroIdentifier = Heroes.GetIdentifierByName(heroName)
+            ?? JSONConfiguration.MasteryCoupons.SingleOrDefault(coupon => string.Equals(coupon.Name, $"{heroName} Mastery Coupon", StringComparison.InvariantCultureIgnoreCase))?.Hero
+            ?? (heroName.StartsWith("Hero_", StringComparison.Ordinal) ? heroName : null);
+
+        if (heroIdentifier is null)
+            return NotFound($@"Hero Identifier Could Not Be Resolved For Hero Name ""{heroName}""");
+
+        Mastery? mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID);
+
+        if (mastery is null)
+        {
+            mastery = new Mastery { Account = account };
+
+            MerrickContext.Masteries.Add(mastery);
+        }
+
+        Dictionary<string, object> response = new ();
+
+        if (account.User.GoldCoins < MasteryBoost.Regular.GoldCost)
+        {
+            response["popupCode"] = (int) StorePopupCode.POP_UP_ERROR_MESSAGE;
+            response["errorCode"] = (int) StoreErrorCode.STORE_PURCHASE_POINT_ERROR;
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        int currentExperience = mastery.GetHeroExperienceByHeroIdentifier(heroIdentifier);
+        int previousLevel = Mastery.GetLevelFromExperience(currentExperience);
+
+        if (mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + boostExperience).Equals(false))
+            return NotFound($@"Mastery Column For Hero Identifier ""{heroIdentifier}"" Could Not Be Found");
+
+        account.User.GoldCoins -= MasteryBoost.Regular.GoldCost;
+
+        int currentLevel = Mastery.GetLevelFromExperience(currentExperience + boostExperience);
+
+        // A Single Boost Can Never Award Enough Experience To Cross More Than One Mastery Level
+        if (currentLevel == previousLevel + 1)
+            MasteryConsumables.IssueHeroMasteryLevelReward(account.User, currentLevel, heroIdentifier, Logger);
+
+        await MerrickContext.SaveChangesAsync();
+
+        response["popupCode"]          = (int) StorePopupCode.POP_UP_PRODUCT_PURCHASE_SUCCESS;
+        response["errorCode"]          = 0;
+        response["product_id"]         = MasteryBoost.Regular.ProductCode;
+        response["_confirm_submitted"] = true;
+
+        return Ok(PhpSerialization.Serialize(response));
     }
 
     /// <summary>
