@@ -30,6 +30,40 @@ public static class Heroes
         return identifiers;
     }
 
+    /// <summary>
+    ///     Resolves the display name (for example "Blood Hunter") for the hero with the given identifier (for example "Hero_Hunter").
+    /// </summary>
+    /// <returns>
+    ///     The hero's display name, or <see langword="null"/> if no hero with the given identifier exists.
+    /// </returns>
+    public static string? GetNameByIdentifier(string identifier)
+    {
+        foreach (Type type in typeof(Heroes).GetNestedTypes())
+        {
+            if (type.GetField("Identifier")?.GetValue(null) as string == identifier)
+                return type.GetField("Name")?.GetValue(null) as string;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     Resolves the identifier (for example "Hero_Hunter") for the hero with the given display name (for example "Blood Hunter"), ignoring case.
+    /// </summary>
+    /// <returns>
+    ///     The hero's identifier, or <see langword="null"/> if no hero with the given display name exists.
+    /// </returns>
+    public static string? GetIdentifierByName(string name)
+    {
+        foreach (Type type in typeof(Heroes).GetNestedTypes())
+        {
+            if (string.Equals(type.GetField("Name")?.GetValue(null) as string, name, StringComparison.InvariantCultureIgnoreCase))
+                return type.GetField("Identifier")?.GetValue(null) as string;
+        }
+
+        return null;
+    }
+
     public static class Accursed
     {
         public const string Name = "Accursed";
