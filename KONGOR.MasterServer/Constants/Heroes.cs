@@ -2,6 +2,11 @@
 
 public static class Heroes
 {
+    /// <summary>
+    ///     The total number of heroes, used as the denominator for mastery completion percentages.
+    /// </summary>
+    public static readonly int TotalHeroCount = typeof(Heroes).GetNestedTypes().Count(type => type.GetField("Identifier") is not null);
+
     public static List<string> AllHeroIdentifiers()
     {
         List<string> identifiers = [];
