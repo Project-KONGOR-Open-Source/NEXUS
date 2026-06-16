@@ -10,6 +10,8 @@ public static class JSONConfiguration
 
     private static readonly string MasteryRewardsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Mastery", "MasteryRewardsConfiguration.json"));
 
+    private static readonly string MasteryCouponsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Mastery", "MasteryCouponsConfiguration.json"));
+
     private static readonly string StoreItemsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Store", "StoreItemsConfiguration.json"));
 
     private static readonly string DailySpecialsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Store", "DailySpecialsConfiguration.json"));
@@ -32,6 +34,9 @@ public static class JSONConfiguration
 
     public static readonly MasteryRewardsConfiguration MasteryRewardsConfiguration = JsonSerializer.Deserialize<MasteryRewardsConfiguration>(MasteryRewardsConfigurationJSON)
         ?? throw new NullReferenceException("Mastery Rewards Configuration Is NULL");
+
+    public static readonly List<MasteryCoupon> MasteryCoupons = JsonSerializer.Deserialize<List<MasteryCoupon>>(MasteryCouponsConfigurationJSON)
+        ?? throw new NullReferenceException("Mastery Coupons Configuration Is NULL");
 
     public static readonly StoreItemsConfiguration StoreItemsConfiguration = new (JsonSerializer.Deserialize<List<StoreItem>>(StoreItemsConfigurationJSON)
         ?? throw new NullReferenceException("Store Item Configuration Is NULL"));
