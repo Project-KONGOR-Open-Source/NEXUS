@@ -195,9 +195,9 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         if (categoryIDString is null)
             return BadRequest(@"Missing Value For Form Parameter ""category_id""");
 
-        // The Match Stats Screen Injects The Hero And Experience To Boost Into The Category As "MASTERY-{HeroName}-{Experience}", Because These Are Unknown Within The Store Context
-        if (categoryIDString.StartsWith("MASTERY-", StringComparison.Ordinal) && productID == MasteryBoost.Regular.ProductCode)
-            return await PurchaseMasteryBoostFromMatchStatsScreen(account, categoryIDString);
+        // The Match Stats Screen Signals A Post-Match Boost Purchase With A "MASTERY" Category; The Hero And Experience Are Resolved Server-Side From The Cached Boost Context
+        if (categoryIDString.StartsWith("MASTERY", StringComparison.Ordinal) && productID == MasteryBoost.Regular.ProductCode)
+            return await PurchaseMasteryBoostFromMatchStatsScreen(account);
 
         if (int.TryParse(categoryIDString, out int categoryID).Equals(false))
             return BadRequest(@"Invalid Value For Form Parameter ""category_id""");
@@ -534,29 +534,19 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
     /// <summary>
     ///     Purchases and immediately applies a regular mastery boost from the post-match stats screen.
-    ///     The hero and the experience to award are parsed from the injected category in the format "MASTERY-{HeroName}-{Experience}".
+    ///     The hero and the experience to award are read from the boost context cached during the match stats request, so the values are server-computed rather than trusted from the client.
     /// </summary>
-    private async Task<IActionResult> PurchaseMasteryBoostFromMatchStatsScreen(Account account, string categoryID)
+    private async Task<IActionResult> PurchaseMasteryBoostFromMatchStatsScreen(Account account)
     {
-        // The Hero Name May Contain Hyphens (For Example "Amun-Ra"), So Split Off The Trailing Experience Rather Than Splitting On Every Hyphen
-        string context = categoryID["MASTERY-".Length..];
-        int experienceSeparatorIndex = context.LastIndexOf('-');
+        string cookie = Request.Form["cookie"].ToString();
 
-        if (experienceSeparatorIndex < 1)
-            return UnprocessableEntity("Mastery Boost Context Is Missing Or Not In The Expected Format");
+        MasteryBoostContext? boostContext = await DistributedCache.GetMasteryBoostContext(cookie);
 
-        string heroName = context[..experienceSeparatorIndex];
+        if (boostContext is null)
+            return UnprocessableEntity("Mastery Boost Context Was Not Found Or Has Expired");
 
-        if (int.TryParse(context[(experienceSeparatorIndex + 1)..], out int boostExperience).Equals(false))
-            return BadRequest("Invalid Mastery Boost Experience Amount");
-
-        // The Client Sends The Hero's Display Name; Resolve It To Its Identifier, Falling Back To The Mastery Coupon Definitions Or An Identifier Sent Verbatim
-        string? heroIdentifier = Heroes.GetIdentifierByName(heroName)
-            ?? JSONConfiguration.MasteryCoupons.SingleOrDefault(coupon => string.Equals(coupon.Name, $"{heroName} Mastery Coupon", StringComparison.InvariantCultureIgnoreCase))?.Hero
-            ?? (heroName.StartsWith("Hero_", StringComparison.Ordinal) ? heroName : null);
-
-        if (heroIdentifier is null)
-            return NotFound($@"Hero Identifier Could Not Be Resolved For Hero Name ""{heroName}""");
+        string heroIdentifier = boostContext.HeroIdentifier;
+        int boostExperience = boostContext.Experience;
 
         Mastery? mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID);
 
@@ -580,8 +570,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         int currentExperience = mastery.GetHeroExperienceByHeroIdentifier(heroIdentifier);
         int previousLevel = Mastery.GetLevelFromExperience(currentExperience);
 
-        if (mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + boostExperience).Equals(false))
-            return NotFound($@"Mastery Column For Hero Identifier ""{heroIdentifier}"" Could Not Be Found");
+        mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + boostExperience);
 
         account.User.GoldCoins -= MasteryBoost.Regular.GoldCost;
 
@@ -592,6 +581,9 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
             MasteryConsumables.IssueHeroMasteryLevelReward(account.User, currentLevel, heroIdentifier, Logger);
 
         await MerrickContext.SaveChangesAsync();
+
+        // The Boost Context Is Single-Use; Clear It So The Boost Cannot Be Re-Applied From A Stale Cache Entry
+        await DistributedCache.RemoveMasteryBoostContext(cookie);
 
         response["popupCode"]          = (int) StorePopupCode.POP_UP_PRODUCT_PURCHASE_SUCCESS;
         response["errorCode"]          = 0;

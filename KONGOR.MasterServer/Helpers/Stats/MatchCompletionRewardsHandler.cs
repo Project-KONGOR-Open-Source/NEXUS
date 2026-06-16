@@ -184,18 +184,13 @@ public static class MatchCompletionRewardsHandler
         if (matchExperience is 0)
             return;
 
-        int bonusExperience = mastery.CalculateBonusExperience(statisticsType);
+        int bonusExperience = mastery.CalculateBonusExperience(statisticsType, Heroes.TotalHeroCount);
 
         string heroIdentifier = matchParticipantStatistics.HeroIdentifier;
 
         int currentExperience = mastery.GetHeroExperienceByHeroIdentifier(heroIdentifier);
 
-        if (mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + matchExperience + bonusExperience).Equals(false))
-        {
-            logger.LogError(@"[BUG] Mastery Column For Hero Identifier ""{HeroIdentifier}"" Was Not Found", heroIdentifier);
-
-            return;
-        }
+        mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + matchExperience + bonusExperience);
 
         int previousLevel = Mastery.GetLevelFromExperience(currentExperience);
         int currentLevel = Mastery.GetLevelFromExperience(currentExperience + matchExperience + bonusExperience);
