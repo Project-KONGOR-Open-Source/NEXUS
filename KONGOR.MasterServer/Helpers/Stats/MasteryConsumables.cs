@@ -64,7 +64,8 @@ public static class MasteryConsumables
 
     /// <summary>
     ///     Issues the reward granted when a hero reaches the given mastery level.
-    ///     Level 1 grants the hero's mastery account icon, levels 2 and 11 grant the hero's mastery coupon, and the remaining rewarded levels grant silver coins or plinko tickets.
+    ///     Level 1 grants the hero's mastery account icon, levels 2 and 11 grant the hero's mastery coupon, levels 4, 8 and 12 grant silver coins (1000, 2000 and 2000 respectively), and levels 6, 9 and 14 grant plinko tickets (100, 200 and 200 respectively).
+    ///     Levels 3, 5, 7, 10, 13 and 15 correspond to cosmetic rewards (silver border, silver badge, silver teleport, gold upgrade, emote and epic upgrade) which are handled automatically by the client, and so are intentionally not issued here.
     /// </summary>
     /// <returns>
     ///     <see langword="true"/> if a reward was issued, otherwise <see langword="false"/>.
