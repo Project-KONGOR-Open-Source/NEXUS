@@ -138,15 +138,31 @@ public static class StatisticsResponseHelper
     }
 
     /// <summary>
-    ///     Gets the owned store items data dictionary, excluding mastery boosts and coupons.
+    ///     Gets the owned store items data dictionary.
+    ///     Mastery boost consumables are excluded, as their counts are surfaced via the match mastery response instead.
+    ///     Owned mastery coupons are surfaced as discount coupon data so the client can offer their discount in the store.
     /// </summary>
     public static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> GetOwnedStoreItemsData(Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
-            .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
-            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
+        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = [];
 
-        // TODO: Add Mastery Boosts And Coupons
+        foreach (string ownedItem in account.User.OwnedStoreItems)
+        {
+            if (ownedItem.StartsWith("ma.", StringComparison.Ordinal))
+                continue;
+
+            if (ownedItem.StartsWith("cp.", StringComparison.Ordinal))
+            {
+                StoreItemDiscountCoupon? coupon = MasteryCouponHelper.BuildDiscountCoupon(ownedItem);
+
+                if (coupon is not null)
+                    items[ownedItem] = coupon;
+
+                continue;
+            }
+
+            items[ownedItem] = new StoreItemData();
+        }
 
         return items;
     }
