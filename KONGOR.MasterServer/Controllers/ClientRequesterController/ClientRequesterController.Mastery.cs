@@ -157,7 +157,7 @@ public partial class ClientRequesterController
 
         // Error Code 5 Is The Client's "Match Is Too Old" Code, Which Shows The Player An Error Modal Rather Than Failing Silently
         if (matchID != mostRecentMatchID)
-            return Ok(PhpSerialization.Serialize(new Dictionary<string, object> { ["error_code"] = 5, ["error_msg"] = "Mastery boosts may only be applied to your most recent match." }));
+            return Ok(PhpSerialization.Serialize(new Dictionary<string, object> { ["error_code"] = 5, ["error_msg"] = "Hero Mastery Boosts May Only Be Applied To Your Most Recent Match" }));
 
         MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(statistics => statistics.MatchID == matchID);
 
