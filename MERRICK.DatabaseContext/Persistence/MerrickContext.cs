@@ -19,6 +19,8 @@ public sealed class MerrickContext : DbContext
     public DbSet<AccountStatistics> AccountStatistics => Set<AccountStatistics>();
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
+    public DbSet<Mastery> Masteries => Set<Mastery>();
+    public DbSet<MasteryRewards> MasteryRewards => Set<MasteryRewards>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
     public DbSet<MatchParticipantStatistics> MatchParticipantStatistics => Set<MatchParticipantStatistics>();
     public DbSet<RedeemableCode> RedeemableCodes => Set<RedeemableCode>();
@@ -49,6 +51,8 @@ public sealed class MerrickContext : DbContext
         builder.Entity<AccountStatistics>().ToTable("AccountStatistics", StatisticsSchema);
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
+        builder.Entity<Mastery>().ToTable("Masteries", StatisticsSchema);
+        builder.Entity<MasteryRewards>().ToTable("MasteryRewards", StatisticsSchema);
         builder.Entity<MatchParticipantStatistics>().ToTable("MatchParticipantStatistics", StatisticsSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
         builder.Entity<RedeemableCode>().ToTable("RedeemableCodes", MiscellaneousSchema);
