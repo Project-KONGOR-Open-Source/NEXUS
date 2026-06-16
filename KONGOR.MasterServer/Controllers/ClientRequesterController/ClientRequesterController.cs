@@ -68,6 +68,8 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // statistics
             "get_account_all_hero_stats"    => await GetHeroStatistics(),
             "get_match_stats"               => await GetMatchStatistics(),
+            "take_mastery_reward"           => await TakeMasteryReward(),
+            "boost_match_mastery"           => await BoostMatchMastery(),
             "client_events_info"            => GetClientEventsInformation(),
             "get_special_messages"          => GetSpecialMessages(),
             "claim_season_rewards"          => ClaimSeasonRewards(),
