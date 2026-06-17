@@ -24,9 +24,9 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public Guid GUID { get; } = Guid.CreateVersion7();
 
-    private string? overriddenDatabaseName;
+    private string? OverriddenDatabaseName { get; set; }
 
-    private string DatabaseName => overriddenDatabaseName ?? $"test_{GUID:N}";
+    private string DatabaseName => OverriddenDatabaseName ?? $"test_{GUID:N}";
 
     private string RedisKeyPrefix => $"test:{GUID:N}:";
 
@@ -93,11 +93,6 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithSQLServerContainer()
     {
-        if (IsInitialised)
-        {
-            return (TSelf)this;
-        }
-
         ThrowIfInitialised();
 
         UseSQLServerContainer = true;
@@ -111,11 +106,6 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithRedisContainer()
     {
-        if (IsInitialised)
-        {
-            return (TSelf)this;
-        }
-
         ThrowIfInitialised();
 
         UseRedisContainer = true;
@@ -129,11 +119,6 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithWireMockContainer()
     {
-        if (IsInitialised)
-        {
-            return (TSelf)this;
-        }
-
         ThrowIfInitialised();
 
         UseWireMockContainer = true;
@@ -147,11 +132,6 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithEnvironment(string environmentName)
     {
-        if (IsInitialised)
-        {
-            return (TSelf)this;
-        }
-
         ThrowIfInitialised();
 
         EnvironmentName = environmentName;
@@ -187,28 +167,6 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
                 }
 
                 IsInitialised = true;
-            }
-
-            else
-            {
-                if (UseWireMockContainer)
-                {
-                    await ResetWireMock();
-                }
-
-                if (UseRedisContainer)
-                {
-                    await ResetRedis();
-                }
-
-                if (UseSQLServerContainer)
-                {
-                    string assemblyName = typeof(TAssemblyMarker).Assembly.GetName().Name ?? throw new InvalidOperationException($@"Failed To Retrieve Assembly Name For ""{typeof(TAssemblyMarker).Name}""");
-                    string templateDatabaseName = $"template_{assemblyName.Replace(".", "_")}";
-                    string backupFileName = $"/var/opt/mssql/data/{templateDatabaseName}.bak";
-
-                    await RestoreDatabaseFromBackup(backupFileName);
-                }
             }
 
             return (TSelf)this;
@@ -304,7 +262,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
     private async Task EnsureDatabaseCreated()
     {
-        if (overriddenDatabaseName is not null)
+        if (OverriddenDatabaseName is not null)
         {
             // We Are The Template Factory; Just Run Migrations And Return
             await RunMigrations();
@@ -316,12 +274,20 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
         string templateDatabaseName = $"template_{assemblyName.Replace(".", "_")}";
         string backupFileName = $"/var/opt/mssql/data/{templateDatabaseName}.bak";
 
-        Task templateTask = TemplateTasks.GetOrAdd(assemblyName, key => new Lazy<Task>(async () =>
-        {
-            await CreateAndBackupTemplateDatabase(templateDatabaseName, backupFileName);
-        })).Value;
+        Lazy<Task> templateTask = TemplateTasks.GetOrAdd(assemblyName, key => new Lazy<Task>(() => CreateAndBackupTemplateDatabase(templateDatabaseName, backupFileName)));
 
-        await templateTask;
+        try
+        {
+            await templateTask.Value;
+        }
+
+        catch
+        {
+            // If The Template Build Failed, Evict The Cached Faulted Task So A Subsequent Test Rebuilds The Template Rather Than Re-Awaiting The Same Failure; The Key And Value Overload Avoids Clobbering A Concurrent Retry's Fresh Entry
+            TemplateTasks.TryRemove(new KeyValuePair<string, Lazy<Task>>(assemblyName, templateTask));
+
+            throw;
+        }
 
         await RestoreDatabaseFromBackup(backupFileName);
     }
@@ -384,7 +350,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
         try
         {
-            templateFactory.overriddenDatabaseName = templateDatabaseName;
+            templateFactory.OverriddenDatabaseName = templateDatabaseName;
 
             await templateFactory.InitialiseAsync();
         }
@@ -530,7 +496,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public override async ValueTask DisposeAsync()
     {
-        if (UseSQLServerContainer && IsInitialised && overriddenDatabaseName is null)
+        if (UseSQLServerContainer && IsInitialised && OverriddenDatabaseName is null)
         {
             await DropDatabase();
         }
@@ -568,45 +534,6 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
         {
             // Cleanup Is Best-Effort Because The Container Itself Will Be Destroyed At The End Of The Test Run, But The Failure Is Surfaced To "stderr" So Flaky Cleanup Issues Remain Visible
             Console.Error.WriteLine($@"[CLEANUP] Failed To Drop Database ""{DatabaseName}"": {exception.Message}");
-        }
-    }
-
-    private async Task ResetRedis()
-    {
-        IConnectionMultiplexer multiplexer = Services.GetRequiredService<IConnectionMultiplexer>();
-        IDatabase database = Services.GetRequiredService<IDatabase>();
-
-        foreach (System.Net.EndPoint endpoint in multiplexer.GetEndPoints())
-        {
-            IServer server = multiplexer.GetServer(endpoint);
-
-            RedisKey[] keys = [.. server.Keys(pattern: RedisKeyPrefix + "*")];
-
-            if (keys.Length > 0)
-            {
-                await database.KeyDeleteAsync(keys);
-            }
-        }
-    }
-
-    private async Task ResetWireMock()
-    {
-        IList<MappingModel> mappings = await WireMockClient.GetMappingsAsync();
-
-        string scopedPrefix = $"/{WireMockPathPrefix}/";
-
-        foreach (MappingModel mapping in mappings)
-        {
-            if (mapping.Guid is Guid guid && mapping.Request?.Path is PathModel { Matchers: { } matchers })
-            {
-                bool matches = System.Linq.Enumerable.Any(matchers, matcher =>
-                    matcher.Pattern is string pattern && pattern.StartsWith(scopedPrefix, StringComparison.Ordinal));
-
-                if (matches)
-                {
-                    await WireMockClient.DeleteMappingAsync(guid);
-                }
-            }
         }
     }
 
