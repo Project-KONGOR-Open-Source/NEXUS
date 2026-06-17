@@ -24,7 +24,9 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public Guid GUID { get; } = Guid.CreateVersion7();
 
-    private string DatabaseName => $"test_{GUID:N}";
+    private string? overriddenDatabaseName;
+
+    private string DatabaseName => overriddenDatabaseName ?? $"test_{GUID:N}";
 
     private string RedisKeyPrefix => $"test:{GUID:N}:";
 
@@ -55,6 +57,8 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     private string EnvironmentName { get; set; } = "Development";
 
     private AsynchronousLock Lock { get; } = new();
+
+    private static readonly ConcurrentDictionary<string, Lazy<Task>> TemplateTasks = new();
 
     private bool IsInitialised { get; set; } = false;
 
@@ -89,6 +93,11 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithSQLServerContainer()
     {
+        if (IsInitialised)
+        {
+            return (TSelf)this;
+        }
+
         ThrowIfInitialised();
 
         UseSQLServerContainer = true;
@@ -102,6 +111,11 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithRedisContainer()
     {
+        if (IsInitialised)
+        {
+            return (TSelf)this;
+        }
+
         ThrowIfInitialised();
 
         UseRedisContainer = true;
@@ -115,6 +129,11 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithWireMockContainer()
     {
+        if (IsInitialised)
+        {
+            return (TSelf)this;
+        }
+
         ThrowIfInitialised();
 
         UseWireMockContainer = true;
@@ -128,6 +147,11 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public TSelf WithEnvironment(string environmentName)
     {
+        if (IsInitialised)
+        {
+            return (TSelf)this;
+        }
+
         ThrowIfInitialised();
 
         EnvironmentName = environmentName;
@@ -163,6 +187,28 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
                 }
 
                 IsInitialised = true;
+            }
+
+            else
+            {
+                if (UseWireMockContainer)
+                {
+                    await ResetWireMock();
+                }
+
+                if (UseRedisContainer)
+                {
+                    await ResetRedis();
+                }
+
+                if (UseSQLServerContainer)
+                {
+                    string assemblyName = typeof(TAssemblyMarker).Assembly.GetName().Name ?? throw new InvalidOperationException($@"Failed To Retrieve Assembly Name For ""{typeof(TAssemblyMarker).Name}""");
+                    string templateDatabaseName = $"template_{assemblyName.Replace(".", "_")}";
+                    string backupFileName = $"/var/opt/mssql/data/{templateDatabaseName}.bak";
+
+                    await RestoreDatabaseFromBackup(backupFileName);
+                }
             }
 
             return (TSelf)this;
@@ -258,23 +304,223 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
     private async Task EnsureDatabaseCreated()
     {
-        try
+        if (overriddenDatabaseName is not null)
         {
-            using IServiceScope scope = Services.CreateScope();
+            // We Are The Template Factory; Just Run Migrations And Return
+            await RunMigrations();
 
-            MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
-
-            await merrickContext.Database.MigrateAsync();
-
-            await MigrateAdditionalDatabaseContexts(scope.ServiceProvider);
+            return;
         }
 
-        catch
-        {
-            // If Migration Fails Partway Through, Drop The Half-Created Database Before Propagating So It Cannot Linger Inside The Shared Container
-            await DropDatabase();
+        string assemblyName = typeof(TAssemblyMarker).Assembly.GetName().Name ?? throw new InvalidOperationException($@"Failed To Retrieve Assembly Name For ""{typeof(TAssemblyMarker).Name}""");
+        string templateDatabaseName = $"template_{assemblyName.Replace(".", "_")}";
+        string backupFileName = $"/var/opt/mssql/data/{templateDatabaseName}.bak";
 
-            throw;
+        Task templateTask = TemplateTasks.GetOrAdd(assemblyName, key => new Lazy<Task>(async () =>
+        {
+            await CreateAndBackupTemplateDatabase(templateDatabaseName, backupFileName);
+        })).Value;
+
+        await templateTask;
+
+        await RestoreDatabaseFromBackup(backupFileName);
+    }
+
+    private static bool IsModelDatabaseLockException(Exception? exception)
+    {
+        while (exception is not null)
+        {
+            if (exception is SqlException sqlException && sqlException.Message.Contains("exclusive lock on database 'model'", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            exception = exception.InnerException;
+        }
+
+        return false;
+    }
+
+    private async Task CreateAndBackupTemplateDatabase(string templateDatabaseName, string backupFileName)
+    {
+        string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
+
+        await using (SqlConnection connection = new(masterConnectionString))
+        {
+            await connection.OpenAsync();
+
+            string createDatabaseSql = $@"IF DB_ID('{templateDatabaseName}') IS NULL CREATE DATABASE [{templateDatabaseName}]";
+
+            await using (SqlCommand command = new(createDatabaseSql, connection))
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+
+        // Instantiate A Template Factory Instance To Perform Migrations Sequentially
+        TSelf? templateFactory = Activator.CreateInstance(typeof(TSelf), containerContext) as TSelf;
+
+        if (templateFactory is null)
+        {
+            throw new InvalidOperationException($@"Failed To Instantiate Template Factory Of Type ""{typeof(TSelf).Name}""");
+        }
+
+        if (UseSQLServerContainer)
+        {
+            templateFactory.WithSQLServerContainer();
+        }
+
+        if (UseRedisContainer)
+        {
+            templateFactory.WithRedisContainer();
+        }
+
+        if (UseWireMockContainer)
+        {
+            templateFactory.WithWireMockContainer();
+        }
+
+        templateFactory.WithEnvironment(EnvironmentName);
+
+        try
+        {
+            templateFactory.overriddenDatabaseName = templateDatabaseName;
+
+            await templateFactory.InitialiseAsync();
+        }
+
+        finally
+        {
+            await templateFactory.DisposeAsync();
+        }
+
+        await using (SqlConnection connection = new(masterConnectionString))
+        {
+            await connection.OpenAsync();
+
+            // Set The Database Recovery Model To Simple To Minimise Backup Size And Overhead
+            string simpleRecoverySql = $@"ALTER DATABASE [{templateDatabaseName}] SET RECOVERY SIMPLE";
+
+            await using (SqlCommand recoveryCommand = new(simpleRecoverySql, connection))
+            {
+                await recoveryCommand.ExecuteNonQueryAsync();
+            }
+
+            // Back Up The Initialised Database To The Container Local Storage
+            string backupDatabaseSql = $@"BACKUP DATABASE [{templateDatabaseName}] TO DISK = '{backupFileName}' WITH FORMAT, INIT";
+
+            await using (SqlCommand backupCommand = new(backupDatabaseSql, connection))
+            {
+                await backupCommand.ExecuteNonQueryAsync();
+            }
+
+            // Drop The Template Database Immediately After The Backup Completes To Clean Up
+            string dropDatabaseSql =
+            $"""
+                ALTER DATABASE [{templateDatabaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                DROP DATABASE [{templateDatabaseName}];
+            """;
+
+            await using (SqlCommand dropCommand = new(dropDatabaseSql, connection))
+            {
+                await dropCommand.ExecuteNonQueryAsync();
+            }
+        }
+    }
+
+    private async Task RestoreDatabaseFromBackup(string backupFileName)
+    {
+        string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
+
+        await using (SqlConnection connection = new(masterConnectionString))
+        {
+            await connection.OpenAsync();
+
+            string logicalDataName = string.Empty;
+            string logicalLogName = string.Empty;
+            string dataPhysicalPath = string.Empty;
+            string logPhysicalPath = string.Empty;
+
+            // Query The Logical File Names From The Backup Header File
+            string fileListSql = $@"RESTORE FILELISTONLY FROM DISK = '{backupFileName}'";
+
+            await using (SqlCommand fileListCommand = new(fileListSql, connection))
+            {
+                await using (SqlDataReader reader = await fileListCommand.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        string logicalName = reader.GetString(0);
+                        string physicalPath = reader.GetString(1);
+                        string type = reader.GetString(2);
+
+                        if (type.Equals("D", StringComparison.OrdinalIgnoreCase))
+                        {
+                            logicalDataName = logicalName;
+
+                            int lastSlash = physicalPath.LastIndexOfAny(['/', '\\']);
+                            string directoryPath = lastSlash >= 0 ? physicalPath.Substring(0, lastSlash + 1) : "/var/opt/mssql/data/";
+
+                            dataPhysicalPath = $"{directoryPath}{DatabaseName}.mdf";
+                        }
+
+                        else if (type.Equals("L", StringComparison.OrdinalIgnoreCase))
+                        {
+                            logicalLogName = logicalName;
+
+                            int lastSlash = physicalPath.LastIndexOfAny(['/', '\\']);
+                            string directoryPath = lastSlash >= 0 ? physicalPath.Substring(0, lastSlash + 1) : "/var/opt/mssql/data/";
+
+                            logPhysicalPath = $"{directoryPath}{DatabaseName}_log.ldf";
+                        }
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(logicalDataName) || string.IsNullOrEmpty(logicalLogName))
+            {
+                throw new InvalidOperationException($@"Failed To Retrieve Logical File Names From Backup File ""{backupFileName}""");
+            }
+
+            // Restore The Test Database From The Backup Relocating Logical Files To Unique Locations
+            string restoreSql =
+            $"""
+                RESTORE DATABASE [{DatabaseName}] FROM DISK = '{backupFileName}'
+                WITH MOVE '{logicalDataName}' TO '{dataPhysicalPath}',
+                MOVE '{logicalLogName}' TO '{logPhysicalPath}',
+                REPLACE;
+            """;
+
+            await using (SqlCommand restoreCommand = new(restoreSql, connection))
+            {
+                await restoreCommand.ExecuteNonQueryAsync();
+            }
+        }
+    }
+
+    private async Task RunMigrations()
+    {
+        int maxRetries = 5;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                using IServiceScope scope = Services.CreateScope();
+
+                MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+                await merrickContext.Database.MigrateAsync();
+
+                await MigrateAdditionalDatabaseContexts(scope.ServiceProvider);
+
+                break;
+            }
+
+            catch (Exception exception) when (attempt < maxRetries && IsModelDatabaseLockException(exception))
+            {
+                await Task.Delay(Random.Shared.Next(100, 500));
+            }
         }
     }
 
@@ -284,7 +530,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public override async ValueTask DisposeAsync()
     {
-        if (UseSQLServerContainer && IsInitialised)
+        if (UseSQLServerContainer && IsInitialised && overriddenDatabaseName is null)
         {
             await DropDatabase();
         }
@@ -322,6 +568,45 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
         {
             // Cleanup Is Best-Effort Because The Container Itself Will Be Destroyed At The End Of The Test Run, But The Failure Is Surfaced To "stderr" So Flaky Cleanup Issues Remain Visible
             Console.Error.WriteLine($@"[CLEANUP] Failed To Drop Database ""{DatabaseName}"": {exception.Message}");
+        }
+    }
+
+    private async Task ResetRedis()
+    {
+        IConnectionMultiplexer multiplexer = Services.GetRequiredService<IConnectionMultiplexer>();
+        IDatabase database = Services.GetRequiredService<IDatabase>();
+
+        foreach (System.Net.EndPoint endpoint in multiplexer.GetEndPoints())
+        {
+            IServer server = multiplexer.GetServer(endpoint);
+
+            RedisKey[] keys = [.. server.Keys(pattern: RedisKeyPrefix + "*")];
+
+            if (keys.Length > 0)
+            {
+                await database.KeyDeleteAsync(keys);
+            }
+        }
+    }
+
+    private async Task ResetWireMock()
+    {
+        IList<MappingModel> mappings = await WireMockClient.GetMappingsAsync();
+
+        string scopedPrefix = $"/{WireMockPathPrefix}/";
+
+        foreach (MappingModel mapping in mappings)
+        {
+            if (mapping.Guid is Guid guid && mapping.Request?.Path is PathModel { Matchers: { } matchers })
+            {
+                bool matches = System.Linq.Enumerable.Any(matchers, matcher =>
+                    matcher.Pattern is string pattern && pattern.StartsWith(scopedPrefix, StringComparison.Ordinal));
+
+                if (matches)
+                {
+                    await WireMockClient.DeleteMappingAsync(guid);
+                }
+            }
         }
     }
 
