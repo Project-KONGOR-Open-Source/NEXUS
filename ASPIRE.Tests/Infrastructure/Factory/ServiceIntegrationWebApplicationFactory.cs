@@ -24,9 +24,14 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public Guid GUID { get; } = Guid.CreateVersion7();
 
-    private string? OverriddenDatabaseName { get; set; }
+    /// <summary>
+    ///     Distinguishes the role this factory instance plays during database setup, so that one class can serve both as an ordinary per-test factory and as the throwaway template factory.
+    ///     When <see langword="null"/>, which is the default, the factory is a per-test factory, so <see cref="DatabaseName"/> resolves to a unique per-test database derived from <see cref="GUID"/> that is restored from the shared template backup and dropped on disposal.
+    ///     When set, the factory is the template factory and this holds the name of the template database, so <see cref="EnsureDatabaseCreated"/> only runs migrations instead of creating and restoring, and <see cref="DisposeAsync"/> deliberately leaves the database in place so that <see cref="CreateAndBackUpTemplateDatabase"/> can back it up and drop it afterwards.
+    /// </summary>
+    private string? TemplateDatabaseNameOverride { get; set; }
 
-    private string DatabaseName => OverriddenDatabaseName ?? $"test_{GUID:N}";
+    private string DatabaseName => TemplateDatabaseNameOverride ?? $"test_{GUID:N}";
 
     private string RedisKeyPrefix => $"test:{GUID:N}:";
 
@@ -262,7 +267,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
     private async Task EnsureDatabaseCreated()
     {
-        if (OverriddenDatabaseName is not null)
+        if (TemplateDatabaseNameOverride is not null)
         {
             // We Are The Template Factory; Just Run Migrations And Return
             await RunMigrations();
@@ -274,7 +279,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
         string templateDatabaseName = $"template_{assemblyName.Replace(".", "_")}";
         string backupFileName = $"/var/opt/mssql/data/{templateDatabaseName}.bak";
 
-        Lazy<Task> templateTask = TemplateTasks.GetOrAdd(assemblyName, key => new Lazy<Task>(() => CreateAndBackupTemplateDatabase(templateDatabaseName, backupFileName)));
+        Lazy<Task> templateTask = TemplateTasks.GetOrAdd(assemblyName, key => new Lazy<Task>(() => CreateAndBackUpTemplateDatabase(templateDatabaseName, backupFileName)));
 
         try
         {
@@ -307,7 +312,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
         return false;
     }
 
-    private async Task CreateAndBackupTemplateDatabase(string templateDatabaseName, string backupFileName)
+    private async Task CreateAndBackUpTemplateDatabase(string templateDatabaseName, string backupFileName)
     {
         string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
 
@@ -315,9 +320,9 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
         {
             await connection.OpenAsync();
 
-            string createDatabaseSql = $@"IF DB_ID('{templateDatabaseName}') IS NULL CREATE DATABASE [{templateDatabaseName}]";
+            string createDatabaseSQL = $@"IF DB_ID('{templateDatabaseName}') IS NULL CREATE DATABASE [{templateDatabaseName}]";
 
-            await using (SqlCommand command = new(createDatabaseSql, connection))
+            await using (SqlCommand command = new(createDatabaseSQL, connection))
             {
                 await command.ExecuteNonQueryAsync();
             }
@@ -350,7 +355,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
         try
         {
-            templateFactory.OverriddenDatabaseName = templateDatabaseName;
+            templateFactory.TemplateDatabaseNameOverride = templateDatabaseName;
 
             await templateFactory.InitialiseAsync();
         }
@@ -365,29 +370,29 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
             await connection.OpenAsync();
 
             // Set The Database Recovery Model To Simple To Minimise Backup Size And Overhead
-            string simpleRecoverySql = $@"ALTER DATABASE [{templateDatabaseName}] SET RECOVERY SIMPLE";
+            string simpleDatabaseRecoverySQL = $@"ALTER DATABASE [{templateDatabaseName}] SET RECOVERY SIMPLE";
 
-            await using (SqlCommand recoveryCommand = new(simpleRecoverySql, connection))
+            await using (SqlCommand recoveryCommand = new(simpleDatabaseRecoverySQL, connection))
             {
                 await recoveryCommand.ExecuteNonQueryAsync();
             }
 
             // Back Up The Initialised Database To The Container Local Storage
-            string backupDatabaseSql = $@"BACKUP DATABASE [{templateDatabaseName}] TO DISK = '{backupFileName}' WITH FORMAT, INIT";
+            string backUpDatabaseSQL = $@"BACKUP DATABASE [{templateDatabaseName}] TO DISK = '{backupFileName}' WITH FORMAT, INIT";
 
-            await using (SqlCommand backupCommand = new(backupDatabaseSql, connection))
+            await using (SqlCommand backupCommand = new(backUpDatabaseSQL, connection))
             {
                 await backupCommand.ExecuteNonQueryAsync();
             }
 
             // Drop The Template Database Immediately After The Backup Completes To Clean Up
-            string dropDatabaseSql =
+            string dropDatabaseSQL =
             $"""
                 ALTER DATABASE [{templateDatabaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
                 DROP DATABASE [{templateDatabaseName}];
             """;
 
-            await using (SqlCommand dropCommand = new(dropDatabaseSql, connection))
+            await using (SqlCommand dropCommand = new(dropDatabaseSQL, connection))
             {
                 await dropCommand.ExecuteNonQueryAsync();
             }
@@ -408,9 +413,9 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
             string logPhysicalPath = string.Empty;
 
             // Query The Logical File Names From The Backup Header File
-            string fileListSql = $@"RESTORE FILELISTONLY FROM DISK = '{backupFileName}'";
+            string fileListSQL = $@"RESTORE FILELISTONLY FROM DISK = '{backupFileName}'";
 
-            await using (SqlCommand fileListCommand = new(fileListSql, connection))
+            await using (SqlCommand fileListCommand = new(fileListSQL, connection))
             {
                 await using (SqlDataReader reader = await fileListCommand.ExecuteReaderAsync())
                 {
@@ -449,7 +454,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
             }
 
             // Restore The Test Database From The Backup Relocating Logical Files To Unique Locations
-            string restoreSql =
+            string restoreDatabaseSQL =
             $"""
                 RESTORE DATABASE [{DatabaseName}] FROM DISK = '{backupFileName}'
                 WITH MOVE '{logicalDataName}' TO '{dataPhysicalPath}',
@@ -457,7 +462,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
                 REPLACE;
             """;
 
-            await using (SqlCommand restoreCommand = new(restoreSql, connection))
+            await using (SqlCommand restoreCommand = new(restoreDatabaseSQL, connection))
             {
                 await restoreCommand.ExecuteNonQueryAsync();
             }
@@ -496,7 +501,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public override async ValueTask DisposeAsync()
     {
-        if (UseSQLServerContainer && IsInitialised && OverriddenDatabaseName is null)
+        if (UseSQLServerContainer && IsInitialised && TemplateDatabaseNameOverride is null)
         {
             await DropDatabase();
         }
