@@ -79,6 +79,8 @@ public static class MatchCompletionRewardsHandler
 
         AccumulateHeroStatistics(statistics, matchParticipantStatistics);
 
+        await AccumulateMasteryExperience(databaseContext, logger, account, statisticsType, matchParticipantStatistics);
+
         AccumulateAwardStatistics(statistics, matchStatistics, matchParticipantStatistics);
 
         RecordPlacementMatchResult(statistics, matchParticipantStatistics);
@@ -158,6 +160,44 @@ public static class MatchCompletionRewardsHandler
         heroStats.Humiliations += match.Humiliation;
         heroStats.Nemeses += match.Nemesis;
         heroStats.Retributions += match.Retribution;
+    }
+
+    /// <summary>
+    ///     Accumulates the base and bonus mastery experience for the participant's hero into the account's mastery row, creating the row on first use, and issues the per-hero mastery level reward when the hero crosses a level.
+    ///     Only the eligible game modes (ranked normal matchmaking, ranked casual matchmaking, and MidWars) award mastery experience. For any other mode the base experience is zero and no accrual occurs.
+    /// </summary>
+    private static async Task AccumulateMasteryExperience(MerrickContext databaseContext, ILogger logger, Account account, AccountStatisticsType statisticsType, MatchParticipantStatistics matchParticipantStatistics)
+    {
+        Mastery? mastery = await databaseContext.Masteries
+            .SingleOrDefaultAsync(record => record.AccountID == account.ID);
+
+        if (mastery is null)
+        {
+            mastery = new Mastery { Account = account };
+
+            databaseContext.Masteries.Add(mastery);
+        }
+
+        int matchExperience = mastery.CalculateMatchExperience(statisticsType, matchParticipantStatistics.HeroLevel);
+
+        // A Zero Match Experience Means The Game Mode Is Not Eligible For Mastery Progression
+        if (matchExperience is 0)
+            return;
+
+        int bonusExperience = mastery.CalculateBonusExperience(statisticsType, Heroes.TotalHeroCount);
+
+        string heroIdentifier = matchParticipantStatistics.HeroIdentifier;
+
+        int currentExperience = mastery.GetHeroExperienceByHeroIdentifier(heroIdentifier);
+
+        mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + matchExperience + bonusExperience);
+
+        int previousLevel = Mastery.GetLevelFromExperience(currentExperience);
+        int currentLevel = Mastery.GetLevelFromExperience(currentExperience + matchExperience + bonusExperience);
+
+        // A Single Match Can Never Award Enough Experience To Cross More Than One Mastery Level
+        if (currentLevel == previousLevel + 1)
+            MasteryConsumables.IssueHeroMasteryLevelReward(account.User, currentLevel, heroIdentifier, logger);
     }
 
     /// <summary>

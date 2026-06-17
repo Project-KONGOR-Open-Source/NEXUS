@@ -813,8 +813,9 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public string HeroIdentifier { get; init; } = heroIdentifier;
 
     /// <summary>
-    ///     The hero's original mastery experience before the match.
-    ///     This is the current mastery level progress persisted to the database.
+    ///     The hero's current mastery experience as persisted to the database.
+    ///     Because the match and bonus experience are accrued during statistics submission, this is the post-match total.
+    ///     The client animates the progress bar up to this value and derives the pre-match value itself by subtracting the match and bonus experience.
     /// </summary>
     [PHPProperty("mastery_exp_original")]
     public int CurrentMasteryExperience { get; init; } = currentMasteryExperience;

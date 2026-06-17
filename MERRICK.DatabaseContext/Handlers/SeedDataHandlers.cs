@@ -35,7 +35,7 @@ public static class SeedDataHandlers
 
             // TODO: Add All Upgrades (Including Missing Ones From PK Version Control); Maybe Scrape The Resources Again
 
-            OwnedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
+            OwnedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward", "ma.Mastery Boost * 5555", "ma.Super Mastery Boost * 555" ]
         };
 
         await context.Users.AddAsync(userAdministrator, cancellationToken);
@@ -57,7 +57,7 @@ public static class SeedDataHandlers
 
             // TODO: Add All Upgrades (Including Missing Ones From PK Version Control); Maybe Scrape The Resources Again
 
-            OwnedStoreItems = ["ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward"]
+            OwnedStoreItems = ["ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward", "ma.Mastery Boost * 5555", "ma.Super Mastery Boost * 555"]
         };
 
         await context.Users.AddAsync(userGuest, cancellationToken);

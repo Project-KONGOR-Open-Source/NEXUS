@@ -319,8 +319,33 @@ public partial class ClientRequesterController
         {
             ShowMasteryStatisticsResponse response = new (account);
 
-            // TODO: Populate MasteryInfo From Mastery System Once Re-Implemented
-            // TODO: Populate MasteryRewards From Mastery System Once Re-Implemented (Only For Own Account)
+            // The Mastery And Mastery Rewards Rows Are Created During Statistics Submission; Transient All-Zero Rows Are Used As A Fallback So That Reads Never Write To The Database
+            Mastery mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID)
+                ?? new Mastery { Account = account };
+
+            MasteryRewards rewards = await MerrickContext.MasteryRewards.SingleOrDefaultAsync(record => record.AccountID == account.ID)
+                ?? new MasteryRewards { Account = account };
+
+            // Every Hero Is Reported (Including Those With No Experience) So The Client Renders The Full Mastery Grid
+            response.MasteryInfo = Heroes.AllHeroIdentifiers()
+                .Select(identifier => new HeroMasteryInfo { HeroName = identifier, Experience = mastery.GetHeroExperienceByHeroIdentifier(identifier) }).ToList();
+
+            response.MasteryRewards = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards
+                .Select(configuredReward => new MasteryRewardTier
+                {
+                    Level = configuredReward.RequiredLevel,
+                    AlreadyClaimed = rewards.HasObtained(configuredReward.RequiredLevel),
+                    Reward = new global::KONGOR.MasterServer.Models.RequestResponse.Stats.MasteryReward
+                    {
+                        ProductID = configuredReward.ProductIdentifier,
+                        ProductName = configuredReward.ProductName ?? string.Empty,
+                        ProductLocalContent = configuredReward.ProductLocalResource ?? string.Empty,
+                        Quantity = configuredReward.ProductQuantity,
+                        GoldCoins = configuredReward.GoldCoins,
+                        SilverCoins = configuredReward.SilverCoins,
+                        GameTokens = configuredReward.PlinkoTickets
+                    }
+                }).ToList();
 
             return Ok(PhpSerialization.Serialize(response));
         }
@@ -722,18 +747,40 @@ public partial class ClientRequesterController
 
         MatchParticipantStatistics requestingPlayerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
 
-        MatchMastery matchMastery = new
-        (
-            heroIdentifier: requestingPlayerStatistics.HeroIdentifier,
-            currentMasteryExperience: 0, // TODO: Retrieve From Mastery System Once Re-Implemented
-            matchMasteryExperience: 100, // TODO: Calculate Based On Match Duration And Result (Use Calculation That I Implemented In Legacy PK)
-            bonusExperience: 10 // TODO: Calculate Based On Max-Level Heroes Owned
-        )
+        // The Mastery Row Is Created During Statistics Submission; A Transient All-Zero Row Is Used As A Fallback So That Reads Never Write To The Database
+        Mastery mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID)
+            ?? new Mastery { Account = account };
+
+        AccountStatisticsType masteryStatisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
+
+        int heroMatchExperience = mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
+        int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType, Heroes.TotalHeroCount);
+        int heroCurrentExperience = mastery.GetHeroExperienceByHeroIdentifier(requestingPlayerStatistics.HeroIdentifier);
+
+        // A Mastery Boost May Only Be Applied To The Account's Most Recent Match, Before Another Game Is Started
+        // The Boost Is Therefore Disabled When An Older Match Is Viewed In The Match History
+        int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .MaxAsync(statistics => statistics.MatchID);
+
+        bool isMostRecentMatch = matchStatistics.MatchID == mostRecentMatchID;
+
+        bool masteryCanBoost = isMostRecentMatch && heroMatchExperience > 0 && Mastery.GetLevelFromExperience(heroCurrentExperience) < Mastery.MaximumMasteryLevel;
+
+        // The Match And Bonus Experience Are Accrued During Statistics Submission, So The Current Persisted Value Is The Post-Match Total
+        // The Client Animates The Bar Up To "mastery_exp_original" And Derives The Pre-Match Value Itself By Subtracting The Match And Bonus Experience, So The Current Total Is Sent Here
+        MatchMastery matchMastery = new (requestingPlayerStatistics.HeroIdentifier, heroCurrentExperience, heroMatchExperience, heroBonusExperience)
         {
-            MasteryExperienceMaximumLevelHeroesCount = 0, // TODO: Count Heroes At Max Mastery Level (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
-            MasteryExperienceBoostProductCount = 0, // TODO: Count "ma.Mastery Boost" Items (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
-            MasteryExperienceSuperBoostProductCount = 0 // TODO: Count "ma.Super Mastery Boost" Items (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
+            MasteryExperienceMaximumLevelHeroesCount = mastery.HeroesAtMaximumMasteryCount(),
+            MasteryExperienceBoostProductCount = MasteryConsumables.MasteryBoostsOwned(account.User),
+            MasteryExperienceSuperBoostProductCount = MasteryConsumables.SuperMasteryBoostsOwned(account.User),
+            MasteryExperienceCanBoost = masteryCanBoost,
+            MasteryExperienceCanSuperBoost = masteryCanBoost
         };
+
+        // Cache The Post-Match Boost Context So A Subsequent Boost Purchase Is Applied From This Server-Computed Value Rather Than Trusting Client-Supplied Data
+        if (masteryCanBoost)
+            await DistributedCache.SetMasteryBoostContext(Request.Form["cookie"].ToString(), new MasteryBoostContext(requestingPlayerStatistics.HeroIdentifier, matchMastery.MasteryExperienceToBoost));
 
         MatchStatsResponse response = new ()
         {
@@ -855,11 +902,7 @@ public partial class ClientRequesterController
 
     private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
-            .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
-            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
-
-        // TODO: Add Mastery Boosts And Coupons
+        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
         /*
             Dictionary<string, object> myUpgradesInfo = accountDetails.UnlockedUpgradeCodes

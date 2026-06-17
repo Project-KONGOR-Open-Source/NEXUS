@@ -19,6 +19,8 @@ public sealed class MerrickContext : DbContext
     public DbSet<AccountStatistics> AccountStatistics => Set<AccountStatistics>();
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
+    public DbSet<Mastery> Masteries => Set<Mastery>();
+    public DbSet<MasteryRewards> MasteryRewards => Set<MasteryRewards>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
     public DbSet<MatchParticipantStatistics> MatchParticipantStatistics => Set<MatchParticipantStatistics>();
     public DbSet<RedeemableCode> RedeemableCodes => Set<RedeemableCode>();
@@ -36,6 +38,8 @@ public sealed class MerrickContext : DbContext
         ConfigureUsers(builder.Entity<User>());
         ConfigureAccounts(builder.Entity<Account>());
         ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
+        ConfigureMastery(builder.Entity<Mastery>());
+        ConfigureMasteryRewards(builder.Entity<MasteryRewards>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
         ConfigureMatchParticipantStatistics(builder.Entity<MatchParticipantStatistics>());
         ConfigureTokens(builder.Entity<Token>());
@@ -49,6 +53,8 @@ public sealed class MerrickContext : DbContext
         builder.Entity<AccountStatistics>().ToTable("AccountStatistics", StatisticsSchema);
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
+        builder.Entity<Mastery>().ToTable("Masteries", StatisticsSchema);
+        builder.Entity<MasteryRewards>().ToTable("MasteryRewards", StatisticsSchema);
         builder.Entity<MatchParticipantStatistics>().ToTable("MatchParticipantStatistics", StatisticsSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
         builder.Entity<RedeemableCode>().ToTable("RedeemableCodes", MiscellaneousSchema);
@@ -87,6 +93,28 @@ public sealed class MerrickContext : DbContext
         collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())),
         collection => collection.ToList()
     );
+
+    private static ValueComparer<List<int>> IntListValueComparer => new
+    (
+        (first, second) => (first ?? new List<int>()).SequenceEqual(second ?? new List<int>()),
+        collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())),
+        collection => collection.ToList()
+    );
+
+    private static void ConfigureMastery(EntityTypeBuilder<Mastery> builder)
+    {
+        builder.OwnsMany(mastery => mastery.HeroExperiences, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+    }
+
+    private static void ConfigureMasteryRewards(EntityTypeBuilder<MasteryRewards> builder)
+    {
+        builder.Property(rewards => rewards.ClaimedLevels).HasConversion
+        (
+            value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
+            value => JsonSerializer.Deserialize<List<int>>(value, new JsonSerializerOptions()) ?? new List<int>(),
+            IntListValueComparer
+        );
+    }
 
     private static void ConfigureUsers(EntityTypeBuilder<User> builder)
     {

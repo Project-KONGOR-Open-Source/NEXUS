@@ -24,7 +24,14 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public Guid GUID { get; } = Guid.CreateVersion7();
 
-    private string DatabaseName => $"test_{GUID:N}";
+    /// <summary>
+    ///     Distinguishes the role this factory instance plays during database setup, so that one class can serve both as an ordinary per-test factory and as the throwaway template factory.
+    ///     When <see langword="null"/>, which is the default, the factory is a per-test factory, so <see cref="DatabaseName"/> resolves to a unique per-test database derived from <see cref="GUID"/> that is restored from the shared template backup and dropped on disposal.
+    ///     When set, the factory is the template factory and this holds the name of the template database, so <see cref="EnsureDatabaseCreated"/> only runs migrations instead of creating and restoring, and <see cref="DisposeAsync"/> deliberately leaves the database in place so that <see cref="CreateAndBackUpTemplateDatabase"/> can back it up and drop it afterwards.
+    /// </summary>
+    private string? TemplateDatabaseNameOverride { get; set; }
+
+    private string DatabaseName => TemplateDatabaseNameOverride ?? $"test_{GUID:N}";
 
     private string RedisKeyPrefix => $"test:{GUID:N}:";
 
@@ -55,6 +62,8 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     private string EnvironmentName { get; set; } = "Development";
 
     private AsynchronousLock Lock { get; } = new();
+
+    private static readonly ConcurrentDictionary<string, Lazy<Task>> TemplateTasks = new();
 
     private bool IsInitialised { get; set; } = false;
 
@@ -258,23 +267,231 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
     private async Task EnsureDatabaseCreated()
     {
+        if (TemplateDatabaseNameOverride is not null)
+        {
+            // We Are The Template Factory; Just Run Migrations And Return
+            await RunMigrations();
+
+            return;
+        }
+
+        string assemblyName = typeof(TAssemblyMarker).Assembly.GetName().Name ?? throw new InvalidOperationException($@"Failed To Retrieve Assembly Name For ""{typeof(TAssemblyMarker).Name}""");
+        string templateDatabaseName = $"template_{assemblyName.Replace(".", "_")}";
+        string backupFileName = $"/var/opt/mssql/data/{templateDatabaseName}.bak";
+
+        Lazy<Task> templateTask = TemplateTasks.GetOrAdd(assemblyName, key => new Lazy<Task>(() => CreateAndBackUpTemplateDatabase(templateDatabaseName, backupFileName)));
+
         try
         {
-            using IServiceScope scope = Services.CreateScope();
-
-            MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
-
-            await merrickContext.Database.MigrateAsync();
-
-            await MigrateAdditionalDatabaseContexts(scope.ServiceProvider);
+            await templateTask.Value;
         }
 
         catch
         {
-            // If Migration Fails Partway Through, Drop The Half-Created Database Before Propagating So It Cannot Linger Inside The Shared Container
-            await DropDatabase();
+            // If The Template Build Failed, Evict The Cached Faulted Task So A Subsequent Test Rebuilds The Template Rather Than Re-Awaiting The Same Failure; The Key And Value Overload Avoids Clobbering A Concurrent Retry's Fresh Entry
+            TemplateTasks.TryRemove(new KeyValuePair<string, Lazy<Task>>(assemblyName, templateTask));
 
             throw;
+        }
+
+        await RestoreDatabaseFromBackup(backupFileName);
+    }
+
+    private static bool IsModelDatabaseLockException(Exception? exception)
+    {
+        while (exception is not null)
+        {
+            if (exception is SqlException sqlException && sqlException.Message.Contains("exclusive lock on database 'model'", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            exception = exception.InnerException;
+        }
+
+        return false;
+    }
+
+    private async Task CreateAndBackUpTemplateDatabase(string templateDatabaseName, string backupFileName)
+    {
+        string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
+
+        await using (SqlConnection connection = new(masterConnectionString))
+        {
+            await connection.OpenAsync();
+
+            string createDatabaseSQL = $@"IF DB_ID('{templateDatabaseName}') IS NULL CREATE DATABASE [{templateDatabaseName}]";
+
+            await using (SqlCommand command = new(createDatabaseSQL, connection))
+            {
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+
+        // Instantiate A Template Factory Instance To Perform Migrations Sequentially
+        TSelf? templateFactory = Activator.CreateInstance(typeof(TSelf), containerContext) as TSelf;
+
+        if (templateFactory is null)
+        {
+            throw new InvalidOperationException($@"Failed To Instantiate Template Factory Of Type ""{typeof(TSelf).Name}""");
+        }
+
+        if (UseSQLServerContainer)
+        {
+            templateFactory.WithSQLServerContainer();
+        }
+
+        if (UseRedisContainer)
+        {
+            templateFactory.WithRedisContainer();
+        }
+
+        if (UseWireMockContainer)
+        {
+            templateFactory.WithWireMockContainer();
+        }
+
+        templateFactory.WithEnvironment(EnvironmentName);
+
+        try
+        {
+            templateFactory.TemplateDatabaseNameOverride = templateDatabaseName;
+
+            await templateFactory.InitialiseAsync();
+        }
+
+        finally
+        {
+            await templateFactory.DisposeAsync();
+        }
+
+        await using (SqlConnection connection = new(masterConnectionString))
+        {
+            await connection.OpenAsync();
+
+            // Set The Database Recovery Model To Simple To Minimise Backup Size And Overhead
+            string simpleDatabaseRecoverySQL = $@"ALTER DATABASE [{templateDatabaseName}] SET RECOVERY SIMPLE";
+
+            await using (SqlCommand recoveryCommand = new(simpleDatabaseRecoverySQL, connection))
+            {
+                await recoveryCommand.ExecuteNonQueryAsync();
+            }
+
+            // Back Up The Initialised Database To The Container Local Storage
+            string backUpDatabaseSQL = $@"BACKUP DATABASE [{templateDatabaseName}] TO DISK = '{backupFileName}' WITH FORMAT, INIT";
+
+            await using (SqlCommand backupCommand = new(backUpDatabaseSQL, connection))
+            {
+                await backupCommand.ExecuteNonQueryAsync();
+            }
+
+            // Drop The Template Database Immediately After The Backup Completes To Clean Up
+            string dropDatabaseSQL =
+            $"""
+                ALTER DATABASE [{templateDatabaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+                DROP DATABASE [{templateDatabaseName}];
+            """;
+
+            await using (SqlCommand dropCommand = new(dropDatabaseSQL, connection))
+            {
+                await dropCommand.ExecuteNonQueryAsync();
+            }
+        }
+    }
+
+    private async Task RestoreDatabaseFromBackup(string backupFileName)
+    {
+        string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
+
+        await using (SqlConnection connection = new(masterConnectionString))
+        {
+            await connection.OpenAsync();
+
+            string logicalDataName = string.Empty;
+            string logicalLogName = string.Empty;
+            string dataPhysicalPath = string.Empty;
+            string logPhysicalPath = string.Empty;
+
+            // Query The Logical File Names From The Backup Header File
+            string fileListSQL = $@"RESTORE FILELISTONLY FROM DISK = '{backupFileName}'";
+
+            await using (SqlCommand fileListCommand = new(fileListSQL, connection))
+            {
+                await using (SqlDataReader reader = await fileListCommand.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        string logicalName = reader.GetString(0);
+                        string physicalPath = reader.GetString(1);
+                        string type = reader.GetString(2);
+
+                        if (type.Equals("D", StringComparison.OrdinalIgnoreCase))
+                        {
+                            logicalDataName = logicalName;
+
+                            int lastSlash = physicalPath.LastIndexOfAny(['/', '\\']);
+                            string directoryPath = lastSlash >= 0 ? physicalPath.Substring(0, lastSlash + 1) : "/var/opt/mssql/data/";
+
+                            dataPhysicalPath = $"{directoryPath}{DatabaseName}.mdf";
+                        }
+
+                        else if (type.Equals("L", StringComparison.OrdinalIgnoreCase))
+                        {
+                            logicalLogName = logicalName;
+
+                            int lastSlash = physicalPath.LastIndexOfAny(['/', '\\']);
+                            string directoryPath = lastSlash >= 0 ? physicalPath.Substring(0, lastSlash + 1) : "/var/opt/mssql/data/";
+
+                            logPhysicalPath = $"{directoryPath}{DatabaseName}_log.ldf";
+                        }
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(logicalDataName) || string.IsNullOrEmpty(logicalLogName))
+            {
+                throw new InvalidOperationException($@"Failed To Retrieve Logical File Names From Backup File ""{backupFileName}""");
+            }
+
+            // Restore The Test Database From The Backup Relocating Logical Files To Unique Locations
+            string restoreDatabaseSQL =
+            $"""
+                RESTORE DATABASE [{DatabaseName}] FROM DISK = '{backupFileName}'
+                WITH MOVE '{logicalDataName}' TO '{dataPhysicalPath}',
+                MOVE '{logicalLogName}' TO '{logPhysicalPath}',
+                REPLACE;
+            """;
+
+            await using (SqlCommand restoreCommand = new(restoreDatabaseSQL, connection))
+            {
+                await restoreCommand.ExecuteNonQueryAsync();
+            }
+        }
+    }
+
+    private async Task RunMigrations()
+    {
+        int maxRetries = 5;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                using IServiceScope scope = Services.CreateScope();
+
+                MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+                await merrickContext.Database.MigrateAsync();
+
+                await MigrateAdditionalDatabaseContexts(scope.ServiceProvider);
+
+                break;
+            }
+
+            catch (Exception exception) when (attempt < maxRetries && IsModelDatabaseLockException(exception))
+            {
+                await Task.Delay(Random.Shared.Next(100, 500));
+            }
         }
     }
 
@@ -284,7 +501,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     public override async ValueTask DisposeAsync()
     {
-        if (UseSQLServerContainer && IsInitialised)
+        if (UseSQLServerContainer && IsInitialised && TemplateDatabaseNameOverride is null)
         {
             await DropDatabase();
         }
