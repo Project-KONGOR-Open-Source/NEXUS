@@ -328,7 +328,7 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
     /// </summary>
     public bool Send(ChatBuffer buffer)
     {
-        if (buffer.Size > ChatProtocol.MAX_PACKET_SIZE)
+        if (buffer.Size + 2 /* The Buffer Size Prefix */ > ChatProtocol.MAX_PACKET_SIZE)
         {
             Logger.Error("Outbound Packet Of {PacketSize} Bytes Exceeds The Maximum Allowed Size Of {PacketMaximumSize} Bytes And Will Not Be Sent", buffer.Size, ChatProtocol.MAX_PACKET_SIZE);
 
