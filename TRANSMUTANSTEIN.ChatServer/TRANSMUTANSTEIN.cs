@@ -55,9 +55,20 @@ public class TRANSMUTANSTEIN
             int matchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
                 ?? throw new NullReferenceException("Chat Server Port For Match Server Manager Connections Is NULL"));
 
-            kestrelOptions.ListenAnyIP(clientConnectionsPort, listenOptions => listenOptions.UseConnectionHandler<ClientConnectionHandler>());
-            kestrelOptions.ListenAnyIP(matchServerConnectionsPort, listenOptions => listenOptions.UseConnectionHandler<MatchServerConnectionHandler>());
-            kestrelOptions.ListenAnyIP(matchServerManagerConnectionsPort, listenOptions => listenOptions.UseConnectionHandler<MatchServerManagerConnectionHandler>());
+            bool isDevelopmentEnvironment = builder.Environment.IsDevelopment();
+
+            // In Development, Log Each Connection's Raw Traffic To Aid Protocol Debugging; This Is Too Verbose For Other Environments
+            void ConfigureChatEndpoint<THandler>(ListenOptions listenOptions) where THandler : ConnectionHandler
+            {
+                if (isDevelopmentEnvironment)
+                    listenOptions.UseConnectionLogging();
+
+                listenOptions.UseConnectionHandler<THandler>();
+            }
+
+            kestrelOptions.ListenAnyIP(clientConnectionsPort, ConfigureChatEndpoint<ClientConnectionHandler>);
+            kestrelOptions.ListenAnyIP(matchServerConnectionsPort, ConfigureChatEndpoint<MatchServerConnectionHandler>);
+            kestrelOptions.ListenAnyIP(matchServerManagerConnectionsPort, ConfigureChatEndpoint<MatchServerManagerConnectionHandler>);
         });
 
         // Configure Matchmaking Settings
