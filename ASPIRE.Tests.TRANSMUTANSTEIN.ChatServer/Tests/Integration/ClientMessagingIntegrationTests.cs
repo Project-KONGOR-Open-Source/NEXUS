@@ -3,7 +3,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 /// <summary>
 ///     Drives client-to-client messaging against the real host over real sockets, verifying that the chat server delivers whispers and channel messages to their recipients through each connection's outbound write pump, in order, and reports failures back to the sender.
 /// </summary>
-[NotInParallel("ChatServerHost")]
+[NotInParallel(nameof(ChatServerHost))]
 public sealed class ClientMessagingIntegrationTests(ServiceContainerContext containerContext)
 {
     private const string RemoteIP = "127.0.0.1";

@@ -3,7 +3,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 /// <summary>
 ///     Drives the match server handshake against the real host over a real socket, covering the accept path, the reconnect supersede path, and the graceful termination that must flush the "quit" remote command before closing.
 /// </summary>
-[NotInParallel("ChatServerHost")]
+[NotInParallel(nameof(ChatServerHost))]
 public sealed class MatchServerHandshakeIntegrationTests(ServiceContainerContext containerContext)
 {
     [Test]

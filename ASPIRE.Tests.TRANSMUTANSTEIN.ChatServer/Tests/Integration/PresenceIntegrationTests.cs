@@ -3,7 +3,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 /// <summary>
 ///     Drives presence broadcasting against the real host over real sockets, verifying that connecting clients receive an initial snapshot of their already-online friends and that a friend coming online is broadcast to friends who are already connected.
 /// </summary>
-[NotInParallel("ChatServerHost")]
+[NotInParallel(nameof(ChatServerHost))]
 public sealed class PresenceIntegrationTests(ServiceContainerContext containerContext)
 {
     private const string RemoteIP = "127.0.0.1";

@@ -3,7 +3,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 /// <summary>
 ///     Drives the client handshake against the real host over a real socket, covering the accept and reject paths, the concurrent-connection takeover, and the disconnect cleanup.
 /// </summary>
-[NotInParallel("ChatServerHost")]
+[NotInParallel(nameof(ChatServerHost))]
 public sealed class ClientHandshakeIntegrationTests(ServiceContainerContext containerContext)
 {
     private const string RemoteIP = "127.0.0.1";

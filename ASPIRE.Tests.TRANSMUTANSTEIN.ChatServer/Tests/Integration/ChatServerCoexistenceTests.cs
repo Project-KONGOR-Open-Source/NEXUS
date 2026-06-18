@@ -4,7 +4,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 ///     Verifies that the real host serves its HTTP health surface and the TCP chat protocol concurrently on the same running instance.
 ///     This exercises the production Kestrel wiring, where configuring the chat protocol endpoints in code also re-applies the HTTP address so that both continue to bind.
 /// </summary>
-[NotInParallel("ChatServerHost")]
+[NotInParallel(nameof(ChatServerHost))]
 public sealed class ChatServerCoexistenceTests(ServiceContainerContext containerContext)
 {
     [Test]
