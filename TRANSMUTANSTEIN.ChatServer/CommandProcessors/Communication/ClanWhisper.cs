@@ -5,13 +5,17 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 ///     Broadcasts a message to all online clan members, respecting DND/AFK chat modes.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_WHISPER)]
-public class ClanWhisper : ISynchronousCommandProcessor<ClientChatSession>
+public class ClanWhisper(FloodPreventionService floodPreventionService) : ISynchronousCommandProcessor<ClientChatSession>
 {
     public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         ClanWhisperRequestData requestData = new (buffer);
 
         if (string.IsNullOrEmpty(requestData.Message))
+            return;
+
+        // If The Flood Prevention Service Returns False, The Session Has Been Notified That The Client Has Exceeded The Flood Threshold; In This Case, The Command Is Aborted
+        if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
             return;
 
         if (session.Account.Clan is null)

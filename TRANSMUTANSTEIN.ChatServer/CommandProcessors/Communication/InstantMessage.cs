@@ -30,13 +30,17 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 ///     </list>
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_IM)]
-public class InstantMessage : ISynchronousCommandProcessor<ClientChatSession>
+public class InstantMessage(FloodPreventionService floodPreventionService) : ISynchronousCommandProcessor<ClientChatSession>
 {
     public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         InstantMessageRequestData requestData = new (buffer);
 
         if (string.IsNullOrEmpty(requestData.Message))
+            return;
+
+        // If The Flood Prevention Service Returns False, The Session Has Been Notified That The Client Has Exceeded The Flood Threshold; In This Case, The Command Is Aborted
+        if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
             return;
 
         // Find Recipient

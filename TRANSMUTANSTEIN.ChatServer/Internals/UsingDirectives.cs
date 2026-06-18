@@ -48,6 +48,7 @@ global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Text;
 global using System.Threading.Channels;
+global using System.Threading.RateLimiting;
 
 global using TRANSMUTANSTEIN.ChatServer.Attributes;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;

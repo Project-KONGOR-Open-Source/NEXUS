@@ -11,7 +11,7 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
         if (string.IsNullOrEmpty(requestData.Message))
             return;
 
-        // Check Flood Prevention (Service Handles Both Check And Response)
+        // If The Flood Prevention Service Returns False, The Session Has Been Notified That The Client Has Exceeded The Flood Threshold; In This Case, The Command Is Aborted
         if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
             return;
 
