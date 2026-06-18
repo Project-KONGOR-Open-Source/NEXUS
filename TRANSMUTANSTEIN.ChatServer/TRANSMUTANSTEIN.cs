@@ -4,6 +4,15 @@ public class TRANSMUTANSTEIN
 {
     public static void Main(string[] arguments)
     {
+        CreateApplication(arguments).Run();
+    }
+
+    /// <summary>
+    ///     Builds and fully configures the chat server's web application, leaving it ready to run.
+    ///     Extracted from <see cref="Main"/> so that integration tests can start the production wiring on their own ports without invoking the blocking run loop.
+    /// </summary>
+    public static WebApplication CreateApplication(string[] arguments)
+    {
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(arguments);
 
@@ -12,6 +21,44 @@ public class TRANSMUTANSTEIN
 
         // Add Serilog Logging
         builder.AddSerilogLogging();
+
+        // Configure The Chat Server's Endpoints On Kestrel; The Three Chat Protocol Ports Are Each Served By Their Own Connection Handler
+        // Because Configuring Any Endpoint In Code Makes Kestrel Ignore The Host's URL-Based Address Configuration ("ASPNETCORE_URLS"), The HTTP Surface (Health Checks) Is Re-Applied Here From That Same Configuration So That Both It And The Chat Protocol Endpoints Continue To Bind
+        builder.WebHost.ConfigureKestrel(kestrelOptions =>
+        {
+            foreach (string applicationUrl in (Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? string.Empty).Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                BindingAddress bindingAddress = BindingAddress.Parse(applicationUrl);
+
+                Action<ListenOptions> configureHTTPEndpoint = listenOptions =>
+                {
+                    if (bindingAddress.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                        listenOptions.UseHttps();
+                };
+
+                if (bindingAddress.Host is "*" or "+" or "0.0.0.0" or "::" or "[::]")
+                    kestrelOptions.ListenAnyIP(bindingAddress.Port, configureHTTPEndpoint);
+
+                else if (bindingAddress.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase))
+                    kestrelOptions.ListenLocalhost(bindingAddress.Port, configureHTTPEndpoint);
+
+                else
+                    kestrelOptions.Listen(IPAddress.Parse(bindingAddress.Host), bindingAddress.Port, configureHTTPEndpoint);
+            }
+
+            int clientConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT")
+                ?? throw new NullReferenceException("Chat Server Port For Client Connections Is NULL"));
+
+            int matchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER")
+                ?? throw new NullReferenceException("Chat Server Port For Match Server Connections Is NULL"));
+
+            int matchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
+                ?? throw new NullReferenceException("Chat Server Port For Match Server Manager Connections Is NULL"));
+
+            kestrelOptions.ListenAnyIP(clientConnectionsPort, listenOptions => listenOptions.UseConnectionHandler<ClientConnectionHandler>());
+            kestrelOptions.ListenAnyIP(matchServerConnectionsPort, listenOptions => listenOptions.UseConnectionHandler<MatchServerConnectionHandler>());
+            kestrelOptions.ListenAnyIP(matchServerManagerConnectionsPort, listenOptions => listenOptions.UseConnectionHandler<MatchServerManagerConnectionHandler>());
+        });
 
         // Configure Matchmaking Settings
         builder.Services.Configure<MatchmakingSettings>(builder.Configuration.GetSection(MatchmakingSettings.SectionName));
@@ -45,9 +92,6 @@ public class TRANSMUTANSTEIN
 
         // Register IDatabase From IConnectionMultiplexer
         builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
-
-        // Register Chat Service As Background Hosted Service
-        builder.Services.AddHostedService<ChatService>();
 
         // Register Matchmaking Service As Background Hosted Service
         builder.Services.AddHostedService<MatchmakingService>();
@@ -90,6 +134,9 @@ public class TRANSMUTANSTEIN
 
         // Build The Application
         WebApplication application = builder.Build();
+
+        // Initialise The Chat Server's Static Logger Facade From The Host's Configured Logger, Before Any Connection Handler Or Hosted Service Runs
+        Log.Initialise(application.Services.GetRequiredService<ILogger>());
 
         // Enable Forwarded Headers Middleware For Reverse Proxy Support
         application.UseForwardedHeaders();
@@ -136,7 +183,6 @@ public class TRANSMUTANSTEIN
         // Map Aspire Default Health Check Endpoints
         application.MapDefaultEndpoints();
 
-        // Run The Application
-        application.Run();
+        return application;
     }
 }

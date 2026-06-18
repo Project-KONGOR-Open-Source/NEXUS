@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class ClientChatSession(TCPServer server, IServiceProvider serviceProvider) : ChatSession(server, serviceProvider)
+public class ClientChatSession(ConnectionContext connection, IServiceProvider serviceProvider) : ChatSession(connection, serviceProvider)
 {
     /// <summary>
     ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
@@ -371,11 +371,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // Perform The In-Memory Cleanup
         CleanUpSession();
 
-        // Tear Down The Underlying Socket
+        // Tear Down The Underlying Connection
         Disconnect();
-
-        // Dispose Of The Chat Session
-        Dispose();
     }
 
     /// <summary>

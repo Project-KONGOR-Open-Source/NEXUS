@@ -28,7 +28,7 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
         // Use The Server Address That Was Set When The Match Was Spawned (From The MatchServer Cache Entry), Falling Back To The Session's Remote Endpoint When It Is Missing
         string? serverAddress = pendingMatch.ServerAddress;
 
-        if (string.IsNullOrEmpty(serverAddress) && session.Socket.RemoteEndPoint is IPEndPoint remoteEndPoint)
+        if (string.IsNullOrEmpty(serverAddress) && session.RemoteEndPoint is IPEndPoint remoteEndPoint)
             serverAddress = remoteEndPoint.Address.ToString();
 
         if (string.IsNullOrEmpty(serverAddress))
