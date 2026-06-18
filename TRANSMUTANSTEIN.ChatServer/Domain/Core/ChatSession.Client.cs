@@ -362,7 +362,7 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
         });
     }
 
-    public void Terminate()
+    public async Task Terminate()
     {
         // For Authenticated Sessions, Notify The Client Of The Forced Logout While The Socket Is Still Open
         if (Account is not null)
@@ -371,8 +371,8 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
         // Perform The In-Memory Cleanup
         CleanUpSession();
 
-        // Tear Down The Underlying Connection
-        Disconnect();
+        // Tear Down The Connection, Flushing The Queued Reject Or Logout Frame To The Client Before The Socket Is Closed
+        await CloseGracefully();
     }
 
     /// <summary>
