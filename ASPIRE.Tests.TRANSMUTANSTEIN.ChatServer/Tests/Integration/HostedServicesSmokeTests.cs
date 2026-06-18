@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
+namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 
 /// <summary>
 ///     Smoke tests verifying that the TRANSMUTANSTEIN host builds end-to-end against real SQL Server and Redis containers, migrations run successfully against the per-test database, and the distributed cache is reachable.
