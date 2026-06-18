@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 
 /// <summary>
-///     Drives the match server handshake against the real host over a real socket, covering the accept path and the reconnect supersede path that the new transport's teardown must preserve.
+///     Drives the match server handshake against the real host over a real socket, covering the accept path, the reconnect supersede path, and the graceful termination that must flush the "quit" remote command before closing.
 /// </summary>
 [NotInParallel("ChatServerHost")]
 public sealed class MatchServerHandshakeIntegrationTests(ServiceContainerContext containerContext)
@@ -78,5 +78,41 @@ public sealed class MatchServerHandshakeIntegrationTests(ServiceContainerContext
             await Assert.That(Context.MatchServerChatSessions.ContainsKey(serverID)).IsTrue();
             await Assert.That(cacheEntryPreserved).IsTrue();
         }
+    }
+
+    [Test]
+    public async Task Graceful_Terminate_Delivers_The_Quit_Remote_Command()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        (int hostAccountID, string hostAccountName) = await ChatTestData.SeedAccount(host.Services, AccountType.ServerHost);
+
+        int serverID = Random.Shared.Next(100_000, 999_999);
+        string cookie = Guid.CreateVersion7().ToString();
+
+        await ChatTestData.SeedMatchServer(host.Services, serverID, hostAccountID, hostAccountName, cookie);
+
+        using TcpClient client = await host.ConnectMatchServerAsync();
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildServerHandshake(serverID, cookie));
+
+        // Wait For The Handshake To Register The Session In The Pool, Then Terminate It Gracefully
+        await ChatTestProtocol.WaitUntil(() => Context.MatchServerChatSessions.ContainsKey(serverID), TimeSpan.FromSeconds(10));
+
+        MatchServerChatSession session = Context.MatchServerChatSessions[serverID];
+
+        await using (AsyncServiceScope scope = host.Services.CreateAsyncScope())
+        {
+            IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+            await session.Terminate(distributedCacheStore);
+        }
+
+        // The Graceful Teardown Must Flush The "quit" Remote Command To The Match Server Before The Socket Is Closed
+        bool quitDelivered = await ChatTestProtocol.ReadUntilRemoteCommand(stream, "quit", TimeSpan.FromSeconds(10));
+
+        await Assert.That(quitDelivered).IsTrue();
     }
 }

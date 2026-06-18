@@ -21,16 +21,52 @@ internal static class ChatTestProtocol
     }
 
     /// <summary>
-    ///     Reads one length-prefixed frame and returns the command identifier from the front of its payload.
+    ///     Reads one length-prefixed frame and returns its payload (the command identifier followed by the command body).
     /// </summary>
-    public static async Task<ushort> ReadCommand(NetworkStream stream, CancellationToken cancellationToken)
+    public static async Task<byte[]> ReadFramePayload(NetworkStream stream, CancellationToken cancellationToken)
     {
         byte[] header = await ReadExactly(stream, 2, cancellationToken);
         ushort length = BitConverter.ToUInt16(header, 0);
 
-        byte[] payload = await ReadExactly(stream, length, cancellationToken);
+        return await ReadExactly(stream, length, cancellationToken);
+    }
 
-        return BitConverter.ToUInt16(payload, 0);
+    /// <summary>
+    ///     Reads one length-prefixed frame and returns the command identifier from the front of its payload.
+    /// </summary>
+    public static async Task<ushort> ReadCommand(NetworkStream stream, CancellationToken cancellationToken)
+        => BitConverter.ToUInt16(await ReadFramePayload(stream, cancellationToken), 0);
+
+    /// <summary>
+    ///     Reads frames until a remote command frame carrying the expected command text is seen, returning whether it arrived before the connection closed or the timeout elapsed.
+    /// </summary>
+    public static async Task<bool> ReadUntilRemoteCommand(NetworkStream stream, string expectedCommand, TimeSpan timeout)
+    {
+        using CancellationTokenSource cancellation = new (timeout);
+
+        try
+        {
+            while (true)
+            {
+                ChatBuffer frame = new (await ReadFramePayload(stream, cancellation.Token));
+
+                ushort command = BitConverter.ToUInt16(frame.ReadCommandBytes(), 0);
+
+                if (command != ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND)
+                    continue;
+
+                frame.ReadString();                        // Session Cookie
+
+                string remoteCommand = frame.ReadString(); // Command Text
+
+                if (remoteCommand.Equals(expectedCommand, StringComparison.Ordinal))
+                    return true;
+            }
+        }
+
+        catch (OperationCanceledException) { return false; }
+
+        catch (Exception exception) when (exception is IOException or SocketException or InvalidOperationException) { return false; }
     }
 
     /// <summary>
