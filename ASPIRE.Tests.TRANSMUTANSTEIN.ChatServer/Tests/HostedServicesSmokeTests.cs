@@ -2,7 +2,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
 /// <summary>
 ///     Smoke tests verifying that the TRANSMUTANSTEIN host builds end-to-end against real SQL Server and Redis containers, migrations run successfully against the per-test database, and the distributed cache is reachable.
-///     The production hosted services (<see cref="ChatService"/>, <see cref="MatchmakingService"/>, <see cref="FloodPreventionService"/>) bind raw TCP sockets, so <see cref="TRANSMUTANSTEINIntegrationWebApplicationFactory.ConfigureAdditionalServices"/> removes them before the test host starts; these smoke tests therefore exercise only the infrastructure wiring, not the hosted services themselves.
+///     The production hosted services (<see cref="MatchmakingService"/>, <see cref="FloodPreventionService"/>) are removed by <see cref="TRANSMUTANSTEINIntegrationWebApplicationFactory.ConfigureAdditionalServices"/> before the test host starts; these smoke tests therefore exercise only the infrastructure wiring, not the hosted services themselves.
 /// </summary>
 public sealed class HostedServicesSmokeTests(TRANSMUTANSTEINIntegrationWebApplicationFactory webApplicationFactory)
 {
