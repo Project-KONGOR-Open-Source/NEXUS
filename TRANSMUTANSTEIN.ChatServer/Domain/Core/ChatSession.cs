@@ -388,8 +388,8 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
 
         OutboundFrames.Writer.TryComplete();
 
-        try { await WritePump; }
-        catch { }
+        // Allow The Writer Pump To Flush The Queued Frames, But Do Not Wait Indefinitely On A Peer That Has Stopped Reading
+        try { await WritePump.WaitAsync(TimeSpan.FromSeconds(5)); } catch { }
 
         Connection.Abort();
     }
