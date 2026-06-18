@@ -30,6 +30,7 @@ global using ASPIRE.Common;
 global using ASPIRE.Common.Constants;
 
 global using MERRICK.DatabaseContext.Entities.Core;
+global using MERRICK.DatabaseContext.Entities.Relational;
 global using MERRICK.DatabaseContext.Entities.Utility;
 
 global using System.Buffers;
@@ -44,11 +45,6 @@ global using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Services;
 global using TRANSMUTANSTEIN.ChatServer.Utilities;
-
-global using ChatServerApplication = TRANSMUTANSTEIN.ChatServer.TRANSMUTANSTEIN;
-global using Context = TRANSMUTANSTEIN.ChatServer.Internals.Context;
-global using Log = TRANSMUTANSTEIN.ChatServer.Utilities.Log;
-global using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
 
 global using TUnit.Assertions;
 global using TUnit.Assertions.Extensions;

@@ -66,7 +66,7 @@ internal sealed class ChatServerHost : IAsyncDisposable
             $"--ConnectionStrings:DISTRIBUTED-CACHE={cacheConnectionString}"
         ];
 
-        WebApplication application = ChatServerApplication.CreateApplication(arguments);
+        WebApplication application = ChatServerWebApplication.CreateApplication(arguments);
 
         // Ensure The Target Database Exists And Is Migrated Before The Host Begins Serving
         using (IServiceScope scope = application.Services.CreateScope())
@@ -102,6 +102,34 @@ internal sealed class ChatServerHost : IAsyncDisposable
         TcpClient client = new ();
 
         await client.ConnectAsync(IPAddress.Loopback, MatchServerPort);
+
+        return client;
+    }
+
+    /// <summary>
+    ///     Connects a game client, performs a valid handshake, and waits until the session is registered and online, returning the connected client ready to exchange chat traffic.
+    ///     Used by tests that need two or more authenticated clients connected at once to exercise peer delivery, channel fan-out, and presence broadcasts.
+    /// </summary>
+    public async Task<TcpClient> ConnectAndAuthenticateClientAsync(int accountID, string accountName, string cookie, string remoteIP)
+    {
+        TcpClient client = await ConnectClientAsync();
+
+        NetworkStream stream = client.GetStream();
+
+        string authenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountID, remoteIP, cookie);
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildClientHandshake(accountID, cookie, remoteIP, authenticationHash));
+
+        using (CancellationTokenSource timeout = new (TimeSpan.FromSeconds(10)))
+        {
+            ushort command = await ChatTestProtocol.ReadCommand(stream, timeout.Token);
+
+            if (command != (ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT)
+                throw new InvalidOperationException(@$"The Client Handshake For Account ""{accountName}"" Was Not Accepted (Received Command {command})");
+        }
+
+        if (await ChatTestProtocol.WaitUntil(() => Context.ClientChatSessions.ContainsKey(accountName), TimeSpan.FromSeconds(10)) is false)
+            throw new InvalidOperationException(@$"The Client Session For Account ""{accountName}"" Was Not Registered Within The Timeout");
 
         return client;
     }

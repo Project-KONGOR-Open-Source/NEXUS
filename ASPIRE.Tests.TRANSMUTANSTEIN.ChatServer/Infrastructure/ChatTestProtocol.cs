@@ -70,6 +70,31 @@ internal static class ChatTestProtocol
     }
 
     /// <summary>
+    ///     Reads frames until one carrying the expected command identifier is seen, returning that frame positioned immediately after the command bytes so the caller can read its fields, or <see langword="null"/> if the connection closed or the timeout elapsed first.
+    /// </summary>
+    public static async Task<ChatBuffer?> ReadUntilCommand(NetworkStream stream, ushort expectedCommand, TimeSpan timeout)
+    {
+        using CancellationTokenSource cancellation = new (timeout);
+
+        try
+        {
+            while (true)
+            {
+                ChatBuffer frame = new (await ReadFramePayload(stream, cancellation.Token));
+
+                ushort command = BitConverter.ToUInt16(frame.ReadCommandBytes(), 0);
+
+                if (command == expectedCommand)
+                    return frame;
+            }
+        }
+
+        catch (OperationCanceledException) { return null; }
+
+        catch (Exception exception) when (exception is IOException or SocketException or InvalidOperationException) { return null; }
+    }
+
+    /// <summary>
     ///     Reads and discards from the stream until the peer closes the connection, returning whether it closed within the timeout.
     /// </summary>
     public static async Task<bool> WaitForClose(NetworkStream stream, TimeSpan timeout)
@@ -150,6 +175,38 @@ internal static class ChatTestProtocol
         buffer.WriteInt32(serverID);
         buffer.WriteString(cookie);
         buffer.WriteInt32((int) ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildWhisper(string targetName, string message)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_WHISPER);
+        buffer.WriteString(targetName);
+        buffer.WriteString(message);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildJoinChannel(string channelName)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOIN_CHANNEL);
+        buffer.WriteString(channelName);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildChannelMessage(string message, int channelID)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_MSG);
+        buffer.WriteString(message);
+        buffer.WriteInt32(channelID);
 
         return buffer;
     }

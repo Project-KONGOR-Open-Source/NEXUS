@@ -17,7 +17,8 @@ internal static class ChatTestData
 
         Role role = await databaseContext.Roles.SingleAsync(candidate => candidate.Name.Equals(UserRoles.User));
 
-        string suffix = Guid.CreateVersion7().ToString("N")[..8];
+        // Version 7 GUIDs Are Time-Ordered, So Their Leading Characters Are A Shared Millisecond Timestamp That Collides For Accounts Seeded Close Together; The Trailing Characters Are Random And Therefore Unique
+        string suffix = Guid.CreateVersion7().ToString("N")[^8..];
 
         User user = new ()
         {
@@ -30,7 +31,7 @@ internal static class ChatTestData
 
         Account account = new ()
         {
-            Name = $"Test{suffix}",
+            Name = $"TEST:{suffix}",
             User = user,
             IsMain = true,
             Type = accountType
@@ -81,5 +82,24 @@ internal static class ChatTestData
         };
 
         await distributedCacheStore.SetMatchServer(hostAccountName, matchServer);
+    }
+
+    /// <summary>
+    ///     Records a mutual friendship between two seeded accounts so that each appears in the other's friend list when the client handshake loads the account.
+    ///     The friendship is stored as an entry in each account's owned <see cref="Account.FriendedPeers"/> collection, mirroring how the client adds a friend.
+    /// </summary>
+    public static async Task SeedFriendship(IServiceProvider services, (int ID, string Name) firstAccount, (int ID, string Name) secondAccount)
+    {
+        await using AsyncServiceScope scope = services.CreateAsyncScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account first = await databaseContext.Accounts.SingleAsync(account => account.ID == firstAccount.ID);
+        Account second = await databaseContext.Accounts.SingleAsync(account => account.ID == secondAccount.ID);
+
+        first.FriendedPeers.Add(new FriendedPeer { ID = secondAccount.ID, Name = secondAccount.Name, ClanTag = null, FriendGroup = "Friends" });
+        second.FriendedPeers.Add(new FriendedPeer { ID = firstAccount.ID, Name = firstAccount.Name, ClanTag = null, FriendGroup = "Friends" });
+
+        await databaseContext.SaveChangesAsync();
     }
 }
