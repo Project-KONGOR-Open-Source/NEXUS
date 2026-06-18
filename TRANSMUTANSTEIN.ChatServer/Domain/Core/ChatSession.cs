@@ -78,6 +78,9 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
 
     private Task WritePump { get; set; } = Task.CompletedTask;
 
+    // Cancelled To End The Read Loop On A Server-Initiated Teardown Without Aborting The Connection, So A Graceful Close Can Send A FIN Rather Than An Abortive Reset
+    private readonly CancellationTokenSource ConnectionTeardown = new ();
+
     private int TeardownCompleted;
 
     /// <summary>
@@ -125,7 +128,7 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
 
         while (true)
         {
-            ReadResult readResult = await input.ReadAsync(Connection.ConnectionClosed);
+            ReadResult readResult = await input.ReadAsync(ConnectionTeardown.Token);
 
             if (readResult.IsCanceled)
                 break;
@@ -139,14 +142,15 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
 
             foreach (byte[] segment in segments)
             {
-                // A Command Processor May Disconnect The Session (e.g. A Rejected Handshake Or A Concurrent-Connection Takeover); Once That Happens, The Remaining Frames In This Batch Must Not Be Processed
-                if (Connection.ConnectionClosed.IsCancellationRequested)
+                // A Command Processor May Tear The Session Down (e.g. A Rejected Handshake Or A Concurrent-Connection Takeover); Once That Happens, The Remaining Frames In This Batch Must Not Be Processed
+                if (ConnectionTeardown.IsCancellationRequested)
                     break;
 
                 await ProcessDataSegment(segment);
             }
 
-            if (readResult.IsCompleted)
+            // Stop Reading Once The Session Has Been Torn Down Or The Peer Has Closed Its End
+            if (ConnectionTeardown.IsCancellationRequested || readResult.IsCompleted)
                 break;
         }
     }
@@ -377,6 +381,8 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
         OutboundFrames.Writer.TryComplete();
 
         Connection.Abort();
+
+        ConnectionTeardown.Cancel();
     }
 
     /// <summary>
@@ -391,7 +397,11 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
         // Allow The Writer Pump To Flush The Queued Frames, But Do Not Wait Indefinitely On A Peer That Has Stopped Reading
         try { await WritePump.WaitAsync(TimeSpan.FromSeconds(5)); } catch { }
 
-        Connection.Abort();
+        // Complete The Output To Flush The Queued Frames And Send A FIN, So The Peer Receives Them In Full; An Abortive Reset Could Otherwise Discard Data It Has Not Yet Read
+        try { await Connection.Transport.Output.CompleteAsync(); } catch { }
+
+        // End The Read Loop Without Aborting, So The Handler Returns And Kestrel Performs An Orderly Close After The Flushed Frames Rather Than An Abortive Reset
+        ConnectionTeardown.Cancel();
     }
 
     private void Teardown()
