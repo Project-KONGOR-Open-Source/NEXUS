@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20260616151345_PersistMasteriesToJSON")]
-    partial class PersistMasteriesToJSON
+    [Migration("20260619063437_AddHeroMasteries")]
+    partial class AddHeroMasteries
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
