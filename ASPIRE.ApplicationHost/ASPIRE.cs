@@ -44,17 +44,21 @@ public class ASPIRE
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
         // Add Distributed Cache Dashboard Resource
-        // The Dashboard Cannot Be Pre-Configured With A Connection (TODO: Keep Checking Updates On This), To Add The Connection Manually:
-        //     1) Open The Dashboard And Click "Add Connection".
-        //     2) Choose Endpoint Type "Node".
-        //     3) Set Host To "distributed-cache" And Port To 6379.
-        //     4) Enter The Distributed Cache Password.
-        //     5) Uncheck "Use TLS" (The Cache Is Plaintext), Then Click "Connect".
-        builder.AddContainer("distributed-cache-dashboard", "valkey/valkey-admin")
-            .WithImageTag("latest") // Latest Valkey Admin Image: https://github.com/valkey-io/valkey-admin/releases/latest
+        // Redis Insight Is Used Rather Than The Valkey-Native Valkey Admin Because It Pre-Configures Its Connection From "RI_REDIS_*" Environment Variables, Whereas Valkey Admin Cannot Pre-Configure A Connection For A Standalone (Non-Cluster) Node (TODO: Revisit If Valkey Admin Adds Standalone Pre-Configuration)
+        builder.AddContainer("distributed-cache-dashboard", "redis/redisinsight")
+            .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent)
-            .WithHttpEndpoint(targetPort: 8080, name: "http") // Default Valkey Admin Web UI Port
-            .WithEnvironment("DEPLOYMENT_MODE", "web") // Run Valkey Admin As A Web Deployment Rather Than As A Desktop Application
+            .WithHttpEndpoint(targetPort: 5540, name: "http") // Default Redis Insight Web UI Port
+            .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
+            .WithEnvironment("RI_REDIS_ALIAS0", "Distributed Cache") // Pre-Configured Connection Alias
+            .WithEnvironment("RI_REDIS_PASSWORD0", distributedCachePassword) // Pre-Configured Connection Password
+            .WithEnvironment(context => // Point The Pre-Configured Connection At The Distributed Cache Endpoint Within The Container Network
+            {
+                EndpointReference distributedCacheEndpoint = distributedCache.Resource.PrimaryEndpoint;
+
+                context.EnvironmentVariables["RI_REDIS_HOST0"] = distributedCacheEndpoint.Property(EndpointProperty.Host);
+                context.EnvironmentVariables["RI_REDIS_PORT0"] = distributedCacheEndpoint.Property(EndpointProperty.TargetPort);
+            })
             .WaitFor(distributedCache) // Wait For The Distributed Cache To Start
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
