@@ -85,7 +85,7 @@ public class MatchStatistics
     /// <summary>
     ///     Snapshot of the match information that was available at the time the match started.
     ///     Serialised as a JSON string and populated when statistics are submitted.
-    ///     Used by the match statistics response to reconstruct match metadata after the Redis cache entry has expired.
+    ///     Used by the match statistics response to reconstruct match metadata after the distributed cache entry has expired.
     /// </summary>
     public string? MatchInformationSnapshot { get; set; }
 }

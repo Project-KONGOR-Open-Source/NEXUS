@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 
 /// <summary>
-///     Boots the real TRANSMUTANSTEIN chat server host on ephemeral ports against the shared SQL Server and Redis containers, so that integration tests drive both the HTTP surface and the TCP chat endpoints through the production wiring.
+///     Boots the real TRANSMUTANSTEIN chat server host on ephemeral ports against the shared SQL Server and distributed cache containers, so that integration tests drive both the HTTP surface and the TCP chat endpoints through the production wiring.
 ///     The host reads its ports and gateway from environment variables and its connection strings from configuration, so those are supplied here in the same shapes the production host expects.
 /// </summary>
 internal sealed class ChatServerHost : IAsyncDisposable
@@ -40,7 +40,7 @@ internal sealed class ChatServerHost : IAsyncDisposable
     public static async Task<ChatServerHost> StartAsync(ServiceContainerContext containerContext)
     {
         await containerContext.SQLServer.StartAsync();
-        await containerContext.Redis.StartAsync();
+        await containerContext.DistributedCache.StartAsync();
 
         int httpPort = GetFreeTCPPort();
         int clientPort = GetFreeTCPPort();
@@ -49,7 +49,7 @@ internal sealed class ChatServerHost : IAsyncDisposable
 
         string databaseName = $"realhost_{Guid.CreateVersion7():N}";
         string databaseConnectionString = containerContext.SQLServer.GetConnectionString(databaseName);
-        string cacheConnectionString = containerContext.Redis.ConnectionString;
+        string cacheConnectionString = containerContext.DistributedCache.ConnectionString;
 
         // The Host Reads These Specific Settings Via Environment.GetEnvironmentVariable Rather Than IConfiguration, So They Must Be Real Process Environment Variables
         Environment.SetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT", clientPort.ToString());

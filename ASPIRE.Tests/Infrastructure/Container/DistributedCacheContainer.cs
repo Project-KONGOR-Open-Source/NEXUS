@@ -1,25 +1,25 @@
 namespace ASPIRE.Tests.Infrastructure.Container;
 
 /// <summary>
-///     Manages the lifecycle of a Redis container for integration tests.
-///     Uses the official <c>redis:latest</c> image, matching the Aspire AppHost configuration.
+///     Manages the lifecycle of a distributed cache container for integration tests.
+///     Uses the official <c>valkey/valkey:latest</c> image, matching the Aspire AppHost configuration.
 ///     Per-test keyspace isolation is achieved by wrapping <see cref="IDatabase"/> with <c>WithKeyPrefix</c> at registration time; see <see cref="ServiceIntegrationWebApplicationFactory{TSelf, TAssemblyMarker}"/>.
 /// </summary>
-public sealed class RedisContainer : IAsyncDisposable
+public sealed class DistributedCacheContainer : IAsyncDisposable
 {
     /// <summary>
-    ///     The Redis container image used by the test suite.
+    ///     The distributed cache container image used by the test suite.
     /// </summary>
-    public const string Image = "redis:latest";
+    public const string Image = "valkey/valkey:latest";
 
     /// <summary>
     ///     Display name used in error messages.
     /// </summary>
-    public const string DisplayName = "Redis";
+    public const string DisplayName = "Distributed Cache";
 
     private AsynchronousLock Lock { get; } = new();
 
-    private RedisTestContainer? Self { get; set; }
+    private DistributedCacheTestContainer? Self { get; set; }
 
     /// <summary>
     ///     The host:port connection string for the shared container, suitable for <see cref="StackExchange.Redis.ConnectionMultiplexer.Connect(string)"/>.
@@ -28,7 +28,7 @@ public sealed class RedisContainer : IAsyncDisposable
         => Self?.GetConnectionString() ?? throw new NullReferenceException($"{DisplayName} Container Connection String Is NULL");
 
     /// <summary>
-    ///     Starts the Redis container if it has not already been started.
+    ///     Starts the distributed cache container if it has not already been started.
     ///     Idempotent and thread-safe: concurrent callers will await the same startup work.
     /// </summary>
     public async Task StartAsync()
@@ -40,7 +40,7 @@ public sealed class RedisContainer : IAsyncDisposable
                 return;
             }
 
-            RedisTestContainerBuilder builder = new RedisTestContainerBuilder(image: Image)
+            DistributedCacheTestContainerBuilder builder = new DistributedCacheTestContainerBuilder(image: Image)
                 .WithDockerEndpoint(DockerEndpointResolver.GetDockerEndpoint());
 
             Self = builder.Build();
@@ -50,7 +50,7 @@ public sealed class RedisContainer : IAsyncDisposable
     }
 
     /// <summary>
-    ///     Disposes the underlying Redis container.
+    ///     Disposes the underlying distributed cache container.
     /// </summary>
     public async ValueTask DisposeAsync()
     {

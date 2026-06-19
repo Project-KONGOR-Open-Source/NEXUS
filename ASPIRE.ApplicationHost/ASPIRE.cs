@@ -34,27 +34,32 @@ public class ASPIRE
             : builder.AddParameter(distributedCachePasswordParameterName, secret: true);
 
         // Add Distributed Cache Resource
-        IResourceBuilder<RedisResource> distributedCache = builder.AddRedis("distributed-cache", password: distributedCachePassword)
-            .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
+        IResourceBuilder<ValkeyResource> distributedCache = builder.AddValkey("distributed-cache", password: distributedCachePassword)
+            .WithImageTag("latest") // Latest Valkey Image: https://github.com/valkey-io/valkey/releases/latest
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data As Docker-Managed Data Volume
-
-        // TODO: Consider Migrating To Valkey For Field-Level TTL Support And Native Namespace Scoping
-        // INFO: Valkey Namespaces Would Let ASPIRE.Tests Drop The Per-Factory Key-Prefix Wrapper Around IDatabase In Favour Of Real Keyspace Isolation
 
         // Create Resource Relationship After Parent Resource Is Defined
         distributedCachePassword
             .WithDescription("Distributed Cache Password") // Add Description To Parameter Resource
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
-        // Create Distributed Cache Dashboard Resource
-        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
-            .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
-            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-dashboard-data") // Persist Cached Data As Docker-Managed Data Volume
-            .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
+        // Add Distributed Cache Dashboard Resource (Valkey Admin: https://github.com/valkey-io/valkey-admin)
+        // The Dashboard Cannot Be Pre-Configured With A Connection. Valkey Admin Keeps Its Connection List In The Browser (Local Storage), Seeded Only At Build Time From The "VITE_LOCAL_VALKEY_HOST" And "VITE_LOCAL_VALKEY_PORT" Variables Which The Published Image Bakes Empty And The Server Never Injects At Runtime, So Provisioning A Connection Would Require A Custom Image.
+        // That Built-In Auto-Connect Would Not Suit This Cache Regardless: It Sends An Empty Password, And In "Web" Deployment Mode Passwords Are Never Persisted (Only The Electron Build Has Native Secure Storage), So A Password-Protected Standalone Node Cannot Be Auto-Connected.
+        // The "VALKEY_HOST" And "VALKEY_PORT" Variables Are Also Omitted Because They Only Drive A Cluster-Discovery Loop That Fails Continuously Against A Standalone (Non-Cluster) Node.
+        // To Add The Connection Manually:
+        //     1) Open The Dashboard And Click "Add Connection".
+        //     2) Choose Endpoint Type "Node".
+        //     3) Set Host To "distributed-cache" And Port To 6379.
+        //     4) Enter The Distributed Cache Password.
+        //     5) Uncheck "Use TLS" (The Cache Is Plaintext), Then Click "Connect".
+        builder.AddContainer("distributed-cache-dashboard", "valkey/valkey-admin")
+            .WithImageTag("latest") // Latest Valkey Admin Image: https://github.com/valkey-io/valkey-admin/releases/latest
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithHttpEndpoint(targetPort: 8080, name: "http") // Default Valkey Admin Web UI Port
+            .WithEnvironment("DEPLOYMENT_MODE", "web") // Run Valkey Admin As A Web Deployment Rather Than As A Desktop Application
+            .WaitFor(distributedCache) // Wait For The Distributed Cache To Start
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
-
-        // Add Distributed Cache Dashboard Resource
-        distributedCache.WithRedisInsight(distributedCacheDashboard, containerName: "distributed-cache-dashboard");
 
         // Set Database Password Parameter Name And Environment Variable Name
         const string databasePasswordParameterName = "database-password";

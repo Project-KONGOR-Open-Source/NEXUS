@@ -9,7 +9,7 @@ public sealed class ChatServerStatusClientTests(KONGORIntegrationWebApplicationF
 {
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().WithWireMockContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().WithWireMockContainer().InitialiseAsync();
 
     [Test]
     public async Task Get_Status_When_Chat_Server_Reports_Healthy_Returns_Is_Healthy_True()

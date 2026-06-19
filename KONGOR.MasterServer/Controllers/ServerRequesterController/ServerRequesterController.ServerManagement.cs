@@ -19,12 +19,12 @@ public partial class ServerRequesterController
         Dictionary<string, string> gameCookies = [];
 
         EndPoint endPoint = DistributedCache.Multiplexer.GetEndPoints().Single();
-        IServer redisServer = DistributedCache.Multiplexer.GetServer(endPoint);
+        IServer distributedCacheServer = DistributedCache.Multiplexer.GetServer(endPoint);
 
         Dictionary<string, string> accountNameToCookie = [];
 
         // Build A Reverse Map Of Account Name → Session Cookie By Scanning All Active Session Cookies
-        foreach (RedisKey key in redisServer.Keys(pattern: "ACCOUNT-SESSION-COOKIE:*"))
+        foreach (RedisKey key in distributedCacheServer.Keys(pattern: "ACCOUNT-SESSION-COOKIE:*"))
         {
             RedisValue cachedValue = await DistributedCache.StringGetAsync(key);
 

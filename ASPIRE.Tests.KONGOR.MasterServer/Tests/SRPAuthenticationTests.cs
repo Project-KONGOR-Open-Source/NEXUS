@@ -7,7 +7,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 {
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
     [Test]
     [Arguments("srpuser1@kongor.com", "SRP1", "SecurePassword123!")]

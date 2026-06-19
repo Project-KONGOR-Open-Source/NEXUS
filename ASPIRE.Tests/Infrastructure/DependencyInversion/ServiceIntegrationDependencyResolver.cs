@@ -2,8 +2,8 @@ namespace ASPIRE.Tests.Infrastructure.DependencyInversion;
 
 /// <summary>
 ///     Base TUnit <see cref="IClassConstructor"/> that resolves test class instances against a shared <see cref="IServiceProvider"/>.
-///     Container instances (<see cref="SQLServerContainer"/>, <see cref="RedisContainer"/>, <see cref="WireMockContainer"/>) are registered as singletons so they are started once per test assembly and reused across tests.
-///     The per-service factory is registered as transient so every test receives a fresh factory with its own per-test state (database name, Redis key prefix, WireMock path prefix).
+///     Container instances (<see cref="SQLServerContainer"/>, <see cref="DistributedCacheContainer"/>, <see cref="WireMockContainer"/>) are registered as singletons so they are started once per test assembly and reused across tests.
+///     The per-service factory is registered as transient so every test receives a fresh factory with its own per-test state (database name, distributed cache key prefix, WireMock path prefix).
 /// </summary>
 /// <remarks>
 ///     Each concrete service provides a sealed derivative (for example <c>KONGORIntegrationDependencyResolver</c>) that fills in the generic type parameters and implements <see cref="BuildFactory"/>.
@@ -68,14 +68,14 @@ public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, T
         ServiceCollection services = new();
 
         services.AddSingleton<SQLServerContainer>();
-        services.AddSingleton<RedisContainer>();
+        services.AddSingleton<DistributedCacheContainer>();
         services.AddSingleton<WireMockContainer>();
 
         services.AddSingleton<ServiceContainerContext>(serviceProvider => new ServiceContainerContext
         (
-            SQLServer: serviceProvider.GetRequiredService<SQLServerContainer>(),
-            Redis:     serviceProvider.GetRequiredService<RedisContainer>(),
-            WireMock:  serviceProvider.GetRequiredService<WireMockContainer>()
+            SQLServer:        serviceProvider.GetRequiredService<SQLServerContainer>(),
+            DistributedCache: serviceProvider.GetRequiredService<DistributedCacheContainer>(),
+            WireMock:         serviceProvider.GetRequiredService<WireMockContainer>()
         ));
 
         services.AddTransient<TFactory>(serviceProvider =>

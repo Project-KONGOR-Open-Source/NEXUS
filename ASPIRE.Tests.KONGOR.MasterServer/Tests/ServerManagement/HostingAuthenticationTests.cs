@@ -56,7 +56,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
     private async Task InitialiseIn(string environment)
     {
-        await webApplicationFactory.WithEnvironment(environment).WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        await webApplicationFactory.WithEnvironment(environment).WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
         await EnsureHostAccountExists(OOTB.Accounts.OPERATOR.Name, OOTB.Accounts.OPERATOR.EmailAddress);
         await EnsureHostAccountExists(DedicatedHostAccountName, "dedicated-host@kongor.test");

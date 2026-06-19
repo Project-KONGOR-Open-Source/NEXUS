@@ -56,7 +56,7 @@ public static partial class DistributedCacheExtensions
     {
         await distributedCacheStore.KeyDeleteAsync(ConstructFriendRequestKey(requesterID, targetID));
 
-        // Redis Deletes The Inbox Set Automatically Once Its Last Entry Is Removed, So There Is No Empty Set Left To Clean Up
+        // The Distributed Cache Deletes The Inbox Set Automatically Once Its Last Entry Is Removed, So There Is No Empty Set Left To Clean Up
         await distributedCacheStore.SetRemoveAsync(ConstructFriendRequestInboxKey(targetID), ConstructFriendRequestInboxEntry(requesterID, targetID));
     }
 
@@ -101,7 +101,7 @@ public static partial class DistributedCacheExtensions
             if (parsedValue is null)
             {
                 // The Friend Request Has Expired Or Is Missing, So Heal The Inbox By Removing The Stale Entry
-                // If This Is The Last Entry In The Inbox, Following Its Deletion, Redis Will Automatically Delete The Inbox Set, So There Is No Empty Set Left To Clean Up
+                // If This Is The Last Entry In The Inbox, Following Its Deletion, The Distributed Cache Will Automatically Delete The Inbox Set, So There Is No Empty Set Left To Clean Up
                 await distributedCacheStore.SetRemoveAsync(inboxKey, inboxEntry);
 
                 continue;

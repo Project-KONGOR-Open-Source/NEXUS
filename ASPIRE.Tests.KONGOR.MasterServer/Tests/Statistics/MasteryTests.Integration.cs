@@ -9,7 +9,7 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
 
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
     [Test]
     public async Task Boost_Match_Mastery_Applies_Experience_And_Consumes_A_Boost()
