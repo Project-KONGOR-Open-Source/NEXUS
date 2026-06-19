@@ -2,7 +2,7 @@ namespace ASPIRE.Tests.Infrastructure.Container;
 
 /// <summary>
 ///     Manages the lifecycle of a distributed cache container for integration tests.
-///     Uses the official <c>valkey/valkey:latest</c> image, matching the Aspire AppHost configuration.
+///     Uses the official Garnet image, matching the Aspire AppHost configuration. The Testcontainers Redis builder's default <c>redis-cli</c> readiness probe is replaced with a log-based wait because the Garnet image does not ship <c>redis-cli</c>.
 ///     Per-test keyspace isolation is achieved by wrapping <see cref="IDatabase"/> with <c>WithKeyPrefix</c> at registration time; see <see cref="ServiceIntegrationWebApplicationFactory{TSelf, TAssemblyMarker}"/>.
 /// </summary>
 public sealed class DistributedCacheContainer : IAsyncDisposable
@@ -10,7 +10,7 @@ public sealed class DistributedCacheContainer : IAsyncDisposable
     /// <summary>
     ///     The distributed cache container image used by the test suite.
     /// </summary>
-    public const string Image = "valkey/valkey:latest";
+    public const string Image = "ghcr.io/microsoft/garnet:latest";
 
     /// <summary>
     ///     Display name used in error messages.
@@ -41,7 +41,9 @@ public sealed class DistributedCacheContainer : IAsyncDisposable
             }
 
             DistributedCacheTestContainerBuilder builder = new DistributedCacheTestContainerBuilder(image: Image)
-                .WithDockerEndpoint(DockerEndpointResolver.GetDockerEndpoint());
+                .WithDockerEndpoint(DockerEndpointResolver.GetDockerEndpoint())
+                // The Garnet Image Does Not Ship "redis-cli", So The Default Readiness Probe Is Replaced With A Wait On Garnet's Startup Log Line
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Ready to accept connections"));
 
             Self = builder.Build();
 
