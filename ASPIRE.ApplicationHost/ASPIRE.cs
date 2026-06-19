@@ -34,8 +34,8 @@ public class ASPIRE
             : builder.AddParameter(distributedCachePasswordParameterName, secret: true);
 
         // Add Distributed Cache Resource
-        IResourceBuilder<GarnetResource> distributedCache = builder.AddGarnet("distributed-cache", password: distributedCachePassword)
-            .WithImageTag("latest") // Latest Garnet Image: https://github.com/microsoft/garnet/pkgs/container/garnet
+        IResourceBuilder<ValkeyResource> distributedCache = builder.AddValkey("distributed-cache", password: distributedCachePassword)
+            .WithImageTag("latest") // Latest Valkey Image: https://github.com/valkey-io/valkey/releases/latest
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data As Docker-Managed Data Volume
 
         // Create Resource Relationship After Parent Resource Is Defined
@@ -44,7 +44,7 @@ public class ASPIRE
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
         // Add Distributed Cache Dashboard Resource
-        // Garnet Ships No Built-In Dashboard, So Redis Insight Is Used: It Speaks The Same RESP Protocol And Pre-Configures Its Connection From "RI_REDIS_*" Environment Variables So The Dashboard Opens Already Connected
+        // Redis Insight Is Used Rather Than The Valkey-Native Valkey Admin Because It Pre-Configures Its Connection From "RI_REDIS_*" Environment Variables, Whereas Valkey Admin Cannot Pre-Configure A Connection For A Standalone (Non-Cluster) Node (TODO: Revisit If Valkey Admin Adds Standalone Pre-Configuration)
         builder.AddContainer("distributed-cache-dashboard", "redis/redisinsight")
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent)

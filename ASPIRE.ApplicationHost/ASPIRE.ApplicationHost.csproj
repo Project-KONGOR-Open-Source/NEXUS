@@ -16,9 +16,9 @@
     <ItemGroup>
         <PackageReference Include="Aspire.Hosting.Browsers" Version="13.4.5-preview.1.26316.12" />
         <PackageReference Include="Aspire.Hosting.EntityFrameworkCore" Version="13.4.5-preview.1.26316.12" />
-        <PackageReference Include="Aspire.Hosting.Garnet" Version="13.4.5" />
         <PackageReference Include="Aspire.Hosting.Seq" Version="13.4.5" />
         <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.4.5" />
+        <PackageReference Include="Aspire.Hosting.Valkey" Version="13.4.5" />
     </ItemGroup>
 
     <ItemGroup>
