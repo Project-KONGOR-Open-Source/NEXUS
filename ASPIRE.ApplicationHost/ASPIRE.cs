@@ -43,11 +43,8 @@ public class ASPIRE
             .WithDescription("Distributed Cache Password") // Add Description To Parameter Resource
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
-        // Add Distributed Cache Dashboard Resource (Valkey Admin: https://github.com/valkey-io/valkey-admin)
-        // The Dashboard Cannot Be Pre-Configured With A Connection. Valkey Admin Keeps Its Connection List In The Browser (Local Storage), Seeded Only At Build Time From The "VITE_LOCAL_VALKEY_HOST" And "VITE_LOCAL_VALKEY_PORT" Variables Which The Published Image Bakes Empty And The Server Never Injects At Runtime, So Provisioning A Connection Would Require A Custom Image.
-        // That Built-In Auto-Connect Would Not Suit This Cache Regardless: It Sends An Empty Password, And In "Web" Deployment Mode Passwords Are Never Persisted (Only The Electron Build Has Native Secure Storage), So A Password-Protected Standalone Node Cannot Be Auto-Connected.
-        // The "VALKEY_HOST" And "VALKEY_PORT" Variables Are Also Omitted Because They Only Drive A Cluster-Discovery Loop That Fails Continuously Against A Standalone (Non-Cluster) Node.
-        // To Add The Connection Manually:
+        // Add Distributed Cache Dashboard Resource
+        // The Dashboard Cannot Be Pre-Configured With A Connection (TODO: Keep Checking Updates On This), To Add The Connection Manually:
         //     1) Open The Dashboard And Click "Add Connection".
         //     2) Choose Endpoint Type "Node".
         //     3) Set Host To "distributed-cache" And Port To 6379.
