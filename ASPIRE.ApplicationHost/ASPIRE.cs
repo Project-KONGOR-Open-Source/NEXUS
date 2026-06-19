@@ -47,7 +47,7 @@ public class ASPIRE
         // Redis Insight Is Used Rather Than The Valkey-Native Valkey Admin Because It Pre-Configures Its Connection From "RI_REDIS_*" Environment Variables, Whereas Valkey Admin Cannot Pre-Configure A Connection For A Standalone (Non-Cluster) Node (TODO: Revisit If Valkey Admin Adds Standalone Pre-Configuration)
         builder.AddContainer("distributed-cache-dashboard", "redis/redisinsight")
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
-            .WithLifetime(ContainerLifetime.Persistent).WithVolume("distributed-cache-dashboard-data", "/data") // Persist Cached Data As Docker-Managed Data Volume
+            .WithLifetime(ContainerLifetime.Persistent)
             .WithHttpEndpoint(targetPort: 5540, name: "http") // Default Redis Insight Web UI Port
             .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
             .WithEnvironment("RI_REDIS_ALIAS0", "Distributed Cache") // Pre-Configured Connection Alias
@@ -168,8 +168,7 @@ public class ASPIRE
         {
             IResourceBuilder<ContainerResource> smtpServer = builder.AddContainer("smtp-server", "axllent/mailpit")
                 .WithImageTag("latest") // Latest MailPit Image: https://github.com/axllent/mailpit/releases/latest
-                .WithLifetime(ContainerLifetime.Persistent).WithVolume("smtp-server-data", "/data") // Persist Captured Messages As Docker-Managed Data Volume
-                .WithEnvironment("MP_DATABASE", "/data/mailpit.db") // Without An Explicit Database Path, MailPit Stores Messages In A Temporary File Which Is Deleted On Exit, So They Would Not Survive A Restart
+                .WithLifetime(ContainerLifetime.Persistent)
                 .WithEndpoint(port: 1025, targetPort: 1025, name: "smtp", scheme: "tcp") // Default SMTP Port
                 .WithHttpEndpoint(port: 8025, targetPort: 8025, name: "http"); // Default Web UI Port
 
