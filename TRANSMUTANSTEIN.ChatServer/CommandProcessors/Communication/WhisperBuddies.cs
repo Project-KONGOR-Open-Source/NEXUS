@@ -5,13 +5,17 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 ///     Broadcasts a message to all online friends, respecting DND/AFK chat modes.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_WHISPER_BUDDIES)]
-public class WhisperBuddies : ISynchronousCommandProcessor<ClientChatSession>
+public class WhisperBuddies(FloodPreventionService floodPreventionService) : ISynchronousCommandProcessor<ClientChatSession>
 {
     public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         WhisperBuddiesRequestData requestData = new (buffer);
 
         if (string.IsNullOrEmpty(requestData.Message))
+            return;
+
+        // If The Flood Prevention Service Returns False, The Session Has Been Notified That The Client Has Exceeded The Flood Threshold; In This Case, The Command Is Aborted
+        if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
             return;
 
         string truncatedMessage = requestData.Message.Length > ChatProtocol.CHAT_MESSAGE_MAX_LENGTH

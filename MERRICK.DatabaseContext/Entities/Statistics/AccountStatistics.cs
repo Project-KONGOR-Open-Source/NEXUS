@@ -40,13 +40,28 @@ public class AccountStatistics
     public double PerformanceScore => (HeroKills + HeroAssists) / Math.Max(1, HeroDeaths);
 
     /// <summary>
-    ///     The total expected number of placement matches is 6.
+    ///     The total number of placement matches expected before a seasonal rank is assigned.
+    /// </summary>
+    public const int ExpectedPlacementMatchCount = 6;
+
+    /// <summary>
+    ///     The total expected number of placement matches is <see cref="ExpectedPlacementMatchCount"/>.
     ///     "0" means a loss, "1" means a win.
     /// </summary>
     /// <remarks>
     ///     "110110" means 6 placement matches with 4 wins and 2 losses.
     /// </remarks>
     public required string? PlacementMatchesData { get; set; }
+
+    /// <summary>
+    ///     Whether the placement phase for this statistics row is still incomplete.
+    ///     Always <see langword="false"/> for queues that do not track placement matches.
+    /// </summary>
+    /// <remarks>
+    ///     The placement phase only gates the visible medal, and is recorded at statistics submission, where a disconnected participant does not consume a placement match.
+    ///     It is distinct from the matchmaking "provisional" rating period, which is a hidden rating-convergence mechanic that amplifies rating changes during a player's first matches of a game type and can also end early once their rating is high enough.
+    /// </remarks>
+    public bool IsInPlacementPhase => PlacementMatchesData is not null && PlacementMatchesData.Length < ExpectedPlacementMatchCount;
 
     /// <summary>
     ///     Aggregated per-hero statistics stored as JSON.

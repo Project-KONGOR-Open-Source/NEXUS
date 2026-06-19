@@ -1405,15 +1405,19 @@ public class Notification
     /// <summary>
     ///     A pipe-separated set of notification data.
     ///     <br/>
-    ///     The format is: "{SenderAccountName}|{Unknown}|{NotificationStatus}|{NotificationType}|{NotificationDisplayType}|{NotificationAction}|{NotificationTimestamp}|{NotificationID}".
+    ///     The format is: "{SenderAccountName}|{Unknown}|{NotificationType}|{NotificationTranslationString}|{NotificationDisplayType}|{NotificationAction}|{NotificationTimestamp}|{NotificationID}".
     ///     <br/>
-    ///     The notification status can be either 0 = Removable, 1 = Not Seen, 2 = Seen. The other data points are exemplified below.
+    ///     The notification type is a numeric value, for example 2 = buddy added, 22 = outgoing friend request, or 23 = incoming friend request. The timestamp is in the "dd/MM  HH:mm" 24-hour format. The other data points are exemplified below.
+    ///     <br/>
+    ///     The game client reads only the sender account name (index 0), the value at index 1, the numeric notification type (index 2), the timestamp (index 6), and any extended game-information parameters (index 9 onwards).
+    ///     It derives the translation string (index 3), the display type (index 4), and the action (index 5) from the numeric type via its internal lookup table, so the server does not need to populate them; they are shown fully populated below for reference against the authoritative format.
+    ///     The notification ID is delivered through the separate "notify_id" field exposed by <see cref="NotificationID"/>, and index 7 repeats it only for reference.
     ///     <code>
-    ///         Examples (the spaces are only added for readability, but they are not needed):
-    ///             "KONGOR||23|notify_buddy_requested_added|notification_generic_action|action_friend_request|01/18 00:21 AM|5000001"
-    ///             "KONGOR|| 2|notify_buddy_added          |notification_generic_info  |                     |01/18 00:22 AM|5000002"
-    ///             "KONGOR|| 2|notify_buddy_requested_adder|notification_generic_info  |                     |01/18 00:23 AM|5000003"
-    ///             "KONGOR|| 2|notify_replay_available     |notification_generic_info  |                     |01/18 00:24 AM|5000004"
+    ///         examples (the spacing which aligns the columns is only for readability):
+    ///             "KONGOR||23|notify_buddy_requested_added|notification_generic_action|action_friend_request|18/01  00:21|5000001"
+    ///             "KONGOR|| 2|notify_buddy_added          |notification_generic_info  |                     |18/01  00:22|5000002"
+    ///             "KONGOR||22|notify_buddy_requested_adder|notification_generic_info  |                     |18/01  00:23|5000003"
+    ///             "KONGOR||26|notify_replay_available     |notification_generic_info  |                     |18/01  00:24|5000004"
     ///     </code>
     /// </summary>
     [PHPProperty("notification")]

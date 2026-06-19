@@ -19,6 +19,9 @@ public class KONGOR
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
+        // Add Serilog Logging
+        builder.AddSerilogLogging();
+
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
@@ -59,6 +62,9 @@ public class KONGOR
 
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
+
+        // Register The Hero Usage Statistics Service Which Aggregates Global Per-Hero Win/Loss Totals For The Hero Usage List
+        builder.Services.AddScoped<HeroUsageStatisticsService>();
 
         // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
         builder.Services.AddRateLimiter(options =>
@@ -153,6 +159,9 @@ public class KONGOR
 
         // Enable Forwarded Headers Middleware For Reverse Proxy Support
         application.UseForwardedHeaders();
+
+        // Emit One Structured Log Event Per HTTP Request
+        application.UseSerilogLogging();
 
         if (application.Services.GetService<IConnectionMultiplexer>() is IConnectionMultiplexer connectionMultiplexer)
         {

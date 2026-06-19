@@ -11,11 +11,11 @@ public class MatchAbandoned(IDatabase distributedCacheStore) : IAsynchronousComm
     {
         MatchAbandonedRequestData requestData = new (buffer);
 
-        Log.Information(@"Match Abandoned On Server ID ""{ServerID}"": Failed={Failed}",
+        Log.Information(@"Match Abandoned On Server ID ""{MatchServerID}"": Failed={Failed}",
             session.Metadata.ServerID, requestData.Failed);
 
         // The Protocol Does Not Carry A Match ID, So We Use The Session Metadata Which Is Populated By NET_CHAT_GS_STATUS.
-        // A Value Of -1 Means No Match Was Ever Announced (e.g. An Abandonment Fired Before NET_CHAT_GS_ANNOUNCE_MATCH), So There Is Nothing To Clean Up
+        // A Value Of -1 Means No Match Was Ever Announced (e.g. An Abandonment Fired Before NET_CHAT_GS_ANNOUNCE_MATCH), So There Is No Cached Match Information To Remove
         if (requestData.Failed && session.Metadata.MatchID is not -1)
         {
             /*
@@ -27,9 +27,9 @@ public class MatchAbandoned(IDatabase distributedCacheStore) : IAsynchronousComm
             await distributedCacheStore.RemoveMatchInformation(session.Metadata.MatchID);
         }
 
-        // TODO: Find The Active Match For This Server And Clean It Up
-        // TODO: Notify Players That The Match Has Been Abandoned
-        // TODO: Return Players To Available State For Re-Queuing
+        // This Signal Fires Whenever The Match Server Resets (Both A Normal Ending And A Failed Start)
+        // So It Is The Single Point At Which A Match Is Dropped From The Active Matches Registry And Its Groups Are Made Available To Queue Again
+        MatchmakingService.CleanUpMatchesForServer(session.Metadata.ServerID);
     }
 }
 

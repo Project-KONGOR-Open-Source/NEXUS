@@ -14,13 +14,15 @@ public class MatchAborted(IDatabase distributedCacheStore) : IAsynchronousComman
         // Remove Match Information From Distributed Cache
         await distributedCacheStore.RemoveMatchInformation(requestData.MatchupID);
 
-        Log.Information(@"Arranged Match {MatchupID} Aborted On Server ID ""{ServerID}"": Reason={Reason}",
+        Log.Information(@"Arranged Match {MatchupID} Aborted On Server ID ""{MatchServerID}"": Reason={Reason}",
             requestData.MatchupID, session.Metadata.ServerID, requestData.Reason);
 
-        // TODO: Check What MatchupID Is Or Whether It Can Just Be Called MatchID Instead
+        // TODO: Check What MatchupID Is Or Whether It Can Just Be Called MatchID Instead (They Are Potentially Different Things, Though)
 
-        // TODO: Notify Players That The Match Has Been Aborted
-        // TODO: Return Players To Available State For Re-Queuing
+        // Make The Aborted Match's Groups Available To Queue Again And Drop The Match From The Active Matches Registry
+        // This Is Harmless If The Subsequent MatchAbandoned "Server Reset" Signal Has Already Cleaned The Match Up
+        MatchmakingService.CleanUpMatchesForServer(session.Metadata.ServerID);
+
         // TODO: Potentially Apply Leaver Penalties If Reason Indicates Player Left
     }
 }

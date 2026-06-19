@@ -1,14 +1,14 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_CREATE)]
-public class GroupCreate : ISynchronousCommandProcessor<ClientChatSession>
+public class GroupCreate(MerrickContext merrick) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupCreateRequestData requestData = new (buffer);
 
-        MatchmakingGroup
-            .Create(session, requestData.ToGroupInformation());
+        await MatchmakingGroup
+            .Create(session, requestData.ToGroupInformation(), merrick);
     }
 }
 

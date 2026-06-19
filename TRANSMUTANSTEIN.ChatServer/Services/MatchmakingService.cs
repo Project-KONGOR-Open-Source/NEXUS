@@ -6,13 +6,15 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 /// </summary>
 public class MatchmakingService : BackgroundService, IDisposable
 {
-    private readonly IOptions<MatchmakingSettings> _settings;
+    private readonly IOptionsMonitor<MatchmakingSettings> _settings;
     private readonly IDatabase _distributedCacheStore;
+    private readonly ILogger<MatchmakingService> _logger;
 
-    public MatchmakingService(IOptions<MatchmakingSettings> settings, IDatabase distributedCacheStore)
+    public MatchmakingService(IOptionsMonitor<MatchmakingSettings> settings, IDatabase distributedCacheStore, ILogger<MatchmakingService> logger)
     {
         _settings = settings;
         _distributedCacheStore = distributedCacheStore;
+        _logger = logger;
     }
 
     /// <summary>
@@ -26,7 +28,19 @@ public class MatchmakingService : BackgroundService, IDisposable
     public static ConcurrentDictionary<Guid, MatchmakingMatch> ActiveMatches { get; set; } = [];
 
     public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
-        => memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id), name => GetMatchmakingGroupByMemberName(name));
+    {
+        MatchmakingGroup? group = memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id), name => GetMatchmakingGroupByMemberName(name));
+
+        if (group is null)
+        {
+            string identifierType = memberIdentifier.IsT0 ? "ID" : "Name";
+            string identifierValue = memberIdentifier.IsT0 ? memberIdentifier.AsT0.ToString() : memberIdentifier.AsT1;
+
+            Log.Debug(@"No Matchmaking Group Found For Member {IdentifierType} ""{IdentifierValue}""", identifierType, identifierValue);
+        }
+
+        return group;
+    }
 
     public static MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID)
         => Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.ID == memberID));
@@ -51,24 +65,27 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Log.Information("Matchmaking Service Has Started");
+        _logger.LogInformation("Matchmaking Service Has Started");
 
         await RunMatchBroker(stoppingToken);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        Log.Information("Matchmaking Service Is Stopping");
+        _logger.LogInformation("Matchmaking Service Is Stopping");
 
         await base.StopAsync(cancellationToken);
 
-        Log.Information("Matchmaking Service Has Stopped");
+        _logger.LogInformation("Matchmaking Service Has Stopped");
     }
 
     public override void Dispose()
     {
         Groups.Clear();
         ActiveMatches.Clear();
+
+        foreach (ConcurrentQueue<double> queue in RecentQueueDurationSecondsSamplesPerPartition.Values)
+            queue.Clear();
 
         base.Dispose();
 
@@ -79,74 +96,284 @@ public class MatchmakingService : BackgroundService, IDisposable
     {
         while (cancellationToken.IsCancellationRequested is false)
         {
-            await Task.Delay(_settings.Value.MatchmakingCycleInterval, cancellationToken);
-
-            if (_settings.Value.Enabled is false)
-                continue;
-
-            // Get All Queued Groups (Groups With A Non-NULL QueueStartTime And Not Already Matched)
-            List<MatchmakingGroup> queuedGroups = [.. Groups.Values
-                .Where(group => group.QueueStartTime is not null && group.MatchedUp is false)
-                .OrderBy(group => group.QueueStartTime)];
-
-            if (queuedGroups.Count == 0)
-                continue;
-
-            // Spawn Bot Matches Immediately (Bot Groups Bypass The Regular Match Broker Cycles)
-            List<MatchmakingGroup> botGroups = [.. queuedGroups.Where(group => group.Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_COOP)];
-
-            foreach (MatchmakingGroup botGroup in botGroups)
+            try
             {
-                MatchmakingMatch botMatch = MatchmakingMatch.FromBotGroup(botGroup);
-
-                bool spawned = await SpawnMatch(botMatch);
-
-                if (spawned is false)
-                {
-                    SendNoServersFound(botMatch);
-
-                    botGroup.MatchedUp = false;
-                    botGroup.AssignedMatchGUID = null;
-                    botGroup.AssignedTeamGUID = null;
-                }
+                await Task.Delay(_settings.CurrentValue.MatchmakingCycleInterval, cancellationToken);
             }
 
-            // Run The Regular Broker Cycle For Non-Bot Groups
-            List<MatchmakingGroup> regularGroups = [.. queuedGroups
-                .Where(group => group.Information.GroupType != ChatProtocol.TMMType.TMM_TYPE_COOP && group.MatchedUp is false)];
-
-            if (regularGroups.Count == 0)
-                continue;
-
-            int queuedPlayerCount = regularGroups.Sum(group => group.Members.Count);
-
-            PoolSizeParameters poolSizeParameters = MatchmakingAlgorithm.ResolvePoolSizeParameters(queuedPlayerCount, _settings.Value);
-
-            Log.Debug(@"Broker Cycle: {PlayerCount} Queued Players, Pool Tier = {PoolTier}", queuedPlayerCount, poolSizeParameters.Tier);
-
-            IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(regularGroups, _settings.Value, poolSizeParameters);
-
-            // Spawn Each Match
-            foreach (MatchmakingMatch match in matches)
+            catch (OperationCanceledException)
             {
-                bool spawned = await SpawnMatch(match);
-
-                if (spawned is false)
-                {
-                    SendNoServersFound(match);
-
-                    // Return Groups To Queue
-                    foreach (MatchmakingGroup group in match.GetAllGroups())
-                    {
-                        group.MatchedUp = false;
-                        group.AssignedMatchGUID = null;
-                        group.AssignedTeamGUID = null;
-                    }
-                }
+                break;
             }
 
-            // Send Periodic Queue Time Updates (Every 10 Seconds = Every 2 Cycles At 5-Second Intervals)
-            BroadcastQueueTimeUpdates(queuedGroups.Where(group => group.MatchedUp is false).ToList());
+            try
+            {
+                await ProcessBrokerCycle();
+            }
+
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            // A Single Broker Cycle Must Never Tear Down The Host (As Per The Default BackgroundServiceExceptionBehavior == StopHost)
+            catch (Exception exception)
+            {
+                // Log And Continue With The Next Cycle
+                _logger.LogError(exception, "Matchmaking Broker Cycle Failed; Continuing With The Next Cycle");
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Runs a single match broker cycle.
+    ///     Each match is spawned in isolation via <see cref="TrySpawnMatch"/> so that the failure of one match cannot abort the others or the cycle.
+    /// </summary>
+    private async Task ProcessBrokerCycle()
+    {
+        MatchmakingSettings settings = _settings.CurrentValue;
+
+        if (settings.Enabled is false)
+            return;
+
+        // Get All Queued Groups (Groups With A Non-NULL QueueStartTime And Not Already Matched)
+        List<MatchmakingGroup> queuedGroups = [.. Groups.Values
+            .Where(group => group.QueueStartTime is not null && group.MatchedUp is false)
+            .OrderBy(group => group.QueueStartTime)];
+
+        if (queuedGroups.Count == 0)
+            return;
+
+        // Spawn Bot Matches Immediately (Bot Groups Bypass The Regular Match Broker Cycles)
+        List<MatchmakingGroup> botGroups = [.. queuedGroups.Where(group => group.Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_COOP)];
+
+        foreach (MatchmakingGroup botGroup in botGroups)
+            await TrySpawnMatch(MatchmakingMatch.FromBotGroup(botGroup));
+
+        // Run The Regular Broker Cycle For Non-Bot Groups
+        List<MatchmakingGroup> regularGroups = [.. queuedGroups
+            .Where(group => group.Information.GroupType != ChatProtocol.TMMType.TMM_TYPE_COOP && group.MatchedUp is false)];
+
+        if (regularGroups.Count == 0)
+            return;
+
+        IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(regularGroups, settings);
+
+        // Spawn Each Match In Isolation
+        int spawnedMatchCount = 0;
+
+        foreach (MatchmakingMatch match in matches)
+        {
+            if (await TrySpawnMatch(match))
+                spawnedMatchCount++;
+        }
+
+        if (matches.Count > 0)
+            _logger.LogInformation(@"Broker Cycle Complete: {SpawnedMatchCount} Of {MatchCount} Match(es) Spawned", spawnedMatchCount, matches.Count);
+
+        // Send A Queue Time Update To All Still-Queued Groups
+        BroadcastQueueDurationEstimate(queuedGroups.Where(group => group.MatchedUp is false).ToList());
+    }
+
+    /// <summary>
+    ///     Spawns a single match, isolating any failure so that it cannot abort sibling matches or the broker cycle.
+    ///     The match's groups are first re-validated at the commitment point, as a group can leave the queue or lose a member between the broker cycle snapshot and the spawn; a match that fails the re-validation is cancelled and its remaining groups are returned to the queue.
+    ///     When no server is available, the players are notified with a "No Servers Found" message and their groups are returned to the queue.
+    ///     When the spawn fails unexpectedly, the failure is logged and the match's groups are returned to the queue so the broker re-matches them on a later cycle, without misreporting the failure to the players as a server-availability problem.
+    /// </summary>
+    private async Task<bool> TrySpawnMatch(MatchmakingMatch match)
+    {
+        try
+        {
+            if (TryClaimMatchGroups(match) is false)
+            {
+                _logger.LogInformation(@"Match GUID {MatchGUID} Was Cancelled Before Spawning Because A Group Left The Queue Or Changed Composition", match.GUID);
+
+                ReturnMatchGroupsToQueue(match);
+
+                return false;
+            }
+
+            // Record The Matched Groups' Waits For The Queue Time Estimate (Bot Matches Spawn Instantly And Would Skew It)
+            if (match.IsBotMatch is false)
+                RecordQueueDuration(match);
+
+            bool spawned = await SpawnMatch(match);
+
+            if (spawned is false)
+            {
+                SendNoServersFound(match);
+
+                ReturnMatchGroupsToQueue(match);
+            }
+
+            return spawned;
+        }
+
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, @"Failed To Spawn Match GUID {MatchGUID} With {PlayerCount} Player(s); Returning Its Groups To Queue", match.GUID, match.GetAllPlayers().Count());
+
+            ActiveMatches.TryRemove(match.GUID, out _);
+
+            ReturnMatchGroupsToQueue(match);
+
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     The maximum number of recent queue duration samples retained for the queue time estimate.
+    /// </summary>
+    private const int MaximumRecentQueueDurationSamples = 20;
+
+    /// <summary>
+    ///     The queue durations of the most recently matched groups per queue type partition, used to estimate the queue time reported to clients.
+    /// </summary>
+    internal static readonly ConcurrentDictionary<QueueType, ConcurrentQueue<double>> RecentQueueDurationSecondsSamplesPerPartition = new ()
+    {
+        [QueueType.COOP]     = new (),
+        [QueueType.Caldavar] = new (),
+        [QueueType.MidWars]  = new (),
+        [QueueType.RiftWars] = new ()
+    };
+
+    /// <summary>
+    ///     Resolves the matchmaking queue type partition for a group from its group type and game type.
+    ///     Only the game modes that are queueable on this deployment are mapped.
+    ///     The game types are those declared for the configured maps ("caldavar", "midwars", "riftwars") in "MatchmakingConfiguration.json", plus co-op bot matches via the group type.
+    ///     Any other game type has no queue time and is rejected.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Thrown when the game type does not correspond to a queue type partition.
+    /// </exception>
+    public static QueueType GetQueueTypePartition(ChatProtocol.TMMType groupType, ChatProtocol.TMMGameType gameType)
+    {
+        if (groupType is ChatProtocol.TMMType.TMM_TYPE_COOP)
+            return QueueType.COOP;
+
+        // The Arms Mirror The Per-Map "GameTypes" Declared In "MatchmakingConfiguration.json"; Any Game Type Not Queueable There Has No Queue Time And Is Rejected
+        return gameType switch
+        {
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL or
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => QueueType.Caldavar,
+
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => QueueType.MidWars,
+
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => QueueType.RiftWars,
+
+            _                                                      => throw new ArgumentOutOfRangeException(nameof(gameType), @$"Unsupported Game Type ""{gameType}""")
+        };
+    }
+
+    /// <summary>
+    ///     Calculates the estimated queue duration in seconds for a specific queue type partition.
+    ///     Uses the average of the most recently matched groups (up to <see cref="MaximumRecentQueueDurationSamples"/>, falling back to the average wait time of groups currently in the queue if no history is available.
+    /// </summary>
+    public static int GetEstimatedQueueDurationSeconds(QueueType partition)
+    {
+        if (RecentQueueDurationSecondsSamplesPerPartition.TryGetValue(partition, out ConcurrentQueue<double>? samples) && samples.IsEmpty is false)
+            return (int) samples.Average();
+
+        List<MatchmakingGroup> activeQueuedGroups = [.. Groups.Values
+            .Where(group => group.QueueStartTime is not null && GetQueueTypePartition(group.Information.GroupType, group.Information.GameType) == partition)];
+
+        if (activeQueuedGroups.Count > 0)
+            return (int) activeQueuedGroups.Average(group => group.QueueDuration.TotalSeconds);
+
+        return 0;
+    }
+
+    /// <summary>
+    ///     Records the queue duration of each group in a spawned match for the queue duration estimate.
+    /// </summary>
+    internal static void RecordQueueDuration(MatchmakingMatch match)
+    {
+        QueueType partition = GetQueueTypePartition(match.IsBotMatch ? ChatProtocol.TMMType.TMM_TYPE_COOP : ChatProtocol.TMMType.TMM_TYPE_PVP, match.GameType);
+
+        if (RecentQueueDurationSecondsSamplesPerPartition.TryGetValue(partition, out ConcurrentQueue<double>? samples))
+        {
+            foreach (MatchmakingGroup group in match.GetAllGroups())
+            {
+                samples.Enqueue(group.QueueDuration.TotalSeconds);
+
+                while (samples.Count > MaximumRecentQueueDurationSamples)
+                    samples.TryDequeue(out _);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Re-validates every group in a proposed match at the commitment point, confirming that each group is still queued and that every PvP team is still full.
+    ///     Once the claim succeeds, a user request to leave the queue is refused, so the roster the match server receives reflects the players who are still committed.
+    /// </summary>
+    internal static bool TryClaimMatchGroups(MatchmakingMatch match)
+    {
+        foreach (MatchmakingGroup group in match.GetAllGroups())
+            if (group.TryClaimForMatch() is false)
+                return false;
+
+        // A Bot Match Has No Fixed Human Roster Size, While A PvP Match Must Still Have Full Teams
+        if (match.IsBotMatch is false && match.GetAllTeams().Any(team => team.PlayerCount != team.TeamSize))
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Returns every group in a match to the queue by clearing its matched-up state, so that the broker re-matches it on a subsequent cycle.
+    /// </summary>
+    private static void ReturnMatchGroupsToQueue(MatchmakingMatch match)
+    {
+        foreach (MatchmakingGroup group in match.GetAllGroups())
+        {
+            group.MatchedUp = false;
+            group.AssignedMatchGUID = null;
+            group.AssignedTeamGUID = null;
+        }
+    }
+
+    /// <summary>
+    ///     Cleans up every active match hosted by the given server. Removes each match from the active matches registry and returns its groups to an available, re-queueable state.
+    ///     Invoked when a match ends, is abandoned, or is aborted. Safe to call more than once for the same server, as subsequent calls find no remaining match and do nothing.
+    /// </summary>
+    public static void CleanUpMatchesForServer(int serverID)
+    {
+        foreach (MatchmakingMatch match in ActiveMatches.Values.Where(match => match.AssignedServerID == serverID).ToList())
+        {
+            ActiveMatches.TryRemove(match.GUID, out _);
+
+            ReturnMatchGroupsToAvailableState(match);
+        }
+    }
+
+    /// <summary>
+    ///     Returns each group in an ended, abandoned, or aborted match to an available, re-queueable state.
+    ///     Solo-queued groups are disbanded silently (the client implicitly drops a solo group once it connects to the match).
+    ///     A pre-made party is kept alive so it can re-queue together.
+    /// </summary>
+    private static void ReturnMatchGroupsToAvailableState(MatchmakingMatch match)
+    {
+        foreach (MatchmakingGroup group in match.GetAllGroups())
+        {
+            foreach (MatchmakingGroupMember member in group.Members)
+                member.IsInGame = false;
+
+            group.MatchedUp = false;
+            group.AssignedMatchGUID = null;
+            group.AssignedTeamGUID = null;
+
+            // The Group Was Already Disbanded During The Match (For Example, Every Member Disconnected), So There Is Nothing Left To Reset Or Notify
+            if (group.Members.Count is 0)
+                continue;
+
+            // A Solo Queue Group Does Not Persist Across Matches (Groups Are Keyed By The Leader's Account ID)
+            if (group.Members.Count is 1)
+                Groups.TryRemove(group.Leader.Account.ID, out _);
+
+            // A Premade Party Persists So It Can Re-Queue Together; Refresh The Client's Party Interface To Reflect The Cleared In-Game State
+            else
+                group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
         }
     }
 
@@ -161,7 +388,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         if (server is null || serverSession is null)
         {
-            Log.Warning(@"No Available Server Found For Match GUID {MatchGUID}", match.GUID);
+            _logger.LogWarning(@"No Available Server Found For Match GUID {MatchGUID}", match.GUID);
 
             return false;
         }
@@ -172,13 +399,17 @@ public class MatchmakingService : BackgroundService, IDisposable
         match.ServerPort = (ushort)server.Port;
         match.State = MatchmakingMatchState.ServerAllocating;
 
+        // Report The Allocated Server's Actual Region To The Players
+        if (string.IsNullOrWhiteSpace(server.Location) is false)
+            match.SelectedRegion = server.Location;
+
         // Store Match In Active Matches Registry
         ActiveMatches.TryAdd(match.GUID, match);
 
         // Send CreateMatch Command To The Game Server
         SendCreateMatch(match, serverSession);
 
-        Log.Information(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
+        _logger.LogInformation(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={MatchServerID}, Server={MatchServerAddress}:{MatchServerPort}",
             match.GUID, server.ID, match.ServerAddress, match.ServerPort);
 
         // Send Leave Queue Notification To Dismiss The Client's Queue Timer
@@ -193,18 +424,46 @@ public class MatchmakingService : BackgroundService, IDisposable
         SendMatchFoundUpdate(match, match.CorrelationID);
         SendFoundServerUpdate(match);
 
-        // Mark All Members As In-Game
+        // Settle Each Matched Group's Post-Matchup State And Mark Its Members As In-Game
+        // The Match Roster Has Already Been Committed To The Match Server (As Per CreateMatch), So This Loop Is Purely Post-Commit Book-Keeping; A Player Who Drops Out Now Is Handled Downstream By The Match Server's Wait-For-Players Logic And The Resulting MatchAbandoned Signal
+        // Each Group Is Handled Individually So That An Exception While Settling One Group Does Not Skip The Remaining Groups
         foreach (MatchmakingGroup group in match.GetAllGroups())
         {
-            group.QueueStartTime = null;
+            try
+            {
+                group.QueueStartTime = null;
 
-            foreach (MatchmakingGroupMember member in group.Members)
-                member.IsInGame = true;
+                foreach (MatchmakingGroupMember member in group.Members)
+                    member.IsInGame = true;
+
+                // If Every Member Disconnected During Server Allocation The Group Will Have Been Disbanded, Leaving Nothing To Settle Or Notify
+                if (group.Members.Count is 0)
+                    continue;
+
+                // A Solo Queue Group Does Not Persist Once The Match Starts; Disband It Server-Side (The Client Implicitly Drops It When It Connects To The Match), So No Update Is Broadcast
+                if (group.Members.Count is 1)
+                {
+                    Groups.TryRemove(group.Leader.Account.ID, out _);
+
+                    continue;
+                }
+
+                // A Premade Party Stays Alive On The Client After A Match Is Found, So Reset The Leader To Not-Ready And Broadcast The Update
+                // Without This, The Client's Matchmaking Loading Overlay Remains Visible And Covers The Match Lobby Interface
+                group.UnloadAndUnreadyMembers();
+
+                group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+            }
+
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, @"Failed Post-Matchup Handling For Group GUID {GroupGUID} In Match GUID {MatchGUID}", group.GUID, match.GUID);
+            }
         }
 
         match.State = MatchmakingMatchState.WaitingForPlayers;
 
-        Log.Information(@"Match Notifications Sent: GUID={MatchGUID}, Server={ServerAddress}:{ServerPort}",
+        _logger.LogInformation(@"Match Notifications Sent: GUID={MatchGUID}, Server={MatchServerAddress}:{MatchServerPort}",
             match.GUID, server.IPAddress, server.Port);
 
         return true;
@@ -281,15 +540,15 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         foreach (MatchmakingGroupMember member in match.LegionTeam.GetAllMembers().OrderBy(member => member.TMR))
         {
-            createMatch.WriteInt32(member.Account.ID);              // Account ID
-            createMatch.WriteInt8(1);                               // Team (1 = Legion)
-            createMatch.WriteInt8(legionSlot++);                    // Slot (Continuous Within Team)
-            createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
-            createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
-            createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
-            createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
-            createMatch.WriteInt8(memberGroupIndices[member]);      // Group Index (Continuous Across Teams)
-            createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
+            createMatch.WriteInt32(member.Account.ID);                   // Account ID
+            createMatch.WriteInt8(1);                                    // Team (1 = Legion)
+            createMatch.WriteInt8(legionSlot++);                         // Slot (Continuous Within Team)
+            createMatch.WriteInt8(0);                                    // Social Bonus (0 = None)
+            createMatch.WriteFloat32((float)member.MatchWinValue);       // Win MMR Delta
+            createMatch.WriteFloat32((float)member.MatchLossValue);      // Loss MMR Delta
+            createMatch.WriteInt8(Convert.ToByte(member.IsProvisional)); // Is Provisional
+            createMatch.WriteInt8(memberGroupIndices[member]);           // Group Index (Continuous Across Teams)
+            createMatch.WriteInt8(0);                                    // Benefit Value (0 = Normal)
         }
 
         // Write Hellbourne Players (Team 2) — Skipped For Bot Matches
@@ -299,15 +558,15 @@ public class MatchmakingService : BackgroundService, IDisposable
 
             foreach (MatchmakingGroupMember member in match.HellbourneTeam.GetAllMembers().OrderBy(member => member.TMR))
             {
-                createMatch.WriteInt32(member.Account.ID);              // Account ID
-                createMatch.WriteInt8(2);                               // Team (2 = Hellbourne)
-                createMatch.WriteInt8(hellbourneSlot++);                // Slot (Continuous Within Team)
-                createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
-                createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
-                createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
-                createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
-                createMatch.WriteInt8(memberGroupIndices[member]);      // Group Index (Continuous Across Teams)
-                createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
+                createMatch.WriteInt32(member.Account.ID);                   // Account ID
+                createMatch.WriteInt8(2);                                    // Team (2 = Hellbourne)
+                createMatch.WriteInt8(hellbourneSlot++);                     // Slot (Continuous Within Team)
+                createMatch.WriteInt8(0);                                    // Social Bonus (0 = None)
+                createMatch.WriteFloat32((float)member.MatchWinValue);       // Win MMR Delta
+                createMatch.WriteFloat32((float)member.MatchLossValue);      // Loss MMR Delta
+                createMatch.WriteInt8(Convert.ToByte(member.IsProvisional)); // Is Provisional
+                createMatch.WriteInt8(memberGroupIndices[member]);           // Group Index (Continuous Across Teams)
+                createMatch.WriteInt8(0);                                    // Benefit Value (0 = Normal)
             }
         }
 
@@ -376,32 +635,59 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Finds an available server for a match along with its chat session.
-    ///     Returns <see langword="null"/> if no idle server with an active session is found.
+    ///     The maximum age of a match server's last status update before its chat session is treated as stale and the server is skipped for selection.
+    ///     A healthy match server sends a status heartbeat at least once per minute, so this threshold tolerates a couple of missed heartbeats before excluding a server whose connection has gone quiet without being detected at the transport level (for example, a hung server process whose socket is still open).
+    /// </summary>
+    private static readonly TimeSpan MatchServerStatusFreshnessThreshold = TimeSpan.FromSeconds(150);
+
+    /// <summary>
+    ///     Finds an idle server for a match along with its chat session.
+    ///     Servers already assigned to an active match are excluded, because the cached server status only changes once the server reports its new state, so without this exclusion two matches spawned in close succession would select the same idle server.
+    ///     Candidates are ranked by regional proximity to the match's requested regions, so the closest available region is used when no requested region has an idle server.
+    ///     Returns <see langword="null"/> if no unassigned, idle server with an active and recently-active session is found.
     /// </summary>
     private async Task<(MatchServer? Server, MatchServerChatSession? Session)> FindAvailableServerWithSession(MatchmakingMatch match)
     {
         List<MatchServer> servers = await _distributedCacheStore.GetMatchServers();
 
-        // Find An Idle Server That Also Has An Active Chat Session
-        foreach (MatchServer server in servers.Where(server => server.Status == ServerStatus.SERVER_STATUS_IDLE))
+        HashSet<int> assignedServerIDs = [.. ActiveMatches.Values.Select(activeMatch => activeMatch.AssignedServerID).OfType<int>()];
+
+        // Rank Unassigned, Idle Servers By Regional Proximity To The Match's Requested Regions
+        List<MatchServer> candidateServers = [.. servers
+            .Where(server => server.Status is ServerStatus.SERVER_STATUS_IDLE && assignedServerIDs.Contains(server.ID) is false)
+            .OrderBy(server => RegionProximity.GetDistance(match.CommonGameRegions, server.Location))];
+
+        // Find The Closest Candidate Server That Also Has An Active Chat Session
+        foreach (MatchServer server in candidateServers)
         {
             if (Context.MatchServerChatSessions.TryGetValue(server.ID, out MatchServerChatSession? session))
             {
-                Log.Debug(@"Found Idle Server With Session: ServerID={ServerID}, ServerName={ServerName}", server.ID, server.Name);
+                // Skip A Server Whose Chat Session Has Gone Quiet (No Recent Status Heartbeat), Which Indicates A Stale Connection Not Yet Detected At The Transport Level
+                if (DateTimeOffset.UtcNow - session.Metadata.LastStatusUpdate > MatchServerStatusFreshnessThreshold)
+                {
+                    _logger.LogWarning(@"Skipping Idle Server With A Stale Chat Session: ServerID={MatchServerID}, LastStatusUpdate={LastStatusUpdate}", server.ID, session.Metadata.LastStatusUpdate);
+
+                    continue;
+                }
+
+                if (RegionProximity.GetDistance(match.CommonGameRegions, server.Location) > 0)
+                    _logger.LogInformation(@"No Idle Server In Requested Regions {RequestedRegions}; Allocating Closest Idle Server In Region {MatchServerLocation} For Match GUID {MatchGUID}",
+                        string.Join("|", match.CommonGameRegions), server.Location, match.GUID);
+
+                _logger.LogDebug(@"Found Idle Server With Session: ServerID={MatchServerID}, ServerName={MatchServerName}", server.ID, server.Name);
 
                 return (server, session);
             }
 
-            Log.Debug(@"Idle Server Has No Active Chat Session: ServerID={ServerID}", server.ID);
+            _logger.LogDebug(@"Idle Server Has No Active Chat Session: ServerID={MatchServerID}", server.ID);
         }
 
         // No Idle Server With Active Session Found
         if (servers.Count == 0)
-            Log.Warning(@"No Servers Available For Match GUID {MatchGUID}", match.GUID);
+            _logger.LogWarning(@"No Idle Servers For Match GUID {MatchGUID}", match.GUID);
 
         else
-            Log.Warning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {ServerCount})", match.GUID, servers.Count);
+            _logger.LogWarning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {MatchServerCount})", match.GUID, servers.Count);
 
         return (null, null);
     }
@@ -421,25 +707,28 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Broadcasts queue time updates to all queued groups.
+    ///     Broadcasts the estimated queue duration to all queued groups.
     /// </summary>
-    private static void BroadcastQueueTimeUpdates(List<MatchmakingGroup> queuedGroups)
+    private static void BroadcastQueueDurationEstimate(List<MatchmakingGroup> queuedGroups)
     {
         if (queuedGroups.Count == 0)
             return;
 
-        // Calculate Average Queue Time
-        int averageQueueTimeSeconds = (int)queuedGroups.Average(group => group.QueueDuration.TotalSeconds);
-
-        ChatBuffer update = new ();
-
-        update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-        update.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
-        update.WriteInt32(averageQueueTimeSeconds);
-
         foreach (MatchmakingGroup group in queuedGroups)
+        {
+            QueueType partition = GetQueueTypePartition(group.Information.GroupType, group.Information.GameType);
+
+            int estimatedQueueDurationSeconds = GetEstimatedQueueDurationSeconds(partition);
+
+            ChatBuffer update = new ();
+
+            update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+            update.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
+            update.WriteInt32(estimatedQueueDurationSeconds);
+
             foreach (MatchmakingGroupMember member in group.Members)
                 member.Session.Send(update);
+        }
     }
 
     /// <summary>

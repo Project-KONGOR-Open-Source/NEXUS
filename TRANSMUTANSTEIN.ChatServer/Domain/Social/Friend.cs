@@ -90,37 +90,38 @@ public class Friend
         }
 
         // Check Whether The Target Account Has Already Sent A Friend Request To The Requester
-        (int RequesterNotificationID, int TargetNotificationID)? mutualRequest = await distributedCacheStore.GetFriendRequest(targetAccount.ID, requesterAccount.ID);
+        int? mutualNotificationID = await distributedCacheStore.GetFriendRequest(targetAccount.ID, requesterAccount.ID);
 
-        if (mutualRequest is not null)
+        if (mutualNotificationID is not null)
         {
             // Request Is Mutual: Both Accounts Become Friends Immediately
             await CreateMutualFriendship(requesterAccount, targetAccount, merrick, distributedCacheStore);
 
             // Send Approval Success Notification To Requester
-            // NOTE: Current Requester Was Target Of Original Request, So They Receive Target Notification ID
-            SendFriendRequestApproval(session, targetAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER, mutualRequest.Value.TargetNotificationID);
+            // NOTE: Current Requester Was The Target Of The Original Friend Request, So They Receive The ID Of The Target's Notification (e.g. {AccountName} Wants To Be Friends)
+            SendFriendRequestApproval(session, targetAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER, mutualNotificationID.Value);
 
             ClientChatSession? targetSession = Context.ClientChatSessions.Values
                 .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
 
             // Send Approval Success Notification To Target, If Online
-            // NOTE: Current Target Was Requester Of Original Request, So They Receive Requester Notification ID
+            // NOTE: Current Target Was The Requester Of The Original Friend Request, So They Receive A Session-Scoped Notification With ID == 0 (e.g. Friend Request Sent)
+            // NOTE: A Notification With ID == 0 Tells The Client To Remove The Notification Locally, Without A Server Round-Trip Or Login Re-Delivery
             if (targetSession is not null)
-                SendFriendRequestApproval(targetSession, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER, mutualRequest.Value.RequesterNotificationID);
+                SendFriendRequestApproval(targetSession, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER, 0);
 
             return this;
         }
 
-        // Request Is Not Mutual: Generate Both Notification IDs
-        int requesterNotificationID = GenerateNotificationID();
+        // Request Is Not Mutual: Generate The Target's Notification ID
         int targetNotificationID = GenerateNotificationID();
 
         // Store Pending Friend Request In Distributed Cache Store
-        await distributedCacheStore.SetFriendRequest(requesterAccount.ID, targetAccount.ID, requesterNotificationID, targetNotificationID);
+        await distributedCacheStore.SetFriendRequest(requesterAccount.ID, targetAccount.ID, targetNotificationID);
 
         // Send Success Response To Requester (Friend Request Created Successfully)
-        SendFriendAddSuccess(session, targetAccount, requesterNotificationID);
+        // The Requester's Own Notification Is Session-Scoped: Notification ID == 0 Tells The Client To Remove The Notification Locally, Without A Server Round-Trip Or Login Re-Delivery
+        SendFriendAddSuccess(session, targetAccount, 0);
 
         ClientChatSession? targetOnlineSession = Context.ClientChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
@@ -152,15 +153,25 @@ public class Friend
 
         if (requesterAccount is null)
         {
+            Log.Warning(@"Friend Request Approval By Account ""{ApproverAccountName}"" (ID: {ApproverAccountID}) Failed: Requester Account ""{RequesterAccountName}"" Was Not Found", approverAccount.Name, approverAccount.ID, AccountName);
+
             return this;
         }
 
         // Check Whether Pending Friend Request Exists Or Not
-        (int RequesterNotificationID, int TargetNotificationID)? pendingRequest = await distributedCacheStore.GetFriendRequest(requesterAccount.ID, approverAccount.ID);
+        int? pendingFriendRequestNotificationID = await distributedCacheStore.GetFriendRequest(requesterAccount.ID, approverAccount.ID);
 
-        if (pendingRequest is null)
+        if (pendingFriendRequestNotificationID is null)
         {
-            // No Pending Request Found (May Have Expired Or Never Existed)
+            Log.Information
+            (
+                @"Friend Request Approval By Account ""{ApproverAccountName}"" (ID: {ApproverAccountID}) Found No Pending Friend Request From ""{RequesterAccountName}"" (ID: {RequesterAccountID}) In The Distributed Cache Store" + Environment.NewLine +
+                "Usually Benign: The Request Was Already Approved/Declined, Or The Notification Was Consumed By A Reciprocal Friend Request, Cleared When All Notifications Were Removed, Or Expired As Per Its Time-To-Live Policy" + Environment.NewLine +
+                "Worth Investigating If Unexpected: A Notification Removal Racing This Approval, A Duplicate Approval, A Recycled Requester Name Resolving To The Wrong Account, Or Lost Or Corrupted Cache Data",
+
+                approverAccount.Name, approverAccount.ID, requesterAccount.Name, requesterAccount.ID
+            );
+
             SendFriendApproveFailure(session, requesterAccount.ID, requesterAccount.NameWithClanTag);
 
             return this;
@@ -170,14 +181,14 @@ public class Friend
         await CreateMutualFriendship(requesterAccount, approverAccount, merrick, distributedCacheStore);
 
         // Send Approval Request To Approver
-        SendFriendRequestApproval(session, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER, pendingRequest.Value.TargetNotificationID);
+        SendFriendRequestApproval(session, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER, pendingFriendRequestNotificationID.Value);
 
         ClientChatSession? requesterSession = Context.ClientChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requesterAccount.Name, StringComparison.OrdinalIgnoreCase));
 
         // Send Approval Response To Requester, If Online
         if (requesterSession is not null)
-            SendFriendRequestApproval(requesterSession, approverAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER, pendingRequest.Value.RequesterNotificationID);
+            SendFriendRequestApproval(requesterSession, approverAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER, 0);
 
         return this;
     }

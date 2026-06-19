@@ -6,15 +6,15 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 ///     Both paths validate the same conditions.
 /// </summary>
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS)]
-public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor<ClientChatSession>
+public class GroupPlayerLoadingStatus(MerrickContext merrick) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupPlayerLoadingStatusRequestData requestData = new (buffer);
 
-        MatchmakingGroup
+        await MatchmakingGroup
             .GetByMemberAccountID(session.Account.ID)
-            .SendLoadingStatusUpdate(session, requestData.LoadingPercent);
+            .SendLoadingStatusUpdate(session, requestData.LoadingPercent, merrick);
     }
 }
 

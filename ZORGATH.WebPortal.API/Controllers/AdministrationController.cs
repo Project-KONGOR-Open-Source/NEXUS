@@ -28,7 +28,7 @@ public class AdministrationController(MerrickContext databaseContext, ILogger<Ad
         await MerrickContext.Tokens.AddAsync(token);
         await MerrickContext.SaveChangesAsync();
 
-        Logger.LogInformation(@"Issued Host Account Authorisation Token ""{Value}""", token.Value);
+        Logger.LogInformation(@"Issued Host Account Authorisation Token ""{Token}""", token.Value);
 
         HostAccountAuthorisationTokenDTO response = new (token.Value, token.TimestampCreated + token.Validity);
 

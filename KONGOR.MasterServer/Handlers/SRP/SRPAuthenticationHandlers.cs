@@ -31,7 +31,7 @@ public static class SRPAuthenticationHandlers
             GoldCoins = parameters.Account.User.GoldCoins.ToString(),
             SilverCoins = parameters.Account.User.SilverCoins,
             CustomIconSlotID = SetCustomIconSlotID(parameters.Account),
-            CurrentSeason = "666",
+            CurrentSeason = SeasonInformation.CurrentSeasonIndex.ToString(),
             MuteExpiration = 0, // TODO: Implement Account Muting As Part Of The Karma System
             FriendAccountList = SetFriendAccountList(parameters.Account),
             IgnoredAccountsList = SetIgnoredAccountsList(parameters.Account),
@@ -44,7 +44,7 @@ public static class SRPAuthenticationHandlers
             AwardsTooltips = SetAwardsTooltips(),
             DataPoints = SetDataPoints(),
             CloudStorageInformation = SetCloudStorageInformation(parameters.Account),
-            Notifications = SetNotifications()
+            Notifications = parameters.Notifications
         };
 
         return response;
@@ -88,6 +88,7 @@ public static class SRPAuthenticationHandlers
         public required string ServerProof { get; set; }
         public required string ClientIPAddress { get; set; }
         public required (string Address, int Port) ChatServer { get; set; }
+        public required List<Notification> Notifications { get; set; }
     }
 
     # region Chat Server Authentication Secret
@@ -227,22 +228,7 @@ public static class SRPAuthenticationHandlers
     }
 
     private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
-    {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
-            .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
-            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
-
-        // TODO: Add Mastery Boosts And Coupons
-
-        return items;
-    }
+        => StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
     private static AwardsTooltips SetAwardsTooltips() => new ();
-
-    private static List<Notification> SetNotifications()
-    {
-        // TODO: Implement This
-
-        return [];
-    }
 }

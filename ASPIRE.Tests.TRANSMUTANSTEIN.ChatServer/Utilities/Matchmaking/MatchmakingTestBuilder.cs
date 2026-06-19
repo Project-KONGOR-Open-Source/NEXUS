@@ -19,7 +19,8 @@ internal static class MatchmakingTestBuilder
     static MatchmakingTestBuilder()
     {
         // The Algorithm Calls Into "TRANSMUTANSTEIN.ChatServer.Utilities.Log", Which Throws Until Initialised By The Production Host; Tests Construct The Algorithm Directly, So We Wire In A No-Op Logger Here
-        Log.Initialise(NullLogger.Instance);
+        // A Serilog Logger With No Sinks Discards Every Event, So It Serves As The No-Op Equivalent Of The Previous Microsoft.Extensions.Logging "NullLogger"
+        Log.Initialise(new Serilog.LoggerConfiguration().CreateLogger());
     }
 
     /// <summary>
@@ -92,7 +93,8 @@ internal static class MatchmakingTestBuilder
                 GameModeAccess           = string.Empty,
                 TMR                      = memberTMRs[index],
                 CasualTMR                = memberTMRs[index],
-                TotalMatchCount          = totalMatchCount
+                TotalMatchCount          = totalMatchCount,
+                GameTypeMatchCount       = totalMatchCount
             };
 
             members.Add(member);
@@ -121,7 +123,8 @@ internal static class MatchmakingTestBuilder
         string[]? gameRegions = null,
         bool? ranked = null,
         ChatProtocol.TMMType? groupType = null,
-        byte? botDifficulty = null
+        byte? botDifficulty = null,
+        byte? matchFidelity = null
     )
     {
         MatchmakingGroupInformation baseInformation = NormalRankedInformation();
@@ -135,7 +138,7 @@ internal static class MatchmakingTestBuilder
             GameModes       = gameModes     ?? baseInformation.GameModes,
             GameRegions     = gameRegions   ?? baseInformation.GameRegions,
             Ranked          = ranked        ?? baseInformation.Ranked,
-            MatchFidelity   = baseInformation.MatchFidelity,
+            MatchFidelity   = matchFidelity ?? baseInformation.MatchFidelity,
             BotDifficulty   = botDifficulty ?? baseInformation.BotDifficulty,
             RandomizeBots   = baseInformation.RandomizeBots
         };

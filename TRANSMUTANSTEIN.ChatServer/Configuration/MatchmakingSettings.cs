@@ -39,16 +39,6 @@ public class MatchmakingSettings
     public double DefaultTMR { get; set; } = 1500.0;
 
     /// <summary>
-    ///     The low TMR threshold for outlier detection.
-    /// </summary>
-    public double LowTMROutlier { get; set; } = 1200.0;
-
-    /// <summary>
-    ///     The high TMR threshold for outlier detection.
-    /// </summary>
-    public double HighTMROutlier { get; set; } = 1750.0;
-
-    /// <summary>
     ///     The baseline TMR difference allowed between teams before any queue-time expansion is applied.
     ///     This is the tightest acceptable spread; the pool-size-aware expansion settings widen it over time.
     /// </summary>
@@ -82,6 +72,11 @@ public class MatchmakingSettings
     public double BaseKFactor { get; set; } = 10.0;
 
     /// <summary>
+    ///     The upper bound on the magnitude of a single match's rating change, after all K-factor multipliers have been applied.
+    /// </summary>
+    public double MaximumKFactor { get; set; } = 20.0;
+
+    /// <summary>
     ///     The K-factor multiplier for provisional players.
     ///     Provisional players are those with fewer than <see cref="ProvisionalMatchCount"/> matches and TMR below <see cref="ProvisionalTMRCutoff"/>.
     /// </summary>
@@ -90,6 +85,10 @@ public class MatchmakingSettings
     /// <summary>
     ///     The number of matches required before a player is no longer considered provisional.
     /// </summary>
+    /// <remarks>
+    ///     The provisional period is a hidden rating-convergence mechanic, and is distinct from placement matches.
+    ///     Placement matches (<see cref="AccountStatistics.PlacementMatchesData"/>) are counted separately by the master server and only gate the visible medal, while the provisional period amplifies rating changes and also ends early once the player's rating reaches <see cref="ProvisionalTMRCutoff"/>.
+    /// </remarks>
     public int ProvisionalMatchCount { get; set; } = 10;
 
     /// <summary>
@@ -108,6 +107,17 @@ public class MatchmakingSettings
     ///     The TMR threshold above which K-factor reduction begins.
     /// </summary>
     public double ReducedKFactorTMRCutoff { get; set; } = 1600.0;
+
+    /// <summary>
+    ///     Whether a team composed only of small groups (the "2+2+1" composition or smaller) suffers half the rating loss when it faces a large pre-made stack (the "4+1" composition or a full team), compensating for the opponent's coordination advantage.
+    /// </summary>
+    public bool ReducedLossForSmallGroupsEnabled { get; set; } = true;
+
+    /// <summary>
+    ///     Whether the anti-boosting coordination penalty is applied. Members of a pre-made group with a wide internal rating spread have both their rating gains and losses reduced the further their rating sits from their team's average, so that boosting a far-lower-rated friend earns little rating.
+    ///     Unlike the original, this does not exempt players on a recent win streak, because a successful boost is indistinguishable from a genuine climb by win rate alone.
+    /// </summary>
+    public bool CoordinationPenaltyEnabled { get; set; } = true;
 
     /// <summary>
     ///     Whether matchmaking is currently enabled.

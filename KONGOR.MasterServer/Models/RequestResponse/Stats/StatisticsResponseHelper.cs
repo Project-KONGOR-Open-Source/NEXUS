@@ -12,12 +12,15 @@ public class AggregateStatistics
 
     public int PublicGamesPlayed { get; init; }
     public int PublicDisconnections { get; init; }
+    public int PublicSecondsPlayed { get; init; }
 
     public int RankedGamesPlayed { get; init; }
     public int RankedDisconnections { get; init; }
+    public int RankedSecondsPlayed { get; init; }
 
     public int CasualGamesPlayed { get; init; }
     public int CasualDisconnections { get; init; }
+    public int CasualSecondsPlayed { get; init; }
 
     public int MidWarsGamesPlayed { get; init; }
     public int MidWarsDisconnections { get; init; }
@@ -45,12 +48,15 @@ public class AggregateStatistics
 
         int publicGames = GetValue(AccountStatisticsType.Public, stat => stat.MatchesPlayed);
         int publicDiscos = GetValue(AccountStatisticsType.Public, stat => stat.MatchesDisconnected);
+        int publicSeconds = GetValue(AccountStatisticsType.Public, stat => stat.HeroStatistics.AggregateTotals().SecondsPlayed);
 
         int rankedGames = GetValue(AccountStatisticsType.Matchmaking, stat => stat.MatchesPlayed);
         int rankedDiscos = GetValue(AccountStatisticsType.Matchmaking, stat => stat.MatchesDisconnected);
+        int rankedSeconds = GetValue(AccountStatisticsType.Matchmaking, stat => stat.HeroStatistics.AggregateTotals().SecondsPlayed);
 
         int casualGames = GetValue(AccountStatisticsType.MatchmakingCasual, stat => stat.MatchesPlayed);
         int casualDiscos = GetValue(AccountStatisticsType.MatchmakingCasual, stat => stat.MatchesDisconnected);
+        int casualSeconds = GetValue(AccountStatisticsType.MatchmakingCasual, stat => stat.HeroStatistics.AggregateTotals().SecondsPlayed);
 
         int midWarsGames = GetValue(AccountStatisticsType.MidWars, stat => stat.MatchesPlayed);
         int midWarsDiscos = GetValue(AccountStatisticsType.MidWars, stat => stat.MatchesDisconnected);
@@ -82,12 +88,15 @@ public class AggregateStatistics
 
             PublicGamesPlayed = publicGames,
             PublicDisconnections = publicDiscos,
+            PublicSecondsPlayed = publicSeconds,
 
             RankedGamesPlayed = rankedGames,
             RankedDisconnections = rankedDiscos,
+            RankedSecondsPlayed = rankedSeconds,
 
             CasualGamesPlayed = casualGames,
             CasualDisconnections = casualDiscos,
+            CasualSecondsPlayed = casualSeconds,
 
             MidWarsGamesPlayed = midWarsGames,
             MidWarsDisconnections = midWarsDiscos,
@@ -129,15 +138,31 @@ public static class StatisticsResponseHelper
     }
 
     /// <summary>
-    ///     Gets the owned store items data dictionary, excluding mastery boosts and coupons.
+    ///     Gets the owned store items data dictionary.
+    ///     Mastery boost consumables are excluded, as their counts are surfaced via the match mastery response instead.
+    ///     Owned mastery coupons are surfaced as discount coupon data so the client can offer their discount in the store.
     /// </summary>
     public static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> GetOwnedStoreItemsData(Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
-            .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
-            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
+        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = [];
 
-        // TODO: Add Mastery Boosts And Coupons
+        foreach (string ownedItem in account.User.OwnedStoreItems)
+        {
+            if (ownedItem.StartsWith("ma.", StringComparison.Ordinal))
+                continue;
+
+            if (ownedItem.StartsWith("cp.", StringComparison.Ordinal))
+            {
+                StoreItemDiscountCoupon? coupon = MasteryCouponHelper.BuildDiscountCoupon(ownedItem);
+
+                if (coupon is not null)
+                    items[ownedItem] = coupon;
+
+                continue;
+            }
+
+            items[ownedItem] = new StoreItemData();
+        }
 
         return items;
     }

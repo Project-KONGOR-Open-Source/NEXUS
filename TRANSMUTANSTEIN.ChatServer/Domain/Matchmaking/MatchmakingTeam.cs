@@ -43,16 +43,6 @@ public class MatchmakingTeam
     public double AverageTMR => PlayerCount > 0 ? TotalTMR / PlayerCount : 0;
 
     /// <summary>
-    ///     The adjusted total TMR including premade bonuses for all groups.
-    /// </summary>
-    public double AdjustedTotalTMR => Groups.Sum(group => group.AdjustedTotalTMR);
-
-    /// <summary>
-    ///     The adjusted average TMR including premade bonuses.
-    /// </summary>
-    public double AdjustedAverageTMR => PlayerCount > 0 ? AdjustedTotalTMR / PlayerCount : 0;
-
-    /// <summary>
     ///     The power mean team rating using the original generalized mean formula.
     ///     This weights higher-rated players more heavily (exponent 6.5).
     /// </summary>
@@ -125,24 +115,30 @@ public class MatchmakingTeam
     public string GroupMakeupString { get; set; } = string.Empty;
 
     /// <summary>
-    ///     The game mode flags that are compatible with all groups in this team.
+    ///     The game modes acceptable to every group in this team.
     /// </summary>
-    public uint GameModeFlags { get; set; }
+    public string[] CommonGameModes { get; set; } = [];
 
     /// <summary>
-    ///     The region flags that are compatible with all groups in this team.
+    ///     The regions acceptable to every group in this team, where "NEWERTH" is a wildcard that matches all regions.
     /// </summary>
-    public uint RegionFlags { get; set; }
+    public string[] CommonGameRegions { get; set; } = [];
+
+    /// <summary>
+    ///     Whether this team queues for ranked matches.
+    /// </summary>
+    public bool IsRanked { get; set; }
+
+    /// <summary>
+    ///     Whether any group in this team prefers match fidelity (fairer matches over shorter queues).
+    ///     Only honoured for ranked teams, mirroring the client's host-only, ranked-only fidelity slider.
+    /// </summary>
+    public bool PrefersMatchFidelity { get; set; }
 
     /// <summary>
     ///     Whether this team has been matched with another team.
     /// </summary>
     public bool MatchedUp { get; set; }
-
-    /// <summary>
-    ///     Whether this team is virtual (for simulation or testing purposes).
-    /// </summary>
-    public bool Virtual { get; set; }
 
     /// <summary>
     ///     Gets all members from all groups in this team.
@@ -151,11 +147,68 @@ public class MatchmakingTeam
         => Groups.SelectMany(group => group.Members);
 
     /// <summary>
-    ///     Recalculates the team statistics including group makeup.
+    ///     Recalculates the team statistics, including the group makeup and the shared queue preferences.
     /// </summary>
     public void RecalculateStatistics()
     {
         CalculateGroupMakeup();
+        CalculateCommonQueuePreferences();
+    }
+
+    /// <summary>
+    ///     Calculates the queue preferences shared by every group in this team: the common game modes, the common regions, and the ranked status.
+    /// </summary>
+    public void CalculateCommonQueuePreferences()
+    {
+        if (Groups.Count == 0)
+        {
+            CommonGameModes = [];
+            CommonGameRegions = [];
+            IsRanked = false;
+
+            return;
+        }
+
+        string[] commonGameModes = Groups[0].Information.GameModes;
+        string[] commonGameRegions = Groups[0].Information.GameRegions;
+
+        foreach (MatchmakingGroup group in Groups.Skip(1))
+        {
+            commonGameModes = IntersectGameModes(commonGameModes, group.Information.GameModes);
+            commonGameRegions = IntersectGameRegions(commonGameRegions, group.Information.GameRegions);
+        }
+
+        CommonGameModes = commonGameModes;
+        CommonGameRegions = commonGameRegions;
+        IsRanked = Groups[0].Information.Ranked;
+        PrefersMatchFidelity = IsRanked && Groups.Any(group => group.Information.MatchFidelity > 0);
+    }
+
+    /// <summary>
+    ///     Intersects two sets of game modes.
+    /// </summary>
+    public static string[] IntersectGameModes(string[] left, string[] right)
+        => [.. left.Intersect(right, StringComparer.OrdinalIgnoreCase)];
+
+    /// <summary>
+    ///     Intersects two sets of regions at the aggregate level (see <see cref="GameRegions"/>), so that for example "USE" and "USW" intersect through their shared "US" aggregate.
+    ///     The <see cref="GameRegions.Wildcard"/> region matches all regions: a side containing it defers to the other side's regions, so the wildcard only survives the intersection when both sides carry it.
+    /// </summary>
+    public static string[] IntersectGameRegions(string[] left, string[] right)
+    {
+        bool leftHasWildcard = left.Contains(GameRegions.Wildcard, StringComparer.OrdinalIgnoreCase);
+        bool rightHasWildcard = right.Contains(GameRegions.Wildcard, StringComparer.OrdinalIgnoreCase);
+
+        string[] leftAggregates = [.. left.Select(GameRegions.GetAggregate).Distinct(StringComparer.OrdinalIgnoreCase)];
+        string[] rightAggregates = [.. right.Select(GameRegions.GetAggregate).Distinct(StringComparer.OrdinalIgnoreCase)];
+
+        if (leftHasWildcard)
+            return rightAggregates.Length > 0 ? rightAggregates : leftAggregates;
+
+        if (rightHasWildcard)
+            return leftAggregates.Length > 0 ? leftAggregates : rightAggregates;
+
+        return [.. leftAggregates.Intersect(rightAggregates, StringComparer.OrdinalIgnoreCase)];
     }
 
     /// <summary>
@@ -217,12 +270,16 @@ public class MatchmakingTeam
         if (PlayerCount != other.PlayerCount)
             return false;
 
-        // Check That Both Teams Have Overlapping Game Modes (If Flags Are Set)
-        if (GameModeFlags != 0 && other.GameModeFlags != 0 && (GameModeFlags & other.GameModeFlags) == 0)
+        // Check That Both Teams Have The Same Ranked Status
+        if (IsRanked != other.IsRanked)
             return false;
 
-        // Check That Both Teams Have Overlapping Regions (If Flags Are Set)
-        if (RegionFlags != 0 && other.RegionFlags != 0 && (RegionFlags & other.RegionFlags) == 0)
+        // Check That Both Teams Have At Least One Game Mode In Common
+        if (IntersectGameModes(CommonGameModes, other.CommonGameModes).Length == 0)
+            return false;
+
+        // Check That Both Teams Have At Least One Region In Common ("NEWERTH" Is A Wildcard That Matches All Regions)
+        if (IntersectGameRegions(CommonGameRegions, other.CommonGameRegions).Length == 0)
             return false;
 
         return true;

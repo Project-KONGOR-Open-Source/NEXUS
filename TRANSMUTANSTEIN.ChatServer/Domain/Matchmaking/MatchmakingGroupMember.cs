@@ -46,29 +46,19 @@ public class MatchmakingGroupMember(ClientChatSession session)
     public int GameTypeMatchCount { get; set; } = 0;
 
     /// <summary>
-    ///     The number of recent wins for streak tracking.
-    /// </summary>
-    public int RecentWins { get; set; } = 0;
-
-    /// <summary>
-    ///     The number of recent losses for streak tracking.
-    /// </summary>
-    public int RecentLosses { get; set; } = 0;
-
-    /// <summary>
-    ///     The TMR adjustment based on match history.
-    /// </summary>
-    public double MatchHistoryAdjustment { get; set; } = 0.0;
-
-    /// <summary>
     ///     The player's Casual TMR for casual game modes.
     /// </summary>
     public double CasualTMR { get; set; } = 1500.0;
 
     /// <summary>
-    ///     The player's kill/death ratio.
+    ///     Whether the player's rating for the queued game type is still in its placement phase, in which case no medal is shown.
     /// </summary>
-    public double KDRatio { get; set; } = 1.0;
+    public bool IsInPlacementPhase { get; set; }
+
+    /// <summary>
+    ///     Whether the player's casual rating is still in its placement phase, in which case no casual medal is shown.
+    /// </summary>
+    public bool IsInCasualPlacementPhase { get; set; }
 
     /// <summary>
     ///     The pre-calculated TMR gain value for winning the current match.
@@ -81,7 +71,8 @@ public class MatchmakingGroupMember(ClientChatSession session)
     public double MatchLossValue { get; set; }
 
     /// <summary>
-    ///     The player's IP address for conflict detection.
+    ///     Whether the player is in the provisional phase of their rating for the queued game type.
+    ///     Assigned together with the match point values and reported to the match server, which awards provisional players bonus rating for kill streaks as a form of smurf protection.
     /// </summary>
-    public string IPAddress { get; set; } = string.Empty;
+    public bool IsProvisional { get; set; }
 }

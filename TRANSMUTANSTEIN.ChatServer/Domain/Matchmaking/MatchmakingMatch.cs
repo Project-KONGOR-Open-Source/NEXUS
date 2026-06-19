@@ -33,29 +33,9 @@ public class MatchmakingMatch
     public double MatchupPrediction { get; set; }
 
     /// <summary>
-    ///     The win percentage threshold that was acceptable for this match.
-    /// </summary>
-    public double WinPercentThreshold { get; set; }
-
-    /// <summary>
-    ///     The loss percentage threshold that was acceptable for this match.
-    /// </summary>
-    public double LossPercentThreshold { get; set; }
-
-    /// <summary>
     ///     Whether the teams have mismatched group compositions.
     /// </summary>
     public bool MismatchedGroupMakeup { get; set; }
-
-    /// <summary>
-    ///     Whether the match was balanced in the first pass.
-    /// </summary>
-    public bool FirstPassBalanced { get; set; }
-
-    /// <summary>
-    ///     Whether the match was balanced in the second pass.
-    /// </summary>
-    public bool SecondPassBalanced { get; set; }
 
     /// <summary>
     ///     The method used to combine groups into this match.
@@ -76,6 +56,12 @@ public class MatchmakingMatch
     ///     The selected region for this match.
     /// </summary>
     public string SelectedRegion { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     The regions acceptable to every player in this match, where "NEWERTH" is a wildcard that matches all regions.
+    ///     Used to allocate a match server in (or as close as possible to) a requested region.
+    /// </summary>
+    public string[] CommonGameRegions { get; set; } = [];
 
     /// <summary>
     ///     The game type for this match.
@@ -100,9 +86,9 @@ public class MatchmakingMatch
     public byte BotDifficulty { get; set; }
 
     /// <summary>
-    ///     The arranged match type derived from the game type and ranked status.
+    ///     The arranged match type derived from the bot-match status, the game type, and the ranked status.
     /// </summary>
-    public MatchType ArrangedMatchType => GameType switch
+    public MatchType ArrangedMatchType => IsBotMatch ? MatchType.AM_MATCHMAKING_BOTMATCH : GameType switch
     {
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => IsRanked ? MatchType.AM_MATCHMAKING : MatchType.AM_UNRANKED_MATCHMAKING,
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => IsRanked ? MatchType.AM_MATCHMAKING : MatchType.AM_UNRANKED_MATCHMAKING,
@@ -123,11 +109,6 @@ public class MatchmakingMatch
 
         _                                                      => throw new ArgumentOutOfRangeException(nameof(GameType), $@"Unsupported Game Type ""{GameType}""")
     };
-
-    /// <summary>
-    ///     Pre-calculated rating changes per player (AccountID -> (WinValue, LossValue)).
-    /// </summary>
-    public Dictionary<int, (double WinValue, double LossValue)> MatchPointValues { get; set; } = [];
 
     /// <summary>
     ///     The ID of the assigned game server, if any.
@@ -188,6 +169,170 @@ public class MatchmakingMatch
         => 1.0 / (1.0 + Math.Exp(-(legionTMR - hellbourneTMR) / scale));
 
     /// <summary>
+    ///     The width of the TMR band over which the high-rating K-factor reduction ramps from zero to the full <see cref="MatchmakingSettings.ReducedKFactorMultiplier"/>.
+    /// </summary>
+    private const double ReducedKFactorRampRange = 300.0;
+
+    /// <summary>
+    ///     Pre-calculates each player's rating point values for winning and for losing this match, and flags provisional players.
+    ///     The match server adjusts these values for in-game events (for example leavers, terminations, and rating-exempt modes) and submits the final value with the match statistics.
+    /// </summary>
+    public void AssignMatchPointValues(MatchmakingSettings settings)
+    {
+        // Bot Matches Have No Opposing Team And Do Not Affect Ratings
+        if (HellbourneTeam is null)
+            return;
+
+        AssignTeamMatchPointValues(LegionTeam, HellbourneTeam, MatchupPrediction, settings);
+        AssignTeamMatchPointValues(HellbourneTeam, LegionTeam, 1.0 - MatchupPrediction, settings);
+    }
+
+    private void AssignTeamMatchPointValues(MatchmakingTeam team, MatchmakingTeam opposingTeam, double winPrediction, MatchmakingSettings settings)
+    {
+        double lossMultiplier = GetSmallGroupLossMultiplier(team, opposingTeam, settings);
+        double teamAverageTMR = team.AverageTMR;
+
+        foreach (MatchmakingGroup group in team.Groups)
+        {
+            // The Coordination Penalty Only Engages For A Pre-Made Group With A Wide Internal Rating Spread (The Boosting Signature)
+            bool groupIncursCoordinationPenalty = settings.CoordinationPenaltyEnabled && group.Members.Count > 1 && group.TMRRange > GammaCurveRange;
+
+            foreach (MatchmakingGroupMember member in group.Members)
+            {
+                member.IsProvisional = IsProvisionalPlayer(member, settings);
+
+                double kFactor = CalculateKFactor(member, settings);
+
+                // The Penalty Scales With How Far The Member's Rating Sits From Their Team's Average, Damping Both Gains And Losses Down To A Tenth
+                double coordinationMultiplier = groupIncursCoordinationPenalty ? CalculateSkillDifferenceAdjustment(member.TMR, teamAverageTMR) : 1.0;
+
+                member.MatchWinValue = Math.Clamp((1.0 - winPrediction) * kFactor * coordinationMultiplier, 0.0, settings.MaximumKFactor);
+                member.MatchLossValue = CalculateMatchLossValue(member, winPrediction, kFactor, coordinationMultiplier, lossMultiplier, settings);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     The highest group makeup score (see <see cref="MatchmakingTeam.GroupMakeup"/>) still considered a team of small groups, equal to the "2+2+1" composition.
+    /// </summary>
+    private const int SmallGroupMakeupCeiling = 9;
+
+    /// <summary>
+    ///     The lowest group makeup score (see <see cref="MatchmakingTeam.GroupMakeup"/>) considered a large pre-made stack, equal to the "4+1" composition.
+    /// </summary>
+    private const int LargeStackMakeupFloor = 17;
+
+    /// <summary>
+    ///     Gets the rating-loss multiplier for a team, halving the loss when a team of only small groups (the "2+2+1" composition or smaller) faces a large pre-made stack (the "4+1" composition or a full team), to compensate for the opponent's coordination advantage.
+    ///     Only applies to full five-player teams, matching the original composition constants, and only when <see cref="MatchmakingSettings.ReducedLossForSmallGroupsEnabled"/> is set.
+    /// </summary>
+    private static double GetSmallGroupLossMultiplier(MatchmakingTeam team, MatchmakingTeam opposingTeam, MatchmakingSettings settings)
+    {
+        if (settings.ReducedLossForSmallGroupsEnabled is false || team.TeamSize is not 5)
+            return 1.0;
+
+        bool teamIsSmallGroups = team.GroupMakeup <= SmallGroupMakeupCeiling;
+        bool opponentIsLargeStack = opposingTeam.GroupMakeup >= LargeStackMakeupFloor;
+
+        return teamIsSmallGroups && opponentIsLargeStack ? 0.5 : 1.0;
+    }
+
+    /// <summary>
+    ///     A player is provisional while their rating for the queued game type is still converging: fewer than <see cref="MatchmakingSettings.ProvisionalMatchCount"/> matches played and a rating below <see cref="MatchmakingSettings.ProvisionalTMRCutoff"/>.
+    ///     MidWars and RiftWars ratings have no provisional phase, matching the original implementation.
+    ///     The provisional phase is distinct from placement matches (<see cref="AccountStatistics.IsInPlacementPhase"/>), which are counted separately by the master server and only gate the visible medal.
+    /// </summary>
+    private bool IsProvisionalPlayer(MatchmakingGroupMember member, MatchmakingSettings settings)
+    {
+        bool gameTypeHasNoProvisionalPhase = GameType
+            is ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS
+            or ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS_REBORN
+            or ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS;
+
+        if (gameTypeHasNoProvisionalPhase)
+            return false;
+
+        return member.TMR < settings.ProvisionalTMRCutoff && member.GameTypeMatchCount < settings.ProvisionalMatchCount;
+    }
+
+    /// <summary>
+    ///     Calculates the player's K-factor: the base value, multiplied by <see cref="MatchmakingSettings.ProvisionalKFactorMultiplier"/> for provisional players, and reduced for highly-rated players to counter rating inflation.
+    ///     The high-rating reduction ramps linearly from zero at <see cref="MatchmakingSettings.ReducedKFactorTMRCutoff"/> to the full <see cref="MatchmakingSettings.ReducedKFactorMultiplier"/> over <see cref="ReducedKFactorRampRange"/> TMR.
+    /// </summary>
+    private static double CalculateKFactor(MatchmakingGroupMember member, MatchmakingSettings settings)
+    {
+        if (member.IsProvisional)
+            return settings.BaseKFactor * settings.ProvisionalKFactorMultiplier;
+
+        if (member.TMR > settings.ReducedKFactorTMRCutoff)
+        {
+            double reduction = Math.Clamp((member.TMR - settings.ReducedKFactorTMRCutoff) / ReducedKFactorRampRange, 0.0, 1.0);
+
+            return settings.BaseKFactor - settings.BaseKFactor * reduction * settings.ReducedKFactorMultiplier;
+        }
+
+        return settings.BaseKFactor;
+    }
+
+    /// <summary>
+    ///     Calculates the rating point value for losing this match, which is always zero or negative.
+    ///     A player already at the minimum TMR loses nothing, and a loss never takes a player below the minimum TMR.
+    /// </summary>
+    private static double CalculateMatchLossValue(MatchmakingGroupMember member, double winPrediction, double kFactor, double coordinationMultiplier, double lossMultiplier, MatchmakingSettings settings)
+    {
+        if (member.TMR < settings.MinimumTMR + 0.01)
+            return 0.0;
+
+        // Clamp To The Same Bound As The Returned Value So The Below-Minimum Check Tests The Loss That Is Actually Applied
+        // A Static -BaseKFactor Bound Here Would Underestimate A Provisional Player's Loss (Whose kFactor Can Reach MaximumKFactor) And Let It Drop Below MinimumTMR
+        double lossValue = Math.Clamp(-winPrediction * kFactor * coordinationMultiplier, -settings.MaximumKFactor, 0.0);
+
+        // The Below-Minimum Floor Is Tested Against The Coordination-Adjusted Loss, Then The Small-Group Reduction Is Applied To The Final Value (Matching The Original Order)
+        if (member.TMR + lossValue < settings.MinimumTMR)
+            return Math.Clamp(settings.MinimumTMR - member.TMR, -settings.MaximumKFactor, 0.0);
+
+        return lossValue * lossMultiplier;
+    }
+
+    /// <summary>
+    ///     The rating spread (around a team's average) over which the coordination penalty ramps in, and the shape and scale of the gamma distribution that defines the ramp.
+    ///     A member exactly at their team's average is unpenalised; one a full <see cref="GammaCurveRange"/> above or below has their gains and losses reduced to a tenth.
+    /// </summary>
+    private const double GammaCurveRange = 175.0;
+    private const int GammaCurveShape = 18;
+    private const double GammaCurveScale = 5.0;
+
+    /// <summary>
+    ///     Calculates the coordination-penalty multiplier (between 0.1 and 1.0) for a member, based on how far their rating sits from their team's average.
+    ///     The further the member is from the average in either direction, the smaller the multiplier, so that a high-rated player boosting far-lower-rated friends (and the boosted friends themselves) gain and lose very little rating.
+    /// </summary>
+    private static double CalculateSkillDifferenceAdjustment(double playerTMR, double teamAverageTMR)
+    {
+        double skillDifference = Math.Max(GammaCurveRange - Math.Abs(playerTMR - teamAverageTMR), 0.1);
+
+        return Math.Clamp(GammaDistribution(skillDifference, GammaCurveShape, GammaCurveScale), 0.1, 1.0);
+    }
+
+    /// <summary>
+    ///     Evaluates the cumulative distribution function of a gamma (Erlang) distribution with the given integer shape and scale at the supplied value.
+    /// </summary>
+    private static double GammaDistribution(double value, int shape, double scale)
+    {
+        double scaledValue = value / scale;
+
+        double cumulative = 0.0;
+        long factorial = 1;
+
+        for (int term = 0; term < shape; term++)
+        {
+            cumulative += Math.Exp(-scaledValue) * (Math.Pow(scaledValue, term) / factorial);
+            factorial *= term + 1;
+        }
+
+        return 1.0 - cumulative;
+    }
+
+    /// <summary>
     ///     Creates a bot (co-op) match from a single group.
     ///     The group is placed on the Legion team; the game server fills remaining slots with bots.
     ///     In the original implementation, bot matches force the game type to <see cref="ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL"/> and the map to "caldavar".
@@ -207,6 +352,7 @@ public class MatchmakingMatch
             SelectedMap = "caldavar",
             SelectedMode = "botmatch",
             SelectedRegion = group.Information.GameRegions.Length > 0 ? group.Information.GameRegions.RandomElement() : "NEWERTH",
+            CommonGameRegions = group.Information.GameRegions,
             GameType = ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL,
             IsRanked = false
         };

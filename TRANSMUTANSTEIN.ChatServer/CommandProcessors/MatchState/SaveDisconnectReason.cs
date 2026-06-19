@@ -12,7 +12,7 @@ public class SaveDisconnectReason : ISynchronousCommandProcessor<MatchServerChat
         SaveDisconnectReasonRequestData requestData = new (buffer);
 
         // TODO: Aggregate And Track Disconnect Reason Counts Per Server For Monitoring And Reporting
-        Log.Debug(@"Received Disconnect Reason Report From Server ID {ServerID} With {ReasonCount} Reason Categories",
+        Log.Debug(@"Received Disconnect Reason Report From Server ID {MatchServerID} With {ReasonCount} Reason Categories",
             session.Metadata.ServerID, requestData.ReasonCounts.Length);
     }
 }

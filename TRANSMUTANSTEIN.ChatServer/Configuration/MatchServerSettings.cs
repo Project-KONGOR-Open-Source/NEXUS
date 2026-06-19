@@ -22,27 +22,23 @@ public class MatchServerSettings
     /// <summary>
     ///     Whether the match server should submit detailed item purchase statistics at the end of each match.
     ///     Maps to the "svr_submitMatchStatItems" CVAR.
+    ///     While this can be useful for analytics, it can cause the request to exceed the ASP.NET Core default form value count limit of 1,024, so it is disabled by default.
     /// </summary>
-    public bool SubmitMatchStatisticsItems { get; set; } = true;
+    public bool SubmitMatchStatisticsItems { get; set; } = false;
 
     /// <summary>
     ///     Whether the match server should submit detailed ability usage statistics at the end of each match.
     ///     Maps to the "svr_submitMatchStatAbilities" CVAR.
+    ///     While this can be useful for analytics, it can cause the request to exceed the ASP.NET Core default form value count limit of 1,024, so it is disabled by default.
     /// </summary>
-    public bool SubmitMatchStatisticsAbilities { get; set; } = true;
+    public bool SubmitMatchStatisticsAbilities { get; set; } = false;
 
     /// <summary>
     ///     Whether the match server should submit detailed kill/death statistics at the end of each match.
     ///     Maps to the "svr_submitMatchStatFrags" CVAR.
+    ///     While this can be useful for analytics, it can cause the request to exceed the ASP.NET Core default form value count limit of 1,024, so it is disabled by default.
     /// </summary>
-    public bool SubmitMatchStatisticsFrags { get; set; } = true;
-
-    /// <summary>
-    ///     Whether the match server should broadcast its presence on the local network.
-    ///     Maps to the "svr_broadcast" CVAR.
-    ///     Should be disabled in production to prevent the server from appearing in local server browsers.
-    /// </summary>
-    public bool Broadcast { get; set; } = true;
+    public bool SubmitMatchStatisticsFrags { get; set; } = false;
 
     /// <summary>
     ///     The maximum outgoing bandwidth per client in bytes per second.

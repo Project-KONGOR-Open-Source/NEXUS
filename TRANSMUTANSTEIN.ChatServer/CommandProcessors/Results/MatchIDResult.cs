@@ -13,7 +13,7 @@ public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousComma
 
             if (data is null)
             {
-                Log.Error(@"[BUG] Unable To Retrieve Match Information For Server Session ""{SessionID}"" With Server ID ""{ServerID}""",
+                Log.Error(@"[BUG] Unable To Retrieve Match Information For Server Session ""{SessionID}"" With Server ID ""{MatchServerID}""",
                     session.ID, session.Metadata.ServerID);
             }
 

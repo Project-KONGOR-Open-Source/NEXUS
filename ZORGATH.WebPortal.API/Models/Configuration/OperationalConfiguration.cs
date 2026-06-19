@@ -22,9 +22,9 @@ public class OperationalConfigurationJWT
 
 public class OperationalConfigurationSMTP
 {
-    public string? Host { get; set; }
+    public string? Host { get; set; } = Environment.GetEnvironmentVariable("SMTP_HOST");
 
-    public int? Port { get; set; }
+    public int? Port { get; set; } = int.TryParse(Environment.GetEnvironmentVariable("SMTP_PORT"), out int port) ? port : null;
 
     public required string SenderName { get; set; }
 
@@ -32,7 +32,7 @@ public class OperationalConfigurationSMTP
 
     public required bool UseTLS { get; set; }
 
-    public string? Username { get; set; }
+    public string? Username { get; set; } = Environment.GetEnvironmentVariable("SMTP_USERNAME");
 
-    public string? Password { get; set; }
+    public string? Password { get; set; } = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
 }

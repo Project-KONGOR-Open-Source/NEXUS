@@ -13,12 +13,12 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
 
     private const int ViewChestPageSize = 56;
 
-    private static PlinkoConfiguration PlinkoConfig => JSONConfiguration.PlinkoConfiguration;
+    private static PlinkoConfiguration PlinkoConfiguration => JSONConfiguration.PlinkoConfiguration;
     private static PlinkoTierProductsConfiguration TierProducts => JSONConfiguration.PlinkoTierProductsConfiguration;
     private static StoreItemsConfiguration StoreItems => JSONConfiguration.StoreItemsConfiguration;
 
     /// <summary>
-    ///     Returns the Plinko panel's initial state: costs, the player's balances, the tier bucket layout, and the per-bucket product counts used by the UI.
+    ///     Returns the Plinko panel's initial state: costs, the player's balances, the tier partition layout, and the per-partition product counts used by the UI.
     /// </summary>
     [HttpPost("master/casino/", Name = "Plinko Index Requester")]
     public async Task<IActionResult> Index()
@@ -35,21 +35,21 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
 
         User user = account.User;
 
-        // Per-Bucket Enabled Product Counts, In The Visual Order Declared By The Bucket Layout
-        string amountOfProducts = string.Join(",", PlinkoConfig.TierBucketOrder
+        // Per-Partition Enabled Product Counts, In The Visual Order Declared By The Partition Layout
+        string amountOfProducts = string.Join(",", PlinkoConfiguration.TierPartitionOrder
             .Select(tierID => TierProducts.CountEnabledProducts(tierID, StoreItems).ToString()));
 
         Dictionary<string, object> response = new ()
         {
             ["status_code"]         = 1,
-            ["tiers"]               = PlinkoConfig.TierBucketOrder,
-            ["ticket_cost"]         = PlinkoConfig.TicketCost,
-            ["gold_cost"]           = PlinkoConfig.GoldCost,
+            ["tiers"]               = PlinkoConfiguration.TierPartitionOrder,
+            ["ticket_cost"]         = PlinkoConfiguration.TicketCost,
+            ["gold_cost"]           = PlinkoConfiguration.GoldCost,
             ["user_gold"]           = user.GoldCoins,
             ["silver"]              = user.SilverCoins,
             ["user_tickets"]        = user.PlinkoTickets,
             ["amount_of_products"]  = amountOfProducts,
-            ["last_update_time"]    = PlinkoConfig.LastUpdateTimes
+            ["last_update_time"]    = PlinkoConfiguration.LastUpdateTimes
         };
 
         return Ok(PhpSerialization.Serialize(response));
@@ -85,7 +85,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
 
         bool payingWithGold = currency.Equals("gold");
 
-        if (payingWithGold && user.GoldCoins < PlinkoConfig.GoldCost)
+        if (payingWithGold && user.GoldCoins < PlinkoConfiguration.GoldCost)
         {
             return Ok(PhpSerialization.Serialize(new Dictionary<string, object>
             {
@@ -93,7 +93,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
             }));
         }
 
-        if (payingWithGold.Equals(false) && user.PlinkoTickets < PlinkoConfig.TicketCost)
+        if (payingWithGold.Equals(false) && user.PlinkoTickets < PlinkoConfiguration.TicketCost)
         {
             return Ok(PhpSerialization.Serialize(new Dictionary<string, object>
             {
@@ -103,9 +103,9 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
 
         // Deduct The Cost Up-Front So Post-Drop Balances Are Consistent With A Failed Reward Path
         if (payingWithGold)
-            user.GoldCoins -= PlinkoConfig.GoldCost;
+            user.GoldCoins -= PlinkoConfiguration.GoldCost;
         else
-            user.PlinkoTickets -= PlinkoConfig.TicketCost;
+            user.PlinkoTickets -= PlinkoConfiguration.TicketCost;
 
         int tierID = GetRandomPlinkoTier();
 
@@ -192,23 +192,23 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
     {
         double roll = Random.Shared.NextDouble() * 100.0;
 
-        double cumulative = PlinkoConfig.DropProbabilities.Tier1;
+        double cumulative = PlinkoConfiguration.DropProbabilities.Tier1;
         if (roll < cumulative)
             return 1;
 
-        cumulative += PlinkoConfig.DropProbabilities.Tier2;
+        cumulative += PlinkoConfiguration.DropProbabilities.Tier2;
         if (roll < cumulative)
             return 2;
 
-        cumulative += PlinkoConfig.DropProbabilities.Tier3;
+        cumulative += PlinkoConfiguration.DropProbabilities.Tier3;
         if (roll < cumulative)
             return 3;
 
-        cumulative += PlinkoConfig.DropProbabilities.Tier4;
+        cumulative += PlinkoConfiguration.DropProbabilities.Tier4;
         if (roll < cumulative)
             return 4;
 
-        cumulative += PlinkoConfig.DropProbabilities.Tier5;
+        cumulative += PlinkoConfiguration.DropProbabilities.Tier5;
         if (roll < cumulative)
             return 5;
 
@@ -251,7 +251,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
                 ProductName         = "Ticket",
                 ProductPath         = "Ticket",
                 ProductType         = "Ticket",
-                TicketReward        = PlinkoConfig.GetExhaustionTicketReward(tierID),
+                TicketReward        = PlinkoConfiguration.GetExhaustionTicketReward(tierID),
                 ProductsExhausted   = true
             };
         }
@@ -280,7 +280,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
         ProductName         = "Ticket",
         ProductPath         = "Ticket",
         ProductType         = "Ticket",
-        TicketReward        = PlinkoConfig.GetConsolationTicketReward(tierID),
+        TicketReward        = PlinkoConfiguration.GetConsolationTicketReward(tierID),
         ProductsExhausted   = true
     };
 
@@ -298,7 +298,7 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
 
         if (isValid.Equals(false) || accountName is null)
         {
-            Logger.LogWarning(@"Plinko Request With Invalid Cookie ""{Cookie}"" From ""{IPAddress}""",
+            Logger.LogWarning(@"Plinko Request With Invalid Cookie ""{SessionCookie}"" From ""{IPAddress}""",
                 cookie, Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN");
 
             return null;

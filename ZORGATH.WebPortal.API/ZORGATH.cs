@@ -13,6 +13,9 @@ public class ZORGATH
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
+        // Add Serilog Logging
+        builder.AddSerilogLogging();
+
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
@@ -226,6 +229,9 @@ public class ZORGATH
 
         // Enable Forwarded Headers Middleware For Reverse Proxy Support
         application.UseForwardedHeaders();
+
+        // Emit One Structured Log Event Per HTTP Request
+        application.UseSerilogLogging();
 
         // Configure Development-Specific Middleware
         if (application.Environment.IsDevelopment())

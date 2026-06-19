@@ -38,6 +38,14 @@ public partial class ServerRequesterController
             return BadRequest("Unable To Resolve Remote IP Address");
         }
 
+        // The Built-In Host Account Which Ships With A Publicly-Known Password And Is Intended For Usage By Self-Hosters Must Not Be Used To Host On The Production Server
+        if (HostEnvironment.IsProduction() && account.Name.Equals(OOTB.Accounts.OPERATOR.Name))
+        {
+            Logger.LogWarning(@"Rejected Server Manager Authentication For Host Account ""{HostAccountName}"": The Built-In ""{OOTBHostAccountName}"" Account Cannot Host On The Production Server", account.Name, OOTB.Accounts.OPERATOR.Name);
+
+            return Unauthorized($@"The Built-In ""{OOTB.Accounts.OPERATOR.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
+        }
+
         MatchServerManager matchServerManager = new ()
         {
             HostAccountID = account.ID,
@@ -68,7 +76,7 @@ public partial class ServerRequesterController
         response["cdn_upload_host"] = Configuration.CDN.Host;
         response["cdn_upload_target"] = "upload";
 
-        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
+        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerAddress}"" With Cookie ""{MatchServerManagerCookie}""",
             matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
@@ -131,6 +139,14 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
+        // The Built-In Host Account Which Ships With A Publicly-Known Password And Is Intended For Usage By Self-Hosters Must Not Be Used To Host On The Production Server
+        if (HostEnvironment.IsProduction() && account.Name.Equals(OOTB.Accounts.OPERATOR.Name))
+        {
+            Logger.LogWarning(@"Rejected Server Authentication For Host Account ""{HostAccountName}"": The Built-In ""{OOTBHostAccountName}"" Account Cannot Host On The Production Server", account.Name, OOTB.Accounts.OPERATOR.Name);
+
+            return Unauthorized($@"The Built-In ""{OOTB.Accounts.OPERATOR.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
+        }
+
         MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
         MatchServer matchServer = new ()
@@ -174,7 +190,7 @@ public partial class ServerRequesterController
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerIPAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
+        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
             matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
@@ -222,7 +238,7 @@ public partial class ServerRequesterController
 
         if (account is null)
         {
-            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{Cookie}""", accountNameForSessionCookie, cookie);
+            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{SessionCookie}""", accountNameForSessionCookie, cookie);
 
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
@@ -412,9 +428,7 @@ public partial class ServerRequesterController
         if (previousConnectionState is null)
             return BadRequest(@"Missing Value For Form Parameter ""prev_c_state""");
 
-        // TODO: Maybe Use This To Link The Server To The Server Manager? (Or Maybe Just Do That On Server New Session)
-
-        // TODO: Maybe Make The Servers And Managers Expire From The Cache After A Certain Amount Of Time, And Use This Call To Refresh The Expiration Time
+        // The Match Server Is Linked To Its Manager At New-Session Authentication (Via The Match Server's "MatchServerManagerID"), So There Is No Linking To Perform On The Heartbeat
 
         MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 

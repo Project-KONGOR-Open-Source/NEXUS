@@ -18,7 +18,7 @@ namespace MERRICK.DatabaseContext.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("data")
-                .HasAnnotation("ProductVersion", "10.0.7")
+                .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -342,6 +342,48 @@ namespace MERRICK.DatabaseContext.Migrations
                         .IsUnique();
 
                     b.ToTable("AccountStatistics", "stat");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.Mastery", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID")
+                        .IsUnique();
+
+                    b.ToTable("Masteries", "stat");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MasteryRewards", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClaimedLevels")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID")
+                        .IsUnique();
+
+                    b.ToTable("MasteryRewards", "stat");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchParticipantStatistics", b =>
@@ -1128,28 +1170,118 @@ namespace MERRICK.DatabaseContext.Migrations
 
                                     b2.Property<int>("Actions");
 
+                                    b2.Property<int>("Annihilations");
+
+                                    b2.Property<int>("BuildingDamage");
+
+                                    b2.Property<int>("BuildingsRazed");
+
+                                    b2.Property<int>("Buybacks");
+
+                                    b2.Property<int>("ConcedeVotes");
+
+                                    b2.Property<int>("Concedes");
+
+                                    b2.Property<int>("ConsumablesPurchased");
+
                                     b2.Property<int>("Denies");
 
+                                    b2.Property<int>("Disconnections");
+
+                                    b2.Property<int>("DoubleKills");
+
                                     b2.Property<int>("Experience");
+
+                                    b2.Property<int>("ExperienceDenied");
+
+                                    b2.Property<int>("ExperienceFromBuildings");
+
+                                    b2.Property<int>("FirstBloods");
 
                                     b2.Property<int>("GamesPlayed");
 
                                     b2.Property<int>("Gold");
 
+                                    b2.Property<int>("GoldFromBuildings");
+
+                                    b2.Property<int>("GoldFromHeroKills");
+
+                                    b2.Property<int>("GoldLostToDeath");
+
+                                    b2.Property<int>("GoldSpent");
+
                                     b2.Property<int>("HeroAssists");
 
+                                    b2.Property<int>("HeroDamage");
+
                                     b2.Property<int>("HeroDeaths");
+
+                                    b2.Property<int>("HeroExperience");
 
                                     b2.Property<string>("HeroIdentifier")
                                         .IsRequired();
 
                                     b2.Property<int>("HeroKills");
 
+                                    b2.Property<int>("Humiliations");
+
+                                    b2.Property<int>("Kicks");
+
+                                    b2.Property<int>("KillStreak03");
+
+                                    b2.Property<int>("KillStreak04");
+
+                                    b2.Property<int>("KillStreak05");
+
+                                    b2.Property<int>("KillStreak06");
+
+                                    b2.Property<int>("KillStreak07");
+
+                                    b2.Property<int>("KillStreak08");
+
+                                    b2.Property<int>("KillStreak09");
+
+                                    b2.Property<int>("KillStreak10");
+
+                                    b2.Property<int>("KillStreak15");
+
                                     b2.Property<int>("Losses");
+
+                                    b2.Property<int>("Nemeses");
+
+                                    b2.Property<int>("NeutralCreepDamage");
+
+                                    b2.Property<int>("NeutralCreepExperience");
+
+                                    b2.Property<int>("NeutralCreepGold");
+
+                                    b2.Property<int>("NeutralCreepKills");
+
+                                    b2.Property<int>("QuadKills");
+
+                                    b2.Property<int>("Retributions");
+
+                                    b2.Property<int>("ScoreTotal");
+
+                                    b2.Property<int>("SecondsDead");
+
+                                    b2.Property<int>("SecondsPlayed");
+
+                                    b2.Property<int>("Smackdowns");
+
+                                    b2.Property<int>("TeamCreepDamage");
+
+                                    b2.Property<int>("TeamCreepExperience");
+
+                                    b2.Property<int>("TeamCreepGold");
 
                                     b2.Property<int>("TeamCreepKills");
 
                                     b2.Property<int>("TimeEarningExperience");
+
+                                    b2.Property<int>("TripleKills");
+
+                                    b2.Property<int>("WardsPlaced");
 
                                     b2.Property<int>("Wins");
 
@@ -1171,6 +1303,54 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.Navigation("HeroStatistics")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.Mastery", b =>
+                {
+                    b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("MERRICK.DatabaseContext.Entities.Statistics.HeroMasteryExperience", "HeroExperiences", b1 =>
+                        {
+                            b1.Property<int>("MasteryID");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<int>("Experience");
+
+                            b1.Property<string>("HeroIdentifier")
+                                .IsRequired();
+
+                            b1.HasKey("MasteryID", "__synthesizedOrdinal");
+
+                            b1.ToTable("Masteries", "stat");
+
+                            b1
+                                .ToJson("HeroExperiences")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MasteryID");
+                        });
+
+                    b.Navigation("Account");
+
+                    b.Navigation("HeroExperiences");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MasteryRewards", b =>
+                {
+                    b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchParticipantStatistics", b =>

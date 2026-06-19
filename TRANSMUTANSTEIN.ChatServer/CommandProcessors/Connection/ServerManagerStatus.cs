@@ -1,18 +1,38 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ServerManagerToChatServer.NET_CHAT_SM_STATUS)]
-public class ServerManagerStatus : ISynchronousCommandProcessor<MatchServerManagerChatSession>
+public class ServerManagerStatus(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerManagerChatSession>
 {
-    public void Process(MatchServerManagerChatSession session, ChatBuffer buffer)
+    public async Task Process(MatchServerManagerChatSession session, ChatBuffer buffer)
     {
         ServerManagerStatusRequestData requestData = new (buffer);
 
-        Log.Debug(@"Received Status Update From Server Manager ID ""{ServerManagerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Version: ""{Version}"", Shutting Down: {ShuttingDown}",
+        Log.Debug(@"Received Status Update From Server Manager ID ""{MatchServerManagerID}"" - Name: ""{MatchServerManagerName}"", Address: ""{MatchServerManagerAddress}:{MatchServerManagerPort}"", Location: ""{Location}"", Version: ""{Version}"", Shutting Down: {ShuttingDown}",
             requestData.ServerManagerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Version, requestData.ShuttingDown);
 
-        // TODO: Update Any Relevant Match Server Manager Data
+        // A Match Server Manager Announcing That It Is Shutting Down Is A Graceful Departure
+        // So We Terminate The Session, Which Removes It From The Pool And Distributed Cache
+        if (requestData.ShuttingDown)
+        {
+            Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Reported That It Is Shutting Down And Will Be Removed", requestData.ServerManagerID);
 
-        // TODO: Update Server Manager In Distributed Cache
+            await session.Terminate(distributedCacheStore);
+
+            return;
+        }
+
+        // Hydrate Session Metadata With The Manager's Identity And Location, So That Operational Telemetry Can Aggregate Managers Per Region
+        session.Metadata.Location = requestData.Location;
+        session.Metadata.Name = requestData.Name;
+        session.Metadata.Address = requestData.Address;
+        session.Metadata.Port = requestData.Port;
+        session.Metadata.Version = requestData.Version;
+
+        // Broadcast The Manager's Presence To The Terminal, So That It Can Be Tracked Alongside Other Managers In Its Region
+        Terminal.Broadcast(@$"Match Server Manager {requestData.ServerManagerID} (""{requestData.Name}"") Registered In Region ""{GameRegions.NormaliseServerLocation(requestData.Location)}""", Terminal.ManagersPerRegion());
+
+        // The Match Server Manager Sends "NET_CHAT_SM_STATUS" Only Once On Connect Via "CManagerChatConnection", There Is No Periodic Manager Status Heartbeat; The Connection Is Kept Alive By PING/PONG, Not Status Updates
+        // So This Handler Is Effectively One-Shot; Manager Liveness Is Tracked Via The In-Memory Session Pool, Which <see cref="StaleHostReaper"/> Reconciles Against The Distributed Cache Each Sweep
     }
 }
 

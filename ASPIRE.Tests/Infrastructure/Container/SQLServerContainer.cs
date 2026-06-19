@@ -9,7 +9,7 @@ public sealed class SQLServerContainer : IAsyncDisposable
     /// <summary>
     ///     The Microsoft SQL Server container image used by the test suite.
     /// </summary>
-    public const string Image = "mcr.microsoft.com/mssql/server:2022-latest";
+    public const string Image = "mcr.microsoft.com/mssql/server:latest";
 
     /// <summary>
     ///     Display name used in error messages.

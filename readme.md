@@ -60,21 +60,6 @@ Optionally, but recommended on development machines, also install these tools gl
 
 <hr/>
 
-<h3 align="center">AI Tools</h3>
-
-* Claude Code: https://claude.ai/
-
-  ```powershell
-  # Add MCP Servers
-
-  claude mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp
-  claude mcp add --transport http context7 https://mcp.context7.com/mcp --header "CONTEXT7_API_KEY: YOUR_API_KEY"
-
-  claude mcp list
-  ```
-
-<hr/>
-
 <h3 align="center">Comprehensive Instructions For Developers</h3>
 
 Run In Development ...
@@ -118,52 +103,58 @@ dotnet run --project ASPIRE.ApplicationHost --launch-profile "ASPIRE.Application
 
 Create A Database Schema Migration
 
-1. restore the Entity Framework Core CLI and the Aspire CLI by executing `dotnet tool restore`
-2. in the context of the solution directory, execute `aspire exec --resource database-context -- dotnet ef migrations add {NAME}`
+1. in the context of the solution directory, restore the Entity Framework Core CLI and the Aspire CLI by executing `dotnet tool restore`
+2. in the context of the solution directory, execute `dotnet ef migrations add {NAME} --project MERRICK.DatabaseContext`
 
 > [!NOTE]
-> Because the code-first database project is an Aspire resource, it needs the Aspire application host to be running when managing migrations and updating the database, so that Entity Framework Core can gain awareness of resources generated dynamically at run time, such as the connection string. Therefore, it is not possible to run `dotnet ef` commands directly against such a project, because on its own it doesn't have awareness of how to connect to the database server, since this information is passed downstream by the application host at run time.
-> More information on resource-aware CLI commands is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/cli-reference/aspire-exec.
+> More information on Entity Framework Core in Aspire is available here: https://aspire.dev/integrations/databases/efcore/migrations.
 
 <br/>
 
 Update The Database Schema
 
+The database schema is updated by invoking `Aspire.Hosting.EntityFrameworkCore` commands which target the `database-migrations` resource. The application host needs to be running during the execution of `Aspire.Hosting.EntityFrameworkCore` commands, so that the connection string which the `database-migrations` resource requires is resolved automatically from the application host. The application host must therefore be running, and the database which is updated is selected by the launch profile used to start the application host.
+
 ```powershell
 # Development Database
-# In The Context Of The Solution Directory
-$ENV:ASPNETCORE_ENVIRONMENT = "Development"
-aspire exec --resource database-context -- dotnet ef database update
+aspire start --environment Development
+aspire resource database-migrations ef-database-update
+aspire stop
 ```
 
 ```powershell
 # Production Database
-# In The Context Of The Solution Directory
-$ENV:ASPNETCORE_ENVIRONMENT = "Production"
-aspire exec --resource database-context -- dotnet ef database update
+aspire start --environment Production
+aspire resource database-migrations ef-database-update
+aspire stop
 ```
 
 > [!NOTE]
 > While updating the database happens automatically at run time, through code, it is still recommended to update databases manually from the command line, due to the significantly better debugging experience.
 
+> [!NOTE]
+> The `database-migrations` resource exposes multiple commands, which are listed by executing `aspire resource database-migrations --help`, including `ef-database-status`, `ef-migrations-add --name {NAME}`, `ef-migrations-remove`, `ef-database-update`, `ef-database-drop`, and `ef-database-reset`. The same commands are also available as buttons on the resource in the Aspire dashboard. Additional information can be discovered by exploring the `Aspire.Hosting.EntityFrameworkCore` integration [source code](https://github.com/microsoft/aspire/tree/main/src/Aspire.Hosting.EntityFrameworkCore).
+
 <br/>
 
-Install/Update .NET Aspire
+Update .NET Aspire
 
 > [!NOTE]
 > The Aspire NuGet packages referenced by the respective projects need to be in-sync with each other and with the Aspire SDK.
 
-1. update the Aspire NuGet packages to the latest version
-2. manually (for now), update the Aspire SDK in the application host project file
-3. optionally (but good practice), ensure that the service defaults are on the latest version of the project template
-    1. make sure that the latest Aspire project templates are installed by executing `dotnet new install Aspire.ProjectTemplates@X.Y.Z --force`, where `X.Y.Z` is the required Aspire version, which would ideally be the latest released version
+1. update the Aspire SDK and NuGet packages to the latest version by running `aspire update`
+2. optionally (but good practice), ensure that the service defaults are on the latest version of the project template
+    1. make sure that the latest Aspire project templates are installed by executing `dotnet new install Aspire.ProjectTemplates`
     2. optionally, update all project templates by executing `dotnet new update`
     3. make sure that the Aspire project templates are correctly installed, by executing `dotnet new list aspire --type project`
     4. create a temporary service defaults project by executing `dotnet new aspire-servicedefaults`
     5. copy the content of the generated extensions class over the already existing extensions class, and then delete the temporary project
 
 > [!NOTE]
-> Mode in-depth information is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/fundamentals/setup-tooling.
+> Mode in-depth information is available at the following resources:
+> - https://aspire.dev/get-started/prerequisites
+> - https://aspire.dev/get-started/aspire-sdk-templates
+> - https://aspire.dev/whats-new/upgrade-aspire
 
 <br/>
 

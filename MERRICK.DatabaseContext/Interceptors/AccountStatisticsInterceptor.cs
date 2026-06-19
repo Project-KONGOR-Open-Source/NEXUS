@@ -1,7 +1,7 @@
 namespace MERRICK.DatabaseContext.Interceptors;
 
 /// <summary>
-///     Automatically creates <see cref="AccountStatistics"/> records for each <see cref="AccountStatisticsType"/> when a new <see cref="Account"/> is created.
+///     Automatically creates <see cref="AccountStatistics"/> records for each <see cref="AccountStatisticsType"/>, plus a <see cref="Mastery"/> record and a <see cref="MasteryRewards"/> record, when a new <see cref="Account"/> is created.
 /// </summary>
 public sealed class AccountStatisticsInterceptor : SaveChangesInterceptor
 {
@@ -43,6 +43,10 @@ public sealed class AccountStatisticsInterceptor : SaveChangesInterceptor
                     AwardStatistics = new AwardStatisticsSummary()
                 });
             }
+
+            context.Add(new Mastery { Account = account });
+
+            context.Add(new MasteryRewards { Account = account });
         }
     }
 }

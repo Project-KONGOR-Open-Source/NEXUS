@@ -81,7 +81,7 @@ public class AccountsController(MerrickContext databaseContext, ILogger<Accounts
 
         await MerrickContext.SaveChangesAsync();
 
-        Logger.LogInformation(@"Created Sub-Account ""{AccountName}"" Of Type ""{AccountType}"" For User ""{EmailAddress}""", account.Name, requestedAccountType, authenticatedUserEmailAddress);
+        Logger.LogInformation(@"Created Sub-Account ""{AccountName}"" Of Type ""{AccountType}"" For User ""{UserEmailAddress}""", account.Name, requestedAccountType, authenticatedUserEmailAddress);
 
         GetBasicAccountDTO response = new (account.ID, account.Name);
 

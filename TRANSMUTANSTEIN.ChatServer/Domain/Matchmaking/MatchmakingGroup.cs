@@ -1,11 +1,13 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 public class MatchmakingGroup
 {
-    private const double MaximumTMR = 2500.0;
-    private const int InexperiencedMatchCount = 50;
-    private const double InexperiencedTMRCutoff = 1625.0;
     private const double MaximumGroupTMRDisparity = 150.0;
+
+    /// <summary>
+    ///     The game type value the client sends in a match-option update to signal that only the match fidelity should be updated.
+    /// </summary>
+    private const byte FidelityOnlyUpdateSentinel = 99;
 
     public Guid GUID { get; } = Guid.CreateVersion7();
 
@@ -14,6 +16,11 @@ public class MatchmakingGroup
     public required List<MatchmakingGroupMember> Members { get; set; }
 
     public required MatchmakingGroupInformation Information { get; set; }
+
+    /// <summary>
+    ///     Synchronises queue-state transitions (joining the queue, leaving the queue, and the broker's match commitment) between session threads and the matchmaking broker.
+    /// </summary>
+    private Lock QueueStateLock { get; } = new ();
 
     /// <summary>
     ///     The group chat channel for pre-match communication.
@@ -32,22 +39,12 @@ public class MatchmakingGroup
     public double AverageTMR => Members.Count > 0 ? TotalTMR / Members.Count : 0;
 
     /// <summary>
-    ///     The adjusted TMR for this group, including a bonus for premade coordination.
-    /// </summary>
-    /// <remarks>
-    ///     Formula: groupMMR += 4 * 2^groupSize (Solo=0, 2p=+16, 3p=+32, 4p=+64, 5p=+128)
-    /// </remarks>
-    public double AdjustedTotalTMR => TotalTMR + GetPremadeBonus();
-
-    /// <summary>
-    ///     The adjusted average TMR for this group, including premade bonus.
-    /// </summary>
-    public double AdjustedAverageTMR => Members.Count > 0 ? AdjustedTotalTMR / Members.Count : 0;
-
-    /// <summary>
     ///     Gets the premade coordination bonus based on group size.
     ///     Larger groups get a higher bonus to compensate for voice comms and coordination advantage.
     /// </summary>
+    /// <remarks>
+    ///     Formula: 4 * 2^groupSize (Solo=0, 2p=+16, 3p=+32, 4p=+64, 5p=+128)
+    /// </remarks>
     public double GetPremadeBonus()
     {
         if (Members.Count <= 1)
@@ -70,20 +67,6 @@ public class MatchmakingGroup
     ///     The TMR range within this group.
     /// </summary>
     public double TMRRange => HighestTMR - LowestTMR;
-
-    /// <summary>
-    ///     The total number of matches played by all members in this group.
-    /// </summary>
-    public int TotalMatchCount => Members.Sum(member => member.TotalMatchCount);
-
-    /// <summary>
-    ///     The average kill/death ratio of all members in this group.
-    /// </summary>
-    public double AverageKD => Members.Count > 0 ? Members.Average(member => member.KDRatio) : 0;
-
-    public float AverageRating => (float)AverageTMR;
-
-    public float RatingDisparity => (float)TMRRange;
 
     public int FullTeamDifference => Information.TeamSize - Members.Count;
 
@@ -115,77 +98,16 @@ public class MatchmakingGroup
     public Guid? AssignedMatchGUID { get; set; }
 
     /// <summary>
-    ///     Determines if this group is considered "experienced" based on match count or TMR.
-    ///     In the original implementation, a group is experienced if matchCount >= 50 OR TMR >= 1625.
+    ///     The bot roster for the ally team in a bot-match group, indexed by team slot (0 to 4).
+    ///     A <see langword="null"/> slot is empty.
     /// </summary>
-    public bool IsExperienced => TotalMatchCount >= InexperiencedMatchCount || AverageTMR >= InexperiencedTMRCutoff;
+    public string?[] AllyBots { get; } = new string?[5];
 
     /// <summary>
-    ///     Gets the adaptive TMR spread based on queue wait time.
-    ///     As queue time increases, the acceptable TMR range widens to improve match finding.
-    ///     Based on the original adaptive TMR spread algorithm.
+    ///     The bot roster for the enemy team in a bot-match group, indexed by team slot (0 to 4).
+    ///     A <see langword="null"/> slot is empty.
     /// </summary>
-    public double GetAdaptiveTMRSpread()
-    {
-        double baseTMRSpread = TMRRange;
-        double queueMinutes = QueuedTimeInMinutes;
-
-        // Widen TMR spread as queue time increases (approximately 50 TMR per minute after 2 minutes)
-        if (queueMinutes > 2.0)
-        {
-            double additionalSpread = (queueMinutes - 2.0) * 50.0;
-
-            baseTMRSpread += additionalSpread;
-        }
-
-        // Cap The Maximum Spread
-        return Math.Min(baseTMRSpread, MaximumTMR);
-    }
-
-    /// <summary>
-    ///     Checks if this group is compatible with another group for team formation.
-    ///     Based on the original compatibility check algorithm.
-    /// </summary>
-    /// <param name="other">The other group to check compatibility with.</param>
-    /// <returns><see langword="true"/> if the groups are compatible, <see langword="false"/> otherwise.</returns>
-    public bool IsCompatibleWith(MatchmakingGroup other)
-    {
-        // Must Have Matching Game Type
-        if (Information.GameType != other.Information.GameType)
-            return false;
-
-        // Must Have Overlapping Game Modes
-        if (Information.GameModes.Intersect(other.Information.GameModes).Any() is false)
-            return false;
-
-        // Must Have Overlapping Regions (NEWERTH Is A Wildcard That Matches All Regions)
-        bool eitherHasAutoRegion = Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase)
-            || other.Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase);
-
-        if (eitherHasAutoRegion is false && Information.GameRegions.Intersect(other.Information.GameRegions).Any() is false)
-            return false;
-
-        // Must Be Same Ranked Status
-        if (Information.Ranked != other.Information.Ranked)
-            return false;
-
-        // Combined Size Must Not Exceed Team Size
-        if (Members.Count + other.Members.Count > Information.TeamSize)
-            return false;
-
-        // TMR Should Be Within Adaptive Range
-        double combinedTMRSpread = GetAdaptiveTMRSpread();
-        double tmrDifference = Math.Abs(AverageTMR - other.AverageTMR);
-
-        if (tmrDifference > combinedTMRSpread)
-            return false;
-
-        // Experience Level Should Match (Experienced vs Inexperienced)
-        if (IsExperienced != other.IsExperienced)
-            return false;
-
-        return true;
-    }
+    public string?[] EnemyBots { get; } = new string?[5];
 
     /// <summary>
     ///     Hidden Constructor Which Enforces <see cref="Create"/> As The Primary Mechanism For Creating Matchmaking Groups
@@ -208,7 +130,7 @@ public class MatchmakingGroup
         return group;
     }
 
-    internal static MatchmakingGroup Create(ClientChatSession session, MatchmakingGroupInformation information)
+    internal static async Task<MatchmakingGroup> Create(ClientChatSession session, MatchmakingGroupInformation information, MerrickContext merrick)
     {
         // Check If Already In A Matchmaking Group And Remove From It First
         MatchmakingGroup? existingGroup = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
@@ -242,6 +164,8 @@ public class MatchmakingGroup
             if (MatchmakingService.Groups.TryUpdate(session.Account.ID, group, MatchmakingService.Groups[session.Account.ID]) is false)
                 throw new InvalidOperationException($@"Failed To Update Matchmaking Group For Account ID ""{session.Account.ID}""");
         }
+
+        await group.LoadMemberStatistics(merrick);
 
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
 
@@ -284,7 +208,7 @@ public class MatchmakingGroup
         return this;
     }
 
-    public MatchmakingGroup Join(ClientChatSession session)
+    public async Task<MatchmakingGroup> Join(ClientChatSession session, MerrickContext merrick)
     {
         // If The Group Is Full, Reject The Join Request
         if (IsFull)
@@ -350,7 +274,7 @@ public class MatchmakingGroup
         // For Subsequent Members, The Channel Already Exists And They Are Simply Added To It
         if (ChatChannel is null)
         {
-            ChatChannel = ChatChannel.GetOrCreateGroupChannel(GUID.GetHashCode());
+            ChatChannel = ChatChannel.GetOrCreateGroupChannel(GUID.GetDeterministicInt32Hash());
 
             // Add All Existing Members To The Newly-Created Channel
             foreach (MatchmakingGroupMember existingMember in Members)
@@ -371,12 +295,14 @@ public class MatchmakingGroup
             session.CurrentChannels.Add(ChatChannel.ID);
         }
 
+        await LoadMemberStatistics(merrick);
+
         MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
 
         return this;
     }
 
-    public MatchmakingGroup SendLoadingStatusUpdate(ClientChatSession session, byte loadingPercent)
+    public async Task<MatchmakingGroup> SendLoadingStatusUpdate(ClientChatSession session, byte loadingPercent, MerrickContext merrick)
     {
         MatchmakingGroupMember groupMember = Members.Single(member => member.Account.ID == session.Account.ID);
 
@@ -387,7 +313,7 @@ public class MatchmakingGroup
 
         if (allMembersAreFullyLoaded)
         {
-            JoinQueue();
+            await JoinQueue(merrick);
         }
 
         MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
@@ -397,13 +323,14 @@ public class MatchmakingGroup
 
     public MatchmakingGroup SendPlayerReadinessStatusUpdate(ClientChatSession session, ChatProtocol.TMMGameType matchType)
     {
-        Information.GameType = matchType;
-
         MatchmakingGroupMember groupMember = Members.Single(member => member.Account.ID == session.Account.ID);
 
         // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
+        // They Are Also Not Permitted To Change The Group's Game Type
         if (groupMember.IsLeader is false)
             return this;
+
+        Information.GameType = matchType;
 
         if (groupMember.IsReady is false)
         {
@@ -412,7 +339,7 @@ public class MatchmakingGroup
                 if (member.IsReady is false)
                 {
                     if (member.IsLeader is false)
-                        Log.Error(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
+                        Log.Error(@"[BUG] Non-Leader Group Member ""{AccountName}"" With ID ""{AccountID}"" Was Not Ready", member.Account.Name, member.Account.ID);
 
                     // All Matchmaking Group Members Need To Be Ready For The Queue To Start
                     member.IsReady = true;
@@ -436,15 +363,137 @@ public class MatchmakingGroup
     }
 
     /// <summary>
+    ///     Applies a match-option change from the group leader (game type, map, game modes, regions, ranked status, match fidelity, and bot-match options) and broadcasts the updated group state to all members.
+    ///     A change to the match fidelity slider arrives with the <see cref="FidelityOnlyUpdateSentinel"/> game type, in which case only the fidelity value is applied.
+    /// </summary>
+    public void UpdateGameOptions(ChatProtocol.TMMGameType gameType, string mapName, string[] gameModes, string[] gameRegions, bool ranked, byte matchFidelity, byte botDifficulty, bool randomizeBots)
+    {
+        if ((byte)gameType is FidelityOnlyUpdateSentinel)
+        {
+            Information.MatchFidelity = matchFidelity;
+
+            MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+
+            return;
+        }
+
+        Information.GameType = gameType;
+        Information.MapName = mapName;
+        Information.GameModes = gameModes;
+        Information.GameRegions = gameRegions;
+        Information.Ranked = ranked;
+        Information.MatchFidelity = matchFidelity;
+        Information.BotDifficulty = botDifficulty;
+        Information.RandomizeBots = randomizeBots;
+
+        // Keep Each Member's Game Mode Access Consistent With The New Game Mode Count (Defaulting To Full Access, As At Group Creation)
+        string gameModeAccess = string.Join('|', gameModes.Select(mode => "true"));
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.GameModeAccess = gameModeAccess;
+
+        MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+    }
+
+    /// <summary>
+    ///     Applies a group-type change from the group leader (for example switching between a player-versus-player group and a co-operative bot-match group) and broadcasts the updated group state to all members.
+    /// </summary>
+    public void ChangeGroupType(ChatProtocol.TMMType groupType)
+    {
+        Information.GroupType = groupType;
+
+        MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+    }
+
+    /// <summary>
+    ///     Sets the bot occupying the given team slot and broadcasts the change to all group members.
+    /// </summary>
+    /// <param name="team">The team the slot belongs to: 1 for the ally team, 2 for the enemy team.</param>
+    /// <param name="slot">The team slot index (0 to 4).</param>
+    /// <param name="botName">The bot definition name (for example "ChronosBot").</param>
+    public void UpdateBot(byte team, byte slot, string botName)
+    {
+        if (slot > 4 /* Slot 5, The Last 0-Indexed Slot */)
+        {
+            Log.Error(@"[BUG] A Bot Update Has Occurred For Out-Of-Range Slot {Slot} In Matchmaking Group GUID ""{GroupGUID}""", slot, GUID);
+
+            return;
+        }
+
+        switch (team)
+        {
+            case 1:
+            {
+                AllyBots[slot] = botName;
+                    
+                break;
+            }
+
+            case 2:
+            {
+                EnemyBots[slot] = botName;
+                    
+                break;
+            }
+
+            default:
+            {
+                Log.Warning(@"Ignoring Bot Update For Unknown Team {Team} In Matchmaking Group GUID ""{GroupGUID}""", team, GUID);
+
+                return;
+            }
+        }
+
+        ChatBuffer update = new ();
+
+        update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_BOT_GROUP_UPDATE);
+        update.WriteInt8(team);      // Team (1 = Ally, 2 = Enemy)
+        update.WriteInt8(slot);      // Team Slot (0 To 4)
+        update.WriteString(botName); // Bot Definition Name
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(update);
+    }
+
+    /// <summary>
+    ///     Loads each member's rating and match counts from the database for the currently-selected game type.
+    ///     A member without a statistics row for a given type falls back to the default values of a fresh account.
+    /// </summary>
+    public async Task LoadMemberStatistics(MerrickContext merrick)
+    {
+        List<int> accountIDs = [.. Members.Select(member => member.Account.ID)];
+
+        List<AccountStatistics> statistics = await merrick.AccountStatistics
+            .Where(accountStatistics => accountIDs.Contains(accountStatistics.AccountID)).ToListAsync();
+
+        AccountStatisticsType statisticsType = Information.StatisticsType;
+
+        foreach (MatchmakingGroupMember member in Members)
+        {
+            List<AccountStatistics> memberStatistics = [.. statistics.Where(accountStatistics => accountStatistics.AccountID == member.Account.ID)];
+
+            AccountStatistics? gameTypeStatistics = memberStatistics.SingleOrDefault(accountStatistics => accountStatistics.Type == statisticsType);
+            AccountStatistics? casualStatistics = memberStatistics.SingleOrDefault(accountStatistics => accountStatistics.Type == AccountStatisticsType.MatchmakingCasual);
+
+            member.TMR = gameTypeStatistics?.SkillRating ?? 1500.0;
+            member.GameTypeMatchCount = gameTypeStatistics?.MatchesPlayed ?? 0;
+            member.IsInPlacementPhase = gameTypeStatistics?.IsInPlacementPhase ?? false;
+            member.CasualTMR = casualStatistics?.SkillRating ?? 1500.0;
+            member.IsInCasualPlacementPhase = casualStatistics?.IsInPlacementPhase ?? false;
+            member.TotalMatchCount = memberStatistics.Sum(accountStatistics => accountStatistics.MatchesPlayed);
+        }
+    }
+
+    /// <summary>
     ///     Attempts to join the matchmaking queue.
     ///     Validates that all members are ready and fully loaded (100%) before joining.
     /// </summary>
-    public void JoinQueue()
+    public async Task JoinQueue(MerrickContext merrick)
     {
-        // Prevent Double-Queuing: Check If Already In Queue
+        // Prevent Double-Queuing (The Explicit Queue Join And The Loading-Status Auto-Join Can Legitimately Race)
         if (QueueStartTime is not null)
         {
-            Log.Error(@"[BUG] Matchmaking Group GUID ""{Group.GUID}"" Tried To Join Queue While Already Queued", GUID);
+            Log.Debug(@"Ignoring Queue Join For Group GUID ""{GroupGUID}"" Because It Is Already Queued", GUID);
 
             return;
         }
@@ -454,8 +503,13 @@ public class MatchmakingGroup
 
         if (allMembersReadyAndLoaded is false)
         {
+            Log.Debug(@"Ignoring Queue Join For Group GUID ""{GroupGUID}"" Because Not All Members Are Ready And Fully Loaded", GUID);
+
             return;
         }
+
+        // Refresh Each Member's Rating And Match Counts For The Selected Game Type, So That Matching And The Disparity Validation Use Current Values
+        await LoadMemberStatistics(merrick);
 
         // Validate MMR Disparity Within Group (Prevents Boosting/Smurfing)
         // If The Highest-Rated Player Is Too Far Above The Average Of The Rest, Reject
@@ -471,8 +525,14 @@ public class MatchmakingGroup
         // TODO: Validate Disabled Game Modes
         // TODO: Update Group Statistics And Cache Information
 
-        // Set Group As Queued
-        QueueStartTime = DateTimeOffset.UtcNow;
+        // Set Group As Queued (Re-Checked Under The Queue-State Lock, As The Explicit Queue Join And The Loading-Status Auto-Join Can Race)
+        lock (QueueStateLock)
+        {
+            if (QueueStartTime is not null || MatchedUp)
+                return;
+
+            QueueStartTime = DateTimeOffset.UtcNow;
+        }
 
         // Broadcast Queue Join To All Group Members
         ChatBuffer joinQueueBroadcast = new ();
@@ -487,12 +547,33 @@ public class MatchmakingGroup
 
         queueUpdateBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
         queueUpdateBroadcast.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
-        queueUpdateBroadcast.WriteInt32(83); // TODO: Calculate Real Average Queue Time In Seconds
+
+        QueueType partition = MatchmakingService.GetQueueTypePartition(Information.GroupType, Information.GameType);
+
+        int estimatedQueueDurationSeconds = MatchmakingService.GetEstimatedQueueDurationSeconds(partition);
+
+        queueUpdateBroadcast.WriteInt32(estimatedQueueDurationSeconds);
 
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(queueUpdateBroadcast);
 
-        Log.Debug(@"Group GUID ""{Group.GUID}"" Joined Queue With {MemberCount} Member(s)", GUID, Members.Count);
+        // Broadcast Queue Join To Terminal
+        Terminal.Broadcast(@$"{Members.Count} Player(s) Joined The Matchmaking Queue For Region(s) ""{string.Join('|', Information.GameRegions)}""", Terminal.UsersInQueuePerRegion());
+
+        Log.Debug(@"Group GUID ""{GroupGUID}"" Joined Queue With {MemberCount} Member(s)", GUID, Members.Count);
+    }
+
+    /// <summary>
+    ///     Resets the readiness and loading state of every member, mirroring the original chat server's behaviour whenever a group leaves the queue (which includes when it is matched into a game).
+    ///     The leader is set to not ready and non-leader members are set to ready, so that group readiness is determined solely by the leader, and every member's loading progress is reset to zero.
+    /// </summary>
+    public void UnloadAndUnreadyMembers()
+    {
+        foreach (MatchmakingGroupMember member in Members)
+        {
+            member.IsReady = member.IsLeader is false;
+            member.LoadingPercent = 0;
+        }
     }
 
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
@@ -538,14 +619,18 @@ public class MatchmakingGroup
                 update.WriteString(member.Account.Name);                                 // Account Name
                 update.WriteInt8(member.Slot);                                           // Group Slot
 
-                // Calculate Rank Level From TMR (Campaign Level / Medal)
-                int normalRankLevel = CalculateCampaignLevel(member.TMR);
-                int casualRankLevel = CalculateCampaignLevel(member.CasualTMR);
+                // Calculate Rank Level From TMR (Campaign Level / Medal); No Medal Is Shown While The Rating's Placement Phase Is Incomplete
+                int normalRankLevel = member.IsInPlacementPhase ? 0 : CalculateCampaignLevel(member.TMR);
+                int casualRankLevel = member.IsInCasualPlacementPhase ? 0 : CalculateCampaignLevel(member.CasualTMR);
+
+                // Get Global Leaderboard Index
+                int normalGlobalLeaderboardIndex = -1; // TODO: Implement Global Leaderboard Index Calculation
+                int casualGlobalLeaderboardIndex = -1; // TODO: Implement Global Leaderboard Index Calculation
 
                 update.WriteInt32(normalRankLevel);                                      // Normal Rank Level (Campaign Level / Medal)
                 update.WriteInt32(casualRankLevel);                                      // Casual Rank Level (Campaign Level / Medal)
-                update.WriteInt32(normalRankLevel);                                      // Normal Rank (Global Ranking Index - Placeholder)
-                update.WriteInt32(casualRankLevel);                                      // Casual Rank (Global Ranking Index - Placeholder)
+                update.WriteInt32(normalGlobalLeaderboardIndex);                         // Normal Ranking Global Leaderboard Index (-1 = Unranked, 1 = Highest Ranked Player)
+                update.WriteInt32(casualGlobalLeaderboardIndex);                         // Casual Ranking Global Leaderboard Index (-1 = Unranked, 1 = Highest Ranked Player)
                 update.WriteBool(member.IsEligibleForMatchmaking);                       // Eligible For Campaign
 
                 // Rating: Use -1 To Hide For Unranked, Otherwise Show Real Rating
@@ -664,7 +749,7 @@ public class MatchmakingGroup
         // Leave Queue If Queued (Queue Membership Changes Require Re-Queuing)
         if (IsQueued)
         {
-            LeaveQueue();
+            LeaveQueue(forced: true);
         }
 
         // Reassign Slots And Transfer Leadership
@@ -717,7 +802,7 @@ public class MatchmakingGroup
     {
         if (Members.Count == 0)
         {
-            Log.Error(@"[BUG] Attempted To Reassign Slots In Empty Matchmaking Group GUID ""{Group.GUID}""", GUID);
+            Log.Error(@"[BUG] Attempted To Reassign Slots In Empty Matchmaking Group GUID ""{GroupGUID}""", GUID);
 
             return;
         }
@@ -739,7 +824,7 @@ public class MatchmakingGroup
         // Leave Queue If Queued
         if (IsQueued)
         {
-            LeaveQueue();
+            LeaveQueue(forced: true);
         }
 
         // Remove All Members From Group Chat Channel And Clean Up
@@ -761,14 +846,38 @@ public class MatchmakingGroup
     }
 
     /// <summary>
-    ///     Leaves the matchmaking queue.
+    ///     Atomically confirms that this group is still queued with at least one member, as part of the broker's match commitment.
+    ///     Taking the queue-state lock orders the confirmation against concurrent queue transitions, so a leave request is either observed before the commitment or refused after it.
     /// </summary>
-    public void LeaveQueue()
+    internal bool TryClaimForMatch()
     {
-        if (QueueStartTime is null)
-            return;
+        lock (QueueStateLock)
+        {
+            return QueueStartTime is not null && Members.Count > 0;
+        }
+    }
 
-        QueueStartTime = null;
+    /// <summary>
+    ///     Leaves the matchmaking queue, returning <see langword="true"/> when the group actually left the queue.
+    ///     A request without <paramref name="forced"/> is refused while the group is committed to a match, because the match roster has been (or is about to be) sent to a match server.
+    ///     A forced leave (for example when a member is removed from the group) always clears the queue state; an in-flight match commitment then fails its re-validation, or the match server's wait-for-players logic handles the no-show.
+    /// </summary>
+    public bool LeaveQueue(bool forced = false)
+    {
+        lock (QueueStateLock)
+        {
+            if (QueueStartTime is null)
+                return false;
+
+            if (forced is false && MatchedUp)
+            {
+                Log.Debug(@"Refusing Queue Leave For Group GUID ""{GroupGUID}"" Because It Is Already Committed To A Match", GUID);
+
+                return false;
+            }
+
+            QueueStartTime = null;
+        }
 
         // Broadcast Queue Leave To All Group Members
         ChatBuffer leaveQueueBroadcast = new ();
@@ -777,6 +886,11 @@ public class MatchmakingGroup
 
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(leaveQueueBroadcast);
+
+        // A Group Disbanded By Its Last Member Disconnecting Reaches This Point With No Remaining Members
+        Terminal.Broadcast(Members.Count > 0 ? $"{Members.Count} Player(s) Left The Matchmaking Queue" : "A Disbanded Group Left The Matchmaking Queue", Terminal.UsersInQueuePerRegion());
+
+        return true;
     }
 
     /// <summary>
@@ -833,19 +947,8 @@ public class MatchmakingGroup
         if (Members.Count <= 1)
             return false;
 
-        // Calculate The Team Approximation (Extrapolate To Full Team Size)
-        double combinedTMR = TotalTMR;
-        double averageTMR = AverageTMR;
-        int teamSize = Information.TeamSize;
-
-        // Approximate What The Full Team's TMR Would Be
-        double teamApproximation = combinedTMR + averageTMR * (teamSize - Members.Count);
-
-        // Calculate The Bottom N-1 Players' Combined TMR
-        double bottomMembersTMR = teamApproximation - HighestTMR;
-
-        // Check If The Highest Player Is Too Far Above The Average Of The Rest
-        double averageOfOthers = bottomMembersTMR / (teamSize - 1);
+        // Compare The Highest-Rated Member Against The Average Of The Remaining Members, So The Cap Applies To The Actual Group Regardless Of Its Size
+        double averageOfOthers = (TotalTMR - HighestTMR) / (Members.Count - 1);
         double disparity = HighestTMR - averageOfOthers;
 
         return disparity >= MaximumGroupTMRDisparity;
@@ -867,6 +970,6 @@ public class MatchmakingGroup
 
         Leader.Session.Send(error);
 
-        Log.Information(@"Queue Join Rejected For Group GUID ""{Group.GUID}"": {Reason}", GUID, errorMessage);
+        Log.Information(@"Queue Join Rejected For Group GUID ""{GroupGUID}"": {Reason}", GUID, errorMessage);
     }
 }

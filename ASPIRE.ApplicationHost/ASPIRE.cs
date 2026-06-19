@@ -36,7 +36,7 @@ public class ASPIRE
         // Add Distributed Cache Resource
         IResourceBuilder<RedisResource> distributedCache = builder.AddRedis("distributed-cache", password: distributedCachePassword)
             .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
-            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data As Docker-Managed Data Volume
 
         // TODO: Consider Migrating To Valkey For Field-Level TTL Support And Native Namespace Scoping
         // INFO: Valkey Namespaces Would Let ASPIRE.Tests Drop The Per-Factory Key-Prefix Wrapper Around IDatabase In Favour Of Real Keyspace Isolation
@@ -49,7 +49,7 @@ public class ASPIRE
         // Create Distributed Cache Dashboard Resource
         Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
-            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-dashboard-data") // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-dashboard-data") // Persist Cached Data As Docker-Managed Data Volume
             .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
@@ -76,14 +76,10 @@ public class ASPIRE
         // While Aspire's Service Orchestration Is Not Running, The Port To Connect Directly To The Running SQL Server Container Can Be Found In Docker (e.g. "docker container list")
         const int databasePort = 1433;
 
-        // Configure SQL Server Data Directory
-        string userHomeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string databaseDirectory = Path.Combine(userHomeDirectory, "SQL", "MERRICK", databaseName);
-
-        // Add SQL Server Container With Persistent Data In The Current User's Directory (Cross-Platform)
+        // Add SQL Server Resource (SQL Server 2025 Requires A Container-Native Data Directory, A Linux-To-Windows Bind Mount Causes I/O Failures During Startup, So A Data Volume Is Required)
         IResourceBuilder<SqlServerServerResource> databaseServer = builder.AddSqlServer("database-server", password: databasePassword, port: databasePort)
-            .WithImageTag("2022-latest") // SQL Server Image Tags: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/tags
-            .WithLifetime(ContainerLifetime.Persistent).WithDataBindMount(source: databaseDirectory) // Persist SQL Server Data Both Between Distributed Application Restarts And Resource Container Restarts
+            .WithImageTag("latest") // SQL Server Image Tags: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/tags
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume($"database-server-data-{databaseName}") // Persist SQL Server Data As Docker-Managed Data Volume
             .WithEnvironment("ACCEPT_EULA", "Y").WithEnvironment("MSSQL_PID", "Developer"); // SQL Server Image Information: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/about
 
         // Create Resource Relationship After Parent Resource Is Defined
@@ -95,16 +91,49 @@ public class ASPIRE
         IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase("database", databaseName)
             .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
 
+        // Add Structured Log Server Resource
+        IResourceBuilder<SeqResource> logServer = builder.AddSeq("log-server")
+            .WithImageTag("latest") // Latest Seq Image: https://hub.docker.com/r/datalust/seq/tags
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("log-server-data") // Persist Ingested Logs As Docker-Managed Data Volume
+            .WithEnvironment("SEQ_DIAGNOSTICS_INTERNALLOGGINGLEVEL", "Warning") // Quieten Seq's Own Internal Maintenance Logging, Which By Default Goes Into STDERR At Information Level
+            .WithEnvironment("ACCEPT_EULA", "Y"); // Automatically Accept End User License Agreement: https://datalust.co/docs/environment-variables
+
+        // In Non-Development Environments, Protect The Log Server Dashboard With An Administrator Password
+        if (builder.Environment.IsDevelopment() is false)
+        {
+            // The Default Seq Administrator User Name
+            const string logServerFirstRunAdministratorUserName = "admin";
+
+            // Any Well-Known Password; Needs To Be Changed On First Login
+            const string logServerFirstRunAdministratorPassword = "admin";
+
+            logServer
+                .WithEnvironment("SEQ_FIRSTRUN_ADMINUSERNAME", logServerFirstRunAdministratorUserName) // Set The Initial Administrator User Name On The Log Server Resource
+                .WithEnvironment("SEQ_FIRSTRUN_ADMINPASSWORD", logServerFirstRunAdministratorPassword); // Set The Initial Administrator Password On The Log Server Resource
+
+            /*
+                Once An Administrator Password Has Been Set, It Will Continue To Be Required Regardless Of Environment
+                So If The Production Profile Is Launched, Which Sets A Password, Then This Password Will Continue To Be Required Even When Launching The Development Profile
+            */
+        }
+
         // Add Database Project
-        builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
+        IResourceBuilder<ProjectResource> databaseContext = builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithParentRelationship(databaseServer) // Set Database Server As Parent Resource
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+
+        // Enable Entity Framework Core Commands Which Resolve The Database Connection String Through The Aspire Application Host
+        databaseContext.AddEFMigrations("database-migrations", "MERRICK.DatabaseContext.Persistence.MerrickContext")
+            .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Supply The Resolved Connection String Under The Name The Database Context Expects, And Wait For The Database To Start
+            .WithParentRelationship(databaseContext); // Set Database Context As Parent Resource
 
         // Add Master Server Project
         builder.AddProject<KONGOR>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
             .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
@@ -115,6 +144,7 @@ public class ASPIRE
         builder.AddProject<TRANSMUTANSTEIN>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
             .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
@@ -124,6 +154,7 @@ public class ASPIRE
         // Add Web Portal API Project
         IResourceBuilder<ProjectResource> webPortalAPI = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Local STMP Server In Development
@@ -189,14 +220,12 @@ public class ASPIRE
                 ? builder.AddParameter(smtpPasswordParameterName, resolvedSMTPPassword, secret: true)
                 : builder.AddParameter(smtpPasswordParameterName, secret: true);
 
-            // Pass SMTP Configuration To Web Portal API As Environment Variables That Override The "Operational:SMTP" Configuration Section
-            // The "__" Separator In Environment Variable Names Maps To ":" In ASP.NET Core's Configuration System (e.g. "Operational__SMTP__Host" Resolves To "Operational:SMTP:Host")
-            // These Environment Variables Are Set On The Child Process Before It Starts, So They Are Available During Configuration Building And Before IOptions<T> Is Bound
+            // Pass SMTP Configuration To Web Portal API
             webPortalAPI
-                .WithEnvironment("Operational__SMTP__Host", smtpHost)
-                .WithEnvironment("Operational__SMTP__Port", smtpPort)
-                .WithEnvironment("Operational__SMTP__Username", smtpUsername)
-                .WithEnvironment("Operational__SMTP__Password", smtpPassword);
+                .WithEnvironment("SMTP_HOST", smtpHost)
+                .WithEnvironment("SMTP_PORT", smtpPort)
+                .WithEnvironment("SMTP_USERNAME", smtpUsername)
+                .WithEnvironment("SMTP_PASSWORD", smtpPassword);
 
             // Create Resource Relationships After Parent Resource Is Defined
             smtpHost.WithDescription("SMTP Host").WithParentRelationship(webPortalAPI);
@@ -209,6 +238,7 @@ public class ASPIRE
         # pragma warning disable ASPIREBROWSERLOGS001
         builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
             .WithReference(webPortalAPI).WaitFor(webPortalAPI) // Connect To Web Portal API And Wait For It To Start
+            .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
             .WithBrowserLogs(userDataMode: BrowserUserDataMode.Isolated); // Experimental Extension; Surfaces Web Browser Logs In The Aspire Dashboard
         # pragma warning restore ASPIREBROWSERLOGS001

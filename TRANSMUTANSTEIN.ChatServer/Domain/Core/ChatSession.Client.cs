@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class ClientChatSession(TCPServer server, IServiceProvider serviceProvider) : ChatSession(server, serviceProvider)
+public class ClientChatSession(ConnectionContext connection, IServiceProvider serviceProvider) : ChatSession(connection, serviceProvider)
 {
     /// <summary>
     ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
@@ -27,10 +27,23 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// </summary>
     public HashSet<int> CurrentChannels { get; set; } = [];
 
+    /// <summary>
+    ///     Surfaces the authenticated account's identifier to the base session, so that it can be pushed into the ambient log context while commands are processed.
+    /// </summary>
+    protected override int? LoggingAccountID => Account?.ID;
+
+    /// <summary>
+    ///     Surfaces the authenticated account's name to the base session, so that it can be pushed into the ambient log context while commands are processed.
+    /// </summary>
+    protected override string? LoggingAccountName => Account?.Name;
+
     public ClientChatSession Accept(Account account)
     {
         // Link The Account To The Chat Session
         Account = account;
+
+        // Enrich This Session's Logger With The Authenticated Account, So That Every Subsequent Session-Level Log Event Is Attributed To It
+        Logger = Logger.ForContext("AccountID", account.ID).ForContext("AccountName", account.Name);
 
         // Add The Chat Session To The Chat Sessions Collection
         Context.ClientChatSessions.AddOrUpdate(account.Name, this, (key, existing) => this);
@@ -78,7 +91,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         if (server is null)
         {
-            Log.Error(@"[BUG] Client Account ID ""{AccountID}"" Attempted To Join Match On Unknown Server ""{ServerAddress}""", Account.ID, serverAddress);
+            Log.Error(@"[BUG] Client Account ID ""{AccountID}"" Attempted To Join Match On Unknown Server ""{MatchServerAddress}""", Account.ID, serverAddress);
 
             return this;
         }
@@ -128,6 +141,11 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // The Match Server Should Already Be Set From PrepareToJoinMatch
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME, Metadata.MatchServerConnectedTo);
 
+        string matchDescription = matchID >= 0 ? $"Match {matchID}" : "A Match";
+
+        // Broadcast A Join Message To The Terminal, With The Player's Name, The Match They Joined, And The Region They Are In
+        Terminal.Broadcast(@$"Player ""{Account.Name}"" Joined {matchDescription} In Region ""{GameRegions.NormaliseServerLocation(Metadata.MatchServerConnectedTo?.Location ?? string.Empty)}""", Terminal.UsersInMatchesPerRegion());
+
         return this;
     }
 
@@ -169,6 +187,9 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             RejoinDefaultChannel();
 
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+
+        // Broadcast A Leave Message To The Terminal, With The Player's Name And The Region They Are In
+        Terminal.Broadcast(@$"Player ""{Account.Name}"" Left A Match", Terminal.UsersInMatchesPerRegion());
 
         return this;
     }
@@ -308,7 +329,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         // Remove The Chat Session From The Chat Sessions Collection
         if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
-            Log.Error(@"Failed To Remove Chat Session For Account Name ""{Account.Name}""", Account.Name);
+            Log.Error(@"Failed To Remove Chat Session For Account Name ""{AccountName}""", Account.Name);
 
         // Record The Last-Active Timestamp; The Account Entity Was Loaded On A Long-Disposed Handshake Context, So Issue A Direct Update Via A Fresh Scope
         // Fire-And-Forget Because The Cleanup Path Is Synchronous And This Telemetry Write Must Not Block The Disconnect
@@ -341,7 +362,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         });
     }
 
-    public void Terminate()
+    public async Task Terminate()
     {
         // For Authenticated Sessions, Notify The Client Of The Forced Logout While The Socket Is Still Open
         if (Account is not null)
@@ -350,11 +371,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // Perform The In-Memory Cleanup
         CleanUpSession();
 
-        // Tear Down The Underlying Socket
-        Disconnect();
-
-        // Dispose Of The Chat Session
-        Dispose();
+        // Tear Down The Connection, Flushing The Queued Reject Or Logout Frame To The Client Before The Socket Is Closed
+        await CloseGracefully();
     }
 
     /// <summary>
@@ -438,7 +456,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         {
             if (matchServer is null)
             {
-                Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
+                Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{AccountName}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
 
                 return;
             }
@@ -519,7 +537,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         {
             ChatProtocol.ChatClientStatus status = onlinePeerSession.Metadata.LastKnownClientState;
 
-            Log.Debug(@"Initial Status Peer: Name=""{Name}"", ID={ID}, NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+            Log.Debug(@"Initial Status Peer: Name=""{AccountName}"", ID={AccountID}, NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
                 onlinePeerSession.Account.Name, onlinePeerSession.Account.ID, onlinePeerSession.Account.NameColourNoPrefixCode,
                 onlinePeerSession.Account.IconNoPrefixCode, onlinePeerSession.Account.AscensionLevel);
 

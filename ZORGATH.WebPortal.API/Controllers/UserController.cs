@@ -133,7 +133,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         if (new [] { UserRoles.Administrator, UserRoles.Custodian, UserRoles.User }.Contains(user.Role.Name).Equals(false))
         {
-            Logger.LogError(@"[BUG] Unknown User Role ""{User.Role.Name}""", user.Role.Name);
+            Logger.LogError(@"[BUG] Unknown User Role ""{UserRoleName}""", user.Role.Name);
 
             return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
         }
@@ -211,7 +211,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         if (new [] { UserRoles.Administrator, UserRoles.Custodian, UserRoles.User }.Contains(role).Equals(false))
         {
-            Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);
+            Logger.LogError(@"[BUG] Unknown User Role ""{UserRole}""", role);
 
             return BadRequest($@"Unknown User Role ""{role}""");
         }

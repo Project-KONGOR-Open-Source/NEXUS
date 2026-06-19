@@ -1,7 +1,8 @@
 ﻿global using ASPIRE.Common.Communication;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Extensions.Collections;
-global using ASPIRE.Common.ServiceDefaults;
+global using ASPIRE.Common.Extensions.Logging;
+global using ASPIRE.Common.Extensions.Services;
 
 global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Data;

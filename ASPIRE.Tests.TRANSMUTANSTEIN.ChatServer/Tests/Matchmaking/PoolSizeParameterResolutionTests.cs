@@ -131,6 +131,33 @@ internal sealed class PoolSizeParameterResolutionTests
         await Assert.That(spread).IsEqualTo(settings.LargePoolMaximumTMRSpread);
     }
 
+    [Test]
+    public async Task Pool_Size_Tier_Is_Resolved_Per_Game_Type()
+    {
+        // Two Normal 5-Stacks (1500 vs 1900, Effective Rating Difference ≈ 512) Queued For 5 Minutes, Plus 40 MidWars Players
+        // Pooled Globally The 50 Players Would Resolve To The Small Tier (Spread At 5 Minutes = 50 + 4 * 100 = 450 < 512 → No Match)
+        // Resolved Per Game Type The Normal Bucket Has Only 10 Players → Micro Tier (Spread At 5 Minutes = 50 + 4.5 * 250 = 1175 → Match)
+
+        MatchmakingSettings settings = MatchmakingTestBuilder.DefaultSettings();
+
+        MatchmakingGroupInformation midwars = MatchmakingTestBuilder.Information(gameType: ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS);
+
+        MatchmakingGroup lowStack  = MatchmakingTestBuilder.BuildGroup([.. Enumerable.Repeat(1500.0, 5)], queuedMinutesAgo: 5);
+        MatchmakingGroup highStack = MatchmakingTestBuilder.BuildGroup([.. Enumerable.Repeat(1900.0, 5)], queuedMinutesAgo: 5);
+
+        List<MatchmakingGroup> queue = [lowStack, highStack];
+
+        for (int index = 0; index < 8; index++)
+            queue.Add(MatchmakingTestBuilder.BuildGroup([.. Enumerable.Repeat(1500.0, 5)], information: midwars));
+
+        IReadOnlyList<MatchmakingMatch> matches = MatchmakingAlgorithm.RunMatchBrokerCycle(queue, settings);
+
+        bool normalMatchFormed = matches.Any(match => match.GetAllGroups().Any(group => group.GUID == highStack.GUID)
+            && match.GetAllGroups().Any(group => group.GUID == lowStack.GUID));
+
+        await Assert.That(normalMatchFormed).IsTrue();
+    }
+
     private static MatchmakingTeam SoloTeamAt(double tmr, double queuedMinutesAgo)
     {
         MatchmakingGroup solo = MatchmakingTestBuilder.BuildSoloGroup(tmr, queuedMinutesAgo: queuedMinutesAgo);

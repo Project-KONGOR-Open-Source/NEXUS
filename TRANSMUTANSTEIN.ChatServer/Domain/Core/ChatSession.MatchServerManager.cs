@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class MatchServerManagerChatSession(TCPServer server, IServiceProvider serviceProvider) : ChatSession(server, serviceProvider)
+public class MatchServerManagerChatSession(ConnectionContext connection, IServiceProvider serviceProvider) : ChatSession(connection, serviceProvider)
 {
     /// <summary>
     ///     Gets set after a successful match server manager handshake.
@@ -180,48 +180,96 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
         return this;
     }
 
+    /// <summary>
+    ///     Tracks whether the cleanup has already run for this session.
+    ///     Required because the graceful (<see cref="Terminate"/>), dropped (<see cref="OnDisconnected"/>), and superseded (<see cref="Supersede"/>) paths can all be reached for the same session, and only one of them should take effect.
+    /// </summary>
+    private int CleanupCompleted;
+
+    /// <summary>
+    ///     Removes this session from the in-memory pool, but only if the pool entry still maps to this exact session.
+    ///     Returns whether this session was the current pool holder, so the caller tears down the shared host state (the distributed cache entry) only when this session genuinely owned it.
+    ///     A session that has been superseded by a reconnecting one returns <see langword="false"/> and leaves the shared host state for its replacement.
+    /// </summary>
+    private bool RemoveFromPoolIfCurrentHolder()
+    {
+        // Use Interlocked To Guarantee The Body Runs At Most Once, Even Under Concurrent Disconnect Paths
+        if (Interlocked.Exchange(ref CleanupCompleted, 1) is 1)
+            return false;
+
+        // If The Metadata Is NULL, The Handshake Never Completed And The Session Was Never Added To The Pool, So There Is Nothing To Clean Up
+        if (Metadata is null)
+            return false;
+
+        // Remove The Pool Entry Only If It Still Maps To This Exact Session
+        if (Context.MatchServerManagerChatSessions.TryRemove(new KeyValuePair<int, MatchServerManagerChatSession>(Metadata.ServerManagerID, this)))
+        {
+            Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Was Removed From The Match Server Manager Pool", Metadata.ServerManagerID);
+
+            Terminal.Broadcast($"Match Server Manager {Metadata.ServerManagerID} Terminated", Terminal.ManagersPerRegion());
+
+            return true;
+        }
+
+        // The Pool Entry No Longer Maps To This Session, So It Was Superseded By A Reconnecting Session Which Now Owns The Shared Host State
+        Log.Debug(@"Match Server Manager ID ""{MatchServerManagerID}"" Was Already Superseded And Will Not Tear Down Shared Host State", Metadata.ServerManagerID);
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Tears down this session because the host is reconnecting and a replacement session has taken over its entry in the pool.
+    ///     The socket is closed, but the shared host state (the distributed cache entry) is deliberately preserved for the replacement session, because the reconnecting host reuses its session cookie and the cache entry is what validates it.
+    /// </summary>
+    public void Supersede()
+    {
+        // Mark The Cleanup As Done So The Resulting OnDisconnected Leaves The Shared Host State For The Replacement Session
+        Interlocked.Exchange(ref CleanupCompleted, 1);
+
+        // Tear Down The Connection; The Stale Socket Is Force-Closed While The Shared Host State Is Preserved For The Replacement Session
+        Disconnect();
+    }
+
+    /// <summary>
+    ///     Performs an immediate, authoritative teardown of this session, reached on a graceful shutdown or a rejected handshake.
+    ///     The distributed cache entry is removed right away, whereas the dropped-connection path (<see cref="OnDisconnected"/>) leaves it for the <see cref="StaleHostReaper"/> to reconcile after its grace period.
+    /// </summary>
     public async Task Terminate(IDatabase distributedCacheStore)
     {
-        await Remove(distributedCacheStore);
-
-        // Remove The Match Server Manager Chat Session
-        if (Context.MatchServerManagerChatSessions.TryRemove(Metadata.ServerManagerID, out MatchServerManagerChatSession? existingSession))
+        if (RemoveFromPoolIfCurrentHolder())
         {
-            Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Was Removed From The Match Server Manager Pool", Metadata.ServerManagerID);
+            // Send The Quit Command While The Socket Is Still Open
+            if (IsConnected)
+                SendRemoteCommand("quit");
 
-            if (existingSession is null)
-            {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Null Session In The Match Server Manager Pool", Metadata.ServerManagerID);
+            // Await The Distributed Cache Removal Here So That Callers Which Immediately Register A Replacement Manager Do Not Race The Removal
+            await Remove(distributedCacheStore);
 
-                // Disconnect And Dispose The Chat Session
-                Disconnect(); Dispose();
-
-                return;
-            }
-
-            if (existingSession.Metadata.SessionCookie != Metadata.SessionCookie)
-            {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Mismatched Session Cookie", Metadata.ServerManagerID);
-
-                // Disconnect And Dispose The Chat Session
-                Disconnect(); Dispose();
-
-                return;
-            }
-
-            // Send Quit Command To Server Manager
-            SendRemoteCommand("quit");
+            Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
         }
 
-        else
-        {
-            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Attempted To Disconnect But Was Not Found In The Match Server Manager Pool", Metadata.ServerManagerID);
-        }
+        // Tear Down The Connection, Flushing Any Queued Frames (Such As The "quit" Remote Command) Before The Socket Is Closed
+        await CloseGracefully();
+    }
 
-        // Disconnect And Dispose The Chat Session
-        Disconnect(); Dispose();
+    /// <summary>
+    ///     Invoked by the TCP transport after the underlying socket has been closed (graceful disconnect, network drop, crash, or keep-alive timeout).
+    ///     On a dropped connection, it removes the in-memory session, but deliberately leaves the distributed cache entry in place for the <see cref="StaleHostReaper"/> to reconcile.
+    ///     When the disconnect is graceful, <see cref="Terminate"/> has already torn the session down, so there is nothing left for this method to do.
+    /// </summary>
+    protected override void OnDisconnected()
+    {
+        RemoveFromPoolIfCurrentHolder();
 
-        Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
+        /*
+            The Session Is Removed From The In-Memory Pool, But The Distributed Cache Entry Is Left In Place
+            A Dropped Connection Is Frequently A Brief Reconnect (The Host Reuses Its Session Cookie), And The Cache Entry Is What Validates That Reused Cookie On The Reconnecting Handshake
+            Tearing The Cache Entry Down Here Would Reject The Reconnect
+            If The Manager Does Not Reconnect, <see cref="StaleHostReaper"/> Reaps The Cache Entry After Its Grace Period
+            A Graceful Shutdown Still Tears Down Immediately Via "Terminate"
+         */
+
+        base.OnDisconnected();
     }
 
     private async Task Remove(IDatabase distributedCacheStore)

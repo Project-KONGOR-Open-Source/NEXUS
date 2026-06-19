@@ -3,7 +3,7 @@ namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 [ApiController]
 [Route("client_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ClientRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ClientRequesterController> logger) : ControllerBase
+public partial class ClientRequesterController(MerrickContext databaseContext, IDatabase distributedCache, HeroUsageStatisticsService heroUsageStatisticsService, ILogger<ClientRequesterController> logger) : ControllerBase
 {
     # region Client Requester Controller Description
     /*
@@ -21,6 +21,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
+    private HeroUsageStatisticsService HeroUsageStatistics { get; } = heroUsageStatisticsService;
     private ILogger Logger { get; } = logger;
 
     [HttpPost(Name = "Client Requester All-In-One")]
@@ -31,9 +32,22 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
         {
-            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Request With Forged Cookie ""{Request.Form["cookie"]}""");
+            string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN";
+            string cookie = string.IsNullOrEmpty(Request.Form["cookie"].ToString()) ? "EMPTY" : Request.Form["cookie"].ToString();
 
-            return Unauthorized($@"Unrecognized Cookie ""{Request.Form["cookie"]}""");
+            string requestContext = JsonSerializer.Serialize(new
+            {
+                Function = Request.Query["f"].SingleOrDefault() ?? Request.Form["f"].SingleOrDefault() ?? "NULL",
+                Query = Request.Query.ToDictionary(entry => entry.Key, entry => entry.Value.ToString()),
+                Form = Request.Form.ToDictionary(entry => entry.Key, entry => entry.Value.ToString()),
+                RemoteEndpoint = $"{remoteIPAddress}:{Request.HttpContext.Connection.RemotePort}",
+                UserAgent = Request.Headers.UserAgent.ToString()
+            });
+
+            Logger.LogWarning(@"IP Address ""{IPAddress}"" Has Made A Client Request With Forged Cookie ""{Cookie}""" + Environment.NewLine + @"Request Context: {RequestContext}",
+                remoteIPAddress, cookie, requestContext);
+
+            return Unauthorized($@"Unrecognised Cookie ""{Request.Form["cookie"]}""");
         }
 
         if (endpointRequiresCookieValidation.Equals(false) && accountSessionCookieIsValid.Equals(true))
@@ -54,6 +68,8 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // statistics
             "get_account_all_hero_stats"    => await GetHeroStatistics(),
             "get_match_stats"               => await GetMatchStatistics(),
+            "take_mastery_reward"           => await TakeMasteryReward(),
+            "boost_match_mastery"           => await BoostMatchMastery(),
             "client_events_info"            => GetClientEventsInformation(),
             "get_special_messages"          => GetSpecialMessages(),
             "claim_season_rewards"          => ClaimSeasonRewards(),
@@ -70,6 +86,10 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
             // friends
             "remove_buddy2"                 => await RemoveFriend(),
+
+            // notifications
+            "delete_notification"           => await DeleteNotification(),
+            "remove_all_notifications"      => await RemoveAllNotifications(),
 
             // session
             "logout"                        => await HandleLogout(),
@@ -92,6 +112,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "get_seasons"                   => await GetSeasons(),
             "match_history_overview"        => await GetMatchHistoryOverview(),
             "show_stats"                    => await GetStatistics(),
+            "get_hero_stats"                => await GetSelectedHeroStatistics(),
+            "get_campaign_hero_stats"       => await GetCampaignHeroStatistics(),
+            "get_hero_usage_list"           => await GetHeroUsageList(),
 
             // store
             "get_daily_special"             => await GetDailySpecial(),

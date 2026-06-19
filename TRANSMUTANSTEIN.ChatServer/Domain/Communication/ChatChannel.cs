@@ -283,7 +283,7 @@ public class ChatChannel
 
         foreach (ChatChannelMember member in Members.Values)
         {
-            Log.Debug(@"Channel ""{ChannelName}"" Member Info: Name=""{Name}"", ID={ID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+            Log.Debug(@"Channel ""{ChannelName}"" Member Info: Name=""{AccountName}"", ID={AccountID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
                 Name, member.Account.NameWithClanTag, member.Account.ID, member.Account.ChatSymbolNoPrefixCode, member.Account.NameColourNoPrefixCode, member.Account.IconNoPrefixCode, member.Account.AscensionLevel);
 
             response.WriteString(member.Account.NameWithClanTag);                 // Member Account Name
@@ -305,6 +305,10 @@ public class ChatChannel
         // Track This Channel In The Client's Current Channels List
         session.CurrentChannels.Add(ID);
 
+        // Announce The Synthetic TERMINAL Member To The Joining Client, So That It Can Render The Operational Log Messages Broadcast By <see cref="Terminal.Broadcast"/>
+        if (Name == ChatChannels.StaffChannel)
+            Terminal.AnnounceSyntheticMember(session);
+
         return this;
     }
 
@@ -314,7 +318,7 @@ public class ChatChannel
 
         List<ChatChannelMember> existingMembers = [.. Members.Values.Where(member => member.Account.ID != session.Account.ID)];
 
-        Log.Debug(@"Broadcasting Join To Channel ""{ChannelName}"": Name=""{Name}"", ID={ID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+        Log.Debug(@"Broadcasting Join To Channel ""{ChannelName}"": Name=""{AccountName}"", ID={AccountID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
             Name, newMember.Account.NameWithClanTag, newMember.Account.ID, newMember.Account.ChatSymbolNoPrefixCode, newMember.Account.NameColourNoPrefixCode, newMember.Account.IconNoPrefixCode, newMember.Account.AscensionLevel);
 
         ChatBuffer broadcast = new ();

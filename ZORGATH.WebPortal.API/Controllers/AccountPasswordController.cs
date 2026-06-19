@@ -26,7 +26,7 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
 
         if (contentResult.Content is null)
         {
-            Logger.LogError(@"[BUG] Sanitized Email Address ""{Payload.EmailAddress}"" Is NULL", payload.EmailAddress);
+            Logger.LogError(@"[BUG] Sanitized Email Address ""{SubmittedEmailAddress}"" Is NULL", payload.EmailAddress);
 
             return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
         }
@@ -128,7 +128,7 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
         bool sent = await EmailService.SendAccountPasswordResetConfirmation(user.EmailAddress, accountNames);
 
         if (sent.Equals(false))
-            Logger.LogWarning("Account Password Was Reset Successfully But A Confirmation Email Could Not Be Sent To {EmailAddress}", user.EmailAddress);
+            Logger.LogWarning("Account Password Was Reset Successfully But A Confirmation Email Could Not Be Sent To {UserEmailAddress}", user.EmailAddress);
 
         return Ok("Account Password Was Reset Successfully");
     }
@@ -251,7 +251,7 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
         bool sent = await EmailService.SendAccountPasswordUpdateConfirmation(user.EmailAddress, accountNames);
 
         if (sent.Equals(false))
-            Logger.LogWarning("Account Password Was Updated Successfully But A Confirmation Email Could Not Be Sent To {EmailAddress}", user.EmailAddress);
+            Logger.LogWarning("Account Password Was Updated Successfully But A Confirmation Email Could Not Be Sent To {UserEmailAddress}", user.EmailAddress);
 
         return Ok("Account Password Was Updated Successfully");
     }
