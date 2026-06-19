@@ -21,7 +21,12 @@ global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Extensions;
 global using MERRICK.DatabaseContext.Persistence;
 
+global using Microsoft.AspNetCore.Connections;
+global using Microsoft.AspNetCore.Connections.Features;
+global using Microsoft.AspNetCore.Hosting.Server;
+global using Microsoft.AspNetCore.Hosting.Server.Features;
 global using Microsoft.AspNetCore.HttpOverrides;
+global using Microsoft.AspNetCore.Server.Kestrel.Core;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -33,13 +38,17 @@ global using Serilog.Context;
 
 global using StackExchange.Redis;
 
+global using System.Buffers;
 global using System.Collections.Concurrent;
 global using System.Diagnostics;
+global using System.IO.Pipelines;
 global using System.Net;
 global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Text;
+global using System.Threading.Channels;
+global using System.Threading.RateLimiting;
 
 global using TRANSMUTANSTEIN.ChatServer.Attributes;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;

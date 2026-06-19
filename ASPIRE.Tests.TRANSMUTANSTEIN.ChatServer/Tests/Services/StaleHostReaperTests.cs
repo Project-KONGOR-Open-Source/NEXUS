@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
+namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Services;
 
 /// <summary>
 ///     Tests for the reconciliation logic that decides which cached hosts the stale host reaper removes.

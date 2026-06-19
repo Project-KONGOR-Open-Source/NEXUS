@@ -19,7 +19,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             Log.Warning(@"Authentication Failed For Account ID ""{AccountID}"": Session Cookie ""{SessionCookie}"" Not Found In Cache",
                 requestData.AccountID, requestData.SessionCookie);
 
-            session
+            await session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
                 .Terminate();
 
@@ -36,7 +36,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         {
             Log.Error(@"[BUG] Account With ID ""{AccountID}"" Could Not Be Found", requestData.AccountID);
 
-            session
+            await session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_UNKNOWN)
                 .Terminate();
 
@@ -49,7 +49,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             Log.Warning(@"Authentication Failed: Account ID ""{AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
                 requestData.AccountID, cachedAccountName);
 
-            session
+            await session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
                 .Terminate();
 
@@ -63,7 +63,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         {
             Log.Warning(@"Authentication Failed For Account ""{AccountName}"": Invalid Authentication Hash", account.Name);
 
-            session
+            await session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
                 .Terminate();
 
@@ -86,7 +86,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                     Log.Information(@"Disconnecting Existing Session For Account ID ""{ExistingSessionAccountID}"" (Account ""{ExistingSessionAccountName}"") Due To Concurrent Connection Attempt",
                         subAccountID, existingSessionMatch.Account.Name);
 
-                    existingSessionMatch
+                    await existingSessionMatch
                         .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
                         .Terminate();
                 }
@@ -97,7 +97,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         {
             Log.Information(@"Disconnecting Existing Session For Account ""{AccountName}"" Due To Concurrent Connection Attempt", account.Name);
 
-            existingSession
+            await existingSession
                 .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
                 .Terminate();
         }
@@ -105,7 +105,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         // Validate Client Version
         if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}" is not "4.10.1.0")
         {
-            session
+            await session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
                 .Terminate();
 

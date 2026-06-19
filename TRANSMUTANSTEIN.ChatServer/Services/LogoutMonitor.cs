@@ -6,32 +6,34 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 /// </summary>
 public class LogoutMonitor(IConnectionMultiplexer distributedCacheProvider, ILogger<LogoutMonitor> logger) : IHostedService
 {
-    private ISubscriber? Subscriber { get; set; }
+    private ChannelMessageQueue? LogoutQueue { get; set; }
 
     private static readonly RedisChannel AccountLogoutChannel = RedisChannel.Literal(DistributedCacheExtensions.AccountLogoutChannel);
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        Subscriber = distributedCacheProvider.GetSubscriber();
+        ISubscriber subscriber = distributedCacheProvider.GetSubscriber();
 
-        await Subscriber.SubscribeAsync(AccountLogoutChannel, HandleAccountLogout);
+        LogoutQueue = await subscriber.SubscribeAsync(AccountLogoutChannel);
+
+        LogoutQueue.OnMessage(HandleAccountLogout);
 
         logger.LogInformation(@"Subscribed To Account Logout Event Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (Subscriber is null)
+        if (LogoutQueue is null)
             return;
 
-        await Subscriber.UnsubscribeAsync(AccountLogoutChannel);
+        await LogoutQueue.UnsubscribeAsync();
 
         logger.LogInformation(@"Unsubscribed From Account Logout Event Channel ""{Channel}""", DistributedCacheExtensions.AccountLogoutChannel);
     }
 
-    private void HandleAccountLogout(RedisChannel channel, RedisValue message)
+    private async Task HandleAccountLogout(ChannelMessage channelMessage)
     {
-        string? accountName = message.IsNullOrEmpty ? null : message.ToString();
+        string? accountName = channelMessage.Message.IsNullOrEmpty ? null : channelMessage.Message.ToString();
 
         if (accountName is null)
         {
@@ -52,7 +54,7 @@ public class LogoutMonitor(IConnectionMultiplexer distributedCacheProvider, ILog
 
         try
         {
-            session.Terminate();
+            await session.Terminate();
         }
 
         catch (Exception exception)

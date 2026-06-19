@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class MatchServerManagerChatSession(TCPServer server, IServiceProvider serviceProvider) : ChatSession(server, serviceProvider)
+public class MatchServerManagerChatSession(ConnectionContext connection, IServiceProvider serviceProvider) : ChatSession(connection, serviceProvider)
 {
     /// <summary>
     ///     Gets set after a successful match server manager handshake.
@@ -226,8 +226,8 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
         // Mark The Cleanup As Done So The Resulting OnDisconnected Leaves The Shared Host State For The Replacement Session
         Interlocked.Exchange(ref CleanupCompleted, 1);
 
-        // Disconnect And Dispose The Chat Session
-        Disconnect(); Dispose();
+        // Tear Down The Connection; The Stale Socket Is Force-Closed While The Shared Host State Is Preserved For The Replacement Session
+        Disconnect();
     }
 
     /// <summary>
@@ -248,8 +248,8 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
             Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
         }
 
-        // Disconnect And Dispose The Chat Session
-        Disconnect(); Dispose();
+        // Tear Down The Connection, Flushing Any Queued Frames (Such As The "quit" Remote Command) Before The Socket Is Closed
+        await CloseGracefully();
     }
 
     /// <summary>
