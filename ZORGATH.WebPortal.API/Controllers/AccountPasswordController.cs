@@ -19,25 +19,16 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
     [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> RequestAccountPasswordReset(RequestAccountPasswordResetDTO payload)
     {
-        IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(payload.EmailAddress, HostEnvironment);
+        IActionResult? sanitisationError = EmailAddressHelpers.TrySanitiseEmailAddress(payload.EmailAddress, HostEnvironment, Logger, out string sanitisedEmailAddress);
 
-        if (result is not ContentResult contentResult)
-            return result;
-
-        if (contentResult.Content is null)
-        {
-            Logger.LogError(@"[BUG] Sanitized Email Address ""{SubmittedEmailAddress}"" Is NULL", payload.EmailAddress);
-
-            return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
-        }
-
-        string sanitizedEmailAddress = contentResult.Content;
+        if (sanitisationError is not null)
+            return sanitisationError;
 
         // Always Return Success To Prevent Email Enumeration Attacks
         const string successMessage = "Account Password Reset Token Was Successfully Issued";
 
         List<string> accountNames = await MerrickContext.Users
-            .Where(user => user.EmailAddress.Equals(sanitizedEmailAddress))
+            .Where(user => user.EmailAddress.Equals(sanitisedEmailAddress))
             .SelectMany(user => user.Accounts.Select(account => account.Name))
             .ToListAsync();
 
@@ -60,7 +51,7 @@ public class AccountPasswordController(MerrickContext databaseContext, ILogger<A
         string srpHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(generatedPassword, salt);
         string pbkdf2Hash = new PasswordHasher<User>().HashPassword(null!, generatedPassword);
 
-        AccountPasswordTokenData tokenData = new (sanitizedEmailAddress, salt, srpHash, pbkdf2Hash);
+        AccountPasswordTokenData tokenData = new (sanitisedEmailAddress, salt, srpHash, pbkdf2Hash);
 
         Token token = new ()
         {

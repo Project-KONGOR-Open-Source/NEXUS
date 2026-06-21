@@ -26,28 +26,17 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
 
         if (token is null)
         {
-            IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(payload.EmailAddress, HostEnvironment);
+            IActionResult? sanitisationError = EmailAddressHelpers.TrySanitiseEmailAddress(payload.EmailAddress, HostEnvironment, Logger, out string sanitisedEmailAddress);
 
-            if (result is not ContentResult contentResult)
-            {
-                return result;
-            }
-
-            if (contentResult.Content is null)
-            {
-                Logger.LogError(@"[BUG] Sanitized Email Address ""{SubmittedEmailAddress}"" Is NULL", payload.EmailAddress);
-
-                return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
-            }
-
-            string sanitizedEmailAddress = contentResult.Content;
+            if (sanitisationError is not null)
+                return sanitisationError;
 
             token = new Token()
             {
                 Purpose = TokenPurpose.EmailAddressVerification,
                 EmailAddress = payload.EmailAddress,
                 Value = Guid.CreateVersion7(),
-                Data = sanitizedEmailAddress,
+                Data = sanitisedEmailAddress,
                 Validity = TimeSpan.FromHours(24)
             };
 
@@ -99,24 +88,15 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
         if (passwordVerificationResult is not PasswordVerificationResult.Success)
             return Unauthorized("The Submitted Password Is Incorrect");
 
-        IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(payload.EmailAddress, HostEnvironment);
+        IActionResult? sanitisationError = EmailAddressHelpers.TrySanitiseEmailAddress(payload.EmailAddress, HostEnvironment, Logger, out string sanitisedEmailAddress);
 
-        if (result is not ContentResult contentResult)
-            return result;
+        if (sanitisationError is not null)
+            return sanitisationError;
 
-        if (contentResult.Content is null)
-        {
-            Logger.LogError(@"[BUG] Sanitized Email Address ""{SubmittedEmailAddress}"" Is NULL", payload.EmailAddress);
-
-            return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
-        }
-
-        string sanitizedEmailAddress = contentResult.Content;
-
-        if (user.EmailAddress.Equals(sanitizedEmailAddress))
+        if (user.EmailAddress.Equals(sanitisedEmailAddress))
             return BadRequest("New Email Address Cannot Be The Same As The Current Email Address");
 
-        if (await MerrickContext.Users.AnyAsync(existingUser => existingUser.EmailAddress.Equals(sanitizedEmailAddress)))
+        if (await MerrickContext.Users.AnyAsync(existingUser => existingUser.EmailAddress.Equals(sanitisedEmailAddress)))
             return Conflict($@"Email Address ""{payload.EmailAddress}"" Is Already In Use");
 
         Token? existingToken = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(user.EmailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressUpdate) && token.TimestampConsumed == null);
@@ -133,14 +113,14 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
             Purpose = TokenPurpose.EmailAddressUpdate,
             EmailAddress = user.EmailAddress,
             Value = Guid.CreateVersion7(),
-            Data = sanitizedEmailAddress,
+            Data = sanitisedEmailAddress,
             Validity = TimeSpan.FromHours(24)
         };
 
         await MerrickContext.Tokens.AddAsync(token);
         await MerrickContext.SaveChangesAsync();
 
-        bool sent = await EmailService.SendEmailAddressUpdateLink(sanitizedEmailAddress, token.Value.ToString());
+        bool sent = await EmailService.SendEmailAddressUpdateLink(sanitisedEmailAddress, token.Value.ToString());
 
         if (sent.Equals(false))
         {
