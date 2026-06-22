@@ -23,7 +23,19 @@ public class MatchAborted(IDatabase distributedCacheStore) : IAsynchronousComman
         // This Is Harmless If The Subsequent MatchAbandoned "Server Reset" Signal Has Already Cleaned The Match Up
         MatchmakingService.CleanUpMatchesForServer(session.Metadata.ServerID);
 
-        // TODO: Potentially Apply Leaver Penalties If Reason Indicates Player Left
+        // TODO: Apply Leaver Penalties (Not Yet Implemented)
+        //
+        // There Are Two Distinct Leaver Signals From The Game Server:
+        //   1. This Match-Aborted "Reason" Field, Which Can Indicate That A Player Left During Loading Or Timed Out
+        //   2. The Separate NET_CHAT_GS_REPORT_LEAVER (0x0518) Command, Which Carries A Single Int32 (The Leaver's Account ID) And Is Sent To Flag An In-Match Leaver
+        //
+        // In The Original HoN Chat Server, NET_CHAT_GS_REPORT_LEAVER Bans The Reported Account From Team Matchmaking
+        // NEXUS Has No Matchmaking Penalty Subsystem Yet, So Neither Signal Currently Results In A Penalty, And 0x0518 Is Deliberately Left Unmapped (It Logs A "Missing Type Mapping" Error Until This Feature Is Built; Adding A Do-Nothing Handler Would Be A Stub)
+        //
+        // A Minimal Implementation Would:
+        //   - Record A Per-Account Leaver Ban As A Distributed-Cache Entry With An Expiry (The Ban Duration And Any Escalation Is A Policy Decision)
+        //   - Check For An Active Ban On The Matchmaking Group Queue-Join Path And Reject Or Hold The Affected Player
+        //   - Add A NET_CHAT_GS_REPORT_LEAVER Command Processor That Reads The Int32 Account ID And Records The Ban
     }
 }
 
