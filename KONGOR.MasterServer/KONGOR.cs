@@ -217,10 +217,10 @@ public class KONGOR
         application.UseHsts();
 
         /*
-            HTTP-To-HTTPS Redirection By Means Of "application.UseHttpsRedirection()" Is Not Used Here
-            The Game Client, Match Servers, And Match Server Manager Communicate Over Plain HTTP And Do Not Follow Redirects
-            This Service Listens On HTTP Behind A TLS-Terminating Gateway And Honours The Forwarded "X-Forwarded-Proto" Scheme
-            So A Blanket Redirect Here Would Only Break Those HTTP Clients
+            Service-Wide HTTP-To-HTTPS Redirection By Means Of "application.UseHttpsRedirection()" Is Not Used Here
+            The Game Client, Match Servers, And Match Server Manager Communicate Over Plain HTTP And Do Not Follow Redirects, So A Blanket Redirect Would Only Break Them
+            This Service Always Listens On HTTP And Honours The Forwarded "X-Forwarded-Proto" Scheme
+            TLS, Where It Is Used, Is Terminated By The Fronting Gateway Rather Than By This Service (That Gateway Is A Separate Host In Production, And The Local Machine In Development)
         */
 
         // Add Security Headers Middleware
