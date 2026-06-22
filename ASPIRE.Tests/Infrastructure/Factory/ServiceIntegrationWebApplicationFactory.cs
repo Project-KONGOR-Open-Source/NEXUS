@@ -224,7 +224,12 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
 
                 services.AddDbContext<MerrickContext>(options =>
                 {
-                    options.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
+                    options.UseSqlServer(connectionString, sqlServerOptions =>
+                    {
+                        sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema);
+                        sqlServerOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    });
+
                     options.EnableThreadSafetyChecks();
                     options.AddMerrickInterceptors();
                 });
