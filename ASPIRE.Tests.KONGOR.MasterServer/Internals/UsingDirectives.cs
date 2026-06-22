@@ -23,6 +23,7 @@ global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Helpers.Stats;
 global using KONGOR.MasterServer.Internals;
+global using KONGOR.MasterServer.Models.RequestResponse.Messaging;
 global using KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 global using KONGOR.MasterServer.Models.RequestResponse.SRP;
 global using KONGOR.MasterServer.Models.RequestResponse.Stats;
