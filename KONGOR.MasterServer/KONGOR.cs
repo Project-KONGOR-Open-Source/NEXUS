@@ -216,8 +216,12 @@ public class KONGOR
         // Enforce HTTPS With Strict Transport Security
         application.UseHsts();
 
-        // Automatically Redirect HTTP Requests To HTTPS
-        application.UseHttpsRedirection();
+        /*
+            HTTP-To-HTTPS Redirection By Means Of "application.UseHttpsRedirection()" Is Not Used Here
+            The Game Client, Match Servers, And Match Server Manager Communicate Over Plain HTTP And Do Not Follow Redirects
+            This Service Listens On HTTP Behind A TLS-Terminating Gateway And Honours The Forwarded "X-Forwarded-Proto" Scheme
+            So A Blanket Redirect Here Would Only Break Those HTTP Clients
+        */
 
         // Add Security Headers Middleware
         application.Use(async (context, next) =>
