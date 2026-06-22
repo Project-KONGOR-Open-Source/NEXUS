@@ -1,0 +1,581 @@
+﻿namespace KONGOR.MasterServer.Controllers.ServerRequester;
+
+public partial class ServerRequesterController
+{
+    private async Task<IActionResult> HandleServerManagerAuthentication()
+    {
+        string? hostAccountName = Request.Form["login"];
+
+        if (hostAccountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""login""");
+
+        hostAccountName = hostAccountName.TrimEnd(':'); // The Semicolon Is Used To Separate The Account Name From The Server Instance, So We Need To Remove It Because It Is Not Needed For The Server Manager
+
+        string? accountPasswordHash = Request.Form["pass"];
+
+        if (accountPasswordHash is null)
+            return BadRequest(@"Missing Value For Form Parameter ""pass""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .SingleOrDefaultAsync(account => account.Name.Equals(hostAccountName));
+
+        if (account is null)
+            return NotFound($@"Account ""{hostAccountName}"" Was Not Found");
+
+        if (account.Type is not AccountType.ServerHost)
+            return Unauthorized($@"Account ""{hostAccountName}"" Is Not A Server Host");
+
+        string srpPasswordHash = SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt);
+
+        if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
+            return Unauthorized("Incorrect Password");
+
+        if (Request.HttpContext.Connection.RemoteIpAddress is null)
+        {
+            Logger.LogError(@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL", hostAccountName);
+
+            return BadRequest("Unable To Resolve Remote IP Address");
+        }
+
+        // The Built-In Host Account Which Ships With A Publicly-Known Password And Is Intended For Usage By Self-Hosters Must Not Be Used To Host On The Production Server
+        if (HostEnvironment.IsProduction() && account.Name.Equals(OOTB.Accounts.OPERATOR.Name))
+        {
+            Logger.LogWarning(@"Rejected Server Manager Authentication For Host Account ""{HostAccountName}"": The Built-In ""{OOTBHostAccountName}"" Account Cannot Host On The Production Server", account.Name, OOTB.Accounts.OPERATOR.Name);
+
+            return Unauthorized($@"The Built-In ""{OOTB.Accounts.OPERATOR.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
+        }
+
+        MatchServerManager matchServerManager = new ()
+        {
+            HostAccountID = account.ID,
+            HostAccountName = account.Name,
+            ID = hostAccountName.GetDeterministicInt32Hash(),
+            MatchServerIDs = [],
+            IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
+        };
+
+        await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
+
+        string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
+            ?? throw new NullReferenceException("Chat Server Host Is NULL");
+
+        int chatServerMatchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
+            ?? throw new NullReferenceException("Chat Server Match Server Manager Connections Port Is NULL"));
+
+        Dictionary<string, object> response = new ()
+        {
+            ["server_id"] = matchServerManager.ID,
+            ["official"] = 1, // If Not Official, It Is Considered To Be Un-Authorized
+            ["session"] = matchServerManager.Cookie,
+            ["chat_address"] = chatServerHost,
+            ["chat_port"] = chatServerMatchServerManagerConnectionsPort,
+        };
+
+        // TODO: Investigate How These Are Used
+        response["cdn_upload_host"] = Configuration.CDN.Host;
+        response["cdn_upload_target"] = "upload";
+
+        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerAddress}"" With Cookie ""{MatchServerManagerCookie}""",
+            matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleServerAuthentication()
+    {
+        string serverIdentifier = Request.Form["login"].ToString();
+
+        if (serverIdentifier.Split(':').Length is not 2)
+            return BadRequest(@"Missing Or Incorrect Value For Form Parameter ""login""");
+
+        string hostAccountName = serverIdentifier.Split(':').First();
+        string serverInstance = serverIdentifier.Split(':').Last();
+
+        string? accountPasswordHash = Request.Form["pass"];
+
+        if (accountPasswordHash is null) 
+            return BadRequest(@"Missing Value For Form Parameter ""pass""");
+
+        string? serverPort = Request.Form["port"];
+
+        if (serverPort is null)
+            return BadRequest(@"Missing Value For Form Parameter ""port""");
+
+        string? serverName = Request.Form["name"];
+
+        if (serverName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""name""");
+
+        string? serverDescription = Request.Form["desc"];
+
+        if (serverDescription is null)
+            return BadRequest(@"Missing Value For Form Parameter ""desc""");
+
+        string? serverLocation = Request.Form["location"];
+
+        if (serverLocation is null)
+            return BadRequest(@"Missing Value For Form Parameter ""location""");
+
+        string? serverIPAddress = Request.Form["ip"];
+
+        if (serverIPAddress is null)
+            return BadRequest(@"Missing Value For Form Parameter ""ip""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .SingleOrDefaultAsync(account => account.Name.Equals(hostAccountName));
+
+        if (account is null)
+            return NotFound($@"Account ""{hostAccountName}"" Was Not Found");
+
+        if (account.Type is not AccountType.ServerHost)
+            return Unauthorized($@"Account ""{hostAccountName}"" Is Not A Server Host");
+
+        string srpPasswordHash = SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt);
+        
+        if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
+            return Unauthorized("Incorrect Password");
+
+        // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
+
+        // The Built-In Host Account Which Ships With A Publicly-Known Password And Is Intended For Usage By Self-Hosters Must Not Be Used To Host On The Production Server
+        if (HostEnvironment.IsProduction() && account.Name.Equals(OOTB.Accounts.OPERATOR.Name))
+        {
+            Logger.LogWarning(@"Rejected Server Authentication For Host Account ""{HostAccountName}"": The Built-In ""{OOTBHostAccountName}"" Account Cannot Host On The Production Server", account.Name, OOTB.Accounts.OPERATOR.Name);
+
+            return Unauthorized($@"The Built-In ""{OOTB.Accounts.OPERATOR.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
+        }
+
+        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
+
+        MatchServer matchServer = new ()
+        {
+            HostAccountID = account.ID,
+            HostAccountName = account.Name,
+            ID = serverIdentifier.GetDeterministicInt32Hash(),
+            Name = serverName,
+            MatchServerManagerID = matchServerManager?.ID,
+            Instance = int.Parse(serverInstance),
+            IPAddress = serverIPAddress,
+            Port = int.Parse(serverPort),
+            Location = serverLocation,
+            Description = serverDescription
+        };
+
+        await DistributedCache.SetMatchServer(hostAccountName, matchServer);
+
+        if (matchServerManager is not null)
+        {
+            matchServerManager.MatchServerIDs.Add(matchServer.ID);
+
+            await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
+        }
+
+        // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
+        // INFO: The Server Manager Doesn't Send Descriptions, So Use Name Instead Since We Can Override Them Anyway Via Remote Command (svr_name) On TCP Handshake
+
+        string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
+            ?? throw new NullReferenceException("Chat Server Host Is NULL");
+
+        int chatServerMatchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER")
+            ?? throw new NullReferenceException("Chat Server Match Server Connections Port Is NULL"));
+
+        Dictionary<string, object> response = new ()
+        {
+            ["session"] = matchServer.Cookie,
+            ["server_id"] = matchServer.ID,
+            ["chat_address"] = chatServerHost,
+            ["chat_port"] = chatServerMatchServerConnectionsPort,
+            ["leaverthreshold"] = 0.05
+        };
+
+        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
+            matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleConnectClient()
+    {
+        string? session = Request.Form["session"];
+
+        if (session is null)
+            return BadRequest(@"Missing Value For Form Parameter ""session""");
+
+        string? cookie = Request.Form["cookie"];
+
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+
+        string? ip = Request.Form["ip"];
+
+        if (ip is null)
+            return BadRequest(@"Missing Value For Form Parameter ""ip""");
+
+        string? casual = Request.Form["cas"];
+
+        if (casual is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cas""");
+
+        // This value is the ChatProtocol.ArrangedMatchType value plus 1. This enum seems to be 1-indexed on the client-side.
+        // Example 1: a value of 1 means AM_PUBLIC, which is ChatProtocol.ArrangedMatchType value 0.
+        // Example 2: a value of 2 means AM_MATCHMAKING, which is ChatProtocol.ArrangedMatchType value 1.
+        string? arrangedMatchType = Request.Form["new"];
+
+        if (arrangedMatchType is null)
+            return BadRequest(@"Missing Value For Form Parameter ""new""");
+
+        string? accountNameForSessionCookie = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountNameForSessionCookie is null)
+            return Unauthorized("No Valid Client Session Cookie Could Be Found");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User).ThenInclude(user => user.Accounts)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountNameForSessionCookie));
+
+        if (account is null)
+        {
+            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{SessionCookie}""", accountNameForSessionCookie, cookie);
+
+            return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
+        }
+
+        Dictionary<string, object> response = new ()
+        {
+            { "cookie", cookie },
+            { "account_id", account.ID },
+            { "nickname", account.Name },
+            { "super_id", account.User.Accounts.Single(record => record.IsMain).ID },
+            { "account_type", account.Type },
+            { "level", account.User.TotalLevel }
+        };
+
+        if (account.Clan is not null)
+        {
+            response.Add("clan_id", account.Clan.ID);
+            response.Add("tag", account.Clan.Tag);
+        }
+
+        /*
+            public static List<Info> InfoForAccount(AccountDetails accountDetails, float tournamentRatingForActiveTeam)
+           {
+               Info info = new ()
+               {
+                   AccountId = accountDetails.AccountId.ToString(),
+                   Standing = "3",
+                   Level = "1",
+                   LevelExp = "0",
+                   // AllTimeTotalDisconnects: appears to be ignored
+                   // PossibleDisconnects: appears to be ignored
+                   // AllTimeGamesPlayed: appears to be ignored
+                   // NumBotGamesWon: appears to be ignored
+                   PSR = accountDetails.PublicRating,
+                   // PublicGameWins = publicStats.Wins,
+                   // PublicGameLosses = publicStats.Losses,
+                   PublicGamesPlayed = accountDetails.PublicGamesPlayed,
+                   PublicGameDisconnects = accountDetails.PublicTimesDisconnected,
+                   // NormalRankedGamesMMR: unused in KONGOR
+                   // NormalRankedGameWins: unused in KONGOR
+                   // NormalRankedGameLosses: unused in KONGOR
+                   // NormalRankedGamesPlayed: unused in KONGOR
+                   // NormalRankedGameDisconnects: unused in KONGOR
+                   // CasualModeMMR: unused in KONGOR
+                   // CasualModeWins: unused in KONGOR
+                   // CasualModeLosses: unused in KONGOR
+                   // CasualModeGamesPlayed: unused in KONGOR
+                   // CasualModeDisconnects: unused in KONGOR
+                   MidWarsMMR = accountDetails.MidWarsRating,
+                   MidWarsGamesPlayed = accountDetails.MidWarsGamesPlayed,
+                   MidWarsTimesDisconnected = accountDetails.MidWarsTimesDisconnected,
+
+                   // Number of Tournament matches played. Note: rift wars is used as a piggy-back.
+                   RiftWarsGamesPlayed = accountDetails.TournamentGamesPlayed,
+                   RiftWarsDisconnects = accountDetails.TournamentTimesDisconnected,
+                   RiftWarsRating = tournamentRatingForActiveTeam,
+
+                   IsNew = 0,
+                   ChampionsOfNewerthNormalMMR = accountDetails.CoNNormalRating,
+                   ChampionsOfNewerthNormalRank = accountDetails.CoNNormalRank,
+                   ChampionsOfNewerthGamesPlayed = accountDetails.CoNNormalGamesPlayed,
+                   ChampionsOfNewerthGameDisconnects = accountDetails.CoNNormalTimesDisconnected,
+
+                   ChampionsOfNewerthCasualMMR = accountDetails.CoNCasualRating,
+                   ChampionsOfNewerthCasualRank = accountDetails.CoNCasualRank,
+                   ChampionsOfNewerthCasualGamesPlayed = accountDetails.CoNCasualGamesPlayed,
+                   ChampionsOfNewerthCasualGameDisconnects = accountDetails.CoNCasualTimesDisconnected,
+
+                   // Additional Public Games info requested by server_requester.php?f=c_conn
+                   // Unclear if used or not.
+                   // PublicHeroKills = account.PlayerSeasonStatsPublic.HeroKills,
+                   // PublicHeroAssists = account.PlayerSeasonStatsPublic.HeroAssists,
+                   // PublicDeaths = account.PlayerSeasonStatsPublic.Deaths,
+                   // PublicWardsPlaced = account.PlayerSeasonStatsPublic.Wards,
+                   // PublicGoldEarned = account.PlayerSeasonStatsPublic.Gold,
+                   // PublicExpEarned = account.PlayerSeasonStatsPublic.Exp,
+                   // PublicSecondsPlayed = account.PlayerSeasonStatsPublic.Secs,
+                   // PublicTimeEarningExp = account.PlayerSeasonStatsPublic.TimeEarningExp,
+
+                   // Additional TMM info requested by server_requester.php?f=c_conn
+
+                   // Additional unknown fields requested by server_requester.php?f=c_conn
+                   // Unclear if used or not.
+                   rnk_amm_solo_conf = 0,
+                   rnk_amm_team_conf = 0,
+               };
+
+               return new List<Info>() { info };
+           }
+         */
+
+        // TODO: Create Proper Response Model
+
+        response.Add("infos", ""); // TODO: Set These Stats
+        response.Add("game_cookie", "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
+        response.Add("my_upgrades", account.User.OwnedStoreItems);
+        response.Add("selected_upgrades", account.SelectedStoreItems);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleAcceptKey()
+    {
+        string? session = Request.Form["session"];
+
+        if (session is null)
+            return BadRequest(@"Missing Value For Form Parameter ""session""");
+
+        string? accountKey = Request.Form["acc_key"];
+
+        if (accountKey is null)
+            return BadRequest(@"Missing Value For Form Parameter ""acc_key""");
+
+        //GameServer? server = MerrickContext.GameServers.SingleOrDefault(server => server.Cookie.Equals(formData["session"]));
+        //if (server is null) return Unauthorized();
+
+        //if (KongorContext.InvalidateGameHostingPermissionToken(formData["acc_key"]).Equals(false))
+        //    return Unauthorized($@"NOT AUTHORISED: Invalid Account Key ""{formData["acc_key"]}""");
+
+        /*
+        Dictionary<string, object> response = new ()
+        {
+            { "server_id", server.GameServerId },
+            { "official", server.Official ? 1 : 0 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
+        };
+        */
+
+        // TODO: Fix This Mess !!! (Maybe Just Use The Cookie As The Account Key?)
+
+        Dictionary<string, object> response = new ()
+        {
+            { "server_id", 666 },
+            { "official", 1 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
+        };
+
+        // TODO: Fully Inspect Response Model
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleSetOnline()
+    {
+        string? session = Request.Form["session"];
+
+        if (session is null)
+            return BadRequest(@"Missing Value For Form Parameter ""session""");
+
+        string? connectionsCount = Request.Form["num_conn"];
+
+        if (connectionsCount is null)
+            return BadRequest(@"Missing Value For Form Parameter ""num_conn""");
+
+        string? gameTime = Request.Form["cgt"];
+
+        if (gameTime is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cgt""");
+
+        string? map = Request.Form["map"];
+
+        if (map is null)
+            return BadRequest(@"Missing Value For Form Parameter ""map""");
+
+        string? isPrivate = Request.Form["private"];
+
+        if (isPrivate is null)
+            return BadRequest(@"Missing Value For Form Parameter ""private""");
+
+        string? isVIP = Request.Form["vip"];
+
+        if (isVIP is null)
+            return BadRequest(@"Missing Value For Form Parameter ""vip""");
+
+        /*
+            "c_state" Values:
+                0 = Sleeping (Host.IsSleeping() Is TRUE)
+                1 = Idle (No World Loaded)
+                2 = Lobby/Picking Phase (World Loaded, "m_bMatchStarted" Is FALSE)
+                3 = In-Game (World Loaded, "m_bMatchStarted" Is TRUE)
+        */
+        string? connectionState = Request.Form["c_state"];
+
+        if (connectionState is null)
+            return BadRequest(@"Missing Value For Form Parameter ""c_state""");
+
+        string? previousConnectionState = Request.Form["prev_c_state"];
+
+        if (previousConnectionState is null)
+            return BadRequest(@"Missing Value For Form Parameter ""prev_c_state""");
+
+        // The Match Server Is Linked To Its Manager At New-Session Authentication (Via The Match Server's "MatchServerManagerID"), So There Is No Linking To Perform On The Heartbeat
+
+        MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
+
+        if (matchServer is null)
+            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
+
+        matchServer.Status = (ServerStatus) int.Parse(connectionState);
+
+        // TODO: Put All The Other Data In The Server Model
+
+        await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
+
+        /*
+            The "new" Parameter Is Only Sent On The First Heartbeat After "StartGame" Loads A New World
+            All Subsequent Heartbeats For The Same In-Progress Match Omit "new"
+            "m_bInitializeMatchHeartbeat" Is Set To TRUE Once By "StartGame", Then Reset To FALSE After The Initialisation Heartbeat Succeeds
+            
+            "new" Values (1-Indexed "EArrangedMatchType" + 1):
+                1  = AM_PUBLIC (Public Match)
+                2  = AM_MATCHMAKING (Ranked Normal/Casual)
+                3  = AM_SCHEDULED_MATCH (Tournament)
+                4  = AM_UNSCHEDULED_MATCH (League)
+                5  = AM_MATCHMAKING_MIDWARS (MidWars)
+                6  = AM_MATCHMAKING_BOTMATCH (Bot Co-Op)
+                7  = AM_UNRANKED_MATCHMAKING (Unranked Normal/Casual)
+                8  = AM_MATCHMAKING_RIFTWARS (RiftWars)
+                9  = AM_PUBLIC_PRELOBBY (Public Pre-Lobby)
+                10 = AM_MATCHMAKING_CUSTOM (Custom Maps)
+                11 = AM_MATCHMAKING_CAMPAIGN (Ranked Season Normal/Casual)
+        */
+        string? newMatch = Request.Form["new"];
+
+        if (newMatch is null)
+        {
+            // Regular Heartbeat — The Server May Be Idle (Sleeping/No World) Or In An Active Match That Was Already Initialised
+            MatchInformation? matchInformation = await DistributedCache.GetMatchInformationByMatchServerSessionCookie(session);
+
+            if (matchInformation is not null)
+            {
+                matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
+                matchInformation.Map = map;
+
+                await DistributedCache.SetMatchInformation(matchInformation);
+            }
+        }
+
+        if (newMatch is not null)
+        {
+            string? matchID = Request.Form["match_id"];
+
+            if (matchID is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""match_id""");
+
+            MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(int.Parse(matchID));
+
+            if (matchInformation is null)
+            {
+                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchInformation Found In Cache", matchID);
+
+                return Ok();
+            }
+
+            matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
+            matchInformation.Map = map;
+
+            string? maximumPlayersCount = Request.Form["max_players"];
+
+            if (maximumPlayersCount is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""max_players""");
+
+            matchInformation.MaximumPlayersCount = int.Parse(maximumPlayersCount);
+
+            string? league = Request.Form["league"];
+
+            if (league is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""league""");
+
+            matchInformation.League = int.Parse(league);
+
+            string? matchMode = Request.Form["mode"];
+
+            if (matchMode is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""mode""");
+
+            matchInformation.MatchMode = PublicMatchModeExtensions.GetPublicMatchModeFromCode(matchMode)
+                ?? throw new InvalidDataException($@"Invalid Match Mode Code ""{matchMode}""");
+
+            string? matchName = Request.Form["mname"];
+
+            if (matchName is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""mname""");
+
+            matchInformation.MatchName = matchName;
+
+            MatchOptions options = MatchOptions.None;
+
+            if (Request.Form.ContainsKey("option[ap]"))                 options |= MatchOptions.AllPick;
+            if (Request.Form.ContainsKey("option[ar]"))                 options |= MatchOptions.AllRandom;
+            if (Request.Form.ContainsKey("option[alt_pick]"))           options |= MatchOptions.AlternateHeroPicking;
+            if (Request.Form.ContainsKey("option[ab]"))                 options |= MatchOptions.AutoBalanced;
+            if (Request.Form.ContainsKey("option[br]"))                 options |= MatchOptions.BalancedRandom;
+            if (Request.Form.ContainsKey("option[veto]"))               options |= MatchOptions.BanPhase;
+            if (Request.Form.ContainsKey("option[rapidfire]"))          options |= MatchOptions.BlitzMode;
+            if (Request.Form.ContainsKey("option[cas]"))                options |= MatchOptions.CasualMode;
+            if (Request.Form.ContainsKey("option[dev_heroes]"))         options |= MatchOptions.DevelopmentHeroes;
+            if (Request.Form.ContainsKey("option[drp_itm]"))            options |= MatchOptions.DropItems;
+            if (Request.Form.ContainsKey("option[dup_h]"))              options |= MatchOptions.DuplicateHeroes;
+            if (Request.Form.ContainsKey("option[em]"))                 options |= MatchOptions.EasyMode;
+            if (Request.Form.ContainsKey("option[gated]"))              options |= MatchOptions.Gated;
+            if (Request.Form.ContainsKey("option[hardcore]"))           options |= MatchOptions.Hardcore;
+            if (Request.Form.ContainsKey("option[no_agi]"))             options |= MatchOptions.NoAgilityHeroes;
+            if (Request.Form.ContainsKey("option[no_repick]"))          options |= MatchOptions.NoHeroRepick;
+            if (Request.Form.ContainsKey("option[no_swap]"))            options |= MatchOptions.NoHeroSwap;
+            if (Request.Form.ContainsKey("option[no_int]"))             options |= MatchOptions.NoIntelligenceHeroes;
+            if (Request.Form.ContainsKey("option[nl]"))                 options |= MatchOptions.NoLeavers;
+            if (Request.Form.ContainsKey("option[no_pups]"))            options |= MatchOptions.NoPowerUps;
+            if (Request.Form.ContainsKey("option[no_timer]"))           options |= MatchOptions.NoRespawnTimer;
+            if (Request.Form.ContainsKey("option[no_stats]"))           options |= MatchOptions.NoStatistics;
+            if (Request.Form.ContainsKey("option[no_str]"))             options |= MatchOptions.NoStrengthHeroes;
+            if (Request.Form.ContainsKey("option[officl]"))             options |= MatchOptions.Official;
+            if (Request.Form.ContainsKey("option[rev_hs]"))             options |= MatchOptions.ReverseHeroSelection;
+            if (Request.Form.ContainsKey("option[rs]"))                 options |= MatchOptions.ReverseSelection;
+            if (Request.Form.ContainsKey("option[shuffleabilities]"))   options |= MatchOptions.ShuffleAbilities;
+            if (Request.Form.ContainsKey("option[shuf]"))               options |= MatchOptions.ShuffleTeams;
+            if (Request.Form.ContainsKey("option[tr]"))                 options |= MatchOptions.TournamentRules;
+            if (Request.Form.ContainsKey("option[verified_only]"))      options |= MatchOptions.VerifiedOnly;
+
+            matchInformation.Options = options;
+
+            await DistributedCache.SetMatchInformation(matchInformation);
+
+            Logger.LogInformation("Captured Match Mode And Options For Match ID {MatchID}: MatchMode={MatchMode}, ArrangedMatchType={ArrangedMatchType}",
+                matchID, matchInformation.MatchMode, matchInformation.MatchType);
+        }
+
+        return Ok();
+    }
+
+    private async Task<IActionResult> HandleAuthentication()
+    {
+        string? accountName = Request.Form["login"];
+
+        if (accountName is not null)
+            Logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Server Authentication", accountName);
+
+        string response = PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
+
+        return BadRequest(response);
+    }
+}
