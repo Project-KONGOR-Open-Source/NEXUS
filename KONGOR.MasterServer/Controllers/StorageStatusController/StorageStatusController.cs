@@ -1,15 +1,44 @@
-﻿namespace KONGOR.MasterServer.Controllers.StorageStatusController;
+namespace KONGOR.MasterServer.Controllers.StorageStatusController;
 
 [ApiController]
 [Route("master/storage/status")]
-[Consumes("application/x-www-form-urlencoded")]
-public class StorageStatusController : ControllerBase
+[Consumes("multipart/form-data")]
+public class StorageStatusController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<StorageStatusController> logger) : ControllerBase
 {
-    [HttpPost(Name = "Storage Status")]
-    public IActionResult StorageStatus([FromForm] Dictionary<string, string> formData)
-    {
-        // TODO: Implement Storage Status Controller
+    private MerrickContext MerrickContext { get; } = databaseContext;
 
-        return Ok(@"a:4:{s:7:""success"";b:1;s:4:""data"";N;s:18:""cloud_storage_info"";a:4:{s:10:""account_id"";s:6:""195592"";s:9:""use_cloud"";s:1:""0"";s:16:""cloud_autoupload"";s:1:""0"";s:16:""file_modify_time"";s:19:""2021-01-10 11:39:47"";}s:8:""messages"";s:0:"""";}");
+    private IDatabase DistributedCache { get; } = distributedCache;
+
+    private ILogger Logger { get; } = logger;
+
+    [HttpPost(Name = "Storage Status")]
+    public async Task<IActionResult> StorageStatus()
+    {
+        string? cookie = Request.Form["cookie"];
+
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+
+        (bool isValid, string? accountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
+
+        if (isValid.Equals(false) || accountName is null)
+        {
+            Logger.LogWarning(@"Configuration Backup Status Request With Invalid Cookie ""{SessionCookie}"" From ""{IPAddress}""",
+                cookie, Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN");
+
+            return Unauthorized(@$"Unrecognised Cookie ""{cookie}""");
+        }
+
+        Account account = await MerrickContext.Accounts
+            .Include(queriedAccount => queriedAccount.ConfigurationBackup)
+            .SingleAsync(queriedAccount => queriedAccount.Name.Equals(accountName));
+
+        ConfigurationBackup? configurationBackup = account.ConfigurationBackup;
+
+        ConfigurationBackupInformation configurationBackupInformation = configurationBackup is null
+            ? new ConfigurationBackupInformation(account.ID, useCloud: false, automaticUpload: false, fileModificationTime: null)
+            : new ConfigurationBackupInformation(account.ID, configurationBackup.UseCloud, configurationBackup.AutomaticUpload, configurationBackup.FileModificationTime);
+
+        return Ok(PhpSerialization.Serialize(new StorageStatusResponse { ConfigurationBackupInformation = configurationBackupInformation }));
     }
 }
