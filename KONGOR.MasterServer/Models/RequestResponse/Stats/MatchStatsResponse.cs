@@ -788,8 +788,16 @@ public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipant
         return -1;
     }
 
+    /// <summary>
+    ///     Determines the winning team based on match participant statistics.
+    /// </summary>
+    /// <remarks>
+    ///     Aborted or cancelled matches have no winning participant.
+    ///     In this case return 0, which the client treats as "No Winner".
+    ///     The client only renders a winning team when the value is greater than 0.
+    /// </remarks>
     private static int GetWinningTeam(List<MatchParticipantStatistics> matchParticipantStatistics)
-        => matchParticipantStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).Single().Team;
+        => matchParticipantStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).SingleOrDefault()?.Team ?? 0;
 
     private static int IsPrivateMatch(List<MatchParticipantStatistics> matchParticipantStatistics)
         => matchParticipantStatistics.DistinctBy(player => player.PublicMatch).Single().PublicMatch is 0 ? 1 : 0;
