@@ -26,6 +26,7 @@ global using KONGOR.MasterServer.Models.RequestResponse.ConfigurationBackup;
 global using KONGOR.MasterServer.Models.RequestResponse.GameData;
 global using KONGOR.MasterServer.Models.RequestResponse.Messaging;
 global using KONGOR.MasterServer.Models.RequestResponse.Patch;
+global using KONGOR.MasterServer.Models.RequestResponse.Quest;
 global using KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 global using KONGOR.MasterServer.Models.RequestResponse.Session;
 global using KONGOR.MasterServer.Models.RequestResponse.SRP;
