@@ -3,7 +3,7 @@ namespace KONGOR.MasterServer.Models.RequestResponse.ConfigurationBackup;
 /// <summary>
 ///     The response payload for the storage store and storage retrieve endpoints.
 /// </summary>
-public class StorageResponse
+public class ConfigurationBackupResponse
 {
     [PHPProperty("success")]
     public bool Success { get; init; }

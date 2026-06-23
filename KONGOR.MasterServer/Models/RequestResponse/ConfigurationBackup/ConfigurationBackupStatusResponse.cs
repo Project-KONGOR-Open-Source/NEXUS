@@ -3,7 +3,7 @@ namespace KONGOR.MasterServer.Models.RequestResponse.ConfigurationBackup;
 /// <summary>
 ///     The response payload for the storage status endpoint, reporting the account's current configuration backup settings.
 /// </summary>
-public class StorageStatusResponse
+public class ConfigurationBackupStatusResponse
 {
     [PHPProperty("success")]
     public bool Success { get; init; } = true;
