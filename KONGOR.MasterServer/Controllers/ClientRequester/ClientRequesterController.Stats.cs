@@ -106,7 +106,7 @@ public partial class ClientRequesterController
         List<(MatchParticipantStatistics Participant, MatchStatistics Match)> matchEntries = await MerrickContext.MatchParticipantStatistics
             .Where(participant => participant.AccountID == account.ID)
             .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => new { Participant = participant, Match = match })
-            .OrderByDescending(entry => entry.Match.MatchID)
+            .OrderByDescending(entry => entry.Match.TimestampRecorded)
             .Take(limit)
             .Select(entry => new ValueTuple<MatchParticipantStatistics, MatchStatistics>(entry.Participant, entry.Match))
             .ToListAsync();
