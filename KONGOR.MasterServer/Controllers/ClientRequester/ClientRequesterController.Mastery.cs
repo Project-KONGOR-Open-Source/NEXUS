@@ -151,9 +151,13 @@ public partial class ClientRequesterController
             return NotFound($@"Match Participant Statistics For Account ID {account.ID} And Match ID {matchID} Could Not Be Found");
 
         // A Mastery Boost May Only Be Applied To The Account's Most Recent Match, Before Another Game Is Started
+        // Match IDs Are Not Chronological, So The Most Recent Match Is Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
         int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
             .Where(statistics => statistics.AccountID == account.ID)
-            .MaxAsync(statistics => statistics.MatchID);
+            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
+            .OrderByDescending(match => match.TimestampRecorded)
+            .Select(match => match.MatchID)
+            .FirstAsync();
 
         // Error Code 5 Is The Client's "Match Is Too Old" Code, Which Shows The Player An Error Modal Rather Than Failing Silently
         if (matchID != mostRecentMatchID)

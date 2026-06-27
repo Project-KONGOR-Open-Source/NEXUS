@@ -759,9 +759,13 @@ public partial class ClientRequesterController
 
         // A Mastery Boost May Only Be Applied To The Account's Most Recent Match, Before Another Game Is Started
         // The Boost Is Therefore Disabled When An Older Match Is Viewed In The Match History
+        // Match IDs Are Not Chronological, So The Most Recent Match Is Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
         int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
             .Where(statistics => statistics.AccountID == account.ID)
-            .MaxAsync(statistics => statistics.MatchID);
+            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
+            .OrderByDescending(match => match.TimestampRecorded)
+            .Select(match => match.MatchID)
+            .FirstAsync();
 
         bool isMostRecentMatch = matchStatistics.MatchID == mostRecentMatchID;
 
