@@ -17,6 +17,7 @@ global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Persistence;
 
 global using Microsoft.AspNetCore.Hosting;
+global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Testing;
 global using Microsoft.EntityFrameworkCore;
@@ -28,6 +29,7 @@ global using Microsoft.IdentityModel.Tokens;
 
 global using System.Collections.Concurrent;
 global using System.IdentityModel.Tokens.Jwt;
+global using System.Security.Claims;
 global using System.Text;
 global using System.Text.Json;
 
