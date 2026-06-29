@@ -47,7 +47,7 @@ public partial class ClientRequesterController
             .SingleOrDefaultAsync(account => account.ID == targetID);
 
         if (target is null)
-            return Ok(SerialiseSetClanRankError("account", "Invalid account given."));
+            return Ok(SerialiseSetClanRankError("account", "Invalid Account Given"));
 
         bool isSelf = targetID == requester.ID;
 
@@ -110,7 +110,14 @@ public partial class ClientRequesterController
 
         Logger.LogInformation(@"Account ""{RequesterName}"" Set The Clan Rank Of Account ID {TargetID} To ""{Rank}"" In Clan ID {ClanID}", requester.Name, targetID, rank, clanID);
 
-        return Ok(PhpSerialization.Serialize(new Dictionary<string, object> { { "set_rank", "Member Updated" } }));
+        /*
+            The Game Client Requires This Exact Value In The "set_rank" Response Field To Treat The Rank Change As Successful
+            It Is Compared Case-Insensitively But Otherwise Exactly, Including The Trailing Full Stop, So The Wording And Punctuation Must Be Preserved
+            A Mismatch Makes The Client Treat The Operation As Failed And Skip Notifying The Chat Server, So The Change Is Never Broadcast To Online Clan Members
+        */
+        const string ClanRankUpdateSuccessValue = "Member updated.";
+
+        return Ok(PhpSerialization.Serialize(new Dictionary<string, object> { { "set_rank", ClanRankUpdateSuccessValue } }));
     }
 
     /// <summary>
