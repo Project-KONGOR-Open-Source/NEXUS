@@ -9,6 +9,7 @@ public class MatchServerChatSessionMetadata
     public required int ChatProtocolVersion { get; set; }
 
     // Match Server Location And Identity
+
     public string? Location { get; set; }
 
     public string? Name { get; set; }

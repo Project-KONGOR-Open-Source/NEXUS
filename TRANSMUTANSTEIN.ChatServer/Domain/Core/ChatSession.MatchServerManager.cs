@@ -92,93 +92,65 @@ public class MatchServerManagerChatSession(ConnectionContext connection, IServic
     }
 
     /// <summary>
-    ///     Sends multiple remote commands to the server manager.
+    ///     Requests that the server manager begin a graceful shutdown of itself and the match servers it manages.
     /// </summary>
-    /// <param name="commands">The commands to execute.</param>
-    public MatchServerManagerChatSession SendRemoteCommands(IEnumerable<string> commands)
+    public MatchServerManagerChatSession ScheduleShutdown()
     {
-        foreach (string command in commands)
-            SendRemoteCommand(command);
-
-        return this;
+        return SendRemoteCommand("ManagerStartShutdown");
     }
 
     /// <summary>
-    ///     Registers a child match server as belonging to this manager.
+    ///     Requests that the server manager cancel a graceful shutdown which has been scheduled but has not yet completed.
     /// </summary>
-    /// <param name="serverID">The match server ID.</param>
-    public MatchServerManagerChatSession AddChildServer(int serverID)
+    public MatchServerManagerChatSession CancelShutdown()
     {
-        Metadata.ChildServerIDs.Add(serverID);
-
-        return this;
+        return SendRemoteCommand("ManagerCancelShutdown");
     }
 
     /// <summary>
-    ///     Removes a child match server from this manager's tracking.
+    ///     Requests that the server manager begin a graceful reset, restarting the match servers it manages once they are no longer hosting matches.
     /// </summary>
-    /// <param name="serverID">The match server ID.</param>
-    public MatchServerManagerChatSession RemoveChildServer(int serverID)
+    public MatchServerManagerChatSession ScheduleReset()
     {
-        Metadata.ChildServerIDs.Remove(serverID);
-
-        return this;
+        return SendRemoteCommand("ManagerStartReset");
     }
 
     /// <summary>
-    ///     Gets all child match server sessions managed by this server manager.
+    ///     Gets the live chat sessions of this manager's match servers, by reading the manager's server IDs from the distributed cache (the source of truth) and resolving those which currently hold a live chat session in the pool.
     /// </summary>
-    /// <returns>Collection of child match server sessions.</returns>
-    public IEnumerable<MatchServerChatSession> GetChildServerSessions()
+    public async Task<List<MatchServerChatSession>> GetMatchServerSessions(IDatabase distributedCacheStore)
     {
-        foreach (int serverID in Metadata.ChildServerIDs)
+        MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByID(Metadata.ServerManagerID);
+
+        List<MatchServerChatSession> matchServerSessions = [];
+
+        if (matchServerManager is null)
+            return matchServerSessions;
+
+        foreach (int matchServerID in matchServerManager.MatchServerIDs)
         {
-            if (Context.MatchServerChatSessions.TryGetValue(serverID, out MatchServerChatSession? session))
-                yield return session;
+            if (Context.MatchServerChatSessions.TryGetValue(matchServerID, out MatchServerChatSession? matchServerSession))
+                matchServerSessions.Add(matchServerSession);
         }
+
+        return matchServerSessions;
     }
 
     /// <summary>
-    ///     Sends a remote command to all child match servers.
+    ///     Relays a remote command to every one of this manager's match servers which currently holds a live chat session.
     /// </summary>
-    /// <param name="command">The command string to execute on all children.</param>
-    public MatchServerManagerChatSession BroadcastToChildServers(string command)
+    /// <param name="command">The command string to execute on each match server.</param>
+    public async Task BroadcastToMatchServers(IDatabase distributedCacheStore, string command)
     {
-        foreach (MatchServerChatSession childSession in GetChildServerSessions())
-            childSession.SendRemoteCommand(command);
-
-        return this;
+        foreach (MatchServerChatSession matchServerSession in await GetMatchServerSessions(distributedCacheStore))
+            matchServerSession.SendRemoteCommand(command);
     }
 
-    /// <summary>
-    ///     Sends a packet to all child match servers.
-    /// </summary>
-    /// <param name="buffer">The packet to send.</param>
-    public MatchServerManagerChatSession BroadcastPacketToChildServers(ChatBuffer buffer)
-    {
-        foreach (MatchServerChatSession childSession in GetChildServerSessions())
-            childSession.Send(buffer);
-
-        return this;
-    }
-
-    /// <summary>
-    ///     Requests an upload operation from the server manager.
-    /// </summary>
-    /// <param name="filePath">The file path to upload.</param>
-    /// <param name="uploadType">The type of upload (replay, log, etc.).</param>
-    public MatchServerManagerChatSession RequestUpload(string filePath, string uploadType)
-    {
-        ChatBuffer uploadRequest = new ();
-
-        uploadRequest.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_UPLOAD_REQUEST);
-        uploadRequest.WriteString(uploadType);
-        uploadRequest.WriteString(filePath);
-
-        Send(uploadRequest);
-
-        return this;
-    }
+    // TODO: Implement On-Demand Replay And Log Uploads Via "NET_CHAT_SM_UPLOAD_REQUEST"
+    // The Server Manager Uploads A Completed Match's Replay Or Log On Request, So That A Client Can Obtain A File Which Is Not Already Available For Download
+    // The Flow Is: A Client Sends "CHAT_CMD_UPLOAD_REQUEST" (Match ID And File Extension), The Chat Server Resolves Which Host Manager Holds That Match, Sends That Manager A "NET_CHAT_SM_UPLOAD_REQUEST", The Manager Uploads And Replies With "NET_CHAT_SM_UPLOAD_UPDATE", And The Chat Server Forwards A "CHAT_CMD_UPLOAD_STATUS" Back To The Client
+    // The "NET_CHAT_SM_UPLOAD_REQUEST" Payload Is The Requesting Account ID, The Match ID, The File Extension, The Destination Host, The Destination Directory, A Flag For FTP Upload, A Flag For S3 Upload, And A Download Link
+    // For The Authoritative Model See "CClient::HandleRequestSMUpload" With "CClientManager::RequestSMUpload" In The HON Chat Server Source, And "UploadRequest" With "UploadRequestResponse" In The Legacy KONGOR Source
 
     /// <summary>
     ///     Tracks whether the cleanup has already run for this session.
@@ -238,17 +210,13 @@ public class MatchServerManagerChatSession(ConnectionContext connection, IServic
     {
         if (RemoveFromPoolIfCurrentHolder())
         {
-            // Send The Quit Command While The Socket Is Still Open
-            if (IsConnected)
-                SendRemoteCommand("quit");
-
             // Await The Distributed Cache Removal Here So That Callers Which Immediately Register A Replacement Manager Do Not Race The Removal
             await Remove(distributedCacheStore);
 
             Log.Information(@"Match Server Manager ID ""{MatchServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
         }
 
-        // Tear Down The Connection, Flushing Any Queued Frames (Such As The "quit" Remote Command) Before The Socket Is Closed
+        // Tear Down The Connection, Flushing Any Queued Frames Before The Socket Is Closed
         await CloseGracefully();
     }
 

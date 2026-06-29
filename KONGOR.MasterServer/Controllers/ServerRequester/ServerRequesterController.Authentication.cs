@@ -46,12 +46,18 @@ public partial class ServerRequesterController
             return Unauthorized($@"The Built-In ""{OOTB.Accounts.OPERATOR.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
         }
 
+        int matchServerManagerID = hostAccountName.GetDeterministicInt32Hash();
+
+        // Re-Adopt Any Of This Manager's Match Servers Which Are Still Registered, So That A Manager Re-Authenticating After Being Reaped Recovers Its Child List Instead Of Resetting It And Losing Track Of Servers Which Are Still Live
+        List<int> matchServerIDs = [.. (await DistributedCache.GetMatchServersByAccountName(hostAccountName))
+            .Where(matchServer => matchServer.MatchServerManagerID == matchServerManagerID).Select(matchServer => matchServer.ID)];
+
         MatchServerManager matchServerManager = new ()
         {
             HostAccountID = account.ID,
             HostAccountName = account.Name,
-            ID = hostAccountName.GetDeterministicInt32Hash(),
-            MatchServerIDs = [],
+            ID = matchServerManagerID,
+            MatchServerIDs = matchServerIDs,
             IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
         };
 

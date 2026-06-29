@@ -9,6 +9,7 @@ public class MatchServerManagerChatSessionMetadata
     public required int ChatProtocolVersion { get; set; }
 
     // Server Manager Location And Identity
+
     public string? Location { get; set; }
 
     public string? Name { get; set; }
@@ -21,7 +22,4 @@ public class MatchServerManagerChatSessionMetadata
 
     // Timestamp Tracking
     public DateTimeOffset LastStatusUpdate { get; set; } = DateTimeOffset.UtcNow;
-
-    // Child Server Tracking: IDs Of Match Servers Managed By This Manager
-    public HashSet<int> ChildServerIDs { get; set; } = [];
 }
