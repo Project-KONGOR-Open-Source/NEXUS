@@ -1,8 +1,8 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 
 /// <summary>
-///     Handles clan demotion notifications.
-///     Demotes a clan officer to member rank and broadcasts the rank change to all clan members.
+///     Handles clan demotion notifications, sent by the client after the master server's "set_rank" endpoint has demoted the officer to member.
+///     Updates the target's in-memory rank and broadcasts the rank change to all clan members.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_DEMOTE_NOTIFY)]
 public class ClanDemoteNotify : ISynchronousCommandProcessor<ClientChatSession>
@@ -21,6 +21,9 @@ public class ClanDemoteNotify : ISynchronousCommandProcessor<ClientChatSession>
         // Target Must Be Online And In The Same Clan
         if (targetSession is null || targetSession.Account.Clan?.ID != session.Account.Clan.ID)
             return;
+
+        // Demote The Target In-Memory; The Database Was Already Updated By The Master Server's "set_rank" Endpoint
+        targetSession.Account.ClanTier = ClanTier.Member;
 
         // Broadcast Rank Change To All Clan Members
         ChatBuffer broadcast = new ();

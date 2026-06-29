@@ -74,6 +74,11 @@ public class ClanInviteAccepted(MerrickContext merrick) : IAsynchronousCommandPr
 
             memberSession?.Send(broadcast);
         }
+
+        // Join The New Member To The Clan Chat Channel, As Is Done For The Founding Members On Clan Creation
+        ChatChannel clanChannel = ChatChannel.GetOrCreate(session, clan.GetChatChannelName());
+
+        clanChannel.Join(session);
     }
 
     /// <summary>
