@@ -87,6 +87,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // friends
             "remove_buddy2"                 => await RemoveFriend(),
 
+            // clans
+            "set_rank"                      => await SetClanRank(),
+
             // notifications
             "delete_notification"           => await DeleteNotification(),
             "remove_all_notifications"      => await RemoveAllNotifications(),
