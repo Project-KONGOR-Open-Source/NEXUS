@@ -582,7 +582,7 @@ public class ClanMemberAccount
     public required string Rank { get; set; }
 
     /// <summary>
-    ///     Unknown.
+    ///     The member's per-clan message.
     /// </summary>
     [PHPProperty("message")]
     public string Message { get; set; } = string.Empty;
@@ -643,10 +643,10 @@ public class ClanMemberData
     public required string Rank { get; set; }
 
     /// <summary>
-    ///     Unknown.
+    ///     The account's per-clan message.
     /// </summary>
     [PHPProperty("message")]
-    public string Message { get; set; } = "TODO: [MESSAGE] See Whether This Does Anything";
+    public string Message { get; set; } = string.Empty;
 
     /// <summary>
     ///     The datetime that the account joined the clan, in the format "yyyy-MM-dd HH:mm:ss".
@@ -655,7 +655,7 @@ public class ClanMemberData
     public required string JoinDate { get; set; }
 
     /// <summary>
-    ///     The clan channel title.
+    ///     The clan's title (motto).
     /// </summary>
     [PHPProperty("title")]
     public required string Title { get; set; }
@@ -670,10 +670,10 @@ public class ClanMemberData
     public string Active { get; set; } = "1";
 
     /// <summary>
-    ///     Unknown.
+    ///     The identifier of the clan's logo.
     /// </summary>
     [PHPProperty("logo")]
-    public string Logo { get; set; } = "TODO: [LOGO] See Whether This Does Anything";
+    public string Logo { get; set; } = string.Empty;
 
     /// <summary>
     ///     Whether the clan has been flagged as idle (no active users) or not.

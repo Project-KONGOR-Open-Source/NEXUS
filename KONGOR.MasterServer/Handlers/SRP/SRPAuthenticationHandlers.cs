@@ -164,7 +164,7 @@ public static class SRPAuthenticationHandlers
         => members.Select(member => new KeyValuePair<string, ClanMemberAccount>(member.ID.ToString(),
                 new ClanMemberAccount { ClanID = member.Clan?.ID.ToString() ?? string.Empty, ID = member.ID.ToString(),
                     JoinDate = member.TimestampJoinedClan is not null ? member.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
-                    Name = member.Name, Rank = member.ClanTierName, Message = "TODO: Find Out What This Does", Standing = Convert.ToInt32(member.Type).ToString() }))
+                    Name = member.Name, Rank = member.ClanTierName, Message = member.Clan?.GetDefaultWelcomeMessage() ?? string.Empty, Standing = Convert.ToInt32(member.Type).ToString() }))
             .ToDictionary();
 
     private static OneOf<ClanMemberData, ClanMemberDataError> SetClanMembershipData(Account account)
@@ -173,7 +173,7 @@ public static class SRPAuthenticationHandlers
             ClanID = account.Clan?.ID.ToString() ?? string.Empty, ID = account.ID.ToString(), ClanName = account.Clan?.Name ?? string.Empty,
             ClanTag = account.Clan?.Tag ?? string.Empty, ClanOwnerAccountID = account.Clan?.Members.Single(member => member.ClanTier is ClanTier.Leader).ID.ToString() ?? string.Empty,
             JoinDate = account.TimestampJoinedClan is not null ? account.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
-            Rank = account.ClanTierName, Message = "TODO: Find Out What This Does", Title = "TODO: Set The Clan Channel Title"
+            Rank = account.ClanTierName, Message = account.Clan?.GetDefaultWelcomeMessage() ?? string.Empty, Title = account.Clan?.Title ?? string.Empty, Logo = account.Clan?.Logo ?? string.Empty
         };
 
     private static string SetCustomIconSlotID(Account account)

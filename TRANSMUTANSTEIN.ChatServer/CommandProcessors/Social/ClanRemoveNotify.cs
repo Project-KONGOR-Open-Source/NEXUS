@@ -60,7 +60,6 @@ public class ClanRemoveNotify(MerrickContext merrick) : IAsynchronousCommandProc
         targetSession.Account.Clan = null;
         targetSession.Account.ClanTier = ClanTier.None;
         targetSession.Account.TimestampJoinedClan = null;
-        targetSession.Account.ClanMessage = string.Empty;
 
         // Broadcast Name Change To Peers (Clan Tag Is Removed From Display Name)
         ChatBuffer nameChange = new ();

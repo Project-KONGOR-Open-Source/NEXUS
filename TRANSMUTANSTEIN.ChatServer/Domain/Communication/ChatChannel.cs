@@ -49,7 +49,9 @@ public class ChatChannel
         if (channelName.Equals(ChatProtocol.CHAT_CHANNEL_BASE_NAME, StringComparison.OrdinalIgnoreCase))
             return GetOrCreateGeneralChannel();
 
-        bool isClanChannel = session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
+        Clan? clan = session.Account.Clan;
+
+        bool isClanChannel = clan is not null && channelName == clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
@@ -59,7 +61,7 @@ public class ChatChannel
         {
             Name = channelName,
             Flags = chatChannelType,
-            Topic = $"Welcome To The {channelName} Channel !"
+            Topic = clan is not null && isClanChannel ? clan.GetDefaultWelcomeMessage() : $"Welcome To The {channelName} Channel !"
         });
 
         return channel;

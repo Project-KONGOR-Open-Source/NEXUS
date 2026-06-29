@@ -77,7 +77,6 @@ public partial class ClientRequesterController
                 target.Clan = null;
                 target.ClanTier = ClanTier.None;
                 target.TimestampJoinedClan = null;
-                target.ClanMessage = string.Empty;
 
                 break;
             }
