@@ -18,7 +18,7 @@ public static class SystemMessages
             Subject: "Welcome To Project KONGOR !",
             Subtitle: "keeping the real Heroes Of Newerth alive since 2022",
             BodyTitle: "Hello Newerthian,",
-            Body: @"<p>Project KONGOR is a community-driven effort to keep the real Heroes Of Newerth alive.</p><p class=""link""><a href=""https://github.com/Project-KONGOR-Open-Source"">Visit The Project On GitHub</a></p>",
+            Body: "Project KONGOR is a community-driven effort to keep the real Heroes Of Newerth alive." + "\n\n" + "Visit the project on GitHub at https://github.com/Project-KONGOR-Open-Source.",
             Footer: "[K]ONGOR"
         )
     ];

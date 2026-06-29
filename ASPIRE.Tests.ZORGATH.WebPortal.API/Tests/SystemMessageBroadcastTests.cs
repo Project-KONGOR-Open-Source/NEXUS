@@ -24,7 +24,7 @@ public sealed class SystemMessageBroadcastTests(ZORGATHIntegrationWebApplication
 
         AdministrationController controller = new (databaseContext, logger);
 
-        IActionResult response = await controller.BroadcastSystemMessage(new BroadcastSystemMessageDTO("Server Maintenance", "<p>The servers will be down at midnight.</p>", null, null, null));
+        IActionResult response = await controller.BroadcastSystemMessage(new BroadcastSystemMessageDTO("Server Maintenance", "The servers will be down at midnight.", null, null, null));
 
         await Assert.That(response).IsTypeOf<OkObjectResult>();
 

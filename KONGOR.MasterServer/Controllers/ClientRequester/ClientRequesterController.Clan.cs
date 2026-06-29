@@ -162,7 +162,7 @@ public partial class ClientRequesterController
         Subject = "You Are Now The Clan Leader",
         Subtitle = clanName,
         BodyTitle = "Congratulations,",
-        Body = $@"<p>The previous leader of <b>{WebUtility.HtmlEncode(clanName)}</b> has left, and you have inherited leadership of the clan.</p>",
+        Body = $"The previous leader of {clanName} has left, and you have inherited leadership of the clan.",
         Footer = "[K]ONGOR"
     };
 
