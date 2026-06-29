@@ -1026,7 +1026,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's Public Skill Rating (PSR).
     /// </summary>
     [PHPProperty("pub_skill")]
-    public string PublicMatchRating { get; init; } = publicMatchStatistics.SkillRating.ToString();
+    public string PublicMatchRating { get; init; } = publicMatchStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of public matches played on the player's account.
@@ -1038,7 +1038,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's solo Matchmaking Rating (MMR).
     /// </summary>
     [PHPProperty("amm_solo_rating")]
-    public string SoloRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
+    public string SoloRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of solo ranked matches played on the player's account.
@@ -1050,7 +1050,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's team Matchmaking Rating (MMR).
     /// </summary>
     [PHPProperty("amm_team_rating")]
-    public string TeamRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
+    public string TeamRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of team ranked matches played on the player's account.
@@ -1062,7 +1062,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's performance score across all matches, calculated as (Kills + Assists) / Max(1, Deaths).
     /// </summary>
     [PHPProperty("avg_score")]
-    public string PerformanceScore { get; init; } = currentMatchTypeStatistics.PerformanceScore.ToString("F2");
+    public string PerformanceScore { get; init; } = currentMatchTypeStatistics.PerformanceScore.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of enemy hero kills achieved by the player in the match.
@@ -1449,13 +1449,13 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     The player's team Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PHPProperty("perf_amm_team_rating")]
-    public string MatchPerformanceTeamRatingBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString("F2");
+    public string MatchPerformanceTeamRatingBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The change in team Matchmaking Rating (MMR) from this match.
     /// </summary>
     [PHPProperty("perf_amm_team_rating_delta")]
-    public string MatchPerformanceTeamRatingDelta { get; init; } = matchParticipantStatistics.RankedSkillRatingChange.ToString("F2");
+    public string MatchPerformanceTeamRatingDelta { get; init; } = matchParticipantStatistics.RankedSkillRatingChange.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Experience points earned based on match outcome (win or loss).
@@ -1710,13 +1710,13 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     The player's Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PHPProperty("mmr_before")]
-    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString();
+    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) after the match.
     /// </summary>
     [PHPProperty("mmr_after")]
-    public string MMRAfter { get; init; } = matchmakingStatistics.SkillRating.ToString();
+    public string MMRAfter { get; init; } = matchmakingStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The player's medal rank before the match.

@@ -136,7 +136,7 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     ///     Solo queue matchmaking rating (MMR) for campaign casual mode.
     /// </summary>
     [PHPProperty("cam_cs_amm_solo_rating")]
-    public string SoloRating { get; init; } = statistics.SkillRating.ToString("F2");
+    public string SoloRating { get; init; } = statistics.SkillRating.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Total solo queue campaign casual matches counted towards rating.
@@ -166,7 +166,7 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     ///     Team/group queue matchmaking rating (MMR) for campaign casual mode.
     /// </summary>
     [PHPProperty("cam_cs_amm_team_rating")]
-    public string TeamRating { get; init; } = statistics.SkillRating.ToString("F2");
+    public string TeamRating { get; init; } = statistics.SkillRating.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Total team queue campaign casual matches counted towards rating.

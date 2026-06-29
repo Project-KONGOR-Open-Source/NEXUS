@@ -128,7 +128,7 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Team/group queue matchmaking rating (MMR) for casual mode. Base rating is 1500.
     /// </summary>
     [PHPProperty("cs_amm_team_rating")]
-    public string TeamRating { get; init; } = statistics.SkillRating.ToString("F3");
+    public string TeamRating { get; init; } = statistics.SkillRating.ToString("F3", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Total team queue casual matches counted towards rating.
