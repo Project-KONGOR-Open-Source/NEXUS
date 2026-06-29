@@ -46,37 +46,37 @@ public class AdministrationController(MerrickContext databaseContext, ILogger<Ad
     public async Task<IActionResult> BroadcastSystemMessage([FromBody] BroadcastSystemMessageDTO payload)
     {
         // These Limits Mirror The Maximum Lengths Of The Corresponding Columns On The "Message" Entity.
-        const int MessageSubjectMaximumLength = 100;
-        const int MessageSubtitleMaximumLength = 80;
-        const int MessageBodyTitleMaximumLength = 100;
-        const int MessageBodyMaximumLength = 2000;
-        const int MessageFooterMaximumLength = 80;
+        const int messageSubjectMaximumLength = 100;
+        const int messageSubtitleMaximumLength = 80;
+        const int messageBodyTitleMaximumLength = 100;
+        const int messageBodyMaximumLength = 2000;
+        const int messageFooterMaximumLength = 80;
 
         // Messages Are Inserted In Batches So That A Broadcast To Many Accounts Does Not Build One Enormous Transaction Or Change-Tracker Graph.
-        const int MessageBroadcastBatchSize = 1000;
+        const int messageBroadcastBatchSize = 1000;
 
-        if (string.IsNullOrWhiteSpace(payload.Subject) || payload.Subject.Length > MessageSubjectMaximumLength)
-            return BadRequest($@"The Subject Is Required And Must Not Exceed {MessageSubjectMaximumLength} Characters");
+        if (string.IsNullOrWhiteSpace(payload.Subject) || payload.Subject.Length > messageSubjectMaximumLength)
+            return BadRequest($@"The Subject Is Required And Must Not Exceed {messageSubjectMaximumLength} Characters");
 
-        if (string.IsNullOrWhiteSpace(payload.Body) || payload.Body.Length > MessageBodyMaximumLength)
-            return BadRequest($@"The Body Is Required And Must Not Exceed {MessageBodyMaximumLength} Characters");
+        if (string.IsNullOrWhiteSpace(payload.Body) || payload.Body.Length > messageBodyMaximumLength)
+            return BadRequest($@"The Body Is Required And Must Not Exceed {messageBodyMaximumLength} Characters");
 
-        if (payload.Subtitle?.Length > MessageSubtitleMaximumLength)
-            return BadRequest($@"The Subtitle Must Not Exceed {MessageSubtitleMaximumLength} Characters");
+        if (payload.Subtitle?.Length > messageSubtitleMaximumLength)
+            return BadRequest($@"The Subtitle Must Not Exceed {messageSubtitleMaximumLength} Characters");
 
-        if (payload.BodyTitle?.Length > MessageBodyTitleMaximumLength)
-            return BadRequest($@"The Body Title Must Not Exceed {MessageBodyTitleMaximumLength} Characters");
+        if (payload.BodyTitle?.Length > messageBodyTitleMaximumLength)
+            return BadRequest($@"The Body Title Must Not Exceed {messageBodyTitleMaximumLength} Characters");
 
-        if (payload.Footer?.Length > MessageFooterMaximumLength)
-            return BadRequest($@"The Footer Must Not Exceed {MessageFooterMaximumLength} Characters");
+        if (payload.Footer?.Length > messageFooterMaximumLength)
+            return BadRequest($@"The Footer Must Not Exceed {messageFooterMaximumLength} Characters");
 
         List<int> accountIDs = await MerrickContext.Accounts.Select(account => account.ID).ToListAsync();
 
-        for (int index = 0; index < accountIDs.Count; index += MessageBroadcastBatchSize)
+        for (int index = 0; index < accountIDs.Count; index += messageBroadcastBatchSize)
         {
             IEnumerable<Message> batch = accountIDs
                 .Skip(index)
-                .Take(MessageBroadcastBatchSize)
+                .Take(messageBroadcastBatchSize)
                 .Select(accountID => new Message
                 {
                     AccountID = accountID,
