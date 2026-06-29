@@ -284,29 +284,18 @@ public partial class ServerRequesterController
         if (accountKey is null)
             return BadRequest(@"Missing Value For Form Parameter ""acc_key""");
 
-        //GameServer? server = MerrickContext.GameServers.SingleOrDefault(server => server.Cookie.Equals(formData["session"]));
-        //if (server is null) return Unauthorized();
+        MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 
-        //if (KongorContext.InvalidateGameHostingPermissionToken(formData["acc_key"]).Equals(false))
-        //    return Unauthorized($@"NOT AUTHORISED: Invalid Account Key ""{formData["acc_key"]}""");
+        if (matchServer is null)
+            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
 
-        /*
-        Dictionary<string, object> response = new ()
-        {
-            { "server_id", server.GameServerId },
-            { "official", server.Official ? 1 : 0 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
-        };
-        */
-
-        // TODO: Fix This Mess !!! (Maybe Just Use The Cookie As The Account Key?)
+        // TODO: Validate And Consume The One-Time Account Key Once The Server List Registers It For Look-Up
 
         Dictionary<string, object> response = new ()
         {
-            { "server_id", 666 },
-            { "official", 1 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
+            ["server_id"] = matchServer.ID,
+            ["official"] = 1 // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats
         };
-
-        // TODO: Fully Inspect Response Model
 
         return Ok(PhpSerialization.Serialize(response));
     }
