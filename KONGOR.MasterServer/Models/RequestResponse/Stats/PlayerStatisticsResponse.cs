@@ -441,7 +441,7 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     ///     Total matches where disconnection was possible (used for leave percentage calculation).
     /// </summary>
     [PHPProperty("possible_discos")]
-    public string PossibleDisconnections { get; init; } = "0"; // TODO: Implement Possible Disconnection Tracking
+    public string PossibleDisconnections { get; init; } = statistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     Total PvP matches played across all game modes (excluding bot matches).

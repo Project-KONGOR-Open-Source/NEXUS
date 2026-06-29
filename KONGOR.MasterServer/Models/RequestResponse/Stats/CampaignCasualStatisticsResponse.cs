@@ -514,10 +514,10 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     public string TotalDisconnections { get; init; } = aggregates.TotalDisconnections.ToString();
 
     /// <summary>
-    ///     Number of possible disconnections (games where the player could have disconnected but did not).
+    ///     Total matches where disconnection was possible (used for leave percentage calculation).
     /// </summary>
     [PHPProperty("possible_discos")]
-    public string PossibleDisconnections { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string PossibleDisconnections { get; init; } = statistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     Total games played across all PvP game modes.
