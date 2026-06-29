@@ -259,81 +259,13 @@ public partial class ServerRequesterController
             response.Add("tag", account.Clan.Tag);
         }
 
-        /*
-            public static List<Info> InfoForAccount(AccountDetails accountDetails, float tournamentRatingForActiveTeam)
-           {
-               Info info = new ()
-               {
-                   AccountId = accountDetails.AccountId.ToString(),
-                   Standing = "3",
-                   Level = "1",
-                   LevelExp = "0",
-                   // AllTimeTotalDisconnects: appears to be ignored
-                   // PossibleDisconnects: appears to be ignored
-                   // AllTimeGamesPlayed: appears to be ignored
-                   // NumBotGamesWon: appears to be ignored
-                   PSR = accountDetails.PublicRating,
-                   // PublicGameWins = publicStats.Wins,
-                   // PublicGameLosses = publicStats.Losses,
-                   PublicGamesPlayed = accountDetails.PublicGamesPlayed,
-                   PublicGameDisconnects = accountDetails.PublicTimesDisconnected,
-                   // NormalRankedGamesMMR: unused in KONGOR
-                   // NormalRankedGameWins: unused in KONGOR
-                   // NormalRankedGameLosses: unused in KONGOR
-                   // NormalRankedGamesPlayed: unused in KONGOR
-                   // NormalRankedGameDisconnects: unused in KONGOR
-                   // CasualModeMMR: unused in KONGOR
-                   // CasualModeWins: unused in KONGOR
-                   // CasualModeLosses: unused in KONGOR
-                   // CasualModeGamesPlayed: unused in KONGOR
-                   // CasualModeDisconnects: unused in KONGOR
-                   MidWarsMMR = accountDetails.MidWarsRating,
-                   MidWarsGamesPlayed = accountDetails.MidWarsGamesPlayed,
-                   MidWarsTimesDisconnected = accountDetails.MidWarsTimesDisconnected,
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID).ToDictionaryAsync(statistics => statistics.Type);
 
-                   // Number of Tournament matches played. Note: rift wars is used as a piggy-back.
-                   RiftWarsGamesPlayed = accountDetails.TournamentGamesPlayed,
-                   RiftWarsDisconnects = accountDetails.TournamentTimesDisconnected,
-                   RiftWarsRating = tournamentRatingForActiveTeam,
+        AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
 
-                   IsNew = 0,
-                   ChampionsOfNewerthNormalMMR = accountDetails.CoNNormalRating,
-                   ChampionsOfNewerthNormalRank = accountDetails.CoNNormalRank,
-                   ChampionsOfNewerthGamesPlayed = accountDetails.CoNNormalGamesPlayed,
-                   ChampionsOfNewerthGameDisconnects = accountDetails.CoNNormalTimesDisconnected,
-
-                   ChampionsOfNewerthCasualMMR = accountDetails.CoNCasualRating,
-                   ChampionsOfNewerthCasualRank = accountDetails.CoNCasualRank,
-                   ChampionsOfNewerthCasualGamesPlayed = accountDetails.CoNCasualGamesPlayed,
-                   ChampionsOfNewerthCasualGameDisconnects = accountDetails.CoNCasualTimesDisconnected,
-
-                   // Additional Public Games info requested by server_requester.php?f=c_conn
-                   // Unclear if used or not.
-                   // PublicHeroKills = account.PlayerSeasonStatsPublic.HeroKills,
-                   // PublicHeroAssists = account.PlayerSeasonStatsPublic.HeroAssists,
-                   // PublicDeaths = account.PlayerSeasonStatsPublic.Deaths,
-                   // PublicWardsPlaced = account.PlayerSeasonStatsPublic.Wards,
-                   // PublicGoldEarned = account.PlayerSeasonStatsPublic.Gold,
-                   // PublicExpEarned = account.PlayerSeasonStatsPublic.Exp,
-                   // PublicSecondsPlayed = account.PlayerSeasonStatsPublic.Secs,
-                   // PublicTimeEarningExp = account.PlayerSeasonStatsPublic.TimeEarningExp,
-
-                   // Additional TMM info requested by server_requester.php?f=c_conn
-
-                   // Additional unknown fields requested by server_requester.php?f=c_conn
-                   // Unclear if used or not.
-                   rnk_amm_solo_conf = 0,
-                   rnk_amm_team_conf = 0,
-               };
-
-               return new List<Info>() { info };
-           }
-         */
-
-        // TODO: Create Proper Response Model
-
-        response.Add("infos", ""); // TODO: Set These Stats
-        response.Add("game_cookie", "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
+        response.Add("infos", new List<DataPoint> { DataPoint.FromAccount(account, aggregates, statisticsByType) });
+        response.Add("game_cookie", "00005072-6f6a-6563-7420-4b4f4e474f52"); // TODO: Generate And Store This Cookie Per Match (Must Exist, But The Value Doesn't Really Matter)
         response.Add("my_upgrades", account.User.OwnedStoreItems);
         response.Add("selected_upgrades", account.SelectedStoreItems);
 

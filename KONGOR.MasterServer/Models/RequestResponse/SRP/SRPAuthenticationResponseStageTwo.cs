@@ -1351,6 +1351,93 @@ public class DataPoint
     /// </summary>
     [PHPProperty("is_new")]
     public int IsNew { get; set; } = 0;
+
+    /// <summary>
+    ///     The Champions Of Newerth seasonal normal ranked MMR (match making rating) of the account.
+    /// </summary>
+    [PHPProperty("campaign_normal_mmr")]
+    public string CampaignNormalMMR { get; set; } = "0";
+
+    /// <summary>
+    ///     The Champions Of Newerth seasonal normal ranked medal of the account, or zero while the placement phase is incomplete.
+    /// </summary>
+    [PHPProperty("campaign_normal_medal")]
+    public int CampaignNormalMedal { get; set; } = 0;
+
+    /// <summary>
+    ///     The Champions Of Newerth seasonal casual ranked MMR (match making rating) of the account.
+    /// </summary>
+    [PHPProperty("campaign_casual_mmr")]
+    public string CampaignCasualMMR { get; set; } = "0";
+
+    /// <summary>
+    ///     The Champions Of Newerth seasonal casual ranked medal of the account, or zero while the placement phase is incomplete.
+    /// </summary>
+    [PHPProperty("campaign_casual_medal")]
+    public int CampaignCasualMedal { get; set; } = 0;
+
+    /// <summary>
+    ///     The solo queue rating confidence. Higher values indicate a more stable rating.
+    /// </summary>
+    [PHPProperty("rnk_amm_solo_conf")]
+    public int SoloRatingConfidence { get; set; } = 0;
+
+    /// <summary>
+    ///     The team queue rating confidence. Higher values indicate a more stable rating.
+    /// </summary>
+    [PHPProperty("rnk_amm_team_conf")]
+    public int TeamRatingConfidence { get; set; } = 0;
+
+    /// <summary>
+    ///     Creates a <see cref="DataPoint"/> from the account and its aggregate and per-type statistics.
+    ///     The campaign medals are derived from the matchmaking ratings, or set to zero while the placement phase is incomplete.
+    /// </summary>
+    public static DataPoint FromAccount(Account account, AggregateStatistics aggregates, IReadOnlyDictionary<AccountStatisticsType, AccountStatistics> statisticsByType)
+    {
+        double GetRating(AccountStatisticsType type) => statisticsByType.TryGetValue(type, out AccountStatistics? statistics) ? statistics.SkillRating : 1500.0;
+        int GetWins(AccountStatisticsType type) => statisticsByType.TryGetValue(type, out AccountStatistics? statistics) ? statistics.MatchesWon : 0;
+        int GetLosses(AccountStatisticsType type) => statisticsByType.TryGetValue(type, out AccountStatistics? statistics) ? statistics.MatchesLost : 0;
+        int GetMedal(AccountStatisticsType type) => statisticsByType.TryGetValue(type, out AccountStatistics? statistics) && statistics.IsInPlacementPhase ? 0 : RankExtensions.CalculateCampaignLevel(GetRating(type));
+
+        return new DataPoint
+        {
+            ID = account.ID.ToString(),
+            Level = account.User.TotalLevel.ToString(),
+            Experience = account.User.TotalExperience.ToString(),
+            Disconnects = aggregates.TotalDisconnections.ToString(),
+            MatchesPlayed = aggregates.TotalGamesPlayed.ToString(),
+            BotMatchesWon = aggregates.BotGamesWon.ToString(),
+            PSR = GetRating(AccountStatisticsType.Public).ToString("F3", CultureInfo.InvariantCulture),
+            PublicMatchesWon = GetWins(AccountStatisticsType.Public).ToString(),
+            PublicMatchesLost = GetLosses(AccountStatisticsType.Public).ToString(),
+            PublicMatchesPlayed = aggregates.PublicGamesPlayed.ToString(),
+            PublicMatchDisconnects = aggregates.PublicDisconnections.ToString(),
+            MMR = GetRating(AccountStatisticsType.Matchmaking).ToString("F3", CultureInfo.InvariantCulture),
+            RankedMatchesWon = aggregates.CampaignWins.ToString(),
+            RankedMatchesLost = aggregates.CampaignLosses.ToString(),
+            RankedMatchesPlayed = aggregates.RankedGamesPlayed.ToString(),
+            RankedMatchDisconnects = aggregates.RankedDisconnections.ToString(),
+            CasualMMR = GetRating(AccountStatisticsType.MatchmakingCasual).ToString("F3", CultureInfo.InvariantCulture),
+            CasualRankedMatchesWon = aggregates.CampaignCasualWins.ToString(),
+            CasualRankedMatchesLost = aggregates.CampaignCasualLosses.ToString(),
+            CasualRankedMatchesPlayed = aggregates.CasualGamesPlayed.ToString(),
+            CasualRankedMatchDisconnects = aggregates.CasualDisconnections.ToString(),
+            MidWarsMMR = GetRating(AccountStatisticsType.MidWars).ToString("F3", CultureInfo.InvariantCulture),
+            RankedMidWarsMatchesPlayed = aggregates.MidWarsGamesPlayed.ToString(),
+            RankedMidWarsMatchDisconnects = aggregates.MidWarsDisconnections.ToString(),
+            RiftWarsMMR = GetRating(AccountStatisticsType.RiftWars).ToString("F3", CultureInfo.InvariantCulture),
+            RankedRiftWarsMatchesPlayed = aggregates.RiftWarsGamesPlayed.ToString(),
+            RankedRiftWarsMatchDisconnects = aggregates.RiftWarsDisconnections.ToString(),
+            SeasonalRankedMatchesPlayed = aggregates.CampaignGamesPlayed,
+            SeasonalRankedMatchDisconnects = aggregates.CampaignDisconnections,
+            CasualSeasonalRankedMatchesPlayed = aggregates.CampaignCasualGamesPlayed,
+            CasualSeasonalRankedMatchDisconnects = aggregates.CampaignCasualDisconnections,
+            CampaignNormalMMR = GetRating(AccountStatisticsType.Matchmaking).ToString("F3", CultureInfo.InvariantCulture),
+            CampaignNormalMedal = GetMedal(AccountStatisticsType.Matchmaking),
+            CampaignCasualMMR = GetRating(AccountStatisticsType.MatchmakingCasual).ToString("F3", CultureInfo.InvariantCulture),
+            CampaignCasualMedal = GetMedal(AccountStatisticsType.MatchmakingCasual)
+        };
+    }
 }
 
 public class CloudStorageInformation

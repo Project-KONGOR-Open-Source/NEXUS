@@ -42,7 +42,7 @@ public static class SRPAuthenticationHandlers
             SelectedStoreItems = parameters.Account.SelectedStoreItems,
             OwnedStoreItemsData = SetOwnedStoreItemsData(parameters.Account),
             AwardsTooltips = SetAwardsTooltips(),
-            DataPoints = SetDataPoints(),
+            DataPoints = SetDataPoints(parameters.Account, parameters.Statistics),
             CloudStorageInformation = SetCloudStorageInformation(parameters.Account),
             Notifications = parameters.Notifications
         };
@@ -84,6 +84,7 @@ public static class SRPAuthenticationHandlers
     public class StageTwoResponseParameters()
     {
         public required Account Account { get; set; }
+        public required Dictionary<AccountStatisticsType, AccountStatistics> Statistics { get; set; }
         public required List<Account> ClanRoster { get; set; }
         public required string ServerProof { get; set; }
         public required string ClientIPAddress { get; set; }
@@ -182,49 +183,12 @@ public static class SRPAuthenticationHandlers
     private static CloudStorageInformation SetCloudStorageInformation(Account account)
         => new () { AccountID = account.ID.ToString(), UseCloud = "0", AutomaticCloudUpload = "0", BackupLastUpdatedTime = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") }; // TODO: Fix These Values
 
-    private static List<DataPoint> SetDataPoints()
+    private static List<DataPoint> SetDataPoints(Account account, IReadOnlyDictionary<AccountStatisticsType, AccountStatistics> statisticsByType)
     {
-        List<DataPoint> dataPoints =
-        [
-            // TODO: Set These From Account Stats
+        AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
 
-            new DataPoint
-            {
-                ID = "666",
-                Level = "1",
-                Disconnects = "0",
-                MatchesPlayed = "0",
-                BotMatchesWon = "0",
-                PSR = "1500.000",
-                PublicMatchesPlayed = "0",
-                PublicMatchesWon = "0",
-                PublicMatchesLost = "0",
-                PublicMatchDisconnects = "0",
-                MMR = "1500.000",
-                RankedMatchesPlayed = "0",
-                RankedMatchesWon = "0",
-                RankedMatchesLost = "0",
-                RankedMatchDisconnects = "0",
-                MidWarsMMR = "1500.000",
-                RankedMidWarsMatchesPlayed = "0",
-                RankedMidWarsMatchDisconnects = "0",
-                RiftWarsMMR = "1500.000",
-                RankedRiftWarsMatchesPlayed = "0",
-                RankedRiftWarsMatchDisconnects = "0",
-                CasualMMR = "1500.000",
-                CasualRankedMatchDisconnects = "0",
-                CasualRankedMatchesLost = "0",
-                CasualRankedMatchesPlayed = "0",
-                CasualRankedMatchesWon = "0",
-                SeasonalRankedMatchesPlayed = 0,
-                SeasonalRankedMatchDisconnects = 0,
-                CasualSeasonalRankedMatchesPlayed = 0,
-                CasualSeasonalRankedMatchDisconnects = 0,
-                Experience = "666"
-            }
-        ];
-
-        return dataPoints;
+        // The Login Response Carries A Single Data Point For The Authenticating Account
+        return [ DataPoint.FromAccount(account, aggregates, statisticsByType) ];
     }
 
     private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)

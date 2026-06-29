@@ -225,9 +225,13 @@ public partial class ClientRequesterController
         int chatServerClientConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT")
             ?? throw new NullReferenceException("Chat Server Client Connections Port Is NULL"));
 
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID).ToDictionaryAsync(statistics => statistics.Type);
+
         SRPAuthenticationHandlers.StageTwoResponseParameters parameters = new ()
         {
             Account = account,
+            Statistics = statisticsByType,
             ClanRoster = account.Clan?.Members ?? [],
             ServerProof = serverProof,
             ClientIPAddress = remoteIPAddress,

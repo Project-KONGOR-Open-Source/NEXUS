@@ -1,40 +1,54 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
+namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
-public class SeasonStatistics : ISynchronousCommandProcessor<ClientChatSession>
+public class SeasonStatistics(MerrickContext merrick) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         SeasonStatisticsRequestData requestData = new (buffer);
+
+        List<AccountStatistics> statistics = await merrick.AccountStatistics
+            .Where(accountStatistics => accountStatistics.AccountID == session.Account.ID).ToListAsync();
+
+        AccountStatistics? rankedNormalStatistics = statistics.SingleOrDefault(accountStatistics => accountStatistics.Type == AccountStatisticsType.Matchmaking);
+        AccountStatistics? rankedCasualStatistics = statistics.SingleOrDefault(accountStatistics => accountStatistics.Type == AccountStatisticsType.MatchmakingCasual);
 
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
-        response.WriteFloat32(1850.55f); // TMM Rating
-        response.WriteInt32(15);         // TMM Rank
-        response.WriteInt32(6661);       // TMM Wins
-        response.WriteInt32(123);        // TMM Losses
-        response.WriteInt32(6662);       // Ranked Win Streak
-        response.WriteInt32(6663);       // Ranked Matches Played
-        response.WriteInt32(5);          // Placement Matches Played
-        response.WriteString("11011");   // Placement Status
-        response.WriteFloat32(1950.55f); // Casual TMM Rating
-        response.WriteInt32(10);         // Casual TMM Rank
-        response.WriteInt32(4441);       // Casual TMM Wins
-        response.WriteInt32(321);        // Casual TMM Losses
-        response.WriteInt32(4442);       // Casual Ranked Win Streak
-        response.WriteInt32(4443);       // Casual Ranked Matches Played
-        response.WriteInt32(6);          // Casual Placement Matches Played
-        response.WriteString("010101");  // Casual Placement Status
-        response.WriteInt8(1);           // Eligible For TMM
-        response.WriteInt8(1);           // Season End
 
-        // TODO: Send Actual Season Statistics
+        WriteQueueStatistics(response, rankedNormalStatistics);
+        WriteQueueStatistics(response, rankedCasualStatistics);
+
+        response.WriteInt8(1); // Eligible For TMM
+        response.WriteInt8(1); // Season End
 
         session.Send(response);
 
         // Also Respond With NET_CHAT_CL_TMM_POPULARITY_UPDATE Since The Client Will Not Explicitly Request It
         PopularityUpdate.SendMatchmakingPopularity(session);
+    }
+
+    /// <summary>
+    ///     Writes a single matchmaking queue's season statistics to the response.
+    ///     While the queue's placement phase is incomplete the rank level is written as zero, which the client uses to display the placement match results instead of a rank medal.
+    /// </summary>
+    private static void WriteQueueStatistics(ChatBuffer response, AccountStatistics? statistics)
+    {
+        double rating = statistics?.SkillRating ?? 1500.0;
+        string placementMatchesData = statistics?.PlacementMatchesData ?? string.Empty;
+        bool isInPlacementPhase = statistics?.IsInPlacementPhase ?? false;
+
+        int rankLevel = isInPlacementPhase ? 0 : RankExtensions.CalculateCampaignLevel(rating);
+
+        response.WriteFloat32((float) rating);                // TMM Rating
+        response.WriteInt32(rankLevel);                       // TMM Rank
+        response.WriteInt32(statistics?.MatchesWon ?? 0);     // TMM Wins
+        response.WriteInt32(statistics?.MatchesLost ?? 0);    // TMM Losses
+        response.WriteInt32(0);                               // Ranked Win Streak // TODO: Implement Win Streak Tracking
+        response.WriteInt32(statistics?.MatchesPlayed ?? 0);  // Ranked Matches Played
+        response.WriteInt32(placementMatchesData.Length);     // Placement Matches Played
+        response.WriteString(placementMatchesData);           // Placement Status
     }
 }
 
