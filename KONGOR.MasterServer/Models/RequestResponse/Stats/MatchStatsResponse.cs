@@ -805,15 +805,6 @@ public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipant
 
 public class MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience, int bonusExperience)
 {
-    // TODO: Set Missing Properties Once Database Entities Are Available
-
-    //public class MatchMastery(MasteryRewards rewards)
-    //{
-    //    MasteryExperienceMaximumLevelHeroesCount = rewards.MasteryMaxLevelHeroesCount;
-    //    MasteryExperienceBoostProductCount = rewards.MasteryBoostsOwned;
-    //    MasteryExperienceSuperBoostProductCount = rewards.MasterySuperBoostsOwned;
-    //}
-
     /// <summary>
     ///     The identifier of the hero, in the format Hero_{Snake_Case_Name} (e.g. "Hero_Armadon").
     /// </summary>
