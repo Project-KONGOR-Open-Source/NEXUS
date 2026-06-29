@@ -45,15 +45,11 @@ public class AdministrationController(MerrickContext databaseContext, ILogger<Ad
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> BroadcastSystemMessage([FromBody] BroadcastSystemMessageDTO payload)
     {
-        // These Limits Mirror The Maximum Lengths Of The Corresponding Columns On The "Message" Entity.
-        const int messageSubjectMaximumLength = 100;
-        const int messageSubtitleMaximumLength = 80;
-        const int messageBodyTitleMaximumLength = 100;
-        const int messageBodyMaximumLength = 2000;
-        const int messageFooterMaximumLength = 80;
-
-        // Messages Are Inserted In Batches So That A Broadcast To Many Accounts Does Not Build One Enormous Transaction Or Change-Tracker Graph.
-        const int messageBroadcastBatchSize = 1000;
+        int messageSubjectMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Subject));
+        int messageSubtitleMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Subtitle));
+        int messageBodyTitleMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.BodyTitle));
+        int messageBodyMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Body));
+        int messageFooterMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Footer));
 
         if (string.IsNullOrWhiteSpace(payload.Subject) || payload.Subject.Length > messageSubjectMaximumLength)
             return BadRequest($@"The Subject Is Required And Must Not Exceed {messageSubjectMaximumLength} Characters");
@@ -71,6 +67,9 @@ public class AdministrationController(MerrickContext databaseContext, ILogger<Ad
             return BadRequest($@"The Footer Must Not Exceed {messageFooterMaximumLength} Characters");
 
         List<int> accountIDs = await MerrickContext.Accounts.Select(account => account.ID).ToListAsync();
+
+        // Messages Are Inserted In Batches So That A Broadcast To Many Accounts Does Not Build One Enormous Transaction Or Change-Tracker Graph.
+        const int messageBroadcastBatchSize = 1000;
 
         for (int index = 0; index < accountIDs.Count; index += messageBroadcastBatchSize)
         {

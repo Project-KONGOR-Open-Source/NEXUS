@@ -22,9 +22,8 @@ public class ClanController(MerrickContext databaseContext, ILogger<ClanControll
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SetClanDetails([FromBody] SetClanDetailsDTO payload)
     {
-        // These Limits Mirror The Maximum Lengths Of The Corresponding Columns On The "Clan" Entity
-        const int clanTitleMaximumLength = 250;
-        const int clanLogoMaximumLength = 50;
+        int clanTitleMaximumLength = typeof(Clan).GetMaximumLength(nameof(Clan.Title));
+        int clanLogoMaximumLength = typeof(Clan).GetMaximumLength(nameof(Clan.Logo));
 
         if (payload.Title.Length > clanTitleMaximumLength)
             return BadRequest($@"The Clan Title Must Not Exceed {clanTitleMaximumLength} Characters");
