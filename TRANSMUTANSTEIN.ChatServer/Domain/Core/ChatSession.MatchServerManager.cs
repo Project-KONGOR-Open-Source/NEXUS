@@ -92,6 +92,18 @@ public class MatchServerManagerChatSession(ConnectionContext connection, IServic
     }
 
     /// <summary>
+    ///     Sends multiple remote commands to the server manager.
+    /// </summary>
+    /// <param name="commands">The commands to execute.</param>
+    public MatchServerManagerChatSession SendRemoteCommands(IEnumerable<string> commands)
+    {
+        foreach (string command in commands)
+            SendRemoteCommand(command);
+
+        return this;
+    }
+
+    /// <summary>
     ///     Requests that the server manager begin a graceful shutdown of itself and the match servers it manages.
     /// </summary>
     public MatchServerManagerChatSession ScheduleShutdown()
