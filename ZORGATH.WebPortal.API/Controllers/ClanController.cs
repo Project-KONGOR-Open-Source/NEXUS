@@ -7,12 +7,8 @@ namespace ZORGATH.WebPortal.API.Controllers;
 public class ClanController(MerrickContext databaseContext, ILogger<ClanController> logger) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
-    private ILogger Logger { get; } = logger;
 
-    // These Limits Mirror The Maximum Lengths Of The Corresponding Columns On The "Clan" And "Account" Entities.
-    private const int ClanTitleMaximumLength = 250;
-    private const int ClanLogoMaximumLength = 64;
-    private const int ClanMessageMaximumLength = 255;
+    private ILogger Logger { get; } = logger;
 
     /// <summary>
     ///     Updates the title and logo of the authenticated account's clan.
@@ -26,11 +22,15 @@ public class ClanController(MerrickContext databaseContext, ILogger<ClanControll
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SetClanDetails([FromBody] SetClanDetailsDTO payload)
     {
-        if (payload.Title.Length > ClanTitleMaximumLength)
-            return BadRequest($@"The Clan Title Must Not Exceed {ClanTitleMaximumLength} Characters");
+        // These Limits Mirror The Maximum Lengths Of The Corresponding Columns On The "Clan" Entity
+        const int clanTitleMaximumLength = 250;
+        const int clanLogoMaximumLength = 50;
 
-        if (payload.Logo.Length > ClanLogoMaximumLength)
-            return BadRequest($@"The Clan Logo Identifier Must Not Exceed {ClanLogoMaximumLength} Characters");
+        if (payload.Title.Length > clanTitleMaximumLength)
+            return BadRequest($@"The Clan Title Must Not Exceed {clanTitleMaximumLength} Characters");
+
+        if (payload.Logo.Length > clanLogoMaximumLength)
+            return BadRequest($@"The Clan Logo Identifier Must Not Exceed {clanLogoMaximumLength} Characters");
 
         Account? account = await ResolveCurrentAccount();
 
@@ -51,36 +51,6 @@ public class ClanController(MerrickContext databaseContext, ILogger<ClanControll
         Logger.LogInformation(@"Account ""{AccountName}"" Updated The Title And Logo Of Clan ""{ClanName}""", account.Name, account.Clan.Name);
 
         return Ok(new ClanDetailsDTO(account.Clan.Name, account.Clan.Tag, account.Clan.Title, account.Clan.Logo));
-    }
-
-    /// <summary>
-    ///     Updates the authenticated account's per-member clan message.
-    /// </summary>
-    [HttpPatch("Message", Name = "Set Clan Message")]
-    [Authorize(Policy = UserRoles.AllRoles)]
-    [ProducesResponseType(typeof(SetClanMessageDTO), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> SetClanMessage([FromBody] SetClanMessageDTO payload)
-    {
-        if (payload.Message.Length > ClanMessageMaximumLength)
-            return BadRequest($@"The Clan Message Must Not Exceed {ClanMessageMaximumLength} Characters");
-
-        Account? account = await ResolveCurrentAccount();
-
-        if (account is null)
-            return NotFound("The Authenticated Account Could Not Be Found");
-
-        if (account.Clan is null)
-            return BadRequest("The Authenticated Account Is Not A Member Of A Clan");
-
-        account.ClanMessage = payload.Message;
-
-        await MerrickContext.SaveChangesAsync();
-
-        Logger.LogInformation(@"Account ""{AccountName}"" Updated Its Clan Message", account.Name);
-
-        return Ok(new SetClanMessageDTO(account.ClanMessage));
     }
 
     /// <summary>
