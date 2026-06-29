@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Controllers.Message;
+namespace KONGOR.MasterServer.Controllers.Messaging;
 
 [ApiController]
 [Consumes("application/x-www-form-urlencoded")]
@@ -10,20 +10,6 @@ public class MessageController(MerrickContext databaseContext, IDatabase distrib
 
     private ILogger Logger { get; } = logger;
 
-    private const string PlaceholderMessageCRC = "welcome";
-
-    private const string PlaceholderMessageImage = "/ui/fe2/NewUI/Res/system_message/msg_type1.png";
-
-    private const string PlaceholderMessageSubject = "Welcome To Project KONGOR !";
-
-    private const string PlaceholderMessageSubtitle = "keeping the real Heroes Of Newerth alive since 2022";
-
-    private const string PlaceholderMessageBodyTitle = "Hello Newerthian" + ",";
-
-    private const string PlaceholderMessageBody = @"<p>Project KONGOR is a community-driven effort to keep the real Heroes Of Newerth alive.</p><p class=""link""><a href=""https://github.com/Project-KONGOR-Open-Source"">Visit The Project On GitHub</a></p>";
-
-    private const string PlaceholderMessageFooter = "[K]ONGOR";
-
     /// <summary>
     ///     Returns the manifest of the account's messages (subject, icon, and metadata, but not the body, which is fetched per-message by <see cref="MessageGet"/>).
     /// </summary>
@@ -33,25 +19,31 @@ public class MessageController(MerrickContext databaseContext, IDatabase distrib
         if (await ValidateMessageRequest(accountID) is { } error)
             return error;
 
-        List<MessageManifestEntry> messageManifest =
-        [
-            new MessageManifestEntry
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        List<Message> messages = await MerrickContext.Messages
+            .Where(message => message.AccountID == accountID && (message.TimestampExpires == null || message.TimestampExpires > now))
+            .OrderByDescending(message => message.TimestampSent)
+            .ToListAsync();
+
+        List<MessageManifestEntry> messageManifest = messages
+            .Select(message => new MessageManifestEntry
             (
-                subject: PlaceholderMessageSubject,
-                image: PlaceholderMessageImage,
-                read: false,
-                expiration: 0,
-                sent: CurrentUNIXTimestamp(),
-                crc: PlaceholderMessageCRC,
-                deletable: true
-            )
-        ];
+                subject: message.Subject,
+                image: message.Image,
+                read: message.Read,
+                expiration: ToUNIXTimestamp(message.TimestampExpires),
+                sent: ToUNIXTimestamp(message.TimestampSent),
+                crc: message.ID.ToString(),
+                deletable: message.Deletable
+            ))
+            .ToList();
 
         return Ok(PhpSerialization.Serialize(new MessageListResponse { MessageManifest = messageManifest }));
     }
 
     /// <summary>
-    ///     Returns a single message in full (including its body and metadata), identified by its CRC.
+    ///     Returns a single message in full (including its body and metadata), identified by its CRC, and marks it as read.
     /// </summary>
     [HttpPost("message/get/{accountID:int}/{crc}", Name = "Message Get")]
     public async Task<IActionResult> MessageGet(int accountID, string crc)
@@ -59,7 +51,9 @@ public class MessageController(MerrickContext databaseContext, IDatabase distrib
         if (await ValidateMessageRequest(accountID) is { } error)
             return error;
 
-        if (crc.Equals(PlaceholderMessageCRC).Equals(false))
+        Message? message = await ResolveMessage(accountID, crc);
+
+        if (message is null)
         {
             OrderedDictionary notFoundResponse = new ()
             {
@@ -70,34 +64,39 @@ public class MessageController(MerrickContext databaseContext, IDatabase distrib
             return Ok(PhpSerialization.Serialize(notFoundResponse));
         }
 
-        MessageDetail message = new
+        if (message.Read.Equals(false))
+        {
+            message.Read = true;
+
+            await MerrickContext.SaveChangesAsync();
+        }
+
+        MessageDetail messageDetail = new
         (
-            subject: PlaceholderMessageSubject,
-            body: PlaceholderMessageBody,
-            image: PlaceholderMessageImage,
-            read: false,
-            expiration: 0,
-            sent: CurrentUNIXTimestamp(),
-            crc: PlaceholderMessageCRC,
-            deletable: true,
+            subject: message.Subject,
+            body: message.Body,
+            image: message.Image,
+            read: message.Read,
+            expiration: ToUNIXTimestamp(message.TimestampExpires),
+            sent: ToUNIXTimestamp(message.TimestampSent),
+            crc: message.ID.ToString(),
+            deletable: message.Deletable,
 
             // The In-Game Message Panel Renders The "subtitle" (Under The Title), The "bodyTitle" (A Header Above The Body), The "body", And The "footer" From The Metadata
-            // The Body Is Also Provided At The Top Level For Contract Completeness, Even Though The Panel Reads It From The Metadata
-
             metadata: new Dictionary<string, string>
             {
-                ["subtitle"] = PlaceholderMessageSubtitle,
-                ["bodyTitle"] = PlaceholderMessageBodyTitle,
-                ["body"] = PlaceholderMessageBody,
-                ["footer"] = PlaceholderMessageFooter
+                ["subtitle"] = message.Subtitle,
+                ["bodyTitle"] = message.BodyTitle,
+                ["body"] = message.Body,
+                ["footer"] = message.Footer
             }
         );
 
-        return Ok(PhpSerialization.Serialize(new MessageGetResponse { Data = message }));
+        return Ok(PhpSerialization.Serialize(new MessageGetResponse { Data = messageDetail }));
     }
 
     /// <summary>
-    ///     Deletes a single message, identified by its CRC.
+    ///     Deletes a single message, identified by its CRC, when the account is permitted to delete it.
     /// </summary>
     [HttpPost("message/delete/{accountID:int}/{crc}", Name = "Message Delete")]
     public async Task<IActionResult> MessageDelete(int accountID, string crc)
@@ -105,10 +104,29 @@ public class MessageController(MerrickContext databaseContext, IDatabase distrib
         if (await ValidateMessageRequest(accountID) is { } error)
             return error;
 
-        bool deleted = crc.Equals(PlaceholderMessageCRC);
+        Message? message = await ResolveMessage(accountID, crc);
+
+        bool deleted = false;
+
+        if (message is not null && message.Deletable)
+        {
+            MerrickContext.Messages.Remove(message);
+
+            await MerrickContext.SaveChangesAsync();
+
+            deleted = true;
+        }
 
         return Ok(PhpSerialization.Serialize(new MessageDeleteResponse { Success = deleted }));
     }
+
+    /// <summary>
+    ///     Resolves the message identified by the client-supplied CRC (the message's identifier) for the given account.
+    /// </summary>
+    private async Task<Message?> ResolveMessage(int accountID, string crc)
+        => int.TryParse(crc, out int messageID)
+            ? await MerrickContext.Messages.SingleOrDefaultAsync(message => message.ID == messageID && message.AccountID == accountID)
+            : null;
 
     /// <summary>
     ///     Authenticates the session cookie and confirms it was issued to the account whose messages are being requested.
@@ -144,5 +162,6 @@ public class MessageController(MerrickContext databaseContext, IDatabase distrib
         return null;
     }
 
-    private static int CurrentUNIXTimestamp() => Convert.ToInt32(Math.Min(DateTimeOffset.UtcNow.ToUnixTimeSeconds(), int.MaxValue));
+    private static int ToUNIXTimestamp(DateTimeOffset? timestamp)
+        => timestamp is null ? 0 : Convert.ToInt32(Math.Min(timestamp.Value.ToUnixTimeSeconds(), int.MaxValue));
 }
