@@ -40,6 +40,7 @@ global using System.Net.Sockets;
 global using System.Runtime.CompilerServices;
 
 global using TRANSMUTANSTEIN.ChatServer.Configuration;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
