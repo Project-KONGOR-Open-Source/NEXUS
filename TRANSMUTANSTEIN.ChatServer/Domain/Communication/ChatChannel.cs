@@ -192,9 +192,7 @@ public class ChatChannel
         // Reject Join Request If Client Is Already In The Channel
         if (Members.ContainsKey(session.Account.Name))
         {
-            // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
-            // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
-
+            // Legacy Behaviour: No Error Message Is Sent To The Client (Silent Rejection), Matching The Authoritative "CChannel::CanJoin"
             return this;
         }
 
@@ -216,14 +214,18 @@ public class ChatChannel
         {
             if (session.Account.Clan is null || Name != session.Account.Clan.GetChatChannelName())
             {
-                // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
-                // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
-
+                // Legacy Behaviour: No Error Message Is Sent To The Client (Silent Rejection), Matching The Authoritative "CChannel::CanJoin"
                 return this;
             }
         }
 
-        // TODO: Reject Join Request If The Channel Has The CHAT_CHANNEL_FLAG_UNJOINABLE Flag
+        // Reject Manual Join Requests For Channels Flagged As Unjoinable, Such As Matchmaking Group Channels
+        // Internal Joins Bypass This Path By Adding Members Directly, Mirroring The Forced-Join Behaviour Of The Authoritative "CChannel::CanJoin"
+        if (Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_UNJOINABLE))
+        {
+            // Legacy Behaviour: No Error Message Is Sent To The Client (Silent Rejection)
+            return this;
+        }
 
         // TODO: Reject Join Request As Non-Administrator If Channel Is Full
 
@@ -253,8 +255,7 @@ public class ChatChannel
                 // If Wrong Password Was Provided, Reject Join Request
                 if (Password is not null && Password.Equals(providedPassword, StringComparison.Ordinal) is false)
                 {
-                    // TODO: Send Error Response To Client Indicating Incorrect Password (Requires Direct User Messaging Implementation)
-
+                    // Legacy Behaviour: No Error Message Is Sent To The Client (Silent Rejection), Matching The Authoritative "CChannel::CanJoin"; The Client Re-Prompts For The Password
                     return this;
                 }
             }
