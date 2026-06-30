@@ -626,7 +626,7 @@ public class MatchmakingService : BackgroundService, IDisposable
             ServerName = server.Name,
             HostAccountName = server.HostAccountName,
             Map = match.SelectedMap,
-            Version = "4.10.1.0", // TODO: Get Actual Client Version From Group Information
+            Version = match.GetAllGroups().Select(group => group.Information.ClientVersion).Distinct().Single(),
             IsCasual = isCasual,
             MatchType = matchType,
             MatchMode = matchMode,
