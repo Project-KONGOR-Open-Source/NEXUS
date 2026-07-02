@@ -1,4 +1,4 @@
-name: "Unit/Integration Tests"
+name: "Run Unit/Integration Tests"
 
 on:
 
