@@ -19,10 +19,10 @@ jobs:
     steps: # latest action versions can be inspected at https://github.com/actions
 
     - name: "Check Out Branch"
-      uses: "actions/checkout@v4"
+      uses: "actions/checkout@v7"
 
     - name: "Install .NET 10"
-      uses: "actions/setup-dotnet@v4"
+      uses: "actions/setup-dotnet@v5"
       with:
         dotnet-version: "10.x"
 
@@ -40,7 +40,7 @@ jobs:
 
     - name: "Publish Test Results"
       if: always()
-      uses: "actions/upload-artifact@v4"
+      uses: "actions/upload-artifact@v7"
       with:
         name: "Published Test Results"
         path: "test-results"
