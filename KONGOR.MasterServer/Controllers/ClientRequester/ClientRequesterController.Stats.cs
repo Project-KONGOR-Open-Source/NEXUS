@@ -745,46 +745,70 @@ public partial class ClientRequesterController
             };
         }
 
-        MatchParticipantStatistics requestingPlayerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
+        MatchParticipantStatistics? requestingPlayerStatistics = allPlayerStatistics.SingleOrDefault(statistics => statistics.AccountID == account.ID);
 
-        // The Mastery Row Is Created During Statistics Submission; A Transient All-Zero Row Is Used As A Fallback So That Reads Never Write To The Database
-        Mastery mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID)
-            ?? new Mastery { Account = account };
+        MatchMastery matchMastery;
 
-        AccountStatisticsType masteryStatisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
-
-        int heroMatchExperience = mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
-        int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType, Heroes.TotalHeroCount);
-        int heroCurrentExperience = mastery.GetHeroExperienceByHeroIdentifier(requestingPlayerStatistics.HeroIdentifier);
-
-        // A Mastery Boost May Only Be Applied To The Account's Most Recent Match, Before Another Game Is Started
-        // The Boost Is Therefore Disabled When An Older Match Is Viewed In The Match History
-        // Match IDs Are Not Chronological, So The Most Recent Match Is Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
-        int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
-            .Where(statistics => statistics.AccountID == account.ID)
-            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
-            .OrderByDescending(match => match.TimestampRecorded)
-            .Select(match => match.MatchID)
-            .FirstAsync();
-
-        bool isMostRecentMatch = matchStatistics.MatchID == mostRecentMatchID;
-
-        bool masteryCanBoost = isMostRecentMatch && heroMatchExperience > 0 && Mastery.GetLevelFromExperience(heroCurrentExperience) < Mastery.MaximumMasteryLevel;
-
-        // The Match And Bonus Experience Are Accrued During Statistics Submission, So The Current Persisted Value Is The Post-Match Total
-        // The Client Animates The Bar Up To "mastery_exp_original" And Derives The Pre-Match Value Itself By Subtracting The Match And Bonus Experience, So The Current Total Is Sent Here
-        MatchMastery matchMastery = new (requestingPlayerStatistics.HeroIdentifier, heroCurrentExperience, heroMatchExperience, heroBonusExperience)
+        // Spectators And Players Viewing Somebody Else's Match From The Match History Are Not Match Participants
+        // The Client Only Reads The Mastery Block Against The Requesting Player's Own Row, So An Empty Block Is Sent For Them
+        if (requestingPlayerStatistics is null)
         {
-            MasteryExperienceMaximumLevelHeroesCount = mastery.HeroesAtMaximumMasteryCount(),
-            MasteryExperienceBoostProductCount = MasteryConsumables.MasteryBoostsOwned(account.User),
-            MasteryExperienceSuperBoostProductCount = MasteryConsumables.SuperMasteryBoostsOwned(account.User),
-            MasteryExperienceCanBoost = masteryCanBoost,
-            MasteryExperienceCanSuperBoost = masteryCanBoost
-        };
+            matchMastery = new MatchMastery(string.Empty, 0, 0, 0)
+            {
+                MasteryExperienceMaximumLevelHeroesCount = 0,
+                MasteryExperienceBoostProductCount = 0,
+                MasteryExperienceSuperBoostProductCount = 0,
+                MasteryExperienceCanBoost = false,
+                MasteryExperienceCanSuperBoost = false
+            };
+        }
 
-        // Cache The Post-Match Boost Context So A Subsequent Boost Purchase Is Applied From This Server-Computed Value Rather Than Trusting Client-Supplied Data
-        if (masteryCanBoost)
-            await DistributedCache.SetMasteryBoostContext(Request.Form["cookie"].ToString(), new MasteryBoostContext(requestingPlayerStatistics.HeroIdentifier, matchMastery.MasteryExperienceToBoost));
+        else
+        {
+            // The Mastery Row Is Created During Statistics Submission; A Transient All-Zero Row Is Used As A Fallback So That Reads Never Write To The Database
+            Mastery mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID)
+                ?? new Mastery { Account = account };
+
+            AccountStatisticsType masteryStatisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
+
+            int heroMatchExperience = mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
+            int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType, Heroes.TotalHeroCount);
+            int heroCurrentExperience = mastery.GetHeroExperienceByHeroIdentifier(requestingPlayerStatistics.HeroIdentifier);
+
+            MasteryBoostContext? masteryBoostContext = await DistributedCache.GetMasteryBoostContext(account.ID, matchStatistics.MatchID);
+
+            // The Match, Bonus, And Boost Experience Are Accrued Into The Persisted Total During Statistics Submission And Boost Application
+            // The Client Treats "mastery_exp_original" As The Pre-Match Starting Value And Adds The Match, Bonus, And Boost Experience On Top Of It, So The Accrued Amounts Are Subtracted Back Out Here
+            int preMatchExperience = Math.Max(0, heroCurrentExperience - heroMatchExperience - heroBonusExperience - (masteryBoostContext?.Experience ?? 0));
+
+            // A Mastery Boost May Only Be Applied Once, Only To The Account's Most Recent Match Before Another Game Is Started, And Only Within The Boost Application Window
+            // The Boost Is Therefore Disabled When An Older Match Is Viewed In The Match History
+            // Match IDs Are Not Chronological, So The Most Recent Match Is Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
+            int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
+                .Where(statistics => statistics.AccountID == account.ID)
+                .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
+                .OrderByDescending(match => match.TimestampRecorded)
+                .Select(match => match.MatchID)
+                .FirstAsync();
+
+            bool isMostRecentMatch = matchStatistics.MatchID == mostRecentMatchID;
+
+            bool masteryCanBoost = isMostRecentMatch && heroMatchExperience > 0 && masteryBoostContext is null
+                && matchStatistics.TimestampRecorded >= DateTimeOffset.UtcNow - MasteryBoost.ApplicationWindow
+                && Mastery.GetLevelFromExperience(heroCurrentExperience) < Mastery.MaximumMasteryLevel;
+
+            // The Applied Experience Is Reported In The Response Field Matching The Boost Type, Mirroring The Original API Contract
+            matchMastery = new MatchMastery(requestingPlayerStatistics.HeroIdentifier, preMatchExperience, heroMatchExperience, heroBonusExperience)
+            {
+                MasteryExperienceBoost = masteryBoostContext is { IsSuperBoost: false } ? masteryBoostContext.Experience : 0,
+                MasteryExperienceSuperBoost = masteryBoostContext is { IsSuperBoost: true } ? masteryBoostContext.Experience : 0,
+                MasteryExperienceMaximumLevelHeroesCount = mastery.HeroesAtMaximumMasteryCount(),
+                MasteryExperienceBoostProductCount = MasteryConsumables.MasteryBoostsOwned(account.User),
+                MasteryExperienceSuperBoostProductCount = MasteryConsumables.SuperMasteryBoostsOwned(account.User),
+                MasteryExperienceCanBoost = masteryCanBoost,
+                MasteryExperienceCanSuperBoost = masteryCanBoost
+            };
+        }
 
         MatchStatsResponse response = new ()
         {

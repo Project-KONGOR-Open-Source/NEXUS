@@ -35,17 +35,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN";
             string cookie = string.IsNullOrEmpty(Request.Form["cookie"].ToString()) ? "EMPTY" : Request.Form["cookie"].ToString();
 
-            string requestContext = JsonSerializer.Serialize(new
-            {
-                Function = Request.Query["f"].SingleOrDefault() ?? Request.Form["f"].SingleOrDefault() ?? "NULL",
-                Query = Request.Query.ToDictionary(entry => entry.Key, entry => entry.Value.ToString()),
-                Form = Request.Form.ToDictionary(entry => entry.Key, entry => entry.Value.ToString()),
-                RemoteEndpoint = $"{remoteIPAddress}:{Request.HttpContext.Connection.RemotePort}",
-                UserAgent = Request.Headers.UserAgent.ToString()
-            });
-
+            // The Forged Cookie Is Logged In Full On Purpose, Because An Invalid Cookie Is Not A Secret And Is Evidence Of Abuse
             Logger.LogWarning(@"IP Address ""{IPAddress}"" Has Made A Client Request With Forged Cookie ""{Cookie}""" + Environment.NewLine + @"Request Context: {RequestContext}",
-                remoteIPAddress, cookie, requestContext);
+                remoteIPAddress, cookie, SerialiseRequestContext());
 
             return Unauthorized($@"Unrecognised Cookie ""{Request.Form["cookie"]}""");
         }
@@ -53,8 +45,44 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         if (endpointRequiresCookieValidation.Equals(false) && accountSessionCookieIsValid.Equals(true))
             Logger.LogError("[BUG] Endpoint Does Not Require Cookie Validation But A Valid Cookie Was Found");
 
-        return await HandleClientRequest();
+        IActionResult result = await HandleClientRequest();
+
+        // Failed Requests Are Otherwise Only Visible In The Logs As Anonymous Non-Success Status Codes, So The Requested Function, The Response Body, And The Request Context Are Logged Here To Make Failures Attributable And Diagnosable
+        if (result is IStatusCodeActionResult { StatusCode: >= StatusCodes.Status400BadRequest } failedResult)
+        {
+            object responseBody = result is ObjectResult objectResult ? objectResult.Value ?? "NULL" : "NULL";
+
+            Logger.LogWarning(@"Client Requester Function ""{Function}"" Responded With Status Code {StatusCode} And Response Body ""{ResponseBody}""" + Environment.NewLine + @"Request Context: {RequestContext}",
+                Request.Query["f"].SingleOrDefault() ?? Request.Form["f"].SingleOrDefault() ?? "NULL", failedResult.StatusCode, responseBody, SerialiseRequestContext());
+        }
+
+        return result;
     }
+
+    /// <summary>
+    ///     Serialises the context of the current request (function, query string, form data, remote endpoint, and user agent) for diagnostic logging.
+    ///     The values of credential-bearing parameters are masked, because the logged request may carry a valid session cookie or a live SRP exchange, either of which could otherwise be replayed by anybody with access to the logs.
+    /// </summary>
+    private string SerialiseRequestContext()
+    {
+        string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN";
+
+        return JsonSerializer.Serialize(new
+        {
+            Function = Request.Query["f"].SingleOrDefault() ?? Request.Form["f"].SingleOrDefault() ?? "NULL",
+            Query = Request.Query.ToDictionary(entry => entry.Key, entry => MaskCredentialBearingParameterValue(entry.Key, entry.Value.ToString())),
+            Form = Request.Form.ToDictionary(entry => entry.Key, entry => MaskCredentialBearingParameterValue(entry.Key, entry.Value.ToString())),
+            RemoteEndpoint = $"{remoteIPAddress}:{Request.HttpContext.Connection.RemotePort}",
+            UserAgent = Request.Headers.UserAgent.ToString()
+        });
+    }
+
+    /// <summary>
+    ///     Masks the value of a request parameter if it carries credential material: the session cookie, or the SRP exchange parameters "A" and "proof".
+    ///     Empty values are preserved, so that a missing credential remains distinguishable from a masked one.
+    /// </summary>
+    private static string MaskCredentialBearingParameterValue(string parameterName, string parameterValue)
+        => parameterName is ("cookie" or "A" or "proof") && parameterValue.Length > 0 ? "REDACTED" : parameterValue;
 
     private async Task<IActionResult> HandleClientRequest()
     {
