@@ -29,7 +29,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt"/>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols*.txt"/>
     </ItemGroup>
 
 </Project>
