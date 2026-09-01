@@ -21,10 +21,11 @@ jobs:
     - name: "Check Out Branch"
       uses: "actions/checkout@v7"
 
-    - name: "Install .NET 10"
-      uses: "actions/setup-dotnet@v5"
+    - name: "Install .NET 11"
+      uses: "actions/setup-dotnet@v6"
       with:
-        dotnet-version: "10.x"
+        dotnet-version: "11.x"
+        dotnet-quality: "preview"
 
     - name: "Print .NET Version"
       run: "dotnet --version"
