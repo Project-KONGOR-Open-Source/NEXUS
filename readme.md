@@ -94,6 +94,12 @@ dotnet tool update --all --global
 
 <h3 align="center">Comprehensive Instructions For Developers</h3>
 
+> [!IMPORTANT]
+> The guides below invoke the Aspire CLI as `aspire`, which requires the tool to be installed globally. Both installations use the same tool package, but they differ in the way the command is exposed. A global installation generates an executable which is named after the command declared by the tool package, and places it in a directory which is on the `PATH`, so `aspire` resolves on its own and from any directory. A local installation generates no executable, and the tool is instead dispatched by the .NET CLI through the tool manifest, so the command resolves only as `dotnet aspire`, and only in the context of the solution directory.
+
+> [!NOTE]
+> The Entity Framework Core CLI is not affected by this distinction, because the command which it declares is already named `dotnet-ef`, which the .NET CLI resolves in both cases.
+
 Run In Development ...
 
 ```powershell
