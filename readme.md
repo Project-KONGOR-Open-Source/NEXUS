@@ -52,11 +52,43 @@
 > [!IMPORTANT]
 > While these tools are not required, most or all guides and code snippets will prefer using them over other methods.
 
-These tools are defined as dependencies in the `.config/dotnet-tools.json` file. In order to restore them, execute `dotnet tool restore` in the context of the solution directory.
+These tools are defined as dependencies in the `.config/dotnet-tools.json` manifest file, which makes them local tools. Local tools are scoped to the solution, and the manifest file pins an exact version for each tool, so that every development machine and every continuous integration run executes the same tool versions. In order to restore them, execute `dotnet tool restore` in the context of the solution directory.
 
-To update the tools locally, execute `dotnet tool update --local {name}` for each tool, where `{name}` is the tool name, or just `dotnet tool update --all --local`.
+```powershell
+# In The Context Of The Solution Directory
+dotnet tool restore
+```
 
-Optionally, but recommended on development machines, also install these tools globally with `dotnet tool install --global {name}` and keep them updated with `dotnet tool update --global {name}`, where `{name}` is the tool name, , or just `dotnet tool update --all --global`.
+Restored local tools are invoked through the .NET CLI, by executing `dotnet {command}`, where `{command}` is the command name declared in the manifest file. The complete list of restored tools and of the commands they provide is available by executing `dotnet tool list --local`.
+
+> [!NOTE]
+> The `commands` array of each entry in the manifest file needs to match the command names which the tool package actually provides. If it does not, then the restore operation still reports success, but the command is unavailable; and if two entries declare the same command name, then the entry which comes first in the manifest file shadows the other.
+
+To update the tools locally, execute `dotnet tool update --local {name}` for each tool, where `{name}` is the tool name, or just `dotnet tool update --all --local`. Updating a local tool rewrites the manifest file, which is tracked by source control, so the resulting change needs to be reviewed and committed like any other change.
+
+```powershell
+# Update A Single Tool, Where {name} Is The Tool Name
+dotnet tool update --local {name}
+
+# Update Every Tool
+dotnet tool update --all --local
+```
+
+Optionally, but recommended on development machines, also install these tools globally with `dotnet tool install --global {name}` and keep them updated with `dotnet tool update --global {name}`, where `{name}` is the tool name, or just `dotnet tool update --all --global`. Global tools are invoked directly, without the `dotnet` prefix, and from any directory.
+
+```powershell
+# Install A Single Tool, Where {name} Is The Tool Name
+dotnet tool install --global {name}
+
+# Update A Single Tool, Where {name} Is The Tool Name
+dotnet tool update --global {name}
+
+# Update Every Tool
+dotnet tool update --all --global
+```
+
+> [!NOTE]
+> Global tools are scoped to the current user rather than to the solution, and they are not backed by a manifest file. There is consequently no global equivalent of the `dotnet tool restore` command, and no option to install every tool at once, so each global tool needs to be installed explicitly. The complete list of installed global tools is available by executing `dotnet tool list --global`.
 
 <hr/>
 
