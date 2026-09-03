@@ -27,14 +27,21 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     public static ConcurrentDictionary<Guid, MatchmakingMatch> ActiveMatches { get; set; } = [];
 
-    public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
+    public static MatchmakingGroup? GetMatchmakingGroup(MatchmakingGroupMemberIdentifier memberIdentifier)
     {
-        MatchmakingGroup? group = memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id), name => GetMatchmakingGroupByMemberName(name));
+        MatchmakingGroup? group = memberIdentifier switch
+        {
+            int memberID      => GetMatchmakingGroupByMemberID(memberID),
+            string memberName => GetMatchmakingGroupByMemberName(memberName)
+        };
 
         if (group is null)
         {
-            string identifierType = memberIdentifier.IsT0 ? "ID" : "Name";
-            string identifierValue = memberIdentifier.IsT0 ? memberIdentifier.AsT0.ToString() : memberIdentifier.AsT1;
+            (string identifierType, string identifierValue) = memberIdentifier switch
+            {
+                int memberID      => ("ID", memberID.ToString()),
+                string memberName => ("Name", memberName)
+            };
 
             Log.Debug(@"No Matchmaking Group Found For Member {IdentifierType} ""{IdentifierValue}""", identifierType, identifierValue);
         }
@@ -764,3 +771,8 @@ public class MatchmakingService : BackgroundService, IDisposable
             member.Session.Send(found);
     }
 }
+
+/// <summary>
+///     Identifies a matchmaking group member by either their account ID or their account name.
+/// </summary>
+public union MatchmakingGroupMemberIdentifier(int, string);

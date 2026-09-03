@@ -891,7 +891,7 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     ///     Detailed information about owned store items, including expiration and discount coupons.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; } = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
+    public Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; init; } = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
     # endregion
 

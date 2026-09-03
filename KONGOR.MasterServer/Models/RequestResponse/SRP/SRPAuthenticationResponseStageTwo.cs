@@ -362,7 +362,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     The account's clan membership data if the account is part of a clan, or an error message if the account is not part of a clan.
     /// </summary>
     [PHPProperty("clan_member_info", isDiscriminatedUnion: true)]
-    public required OneOf<ClanMemberData, ClanMemberDataError> ClanMembershipData { get; set; }
+    public required ClanMemberInformation ClanMembershipData { get; set; }
 
     /// <summary>
     ///     The collection of owned store items.
@@ -403,7 +403,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     Metadata attached to each of the account's owned store items.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; set; }
 
     /// <summary>
     ///     The list of heroes with a non-standard-ownership (free/early-access/etc.) model.
@@ -700,6 +700,11 @@ public class ClanMemberDataError
     public string Error { get; set; } = "No Clan Member Found";
 }
 
+/// <summary>
+///     The account's clan member data if the account is part of a clan, or an error if the account is not part of a clan.
+/// </summary>
+public union ClanMemberInformation(ClanMemberData, ClanMemberDataError);
+
 public class StoreItemData
 {
     /// <summary>
@@ -743,6 +748,11 @@ public class StoreItemData
     [PHPProperty("score")]
     public string Score { get; set; } = "0";
 }
+
+/// <summary>
+///     The metadata attached to an owned store item, which is either standard store item data or a discount coupon.
+/// </summary>
+public union OwnedStoreItemData(StoreItemData, StoreItemDiscountCoupon);
 
 public class HeroList
 {

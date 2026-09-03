@@ -142,9 +142,9 @@ public static class StatisticsResponseHelper
     ///     Mastery boost consumables are excluded, as their counts are surfaced via the match mastery response instead.
     ///     Owned mastery coupons are surfaced as discount coupon data so the client can offer their discount in the store.
     /// </summary>
-    public static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> GetOwnedStoreItemsData(Account account)
+    public static Dictionary<string, OwnedStoreItemData> GetOwnedStoreItemsData(Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = [];
+        Dictionary<string, OwnedStoreItemData> items = [];
 
         foreach (string ownedItem in account.User.OwnedStoreItems)
         {

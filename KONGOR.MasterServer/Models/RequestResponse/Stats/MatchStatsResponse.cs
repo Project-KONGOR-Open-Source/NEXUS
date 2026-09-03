@@ -27,7 +27,7 @@ public class MatchStatsResponse
     ///     The requesting player's entry will be a <see cref="MatchStatsResponse.MatchPlayerStatisticsWithMatchPerformanceData"/> with additional match performance data.
     /// </summary>
     [PHPProperty("match_player_stats", isDiscriminatedUnion: true)]
-    public required Dictionary<int, Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>>> MatchPlayerStatistics { get; init; }
+    public required Dictionary<int, Dictionary<int, MatchPlayerStatisticsEntry>> MatchPlayerStatistics { get; init; }
 
     /// <summary>
     ///     A collection containing player inventories for the match.
@@ -114,7 +114,7 @@ public class MatchStatsResponse
     ///     Detailed information about owned store items including mastery boosts and discount coupons.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; init; }
 
     /// <summary>
     ///     The collection of selected store items.
@@ -1916,3 +1916,8 @@ public class CampaignReward
     [PHPProperty("percentage")]
     public string Percentage { get; init; } = "1.00";
 }
+
+/// <summary>
+///     The statistics of a player in a match, which additionally carry match performance data for the requesting player.
+/// </summary>
+public union MatchPlayerStatisticsEntry(MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics);

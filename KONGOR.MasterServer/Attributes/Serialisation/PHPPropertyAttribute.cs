@@ -14,10 +14,10 @@ public sealed class PHPPropertyAttribute : PhpSerializationFilter
     ///     The PHP property name or index (preserved as original type for correct serialization).
     /// </summary>
     /// <remarks>
-    ///     Stores either an integer index (T0) or a string name (T1).
+    ///     Stores either an integer index or a string name.
     ///     The type is preserved to ensure correct PHP serialization format (i:0 vs s:1:"0").
     /// </remarks>
-    public OneOf<int, string> PropertyKey { get; }
+    public PHPPropertyKey PropertyKey { get; }
 
     /// <summary>
     ///     Whether or not the property annotated with this attribute is a discriminated union type that requires unwrapping before serialization.
@@ -57,7 +57,7 @@ public sealed class PHPPropertyAttribute : PhpSerializationFilter
     {
         // Use The Configured Property Name/Index Instead Of The Default Key
         // Unwrap The Discriminated Union To Get The Actual Integer Or String Value
-        object propertyKey = PropertyKey.Match<object>(intKey => intKey, stringKey => stringKey);
+        object propertyKey = PropertyKey.Value;
 
         if (value is null)
             return PhpSerialization.Serialize(propertyKey, options) + PhpSerialization.Serialize(null, options);
@@ -70,3 +70,8 @@ public sealed class PHPPropertyAttribute : PhpSerializationFilter
         return PhpSerialization.Serialize(propertyKey, options) + PhpSerialization.Serialize(processedValue, options);
     }
 }
+
+/// <summary>
+///     The PHP property key of a serialised property, which is either an integer index or a string name.
+/// </summary>
+public union PHPPropertyKey(int, string);

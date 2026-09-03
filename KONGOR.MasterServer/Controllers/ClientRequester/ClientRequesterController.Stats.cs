@@ -705,7 +705,7 @@ public partial class ClientRequesterController
 
         List<Account> allPlayerAccounts = [account, .. otherPlayerAccounts];
 
-        Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>> matchPlayerStatistics = [];
+        Dictionary<int, MatchPlayerStatisticsEntry> matchPlayerStatistics = [];
         Dictionary<int, MatchPlayerInventory> matchPlayerInventories = [];
 
         foreach (MatchParticipantStatistics playerStatistics in allPlayerStatistics)
@@ -815,7 +815,7 @@ public partial class ClientRequesterController
             GoldCoins = account.User.GoldCoins.ToString(),
             SilverCoins = account.User.SilverCoins.ToString(),
             MatchSummary = new Dictionary<int, MatchSummary> { { matchStatistics.MatchID, matchSummary } },
-            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>>> { { matchStatistics.MatchID, matchPlayerStatistics } },
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, MatchPlayerStatisticsEntry>> { { matchStatistics.MatchID, matchPlayerStatistics } },
             MatchPlayerInventories = new Dictionary<int, Dictionary<int, MatchPlayerInventory>> { { matchStatistics.MatchID, matchPlayerInventories } },
             MatchMastery = matchMastery,
             OwnedStoreItems = account.User.OwnedStoreItems,
@@ -928,9 +928,9 @@ public partial class ClientRequesterController
         => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
             ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
 
-    private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
+    private static Dictionary<string, OwnedStoreItemData> SetOwnedStoreItemsData(Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
+        Dictionary<string, OwnedStoreItemData> items = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
         /*
             Dictionary<string, object> myUpgradesInfo = accountDetails.UnlockedUpgradeCodes

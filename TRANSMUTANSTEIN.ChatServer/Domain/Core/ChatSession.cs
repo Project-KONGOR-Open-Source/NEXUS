@@ -233,17 +233,16 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
                 {
                     ChatBuffer buffer = new (segment);
 
-                    await commandTypeInstance.Match
-                    (
-                        synchronousInstance =>
-                        {
-                            InvokeSynchronousProcessor(synchronousInstance, buffer);
+                    switch (commandTypeInstance)
+                    {
+                        case SynchronousCommandProcessorInstance synchronousProcessor:
+                            InvokeSynchronousProcessor(synchronousProcessor.Instance, buffer);
+                            break;
 
-                            return Task.CompletedTask;
-                        },
-
-                        asynchronousInstance => InvokeAsynchronousProcessor(asynchronousInstance, buffer)
-                    );
+                        case AsynchronousCommandProcessorInstance asynchronousProcessor:
+                            await InvokeAsynchronousProcessor(asynchronousProcessor.Instance, buffer);
+                            break;
+                    }
                 }
 
                 catch (Exception exception)
@@ -300,7 +299,7 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
         return type;
     }
 
-    private OneOf<object, object>? GetCommandTypeInstance(Type type)
+    private CommandProcessorInstance? GetCommandTypeInstance(Type type)
     {
         object instance = ActivatorUtilities.CreateInstance(ServiceProvider, type);
 
@@ -308,13 +307,13 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
             .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>));
 
         if (syncInterface is not null)
-            return OneOf<object, object>.FromT0(instance);
+            return new SynchronousCommandProcessorInstance(instance);
 
         Type? asyncInterface = type.GetInterfaces()
             .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IAsynchronousCommandProcessor<>));
 
         if (asyncInterface is not null)
-            return OneOf<object, object>.FromT1(instance);
+            return new AsynchronousCommandProcessorInstance(instance);
 
         Log.Error(@"[BUG] Command Type ""{TypeName}"" Does Not Implement A Supported Processor Interface", type.Name);
 
@@ -470,3 +469,18 @@ public class ChatSession(ConnectionContext connection, IServiceProvider serviceP
             ID, sessionDuration.TotalSeconds, lastProcessedCommand);
     }
 }
+
+/// <summary>
+///     A command processor instance which implements <see cref="ISynchronousCommandProcessor{TSession}"/>.
+/// </summary>
+public sealed record SynchronousCommandProcessorInstance(object Instance);
+
+/// <summary>
+///     A command processor instance which implements <see cref="IAsynchronousCommandProcessor{TSession}"/>.
+/// </summary>
+public sealed record AsynchronousCommandProcessorInstance(object Instance);
+
+/// <summary>
+///     A command processor instance, which is either synchronous or asynchronous.
+/// </summary>
+public union CommandProcessorInstance(SynchronousCommandProcessorInstance, AsynchronousCommandProcessorInstance);

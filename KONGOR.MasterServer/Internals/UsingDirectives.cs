@@ -57,8 +57,6 @@ global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.Options;
 global using Microsoft.OpenApi;
 
-global using OneOf;
-
 global using PhpSerializerNET;
 
 global using SecureRemotePassword;

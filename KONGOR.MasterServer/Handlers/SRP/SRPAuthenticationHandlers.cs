@@ -167,7 +167,7 @@ public static class SRPAuthenticationHandlers
                     Name = member.Name, Rank = member.ClanTierName, Message = member.Clan?.GetDefaultWelcomeMessage() ?? string.Empty, Standing = Convert.ToInt32(member.Type).ToString() }))
             .ToDictionary();
 
-    private static OneOf<ClanMemberData, ClanMemberDataError> SetClanMembershipData(Account account)
+    private static ClanMemberInformation SetClanMembershipData(Account account)
         => account.Clan is null ? new ClanMemberDataError() : new ClanMemberData
         {
             ClanID = account.Clan?.ID.ToString() ?? string.Empty, ID = account.ID.ToString(), ClanName = account.Clan?.Name ?? string.Empty,
@@ -191,7 +191,7 @@ public static class SRPAuthenticationHandlers
         return [ DataPoint.FromAccount(account, aggregates, statisticsByType) ];
     }
 
-    private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
+    private static Dictionary<string, OwnedStoreItemData> SetOwnedStoreItemsData(Account account)
         => StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
     private static AwardsTooltips SetAwardsTooltips() => new ();

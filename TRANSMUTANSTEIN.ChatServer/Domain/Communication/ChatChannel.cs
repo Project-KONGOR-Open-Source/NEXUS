@@ -153,16 +153,16 @@ public class ChatChannel
         return channel;
     }
 
-    public static ChatChannel Get(ClientChatSession session, OneOf<string, int> channelIdentifier)
+    public static ChatChannel Get(ClientChatSession session, ChatChannelIdentifier channelIdentifier)
     {
-        ChatChannel channel = channelIdentifier.Match
-        (
-            channelName => Context.ChatChannels.Values
+        ChatChannel channel = channelIdentifier switch
+        {
+            string channelName => Context.ChatChannels.Values
                 .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.Account.Name)),
 
-            channelID => Context.ChatChannels.Values
+            int channelID      => Context.ChatChannels.Values
                 .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.Account.Name))
-        );
+        };
 
         return channel;
     }
@@ -861,3 +861,8 @@ public class ChatChannel
         requesterSession.Send(response);
     }
 }
+
+/// <summary>
+///     Identifies a chat channel by either its name or its ID.
+/// </summary>
+public union ChatChannelIdentifier(string, int);

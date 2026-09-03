@@ -24,7 +24,7 @@ public class GetUpgradesResponse
     ///     Detailed information about owned store items including mastery boosts and discount coupons.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; init; }
 
     /// <summary>
     ///     The collection of selected store items.

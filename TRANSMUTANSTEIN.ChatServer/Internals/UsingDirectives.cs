@@ -33,8 +33,6 @@ global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 global using Microsoft.Extensions.Options;
 
-global using OneOf;
-
 global using Serilog.Context;
 
 global using StackExchange.Redis;
