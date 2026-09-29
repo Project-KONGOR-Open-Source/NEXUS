@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer;
+namespace KONGOR.MasterServer;
 
 public class KONGOR
 {
@@ -68,6 +68,9 @@ public class KONGOR
 
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
+
+        // Register S3 MD5 Hash Cache For CDN File Serving
+        builder.Services.AddSingleton<S3MD5HashCache>();
 
         // Register The Hero Usage Statistics Service Which Aggregates Global Per-Hero Win/Loss Totals For The Hero Usage List
         builder.Services.AddScoped<HeroUsageStatisticsService>();
@@ -248,6 +251,16 @@ public class KONGOR
 
         // Map MVC Controllers With Rate Limiting
         application.MapControllers().RequireRateLimiting(RateLimiterPolicies.Relaxed);
+
+        // Map S3-Compatible CDN Endpoint When Local Directory Serving Is Enabled
+        OperationalConfiguration? operationalConfiguration = builder.Configuration
+            .GetSection(OperationalConfiguration.ConfigurationSection)
+            .Get<OperationalConfiguration>();
+
+        if (operationalConfiguration?.CDN is { ServeFromLocalDirectoryURL: not null, LocalDirectory: not null } cdnConfiguration)
+        {
+            S3CDNFileHandler.Map(application, cdnConfiguration, builder.Environment.ContentRootPath);
+        }
 
         // Run The Application
         application.Run();
