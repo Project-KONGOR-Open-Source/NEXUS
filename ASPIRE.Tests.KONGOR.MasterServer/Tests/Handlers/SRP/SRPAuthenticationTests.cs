@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
+namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Handlers.SRP;
 
 /// <summary>
 ///     Tests for SRP authentication in the KONGOR master server.
