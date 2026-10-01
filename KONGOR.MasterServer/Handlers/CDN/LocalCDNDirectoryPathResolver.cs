@@ -6,25 +6,21 @@ namespace KONGOR.MasterServer.Handlers.CDN;
 public static class LocalCDNDirectoryPathResolver
 {
     /// <summary>
-    ///     Resolves the configured local directory path against user profile tokens or the content root path.
+    ///    Resolves a local directory path for CDN file serving.
+    ///    The <c>{USER}</c> token is replaced with the user's home directory, and the <c>{TEMP}</c> token is replaced with the system's temporary directory.
+    ///    Relative paths are resolved against the application's base directory.
     /// </summary>
-    /// <param name="configuredPath">The directory path configured in application settings.</param>
-    /// <param name="contentRootPath">The application content root path used to resolve relative paths.</param>
-    /// <returns>The fully qualified directory path, or <see langword="null"/> if the configured path is null or whitespace.</returns>
-    public static string? Resolve(string? configuredPath, string contentRootPath)
+    /// <returns>
+    ///     The resolved local directory path.
+    /// </returns>
+    public static string Resolve(string path)
     {
-        if (string.IsNullOrWhiteSpace(configuredPath))
-            return null;
+        path = path.Trim()
+            .Replace("{USER}", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), StringComparison.OrdinalIgnoreCase)
+            .Replace("{TEMP}", Path.GetTempPath(), StringComparison.OrdinalIgnoreCase);
 
-        string path = configuredPath.Trim();
-
-        string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        path = path.Replace("Directory.User", userProfile, StringComparison.OrdinalIgnoreCase);
-        path = path.Replace("{UserProfile}", userProfile, StringComparison.OrdinalIgnoreCase);
-
-        if (Path.IsPathFullyQualified(path))
-            return Path.GetFullPath(path);
-
-        return Path.GetFullPath(Path.Combine(contentRootPath, path));
+        return Path.IsPathFullyQualified(path)
+            ? Path.GetFullPath(path)
+            : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, path));
     }
 }

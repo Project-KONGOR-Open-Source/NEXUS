@@ -26,12 +26,7 @@ public static class S3CDNFileHandler
             return;
         }
 
-        string? resolvedRootDirectory = LocalCDNDirectoryPathResolver.Resolve(configuration.LocalDirectory, contentRootPath);
-
-        if (resolvedRootDirectory is null)
-        {
-            return;
-        }
+        string resolvedRootDirectory = LocalCDNDirectoryPathResolver.Resolve(configuration.LocalDirectory);
 
         string routePrefix = "/" + configuration.ServeFromLocalDirectoryURL.Trim('/');
 
