@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Services.CDN;
+namespace KONGOR.MasterServer.Handlers.CDN;
 
 /// <summary>
 ///     Caches MD5 hashes for files served by the S3 CDN endpoint, keyed by path and validated by last write time and length.

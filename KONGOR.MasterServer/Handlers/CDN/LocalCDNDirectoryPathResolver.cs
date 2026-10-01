@@ -1,9 +1,9 @@
-namespace KONGOR.MasterServer.Services.CDN;
+namespace KONGOR.MasterServer.Handlers.CDN;
 
 /// <summary>
 ///     Resolves local directory paths for CDN file serving, expanding user profile tokens and relative paths.
 /// </summary>
-public static class LocalDirectoryPathResolver
+public static class LocalCDNDirectoryPathResolver
 {
     /// <summary>
     ///     Resolves the configured local directory path against user profile tokens or the content root path.

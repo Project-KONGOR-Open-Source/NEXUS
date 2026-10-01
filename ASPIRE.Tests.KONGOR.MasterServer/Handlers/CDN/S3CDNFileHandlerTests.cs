@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.KONGOR.MasterServer;
+namespace ASPIRE.Tests.KONGOR.MasterServer.Handlers.CDN;
 
 /// <summary>
 ///     Unit tests for S3-compatible CDN file handling and MD5 hash caching.

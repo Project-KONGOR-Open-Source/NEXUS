@@ -17,6 +17,7 @@ global using KONGOR.MasterServer.Configuration.Plinko;
 global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
+global using KONGOR.MasterServer.Handlers.CDN;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Helpers.Serialisation;
@@ -34,7 +35,6 @@ global using KONGOR.MasterServer.Models.RequestResponse.Stats;
 global using KONGOR.MasterServer.Models.RequestResponse.Store;
 global using KONGOR.MasterServer.Models.ServerManagement;
 global using KONGOR.MasterServer.Services;
-global using KONGOR.MasterServer.Services.CDN;
 
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Game;

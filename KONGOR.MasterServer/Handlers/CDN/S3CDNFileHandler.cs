@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Services.CDN;
+namespace KONGOR.MasterServer.Handlers.CDN;
 
 /// <summary>
 ///     Handles S3-compatible HTTP requests for CDN files served from a local directory.
@@ -26,7 +26,7 @@ public static class S3CDNFileHandler
             return;
         }
 
-        string? resolvedRootDirectory = LocalDirectoryPathResolver.Resolve(configuration.LocalDirectory, contentRootPath);
+        string? resolvedRootDirectory = LocalCDNDirectoryPathResolver.Resolve(configuration.LocalDirectory, contentRootPath);
 
         if (resolvedRootDirectory is null)
         {
