@@ -17,7 +17,7 @@ public sealed class DistributedCacheContainer : IAsyncDisposable
     /// </summary>
     public const string DisplayName = "Distributed Cache";
 
-    private AsynchronousLock Lock { get; } = new();
+    private AsynchronousLock Lock { get; } = new ();
 
     private DistributedCacheTestContainer? Self { get; set; }
 

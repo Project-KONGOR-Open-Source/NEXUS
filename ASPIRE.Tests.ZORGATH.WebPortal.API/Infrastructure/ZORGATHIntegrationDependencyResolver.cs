@@ -7,5 +7,5 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 public sealed class ZORGATHIntegrationDependencyResolver : ServiceIntegrationDependencyResolver<ZORGATHIntegrationDependencyResolver, ZORGATHIntegrationWebApplicationFactory, ZORGATHAssemblyMarker>
 {
     protected override ZORGATHIntegrationWebApplicationFactory BuildFactory(ServiceContainerContext containerContext)
-        => new(containerContext);
+        => new (containerContext);
 }

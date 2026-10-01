@@ -57,9 +57,9 @@ public static class DockerImageManager
     {
         try
         {
-            using CancellationTokenSource cancellationTokenSource = new(TimeSpan.FromSeconds(5));
+            using CancellationTokenSource cancellationTokenSource = new (TimeSpan.FromSeconds(5));
 
-            using HttpRequestMessage request = new(HttpMethod.Get, "/_ping");
+            using HttpRequestMessage request = new (HttpMethod.Get, "/_ping");
 
             using HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token);
 
@@ -78,7 +78,7 @@ public static class DockerImageManager
     {
         try
         {
-            using HttpRequestMessage request = new(HttpMethod.Get, $"/images/{Uri.EscapeDataString(image)}/json");
+            using HttpRequestMessage request = new (HttpMethod.Get, $"/images/{Uri.EscapeDataString(image)}/json");
 
             using HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
@@ -100,7 +100,7 @@ public static class DockerImageManager
 
     private static async Task PullImage(HttpClient client, string image)
     {
-        using HttpRequestMessage request = new(HttpMethod.Post, $"/images/create?fromImage={Uri.EscapeDataString(image)}");
+        using HttpRequestMessage request = new (HttpMethod.Post, $"/images/create?fromImage={Uri.EscapeDataString(image)}");
 
         using HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
 
@@ -115,16 +115,16 @@ public static class DockerImageManager
 
         await using Stream stream = await response.Content.ReadAsStreamAsync();
 
-        using StreamReader reader = new(stream);
+        using StreamReader reader = new (stream);
 
         while (await reader.ReadLineAsync() is not null) { }
     }
 
     private static HttpClient CreateDockerEngineClient()
     {
-        Uri endpoint = new(DockerEndpointResolver.GetDockerEndpoint());
+        Uri endpoint = new (DockerEndpointResolver.GetDockerEndpoint());
 
-        SocketsHttpHandler handler = new()
+        SocketsHttpHandler handler = new ()
         {
             ConnectCallback = (context, cancellationToken) => ConnectToDockerEngine(endpoint, cancellationToken)
         };
@@ -144,7 +144,7 @@ public static class DockerImageManager
             {
                 string pipeName = endpoint.AbsolutePath.TrimStart('/').Replace("pipe/", string.Empty, StringComparison.OrdinalIgnoreCase);
 
-                NamedPipeClientStream pipe = new(endpoint.Host == "." ? "." : endpoint.Host, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                NamedPipeClientStream pipe = new (endpoint.Host == "." ? "." : endpoint.Host, pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
 
                 await pipe.ConnectAsync(cancellationToken);
 
@@ -153,7 +153,7 @@ public static class DockerImageManager
 
             case "unix":
             {
-                Socket socket = new(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
+                Socket socket = new (AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
 
                 await socket.ConnectAsync(new UnixDomainSocketEndPoint(endpoint.LocalPath), cancellationToken);
 
@@ -164,7 +164,7 @@ public static class DockerImageManager
             case "http":
             case "https":
             {
-                Socket socket = new(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
+                Socket socket = new (SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
 
                 await socket.ConnectAsync(endpoint.Host, endpoint.Port, cancellationToken);
 

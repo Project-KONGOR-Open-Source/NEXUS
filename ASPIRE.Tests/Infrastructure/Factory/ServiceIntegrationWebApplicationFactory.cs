@@ -61,9 +61,9 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// </summary>
     private string EnvironmentName { get; set; } = "Development";
 
-    private AsynchronousLock Lock { get; } = new();
+    private AsynchronousLock Lock { get; } = new ();
 
-    private static readonly ConcurrentDictionary<string, Lazy<Task>> TemplateTasks = new();
+    private static readonly ConcurrentDictionary<string, Lazy<Task>> TemplateTasks = new ();
 
     private bool IsInitialised { get; set; } = false;
 
@@ -72,7 +72,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     ///     All mapping operations automatically prepend a unique path prefix derived from <see cref="GUID"/> so that concurrent tests never collide.
     ///     Only valid after calling <see cref="InitialiseAsync"/> with <see cref="WithWireMockContainer"/> enabled beforehand.
     /// </summary>
-    public ScopedWireMockClient WireMockClient => new(containerContext.WireMock.AdministrativeClient, WireMockPathPrefix);
+    public ScopedWireMockClient WireMockClient => new (containerContext.WireMock.AdministrativeClient, WireMockPathPrefix);
 
     /// <summary>
     ///     The scoped WireMock URL for this factory instance.
@@ -83,7 +83,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     /// <summary>
     ///     The scoped WireMock URI for this factory instance.
     /// </summary>
-    public Uri WireMockURI => new(WireMockURL);
+    public Uri WireMockURI => new (WireMockURL);
 
     /// <summary>
     ///     Builds an absolute URL beneath the scoped WireMock URI for this factory instance.
@@ -321,13 +321,13 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     {
         string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
 
-        await using (SqlConnection connection = new(masterConnectionString))
+        await using (SqlConnection connection = new (masterConnectionString))
         {
             await connection.OpenAsync();
 
             string createDatabaseSQL = $@"IF DB_ID('{templateDatabaseName}') IS NULL CREATE DATABASE [{templateDatabaseName}]";
 
-            await using (SqlCommand command = new(createDatabaseSQL, connection))
+            await using (SqlCommand command = new (createDatabaseSQL, connection))
             {
                 await command.ExecuteNonQueryAsync();
             }
@@ -370,14 +370,14 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
             await templateFactory.DisposeAsync();
         }
 
-        await using (SqlConnection connection = new(masterConnectionString))
+        await using (SqlConnection connection = new (masterConnectionString))
         {
             await connection.OpenAsync();
 
             // Set The Database Recovery Model To Simple To Minimise Backup Size And Overhead
             string simpleDatabaseRecoverySQL = $@"ALTER DATABASE [{templateDatabaseName}] SET RECOVERY SIMPLE";
 
-            await using (SqlCommand recoveryCommand = new(simpleDatabaseRecoverySQL, connection))
+            await using (SqlCommand recoveryCommand = new (simpleDatabaseRecoverySQL, connection))
             {
                 await recoveryCommand.ExecuteNonQueryAsync();
             }
@@ -385,7 +385,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
             // Back Up The Initialised Database To The Container Local Storage
             string backUpDatabaseSQL = $@"BACKUP DATABASE [{templateDatabaseName}] TO DISK = '{backupFileName}' WITH FORMAT, INIT";
 
-            await using (SqlCommand backupCommand = new(backUpDatabaseSQL, connection))
+            await using (SqlCommand backupCommand = new (backUpDatabaseSQL, connection))
             {
                 await backupCommand.ExecuteNonQueryAsync();
             }
@@ -397,7 +397,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
                 DROP DATABASE [{templateDatabaseName}];
             """;
 
-            await using (SqlCommand dropCommand = new(dropDatabaseSQL, connection))
+            await using (SqlCommand dropCommand = new (dropDatabaseSQL, connection))
             {
                 await dropCommand.ExecuteNonQueryAsync();
             }
@@ -408,7 +408,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
     {
         string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
 
-        await using (SqlConnection connection = new(masterConnectionString))
+        await using (SqlConnection connection = new (masterConnectionString))
         {
             await connection.OpenAsync();
 
@@ -420,7 +420,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
             // Query The Logical File Names From The Backup Header File
             string fileListSQL = $@"RESTORE FILELISTONLY FROM DISK = '{backupFileName}'";
 
-            await using (SqlCommand fileListCommand = new(fileListSQL, connection))
+            await using (SqlCommand fileListCommand = new (fileListSQL, connection))
             {
                 await using (SqlDataReader reader = await fileListCommand.ExecuteReaderAsync())
                 {
@@ -467,7 +467,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
                 REPLACE;
             """;
 
-            await using (SqlCommand restoreCommand = new(restoreDatabaseSQL, connection))
+            await using (SqlCommand restoreCommand = new (restoreDatabaseSQL, connection))
             {
                 await restoreCommand.ExecuteNonQueryAsync();
             }
@@ -522,7 +522,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
         {
             string masterConnectionString = containerContext.SQLServer.GetConnectionString("master");
 
-            await using SqlConnection connection = new(masterConnectionString);
+            await using SqlConnection connection = new (masterConnectionString);
 
             await connection.OpenAsync();
 
@@ -535,7 +535,7 @@ public abstract class ServiceIntegrationWebApplicationFactory<TSelf, TAssemblyMa
                 END
             """;
 
-            await using SqlCommand command = new(sql, connection);
+            await using SqlCommand command = new (sql, connection);
 
             await command.ExecuteNonQueryAsync();
         }

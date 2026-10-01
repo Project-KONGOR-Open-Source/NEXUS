@@ -13,7 +13,7 @@ namespace ASPIRE.Tests.Infrastructure.DependencyInversion;
 /// <typeparam name="TFactory">The per-service factory type.</typeparam>
 /// <typeparam name="TAssemblyMarker">The assembly-marker interface of the service under test.</typeparam>
 public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, TAssemblyMarker> : IClassConstructor, ITestEndEventReceiver
-    where TDerived : ServiceIntegrationDependencyResolver<TDerived, TFactory, TAssemblyMarker>, new()
+    where TDerived : ServiceIntegrationDependencyResolver<TDerived, TFactory, TAssemblyMarker>, new ()
     where TFactory : ServiceIntegrationWebApplicationFactory<TFactory, TAssemblyMarker>
     where TAssemblyMarker : class
 {
@@ -21,7 +21,7 @@ public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, T
 
     // TUnit reuses a single <see cref="IClassConstructor"/> instance across every <c>[Arguments]</c> variant of a method, so scopes cannot be stored in an instance field without concurrent tests stomping on each other's state.
     // Keying by <see cref="TestContext.Id"/> gives every test its own slot and is independent of how TUnit schedules <see cref="Create"/> and <see cref="OnTestEnd"/> across threads.
-    private static readonly ConcurrentDictionary<string, IServiceScope> ScopesByTestID = new();
+    private static readonly ConcurrentDictionary<string, IServiceScope> ScopesByTestID = new ();
 
     /// <summary>
     ///     Creates the concrete service-specific factory given the shared container context.
@@ -65,7 +65,7 @@ public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, T
 
     private static IServiceProvider BuildServiceProvider()
     {
-        ServiceCollection services = new();
+        ServiceCollection services = new ();
 
         services.AddSingleton<SQLServerContainer>();
         services.AddSingleton<DistributedCacheContainer>();
@@ -80,7 +80,7 @@ public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, T
 
         services.AddTransient<TFactory>(serviceProvider =>
         {
-            TDerived derived = new();
+            TDerived derived = new ();
 
             return derived.BuildFactory(serviceProvider.GetRequiredService<ServiceContainerContext>());
         });

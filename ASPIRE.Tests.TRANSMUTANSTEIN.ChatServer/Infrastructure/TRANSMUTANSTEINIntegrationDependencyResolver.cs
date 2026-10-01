@@ -7,5 +7,5 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 public sealed class TRANSMUTANSTEINIntegrationDependencyResolver : ServiceIntegrationDependencyResolver<TRANSMUTANSTEINIntegrationDependencyResolver, TRANSMUTANSTEINIntegrationWebApplicationFactory, TRANSMUTANSTEINAssemblyMarker>
 {
     protected override TRANSMUTANSTEINIntegrationWebApplicationFactory BuildFactory(ServiceContainerContext containerContext)
-        => new(containerContext);
+        => new (containerContext);
 }

@@ -6,7 +6,7 @@ namespace ASPIRE.Tests.Utilities.Concurrency;
 /// </summary>
 public sealed class AsynchronousLock : IDisposable
 {
-    private SemaphoreSlim Semaphore { get; } = new(initialCount: 1, maxCount: 1);
+    private SemaphoreSlim Semaphore { get; } = new (initialCount: 1, maxCount: 1);
 
     /// <summary>
     ///     Acquires the lock asynchronously, returning a disposable <see cref="Scope"/> that releases the lock when disposed.

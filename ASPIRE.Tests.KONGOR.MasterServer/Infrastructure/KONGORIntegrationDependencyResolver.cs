@@ -7,5 +7,5 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 public sealed class KONGORIntegrationDependencyResolver : ServiceIntegrationDependencyResolver<KONGORIntegrationDependencyResolver, KONGORIntegrationWebApplicationFactory, KONGORAssemblyMarker>
 {
     protected override KONGORIntegrationWebApplicationFactory BuildFactory(ServiceContainerContext containerContext)
-        => new(containerContext);
+        => new (containerContext);
 }

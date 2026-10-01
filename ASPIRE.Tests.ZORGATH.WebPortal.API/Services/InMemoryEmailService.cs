@@ -9,7 +9,7 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Services;
 /// </remarks>
 public sealed class InMemoryEmailService : IEmailService
 {
-    private ConcurrentDictionary<string, ConcurrentQueue<RecordedEmail>> Store { get; } = new(StringComparer.OrdinalIgnoreCase);
+    private ConcurrentDictionary<string, ConcurrentQueue<RecordedEmail>> Store { get; } = new (StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     ///     Returns the chronological list of emails recorded for <paramref name="emailAddress"/>.

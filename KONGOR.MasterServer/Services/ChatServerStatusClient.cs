@@ -45,7 +45,7 @@ public sealed class ChatServerStatusClient(HttpClient httpClient, ILogger<ChatSe
         }
     }
 
-    private static JsonSerializerOptions SerializerOptions { get; } = new(JsonSerializerDefaults.Web);
+    private static JsonSerializerOptions SerializerOptions { get; } = new (JsonSerializerDefaults.Web);
 
     private sealed record HealthProbeResponse(string? Status);
 }
