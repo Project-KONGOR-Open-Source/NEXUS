@@ -5,30 +5,34 @@ namespace KONGOR.MasterServer.Handlers.CDN;
 /// </summary>
 public sealed class S3MD5HashCache
 {
-    private readonly ConcurrentDictionary<string, (DateTime LastWriteTimeUtc, long FileLength, string ETag)> cache = new();
+    private ConcurrentDictionary<string, (DateTime LastWriteTimeUTC, long FileLength, string ETag)> Cache { get; set; } = new ();
 
     /// <summary>
     ///     Retrieves the cached ETag for the specified file path, or computes, caches, and returns it.
     /// </summary>
     /// <param name="filePath">The absolute path to the file.</param>
-    /// <param name="fileInfo">The file information containing size and last write timestamp.</param>
+    /// <param name="fileInformation">The file information containing size and last write timestamp.</param>
     /// <returns>The quoted lowercase MD5 hex string formatted as an ETag.</returns>
-    public string GetOrCreateETag(string filePath, FileInfo fileInfo)
+    public string GetOrCreateETag(string filePath, FileInfo fileInformation)
     {
-        if (cache.TryGetValue(filePath, out (DateTime LastWriteTimeUtc, long FileLength, string ETag) existingEntry))
+        if (Cache.TryGetValue(filePath, out (DateTime LastWriteTimeUTC, long FileLength, string ETag) existingEntry))
         {
-            if (existingEntry.LastWriteTimeUtc == fileInfo.LastWriteTimeUtc && existingEntry.FileLength == fileInfo.Length)
+            if (existingEntry.LastWriteTimeUTC == fileInformation.LastWriteTimeUtc && existingEntry.FileLength == fileInformation.Length)
             {
                 return existingEntry.ETag;
             }
         }
 
         using FileStream stream = File.OpenRead(filePath);
+
         using MD5 md5 = MD5.Create();
+
         byte[] hashBytes = md5.ComputeHash(stream);
+
         string etag = $@"""{Convert.ToHexStringLower(hashBytes)}""";
 
-        cache[filePath] = (fileInfo.LastWriteTimeUtc, fileInfo.Length, etag);
+        Cache[filePath] = (fileInformation.LastWriteTimeUtc, fileInformation.Length, etag);
+
         return etag;
     }
 
@@ -39,7 +43,8 @@ public sealed class S3MD5HashCache
     /// <returns>The quoted lowercase MD5 hex string formatted as an ETag.</returns>
     public string GetOrCreateETag(string filePath)
     {
-        FileInfo fileInfo = new(filePath);
-        return GetOrCreateETag(filePath, fileInfo);
+        FileInfo fileInformation = new (filePath);
+
+        return GetOrCreateETag(filePath, fileInformation);
     }
 }
