@@ -11,7 +11,7 @@ public static class S3CDNFileHandler
 
     private static readonly FileExtensionContentTypeProvider ContentTypeProvider = CreateContentTypeProvider();
 
-    private static readonly S3MD5HashCache DefaultHashCache = new();
+    private static readonly S3MD5HashCache DefaultHashCache = new ();
 
     /// <summary>
     ///     Maps the S3-compatible CDN file serving endpoint when local directory serving is enabled.
@@ -85,7 +85,7 @@ public static class S3CDNFileHandler
             return;
         }
 
-        FileInfo fileInfo = new(fullPath);
+        FileInfo fileInfo = new (fullPath);
 
         // Resolve MIME Content-Type
         string contentType = ContentTypeProvider.TryGetContentType(fullPath, out string? resolvedType)
@@ -124,7 +124,7 @@ public static class S3CDNFileHandler
                 return;
             }
 
-            await using FileStream rangeStream = new(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: BufferSize, useAsync: true);
+            await using FileStream rangeStream = new (fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: BufferSize, useAsync: true);
             rangeStream.Seek(start, SeekOrigin.Begin);
 
             byte[] buffer = new byte[BufferSize];
@@ -157,13 +157,13 @@ public static class S3CDNFileHandler
             return;
         }
 
-        await using FileStream fileStream = new(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: BufferSize, useAsync: true);
+        await using FileStream fileStream = new (fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: BufferSize, useAsync: true);
         await fileStream.CopyToAsync(httpContext.Response.Body, httpContext.RequestAborted);
     }
 
     private static FileExtensionContentTypeProvider CreateContentTypeProvider()
     {
-        FileExtensionContentTypeProvider provider = new();
+        FileExtensionContentTypeProvider provider = new ();
         provider.Mappings[".s2z"] = "application/octet-stream";
         return provider;
     }

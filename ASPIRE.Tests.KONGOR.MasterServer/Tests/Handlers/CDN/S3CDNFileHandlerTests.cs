@@ -16,8 +16,8 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "test.txt");
             await File.WriteAllTextAsync(filePath, "Hello, World!");
 
-            FileInfo fileInfo = new(filePath);
-            S3MD5HashCache cache = new();
+            FileInfo fileInfo = new (filePath);
+            S3MD5HashCache cache = new ();
 
             string etag = cache.GetOrCreateETag(filePath, fileInfo);
 
@@ -42,8 +42,8 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "test.txt");
             await File.WriteAllTextAsync(filePath, "Original Content");
 
-            FileInfo fileInfo = new(filePath);
-            S3MD5HashCache cache = new();
+            FileInfo fileInfo = new (filePath);
+            S3MD5HashCache cache = new ();
 
             string firstETag = cache.GetOrCreateETag(filePath, fileInfo);
 
@@ -72,14 +72,14 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "test.txt");
             await File.WriteAllTextAsync(filePath, "Initial Content");
 
-            FileInfo initialFileInfo = new(filePath);
-            S3MD5HashCache cache = new();
+            FileInfo initialFileInfo = new (filePath);
+            S3MD5HashCache cache = new ();
 
             string initialETag = cache.GetOrCreateETag(filePath, initialFileInfo);
 
             await File.WriteAllTextAsync(filePath, "Updated Content");
             File.SetLastWriteTimeUtc(filePath, DateTime.UtcNow.AddMinutes(5));
-            FileInfo updatedFileInfo = new(filePath);
+            FileInfo updatedFileInfo = new (filePath);
 
             string updatedETag = cache.GetOrCreateETag(filePath, updatedFileInfo);
 
@@ -103,12 +103,12 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "range-test.txt");
             await File.WriteAllTextAsync(filePath, "0123456789");
 
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "GET";
             httpContext.Request.Headers["Range"] = "bytes=2-6";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "range-test.txt", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status206PartialContent);
@@ -117,7 +117,7 @@ public sealed class S3CDNFileHandlerTests
             await Assert.That(httpContext.Response.Headers["Accept-Ranges"].ToString()).IsEqualTo("bytes");
 
             httpContext.Response.Body.Position = 0;
-            using StreamReader reader = new(httpContext.Response.Body);
+            using StreamReader reader = new (httpContext.Response.Body);
             string responseBody = await reader.ReadToEndAsync();
             await Assert.That(responseBody).IsEqualTo("23456");
         }
@@ -139,12 +139,12 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "range-test.txt");
             await File.WriteAllTextAsync(filePath, "0123456789");
 
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "GET";
             httpContext.Request.Headers["Range"] = "bytes=5-";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "range-test.txt", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status206PartialContent);
@@ -152,7 +152,7 @@ public sealed class S3CDNFileHandlerTests
             await Assert.That(httpContext.Response.Headers["Content-Length"].ToString()).IsEqualTo("5");
 
             httpContext.Response.Body.Position = 0;
-            using StreamReader reader = new(httpContext.Response.Body);
+            using StreamReader reader = new (httpContext.Response.Body);
             string responseBody = await reader.ReadToEndAsync();
             await Assert.That(responseBody).IsEqualTo("56789");
         }
@@ -174,12 +174,12 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "range-test.txt");
             await File.WriteAllTextAsync(filePath, "0123456789");
 
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "GET";
             httpContext.Request.Headers["Range"] = "bytes=20-30";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "range-test.txt", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status416RangeNotSatisfiable);
@@ -203,11 +203,11 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "head-test.txt");
             await File.WriteAllTextAsync(filePath, "Hello, World!");
 
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "HEAD";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "head-test.txt", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status200OK);
@@ -235,11 +235,11 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "get-test.txt");
             await File.WriteAllTextAsync(filePath, "Full CDN Content");
 
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "GET";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "get-test.txt", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status200OK);
@@ -247,7 +247,7 @@ public sealed class S3CDNFileHandlerTests
             await Assert.That(httpContext.Response.Headers["Content-Length"].ToString()).IsEqualTo("16");
 
             httpContext.Response.Body.Position = 0;
-            using StreamReader reader = new(httpContext.Response.Body);
+            using StreamReader reader = new (httpContext.Response.Body);
             string responseBody = await reader.ReadToEndAsync();
             await Assert.That(responseBody).IsEqualTo("Full CDN Content");
         }
@@ -269,11 +269,11 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "options-test.txt");
             await File.WriteAllTextAsync(filePath, "Content");
 
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "OPTIONS";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "options-test.txt", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status200OK);
@@ -307,11 +307,11 @@ public sealed class S3CDNFileHandlerTests
                 "%2e%2e/secret.txt"
             ];
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
 
             foreach (string suspiciousPath in suspiciousPaths)
             {
-                DefaultHttpContext httpContext = new();
+                DefaultHttpContext httpContext = new ();
                 httpContext.Request.Method = "GET";
                 httpContext.Response.Body = new MemoryStream();
 
@@ -335,11 +335,11 @@ public sealed class S3CDNFileHandlerTests
 
         try
         {
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "GET";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "nonexistent.s2z", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status404NotFound);
@@ -362,11 +362,11 @@ public sealed class S3CDNFileHandlerTests
             string filePath = Path.Combine(temporaryDirectory, "game_data.s2z");
             await File.WriteAllBytesAsync(filePath, [0x01, 0x02, 0x03]);
 
-            DefaultHttpContext httpContext = new();
+            DefaultHttpContext httpContext = new ();
             httpContext.Request.Method = "HEAD";
             httpContext.Response.Body = new MemoryStream();
 
-            S3MD5HashCache cache = new();
+            S3MD5HashCache cache = new ();
             await S3CDNFileHandler.HandleRequest(httpContext, temporaryDirectory, "game_data.s2z", cache);
 
             await Assert.That(httpContext.Response.StatusCode).IsEqualTo(StatusCodes.Status200OK);
@@ -391,7 +391,7 @@ public sealed class S3CDNFileHandlerTests
             builder.Services.AddSingleton<S3MD5HashCache>();
             WebApplication application = builder.Build();
 
-            OperationalConfigurationCDN configuration = new()
+            OperationalConfigurationCDN configuration = new ()
             {
                 Host = "http://localhost:5555",
                 PrimaryPatchURL = "http://localhost:5555/patch",
@@ -420,7 +420,7 @@ public sealed class S3CDNFileHandlerTests
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
         WebApplication application = builder.Build();
 
-        OperationalConfigurationCDN configuration = new()
+        OperationalConfigurationCDN configuration = new ()
         {
             Host = "http://localhost:5555",
             PrimaryPatchURL = "http://localhost:5555/patch",
