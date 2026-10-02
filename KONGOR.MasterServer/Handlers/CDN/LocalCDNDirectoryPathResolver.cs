@@ -5,13 +5,13 @@ namespace KONGOR.MasterServer.Handlers.CDN;
 /// </summary>
 public static class LocalCDNDirectoryPathResolver
 {
-    // The Solution Root Is The Nearest Ancestor Of The Application's Base Directory That Contains A "license" File, Which Holds Whether The Application Runs From Source Or From Compiled Binaries
-    // Compiled Binaries Deployed Outside Of The Solution Have No Such Ancestor, So Their Own Base Directory Acts As The Solution Root
     private static string SolutionRootDirectory { get; } = FindSolutionRootDirectory();
 
     /// <summary>
     ///     Resolves a local directory path for CDN file serving.
     ///     The <c>{ROOT}</c> token is replaced with the solution root directory, the <c>{USER}</c> token is replaced with the user's home directory, and the <c>{TEMP}</c> token is replaced with the system's temporary directory.
+    ///     The solution root directory is the nearest ancestor of the application's base directory that contains a "license" file, which holds whether the application runs from source or from compiled binaries inside the solution.
+    ///     If no ancestor contains a "license" file (for example, when compiled binaries are deployed outside of the solution), the application's base directory is used as the solution root directory instead.
     ///     Relative paths are resolved against the solution root directory.
     /// </summary>
     /// <param name="path">The configured local directory path.</param>
