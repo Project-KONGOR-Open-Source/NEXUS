@@ -7,7 +7,7 @@ public static class LocalCDNFileHandler
 {
     /// <summary>
     ///     Adds static file serving for the local CDN directory, when both the request path and the local directory are configured.
-    ///     If the local directory does not exist, a warning is logged and no CDN files are served.
+    ///     The local CDN is optional, so if the local directory does not exist, this is logged as information and no CDN files are served.
     /// </summary>
     /// <param name="application">The web application to add the static file serving middleware to.</param>
     /// <param name="configuration">The CDN configuration settings.</param>
@@ -20,7 +20,7 @@ public static class LocalCDNFileHandler
 
         if (Directory.Exists(localDirectory) is false)
         {
-            application.Logger.LogWarning(@"Local CDN Directory ""{LocalCDNDirectory}"" Does Not Exist, So No CDN Files Will Be Served", localDirectory);
+            application.Logger.LogInformation(@"Local CDN Directory ""{LocalCDNDirectory}"" Does Not Exist, So No CDN Files Will Be Served", localDirectory);
 
             return;
         }
