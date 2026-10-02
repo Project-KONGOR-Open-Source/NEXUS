@@ -52,7 +52,6 @@ global using Microsoft.AspNetCore.Mvc.Filters;
 global using Microsoft.AspNetCore.Mvc.Infrastructure;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
-global using Microsoft.AspNetCore.StaticFiles;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.FileProviders;
@@ -66,7 +65,6 @@ global using SecureRemotePassword;
 global using StackExchange.Redis;
 
 global using System.Collections;
-global using System.Collections.Concurrent;
 global using System.Collections.Specialized;
 global using System.Globalization;
 global using System.Net;
