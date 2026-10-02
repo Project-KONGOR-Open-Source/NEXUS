@@ -13,7 +13,7 @@ public static class LocalCDNFileHandler
 
     /// <summary>
     ///     Adds static file serving for the local CDN directory, when both the request path and the local directory are configured.
-    ///     The local CDN is optional, so if the local directory does not exist, this is logged as information and no CDN files are served.
+    ///     The request path is served regardless of whether the local directory exists, so requests for files or directories which are not there are answered with 404 Not Found, and a local directory which is created later is served without a restart.
     ///     The number of concurrent CDN file transfers is limited, and transfers beyond the limit are queued.
     /// </summary>
     /// <param name="application">The web application to add the static file serving middleware to.</param>
@@ -32,12 +32,7 @@ public static class LocalCDNFileHandler
 
         string localDirectory = LocalCDNDirectoryPathResolver.Resolve(configuration.LocalDirectory);
 
-        if (Directory.Exists(localDirectory) is false)
-        {
-            application.Logger.LogInformation(@"Local CDN Directory ""{LocalCDNDirectory}"" Does Not Exist, So No CDN Files Will Be Served", localDirectory);
-
-            return;
-        }
+        application.Logger.LogInformation(@"Serving Local CDN Directory ""{LocalCDNDirectory}"" At ""/{LocalCDNDirectoryURL}""", localDirectory, requestPath);
 
         application.Map(new PathString("/" + requestPath), branch =>
         {

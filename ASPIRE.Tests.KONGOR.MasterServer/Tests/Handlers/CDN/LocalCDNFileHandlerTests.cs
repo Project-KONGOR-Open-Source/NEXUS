@@ -114,6 +114,29 @@ public sealed class LocalCDNFileHandlerTests
     }
 
     [Test]
+    public async Task A_Local_CDN_Directory_Created_After_Start_Up_Is_Served_Without_A_Restart()
+    {
+        string localDirectory = Path.Combine(TemporaryDirectory, "created-later");
+
+        await using WebApplication application = await StartApplication(localDirectory);
+
+        using HttpResponseMessage responseBeforeCreation = await application.GetTestClient().GetAsync("/cdn/wac/manifest.json");
+
+        Directory.CreateDirectory(Path.Combine(localDirectory, "wac"));
+
+        await File.WriteAllTextAsync(Path.Combine(localDirectory, "wac", "manifest.json"), """{ "version": "4.10.1" }""");
+
+        using HttpResponseMessage responseAfterCreation = await application.GetTestClient().GetAsync("/cdn/wac/manifest.json");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(responseBeforeCreation.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
+            await Assert.That(responseAfterCreation.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await responseAfterCreation.Content.ReadAsStringAsync()).IsEqualTo("""{ "version": "4.10.1" }""");
+        }
+    }
+
+    [Test]
     [Arguments("/")]
     [Arguments("//")]
     [Arguments("http://localhost:5555/cdn")]
