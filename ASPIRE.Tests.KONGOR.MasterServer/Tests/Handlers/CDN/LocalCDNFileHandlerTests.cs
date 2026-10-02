@@ -113,6 +113,23 @@ public sealed class LocalCDNFileHandlerTests
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
     }
 
+    [Test]
+    [Arguments("/")]
+    [Arguments("//")]
+    [Arguments("http://localhost:5555/cdn")]
+    [Arguments("/cdn?version=1")]
+    [Arguments("/cdn#files")]
+    [Arguments("/local cdn")]
+    public async Task An_Invalid_Local_CDN_Directory_URL_Throws_At_Start_Up(string localDirectoryURL)
+    {
+        await using WebApplication application = BuildApplication();
+
+        OperationalConfigurationCDN configuration = CreateConfiguration(LocalCDNDirectory, localDirectoryURL);
+
+        await Assert.That(() => LocalCDNFileHandler.Use(application, configuration))
+            .Throws<InvalidOperationException>().WithMessageContaining("Invalid Local CDN Directory URL");
+    }
+
     private async Task WriteLocalCDNFile(string relativePath, byte[] content)
     {
         string filePath = Path.Combine(LocalCDNDirectory, relativePath);
@@ -124,25 +141,34 @@ public sealed class LocalCDNFileHandlerTests
 
     private static async Task<WebApplication> StartApplication(string localDirectory)
     {
-        WebApplicationBuilder builder = WebApplication.CreateBuilder();
+        WebApplication application = BuildApplication();
 
-        builder.WebHost.UseTestServer();
-
-        WebApplication application = builder.Build();
-
-        OperationalConfigurationCDN configuration = new ()
-        {
-            Host = "http://localhost:5555",
-            PrimaryPatchURL = "http://localhost:5555/patch",
-            SecondaryPatchURL = "http://localhost:5555/patch",
-            ServeFromLocalDirectoryURL = "/cdn",
-            LocalDirectory = localDirectory
-        };
-
-        LocalCDNFileHandler.Use(application, configuration);
+        LocalCDNFileHandler.Use(application, CreateConfiguration(localDirectory, "/cdn"));
 
         await application.StartAsync();
 
         return application;
     }
+
+    private static WebApplication BuildApplication()
+    {
+        WebApplicationBuilder builder = WebApplication.CreateBuilder();
+
+        builder.WebHost.UseTestServer();
+
+        // The Master Server Registers The Rate Limiting Services, Which The Local CDN's Concurrency Limiter Depends On
+        builder.Services.AddRateLimiter();
+
+        return builder.Build();
+    }
+
+    private static OperationalConfigurationCDN CreateConfiguration(string localDirectory, string localDirectoryURL)
+        => new ()
+        {
+            Host = "http://localhost:5555",
+            PrimaryPatchURL = "http://localhost:5555/patch",
+            SecondaryPatchURL = "http://localhost:5555/patch",
+            ServeFromLocalDirectoryURL = localDirectoryURL,
+            LocalDirectory = localDirectory
+        };
 }
