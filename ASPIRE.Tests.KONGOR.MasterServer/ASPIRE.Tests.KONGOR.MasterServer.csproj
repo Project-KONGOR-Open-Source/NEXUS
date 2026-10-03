@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.4.1" />
-        <PackageReference Include="TUnit" Version="1.72.0" />
+        <PackageReference Include="TUnit" Version="1.72.16" />
     </ItemGroup>
 
     <ItemGroup>
