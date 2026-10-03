@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer;
+namespace KONGOR.MasterServer;
 
 public class KONGOR
 {
@@ -209,6 +209,9 @@ public class KONGOR
             FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
             RequestPath = "/swagger"
         });
+
+        // Serve CDN Files From A Local Directory, When Configured
+        LocalCDNFileHandler.Use(application, application.Services.GetRequiredService<IOptions<OperationalConfiguration>>().Value.CDN);
 
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();
