@@ -18,11 +18,13 @@ public sealed class MerrickContext : DbContext
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<AccountStatistics> AccountStatistics => Set<AccountStatistics>();
     public DbSet<Clan> Clans => Set<Clan>();
+    public DbSet<ConfigurationBackup> ConfigurationBackups => Set<ConfigurationBackup>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
     public DbSet<Mastery> Masteries => Set<Mastery>();
     public DbSet<MasteryRewards> MasteryRewards => Set<MasteryRewards>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
     public DbSet<MatchParticipantStatistics> MatchParticipantStatistics => Set<MatchParticipantStatistics>();
+    public DbSet<Message> Messages => Set<Message>();
     public DbSet<RedeemableCode> RedeemableCodes => Set<RedeemableCode>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
@@ -37,6 +39,7 @@ public sealed class MerrickContext : DbContext
         ConfigureRoles(builder.Entity<Role>());
         ConfigureUsers(builder.Entity<User>());
         ConfigureAccounts(builder.Entity<Account>());
+        ConfigureConfigurationBackup(builder.Entity<ConfigurationBackup>());
         ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
         ConfigureMastery(builder.Entity<Mastery>());
         ConfigureMasteryRewards(builder.Entity<MasteryRewards>());
@@ -52,11 +55,13 @@ public sealed class MerrickContext : DbContext
         builder.Entity<Account>().ToTable("Accounts", CoreSchema);
         builder.Entity<AccountStatistics>().ToTable("AccountStatistics", StatisticsSchema);
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
+        builder.Entity<ConfigurationBackup>().ToTable("ConfigurationBackups", MiscellaneousSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
         builder.Entity<Mastery>().ToTable("Masteries", StatisticsSchema);
         builder.Entity<MasteryRewards>().ToTable("MasteryRewards", StatisticsSchema);
         builder.Entity<MatchParticipantStatistics>().ToTable("MatchParticipantStatistics", StatisticsSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
+        builder.Entity<Message>().ToTable("Messages", CoreSchema);
         builder.Entity<RedeemableCode>().ToTable("RedeemableCodes", MiscellaneousSchema);
         builder.Entity<Role>().ToTable("Roles", AuthenticationSchema);
         builder.Entity<Token>().ToTable("Tokens", AuthenticationSchema);
@@ -138,6 +143,14 @@ public sealed class MerrickContext : DbContext
         builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+    }
+
+    private static void ConfigureConfigurationBackup(EntityTypeBuilder<ConfigurationBackup> builder)
+    {
+        builder.HasOne(configurationBackup => configurationBackup.Account)
+            .WithOne(account => account.ConfigurationBackup)
+            .HasForeignKey<ConfigurationBackup>(configurationBackup => configurationBackup.AccountID)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 
     private static void ConfigureAccountStatistics(EntityTypeBuilder<AccountStatistics> builder)

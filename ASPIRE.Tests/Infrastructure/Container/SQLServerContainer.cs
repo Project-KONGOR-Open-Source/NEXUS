@@ -22,7 +22,7 @@ public sealed class SQLServerContainer : IAsyncDisposable
     /// </summary>
     public string Password { get; } = $"PASSWORD_{Guid.CreateVersion7():N}";
 
-    private AsynchronousLock Lock { get; } = new();
+    private AsynchronousLock Lock { get; } = new ();
 
     private MsSqlContainer? Self { get; set; }
 

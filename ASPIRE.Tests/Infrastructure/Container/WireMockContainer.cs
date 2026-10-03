@@ -16,7 +16,7 @@ public sealed class WireMockContainer : IAsyncDisposable
     /// </summary>
     public const string DisplayName = "WireMock";
 
-    private AsynchronousLock Lock { get; } = new();
+    private AsynchronousLock Lock { get; } = new ();
 
     private WireMockTestContainer? Self { get; set; }
 

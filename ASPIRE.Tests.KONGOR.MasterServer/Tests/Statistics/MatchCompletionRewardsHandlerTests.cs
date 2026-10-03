@@ -7,7 +7,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
 {
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
     [Test]
     public async Task Apply_Solo_Win_Main_Account_First_Match_Applies_Match_Reward_And_Post_Signup_Bonus()

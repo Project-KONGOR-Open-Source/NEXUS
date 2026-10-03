@@ -1,8 +1,8 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 
 /// <summary>
-///     Handles clan promotion notifications.
-///     Promotes a clan member to officer rank and broadcasts the rank change to all clan members.
+///     Handles clan promotion notifications, sent by the client after the master server's "set_rank" endpoint has promoted the member to officer.
+///     Updates the target's in-memory rank and broadcasts the rank change to all clan members.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_PROMOTE_NOTIFY)]
 public class ClanPromoteNotify : ISynchronousCommandProcessor<ClientChatSession>
@@ -21,6 +21,9 @@ public class ClanPromoteNotify : ISynchronousCommandProcessor<ClientChatSession>
         // Target Must Be Online And In The Same Clan
         if (targetSession is null || targetSession.Account.Clan?.ID != session.Account.Clan.ID)
             return;
+
+        // Promote The Target In-Memory; The Database Was Already Updated By The Master Server's "set_rank" Endpoint
+        targetSession.Account.ClanTier = ClanTier.Officer;
 
         // Broadcast Rank Change To All Clan Members
         ChatBuffer broadcast = new ();

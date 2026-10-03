@@ -37,7 +37,7 @@ public class ClanWhisper(FloodPreventionService floodPreventionService) : ISynch
         ChatBuffer clanWhisper = new ();
 
         clanWhisper.WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_WHISPER);
-        clanWhisper.WriteInt32(session.Account.ID); // Recipient's Account ID
+        clanWhisper.WriteInt32(session.Account.ID); // Sender's Account ID
         clanWhisper.WriteString(truncatedMessage);  // Message Content
 
         foreach (Account clanMember in session.Account.Clan.Members)

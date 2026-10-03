@@ -27,7 +27,7 @@ public class MatchStatsResponse
     ///     The requesting player's entry will be a <see cref="MatchStatsResponse.MatchPlayerStatisticsWithMatchPerformanceData"/> with additional match performance data.
     /// </summary>
     [PHPProperty("match_player_stats", isDiscriminatedUnion: true)]
-    public required Dictionary<int, Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>>> MatchPlayerStatistics { get; init; }
+    public required Dictionary<int, Dictionary<int, MatchPlayerStatisticsEntry>> MatchPlayerStatistics { get; init; }
 
     /// <summary>
     ///     A collection containing player inventories for the match.
@@ -114,7 +114,7 @@ public class MatchStatsResponse
     ///     Detailed information about owned store items including mastery boosts and discount coupons.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; init; }
 
     /// <summary>
     ///     The collection of selected store items.
@@ -788,24 +788,23 @@ public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipant
         return -1;
     }
 
+    /// <summary>
+    ///     Determines the winning team based on match participant statistics.
+    /// </summary>
+    /// <remarks>
+    ///     Aborted or cancelled matches have no winning participant.
+    ///     In this case return 0, which the client treats as "No Winner".
+    ///     The client only renders a winning team when the value is greater than 0.
+    /// </remarks>
     private static int GetWinningTeam(List<MatchParticipantStatistics> matchParticipantStatistics)
-        => matchParticipantStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).Single().Team;
+        => matchParticipantStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).SingleOrDefault()?.Team ?? 0;
 
     private static int IsPrivateMatch(List<MatchParticipantStatistics> matchParticipantStatistics)
         => matchParticipantStatistics.DistinctBy(player => player.PublicMatch).Single().PublicMatch is 0 ? 1 : 0;
 }
 
-public class MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience, int bonusExperience)
+public class MatchMastery(string heroIdentifier, int preMatchMasteryExperience, int matchMasteryExperience, int bonusExperience)
 {
-    // TODO: Set Missing Properties Once Database Entities Are Available
-
-    //public class MatchMastery(MasteryRewards rewards)
-    //{
-    //    MasteryExperienceMaximumLevelHeroesCount = rewards.MasteryMaxLevelHeroesCount;
-    //    MasteryExperienceBoostProductCount = rewards.MasteryBoostsOwned;
-    //    MasteryExperienceSuperBoostProductCount = rewards.MasterySuperBoostsOwned;
-    //}
-
     /// <summary>
     ///     The identifier of the hero, in the format Hero_{Snake_Case_Name} (e.g. "Hero_Armadon").
     /// </summary>
@@ -813,16 +812,16 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public string HeroIdentifier { get; init; } = heroIdentifier;
 
     /// <summary>
-    ///     The hero's current mastery experience as persisted to the database.
-    ///     Because the match and bonus experience are accrued during statistics submission, this is the post-match total.
-    ///     The client animates the progress bar up to this value and derives the pre-match value itself by subtracting the match and bonus experience.
+    ///     The hero's mastery experience before the match.
+    ///     The client treats this as the starting value of the progress bar and adds the match, bonus, and boost experience on top of it, both for the animation and for the displayed total.
+    ///     Because the match and bonus experience are accrued during statistics submission, this is the persisted total minus the experience accrued for this match.
     /// </summary>
     [PHPProperty("mastery_exp_original")]
-    public int CurrentMasteryExperience { get; init; } = currentMasteryExperience;
+    public int PreMatchMasteryExperience { get; init; } = preMatchMasteryExperience;
 
     /// <summary>
     ///     The base mastery experience earned during the match.
-    ///     Calculated from match duration, map, match type, and win/loss status.
+    ///     Calculated from the match type and the hero level reached in the match.
     ///     Does not include bonuses or boosts.
     /// </summary>
     [PHPProperty("mastery_exp_match")]
@@ -836,9 +835,8 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public int MasteryExperienceBonus { get; init; } = 0;
 
     /// <summary>
-    ///     The additional mastery experience gained from applying a regular mastery boost consumable.
-    ///     Set to zero initially when match results are calculated.
-    ///     Only populated with a non-zero value after the player applies a mastery boost product.
+    ///     The additional mastery experience gained from applying a regular mastery boost consumable to this match.
+    ///     Zero until the player applies a regular boost. A non-zero value makes the client display the match as already boosted and hide the boost purchase controls.
     /// </summary>
     [PHPProperty("mastery_exp_boost")]
     public int MasteryExperienceBoost { get; init; } = 0;
@@ -1018,7 +1016,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's Public Skill Rating (PSR).
     /// </summary>
     [PHPProperty("pub_skill")]
-    public string PublicMatchRating { get; init; } = publicMatchStatistics.SkillRating.ToString();
+    public string PublicMatchRating { get; init; } = publicMatchStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of public matches played on the player's account.
@@ -1030,7 +1028,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's solo Matchmaking Rating (MMR).
     /// </summary>
     [PHPProperty("amm_solo_rating")]
-    public string SoloRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
+    public string SoloRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of solo ranked matches played on the player's account.
@@ -1042,7 +1040,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's team Matchmaking Rating (MMR).
     /// </summary>
     [PHPProperty("amm_team_rating")]
-    public string TeamRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
+    public string TeamRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of team ranked matches played on the player's account.
@@ -1054,7 +1052,7 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The player's performance score across all matches, calculated as (Kills + Assists) / Max(1, Deaths).
     /// </summary>
     [PHPProperty("avg_score")]
-    public string PerformanceScore { get; init; } = currentMatchTypeStatistics.PerformanceScore.ToString("F2");
+    public string PerformanceScore { get; init; } = currentMatchTypeStatistics.PerformanceScore.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The number of enemy hero kills achieved by the player in the match.
@@ -1370,9 +1368,12 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
 
     /// <summary>
     ///     Seasonal campaign progression information for the player in the match.
+    ///     Only ranked matchmaking matches participate in the seasonal campaign, so every other match type (for example MidWars) emits an empty block, which the client renders as no rank or placement progress.
     /// </summary>
     [PHPProperty("campaign_info")]
-    public SeasonProgress SeasonProgress { get; init; } = new (matchInformation, matchParticipantStatistics, matchmakingStatistics);
+    public SeasonProgress SeasonProgress { get; init; } = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation) is AccountStatisticsType.Matchmaking or AccountStatisticsType.MatchmakingCasual
+        ? new SeasonProgress(matchInformation, matchParticipantStatistics, currentMatchTypeStatistics)
+        : new SeasonProgress(matchInformation, matchParticipantStatistics, seasonStatistics: null);
 
     /// <summary>
     ///     Custom gameplay statistic 0 (purpose varies by game mode or event).
@@ -1441,13 +1442,13 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     The player's team Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PHPProperty("perf_amm_team_rating")]
-    public string MatchPerformanceTeamRatingBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString("F2");
+    public string MatchPerformanceTeamRatingBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The change in team Matchmaking Rating (MMR) from this match.
     /// </summary>
     [PHPProperty("perf_amm_team_rating_delta")]
-    public string MatchPerformanceTeamRatingDelta { get; init; } = matchParticipantStatistics.RankedSkillRatingChange.ToString("F2");
+    public string MatchPerformanceTeamRatingDelta { get; init; } = matchParticipantStatistics.RankedSkillRatingChange.ToString("F2", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Experience points earned based on match outcome (win or loss).
@@ -1678,7 +1679,12 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     public string MatchPerformanceMultiplierExperience { get; init; } = "0";
 }
 
-public class SeasonProgress(MatchInformation matchInformation, MatchParticipantStatistics matchParticipantStatistics, AccountStatistics matchmakingStatistics)
+/// <summary>
+///     Seasonal campaign progression information for a player in a match.
+///     Passing <see langword="null"/> for <paramref name="seasonStatistics"/> creates an empty progression block for match types which do not participate in the seasonal campaign (for example MidWars).
+///     The client shows no rank or placement progress when the medal and placement values are all zero.
+/// </summary>
+public class SeasonProgress(MatchInformation matchInformation, MatchParticipantStatistics matchParticipantStatistics, AccountStatistics? seasonStatistics)
 {
     /// <summary>
     ///     The player's account ID.
@@ -1696,19 +1702,19 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     Whether the match was a casual ranked match ("1") or competitive ranked match ("0").
     /// </summary>
     [PHPProperty("is_casual")]
-    public string IsCasual { get; init; } = matchInformation.IsCasual ? "1" : "0";
+    public string IsCasual { get; init; } = seasonStatistics is not null && matchInformation.IsCasual ? "1" : "0";
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PHPProperty("mmr_before")]
-    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString();
+    public string MMRBefore { get; init; } = seasonStatistics is null ? "0" : (seasonStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) after the match.
     /// </summary>
     [PHPProperty("mmr_after")]
-    public string MMRAfter { get; init; } = matchmakingStatistics.SkillRating.ToString();
+    public string MMRAfter { get; init; } = seasonStatistics is null ? "0" : seasonStatistics.SkillRating.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     The player's medal rank before the match.
@@ -1722,18 +1728,18 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     </code>
     /// </summary>
     [PHPProperty("medal_before")]
-    public string MedalBefore { get; init; } = matchmakingStatistics.IsInPlacementPhase
+    public string MedalBefore { get; init; } = seasonStatistics is null || seasonStatistics.IsInPlacementPhase
         ? ((int) Rank.NO_MEDAL).ToString()
-        : ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange)).ToString();
+        : ((int) RankExtensions.GetRank(seasonStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange)).ToString();
 
     /// <summary>
     ///     The player's medal rank after the match.
     ///     Uses the same medal ranking system as "medal_before".
     /// </summary>
     [PHPProperty("medal_after")]
-    public string MedalAfter { get; init; } = matchmakingStatistics.IsInPlacementPhase
+    public string MedalAfter { get; init; } = seasonStatistics is null || seasonStatistics.IsInPlacementPhase
         ? ((int) Rank.NO_MEDAL).ToString()
-        : ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating)).ToString();
+        : ((int) RankExtensions.GetRank(seasonStatistics.SkillRating)).ToString();
 
     /// <summary>
     ///     The seasonal campaign identifier.
@@ -1750,13 +1756,13 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     Players must complete placement matches before receiving their seasonal medal rank.
     /// </summary>
     [PHPProperty("placement_matches")]
-    public int PlacementMatches { get; init; } = AccountStatistics.ExpectedPlacementMatchCount;
+    public int PlacementMatches { get; init; } = seasonStatistics is null ? 0 : AccountStatistics.ExpectedPlacementMatchCount;
 
     /// <summary>
     ///     The number of placement matches won by the player in the current season.
     /// </summary>
     [PHPProperty("placement_wins")]
-    public string PlacementWins { get; init; } = matchmakingStatistics?.PlacementMatchesData ?? string.Empty;
+    public string PlacementWins { get; init; } = seasonStatistics?.PlacementMatchesData ?? string.Empty;
 
     /// <summary>
     ///     The player's current ranking position on the Immortal leaderboard.
@@ -1764,7 +1770,7 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     ///     Not present in the response for players below Immortal rank or outside the top 100.
     /// </summary>
     [PHPProperty("ranking")]
-    public string? Ranking => RankExtensions.GetRank(matchmakingStatistics.SkillRating) is Rank.IMMORTAL ? 1.ToString() : null; // TODO: Implement Actual Leaderboard Ranking Retrieval
+    public string? Ranking { get; init; } = seasonStatistics is not null && RankExtensions.GetRank(seasonStatistics.SkillRating) is Rank.IMMORTAL ? 1.ToString() : null; // TODO: Implement Actual Leaderboard Ranking Retrieval
 }
 
 public class MatchPlayerInventory
@@ -1910,3 +1916,8 @@ public class CampaignReward
     [PHPProperty("percentage")]
     public string Percentage { get; init; } = "1.00";
 }
+
+/// <summary>
+///     The statistics of a player in a match, which additionally carry match performance data for the requesting player.
+/// </summary>
+public union MatchPlayerStatisticsEntry(MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics);

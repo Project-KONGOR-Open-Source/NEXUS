@@ -85,26 +85,12 @@ public static partial class DistributedCacheExtensions
     {
         MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByID(serverManagerID);
 
-        if (matchServerManager is not null)
-        {
-            string hostAccountName = matchServerManager.HostAccountName;
+        if (matchServerManager is null)
+            return;
 
-            await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, hostAccountName);
-
-            foreach (int matchServerID in matchServerManager.MatchServerIDs)
-            {
-                MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(matchServerID);
-
-                if (matchServer is not null)
-                {
-                    matchServer.MatchServerManagerID = null;
-
-                    await distributedCacheStore.RemoveMatchServerByID(matchServer.ID);
-                }
-            }
-
-            matchServerManager.MatchServerIDs.Clear();
-        }
+        // Remove Only The Manager's Own Cache Entry; Its Match Servers Are Independent Hosts With Their Own Chat Sessions, And Are Reaped On Their Own Liveness (Sessionless Past The Grace Period, Or A Stale Status Heartbeat)
+        // A Manager Going Away Must Not Tear Down Its Still-Live Servers, Which Would Otherwise Interrupt In-Progress Matches Whenever The Manager Merely Reconnects After A Transient Disconnect
+        await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, matchServerManager.HostAccountName);
     }
 
     private const string MatchServersKey = "MATCH-SERVERS";
@@ -190,23 +176,20 @@ public static partial class DistributedCacheExtensions
     {
         MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(serverID);
 
-        if (matchServer is not null)
+        if (matchServer is null)
+            return;
+
+        await distributedCacheStore.HashDeleteAsync(MatchServersKey, $"{matchServer.HostAccountName}:{matchServer.Instance}");
+
+        // Keep The Owning Manager's Child List Consistent By Removing This Server From It And Persisting The Change
+        // The Manager Is Left In Place Even When Its Last Server Is Removed, Because A Manager Legitimately Has No Servers While It Is Starting Up Or Respawning Them
+        // An Idle Manager With No Live Session Is Reaped Separately On Its Own Liveness
+        if (matchServer.MatchServerManagerID is int matchServerManagerID)
         {
-            string hashField = $"{matchServer.HostAccountName}:{matchServer.Instance}";
+            MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByID(matchServerManagerID);
 
-            await distributedCacheStore.HashDeleteAsync(MatchServersKey, hashField);
-
-            MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByID(matchServer.MatchServerManagerID ?? default);
-
-            if (matchServerManager is not null)
-            {
-                matchServerManager.MatchServerIDs.Remove(matchServer.ID);
-
-                if (matchServerManager.MatchServerIDs.Any() is false)
-                    await distributedCacheStore.RemoveMatchServerManagerByID(matchServerManager.ID);
-            }
-
-            matchServer.MatchServerManagerID = null;
+            if (matchServerManager is not null && matchServerManager.MatchServerIDs.Remove(matchServer.ID))
+                await distributedCacheStore.SetMatchServerManager(matchServerManager.HostAccountName, matchServerManager);
         }
     }
 

@@ -2,8 +2,8 @@ namespace ASPIRE.Tests.Infrastructure.DependencyInversion;
 
 /// <summary>
 ///     Base TUnit <see cref="IClassConstructor"/> that resolves test class instances against a shared <see cref="IServiceProvider"/>.
-///     Container instances (<see cref="SQLServerContainer"/>, <see cref="RedisContainer"/>, <see cref="WireMockContainer"/>) are registered as singletons so they are started once per test assembly and reused across tests.
-///     The per-service factory is registered as transient so every test receives a fresh factory with its own per-test state (database name, Redis key prefix, WireMock path prefix).
+///     Container instances (<see cref="SQLServerContainer"/>, <see cref="DistributedCacheContainer"/>, <see cref="WireMockContainer"/>) are registered as singletons so they are started once per test assembly and reused across tests.
+///     The per-service factory is registered as transient so every test receives a fresh factory with its own per-test state (database name, distributed cache key prefix, WireMock path prefix).
 /// </summary>
 /// <remarks>
 ///     Each concrete service provides a sealed derivative (for example <c>KONGORIntegrationDependencyResolver</c>) that fills in the generic type parameters and implements <see cref="BuildFactory"/>.
@@ -13,7 +13,7 @@ namespace ASPIRE.Tests.Infrastructure.DependencyInversion;
 /// <typeparam name="TFactory">The per-service factory type.</typeparam>
 /// <typeparam name="TAssemblyMarker">The assembly-marker interface of the service under test.</typeparam>
 public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, TAssemblyMarker> : IClassConstructor, ITestEndEventReceiver
-    where TDerived : ServiceIntegrationDependencyResolver<TDerived, TFactory, TAssemblyMarker>, new()
+    where TDerived : ServiceIntegrationDependencyResolver<TDerived, TFactory, TAssemblyMarker>, new ()
     where TFactory : ServiceIntegrationWebApplicationFactory<TFactory, TAssemblyMarker>
     where TAssemblyMarker : class
 {
@@ -21,7 +21,7 @@ public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, T
 
     // TUnit reuses a single <see cref="IClassConstructor"/> instance across every <c>[Arguments]</c> variant of a method, so scopes cannot be stored in an instance field without concurrent tests stomping on each other's state.
     // Keying by <see cref="TestContext.Id"/> gives every test its own slot and is independent of how TUnit schedules <see cref="Create"/> and <see cref="OnTestEnd"/> across threads.
-    private static readonly ConcurrentDictionary<string, IServiceScope> ScopesByTestID = new();
+    private static readonly ConcurrentDictionary<string, IServiceScope> ScopesByTestID = new ();
 
     /// <summary>
     ///     Creates the concrete service-specific factory given the shared container context.
@@ -65,22 +65,22 @@ public abstract class ServiceIntegrationDependencyResolver<TDerived, TFactory, T
 
     private static IServiceProvider BuildServiceProvider()
     {
-        ServiceCollection services = new();
+        ServiceCollection services = new ();
 
         services.AddSingleton<SQLServerContainer>();
-        services.AddSingleton<RedisContainer>();
+        services.AddSingleton<DistributedCacheContainer>();
         services.AddSingleton<WireMockContainer>();
 
         services.AddSingleton<ServiceContainerContext>(serviceProvider => new ServiceContainerContext
         (
-            SQLServer: serviceProvider.GetRequiredService<SQLServerContainer>(),
-            Redis:     serviceProvider.GetRequiredService<RedisContainer>(),
-            WireMock:  serviceProvider.GetRequiredService<WireMockContainer>()
+            SQLServer:        serviceProvider.GetRequiredService<SQLServerContainer>(),
+            DistributedCache: serviceProvider.GetRequiredService<DistributedCacheContainer>(),
+            WireMock:         serviceProvider.GetRequiredService<WireMockContainer>()
         ));
 
         services.AddTransient<TFactory>(serviceProvider =>
         {
-            TDerived derived = new();
+            TDerived derived = new ();
 
             return derived.BuildFactory(serviceProvider.GetRequiredService<ServiceContainerContext>());
         });

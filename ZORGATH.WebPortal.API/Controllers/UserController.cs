@@ -51,9 +51,9 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             return Conflict($@"Email Registration Token ""{payload.Token}"" Has Already Been Consumed");
         }
 
-        string sanitizedEmailAddress = token.Data;
+        string sanitisedEmailAddress = token.Data;
 
-        if (await MerrickContext.Users.AnyAsync(user => user.EmailAddress.Equals(sanitizedEmailAddress)))
+        if (await MerrickContext.Users.AnyAsync(user => user.EmailAddress.Equals(sanitisedEmailAddress)))
         {
             return Conflict($@"User With Email ""{token.EmailAddress}"" Already Exists");
         }
@@ -76,7 +76,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         User user = new ()
         {
-            EmailAddress = sanitizedEmailAddress,
+            EmailAddress = sanitisedEmailAddress,
             Role = role,
             SRPPasswordSalt = salt,
             SRPPasswordHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt),

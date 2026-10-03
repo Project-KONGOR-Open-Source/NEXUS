@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.Configuration;
+namespace KONGOR.MasterServer.Models.Configuration;
 
 public class OperationalConfiguration
 {
@@ -14,4 +14,8 @@ public class OperationalConfigurationCDN
     public required string PrimaryPatchURL { get; set; }
 
     public required string SecondaryPatchURL { get; set; }
+
+    public string? ServeFromLocalDirectoryURL { get; set; }
+
+    public string? LocalDirectory { get; set; }
 }

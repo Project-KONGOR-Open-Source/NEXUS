@@ -16,7 +16,7 @@ public sealed class TicketExchangeTests(KONGORIntegrationWebApplicationFactory w
 
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
     [Test]
     public async Task List_With_Invalid_Cookie_Returns_Status_Bad_Cookie()

@@ -25,9 +25,13 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
             Title = "Project KONGOR Main Channel"
         };
 
-        OneOf<ClanMemberData, ClanMemberDataError> clanMembershipData = clanData;
+        ClanMemberInformation clanMembershipData = clanData;
 
-        string serialisedData = clanMembershipData.Match(data => PhpSerialization.Serialize(data), error => PhpSerialization.Serialize(error));
+        string serialisedData = clanMembershipData switch
+        {
+            ClanMemberData data       => PhpSerialization.Serialize(data),
+            ClanMemberDataError error => PhpSerialization.Serialize(error)
+        };
 
         const string expectedSerialisationOutput = @"a:13:{s:7:""clan_id"";s:3:""666"";s:4:""name"";s:14:""Project KONGOR"";s:3:""tag"";s:2:""PK"";s:7:""creator"";s:1:""1"";s:10:""account_id"";s:2:""42"";s:4:""rank"";s:7:""Officer"";s:7:""message"";s:36:""Welcome To The Project KONGOR Clan !"";s:9:""join_date"";s:19:""2026-01-17 14:30:00"";s:5:""title"";s:27:""Project KONGOR Main Channel"";s:6:""active"";s:1:""1"";s:4:""logo"";s:36:""ლ(ಠ益ಠლ) BUT AT WHAT COST ?"";s:8:""idleWarn"";s:1:""0"";s:11:""activeIndex"";s:1:""0"";}";
 
@@ -64,9 +68,13 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         ClanMemberDataError errorData = new ();
 
-        OneOf<ClanMemberData, ClanMemberDataError> clanMembershipData = errorData;
+        ClanMemberInformation clanMembershipData = errorData;
 
-        string serialisedData = clanMembershipData.Match(data => PhpSerialization.Serialize(data), error => PhpSerialization.Serialize(error));
+        string serialisedData = clanMembershipData switch
+        {
+            ClanMemberData data       => PhpSerialization.Serialize(data),
+            ClanMemberDataError error => PhpSerialization.Serialize(error)
+        };
 
         const string expectedSerialisationOutput = @"a:1:{s:5:""error"";s:20:""No Clan Member Found"";}";
 
@@ -91,7 +99,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         DiscriminatedUnionDictionary storeItemData = new ()
         {
-            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            OwnedStoreItemsData = new Dictionary<string, OwnedStoreItemData>
             {
                 {
                     "ai.custom_icon:12345", new StoreItemData
@@ -187,7 +195,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         DiscriminatedUnionDictionary storeItemDiscountCoupon = new ()
         {
-            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            OwnedStoreItemsData = new Dictionary<string, OwnedStoreItemData>
             {
                 {
                     "cp.discount_coupon:99999", new StoreItemDiscountCoupon
@@ -253,7 +261,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         DiscriminatedUnionDictionary @object = new ()
         {
-            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            OwnedStoreItemsData = new Dictionary<string, OwnedStoreItemData>
             {
                 {
                     "ai.icon:1", new StoreItemData
@@ -350,10 +358,10 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {
-            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>>
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, NativePropertyCollectionEntry>>
             {
                 {
-                    100001, new Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>
+                    100001, new Dictionary<int, NativePropertyCollectionEntry>
                     {
                         {
                             1, new ExtendedNativePropertyCollection
@@ -500,7 +508,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
                 Logo = "Test Logo",
                 Title = "Test Channel Title"
             },
-            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            OwnedStoreItemsData = new Dictionary<string, OwnedStoreItemData>
             {
                 {
                     "test.item:1", new StoreItemData
@@ -580,6 +588,47 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     }
 
     /// <summary>
+    ///     Asserts that <see cref="DiscriminatedUnionPropertyCollection.ClanMembershipData"/> serialises to <see cref="ClanMemberDataError"/> when unwrapped by the property attribute.
+    /// </summary>
+    [Test]
+    public async Task Clan_Membership_Data_Error_Serialises_Correctly_Through_The_Property_Attribute()
+    {
+        DiscriminatedUnionPropertyCollection @object = new ()
+        {
+            ClanMembershipData = new ClanMemberDataError(),
+            OwnedStoreItemsData = []
+        };
+
+        string serialisedData = PhpSerialization.Serialize(@object);
+
+        const string expectedSerialisationOutput = @"a:2:{s:16:""clan_member_info"";a:1:{s:5:""error"";s:20:""No Clan Member Found"";}s:16:""my_upgrades_info"";a:0:{}}";
+
+        await Assert.That(serialisedData).IsEqualTo(expectedSerialisationOutput);
+
+        if (PhpSerialization.Deserialize(serialisedData) is not IDictionary deserialisedData)
+        {
+            Assert.Fail("Deserialised Data Is NULL");
+        }
+
+        else
+        {
+            if (deserialisedData["clan_member_info"] is not IDictionary clanData)
+            {
+                Assert.Fail("Clan Member Info Is NULL");
+            }
+
+            else
+            {
+                using (Assert.Multiple())
+                {
+                    await Assert.That(clanData.Count).IsEqualTo(1);
+                    await Assert.That(clanData["error"]).IsEqualTo("No Clan Member Found");
+                }
+            }
+        }
+    }
+
+    /// <summary>
     ///     Asserts that an empty discriminated union dictionary serialises to an empty PHP array.
     /// </summary>
     [Test]
@@ -587,7 +636,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         DiscriminatedUnionDictionary @object = new ()
         {
-            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>()
+            OwnedStoreItemsData = new Dictionary<string, OwnedStoreItemData>()
         };
 
         string serialisedData = PhpSerialization.Serialize(@object);
@@ -624,7 +673,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         DiscriminatedUnionDictionary firstVariant = new ()
         {
-            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            OwnedStoreItemsData = new Dictionary<string, OwnedStoreItemData>
             {
                 {
                     "ai.icon:1", new StoreItemData
@@ -641,7 +690,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
 
         DiscriminatedUnionDictionary secondVariant = new ()
         {
-            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            OwnedStoreItemsData = new Dictionary<string, OwnedStoreItemData>
             {
                 {
                     "cp.coupon:1", new StoreItemDiscountCoupon
@@ -737,10 +786,10 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {
-            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>>
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, NativePropertyCollectionEntry>>
             {
                 {
-                    999, new Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>
+                    999, new Dictionary<int, NativePropertyCollectionEntry>
                     {
                         {
                             42, new ExtendedNativePropertyCollection
@@ -815,7 +864,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {
-            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>>()
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, NativePropertyCollectionEntry>>()
         };
 
         string serialisedData = PhpSerialization.Serialize(@object);
@@ -834,10 +883,10 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
     {
         NestedDiscriminatedUnionDictionary @object = new ()
         {
-            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>>
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, NativePropertyCollectionEntry>>
             {
                 {
-                    1, new Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>
+                    1, new Dictionary<int, NativePropertyCollectionEntry>
                     {
                         { 10, new NativePropertyCollection { AccountID = 10, Kills = 1, Deaths = 2, Assists = 3 } },
                         {
@@ -920,13 +969,13 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
 file class DiscriminatedUnionDictionary
 {
     [PHPProperty("owned_store_items_data", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; set; }
 }
 
 file class NestedDiscriminatedUnionDictionary
 {
     [PHPProperty("match_player_stats", isDiscriminatedUnion: true)]
-    public required Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>> MatchPlayerStatistics { get; set; }
+    public required Dictionary<int, Dictionary<int, NativePropertyCollectionEntry>> MatchPlayerStatistics { get; set; }
 }
 
 file class NativePropertyCollection
@@ -959,11 +1008,13 @@ file class ExtendedNativePropertyCollection : NativePropertyCollection
     public required string MatchPerformanceConsecutiveMatchGoldCoins { get; init; }
 }
 
+file union NativePropertyCollectionEntry(ExtendedNativePropertyCollection, NativePropertyCollection);
+
 file class DiscriminatedUnionPropertyCollection
 {
     [PHPProperty("clan_member_info", isDiscriminatedUnion: true)]
-    public required OneOf<ClanMemberData, ClanMemberDataError> ClanMembershipData { get; set; }
+    public required ClanMemberInformation ClanMembershipData { get; set; }
 
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; set; }
 }

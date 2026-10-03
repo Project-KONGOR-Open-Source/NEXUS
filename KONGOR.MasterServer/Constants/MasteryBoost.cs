@@ -8,6 +8,12 @@
 /// </remarks>
 public static class MasteryBoost
 {
+    /// <summary>
+    ///     The window of time after a match is recorded during which a mastery boost can be applied to it.
+    ///     The applied boost cache entries expire after this window, so binding the boost eligibility to it guarantees that an entry can never expire while its match is still eligible for boosting.
+    /// </summary>
+    public static readonly TimeSpan ApplicationWindow = TimeSpan.FromDays(7);
+
     public static class Regular
     {
         public const int ProductCode = 3609;

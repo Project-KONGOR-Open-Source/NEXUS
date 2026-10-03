@@ -5,8 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.4.5" />
-        <PackageReference Include="OneOf" Version="3.0.271" />
+        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.5.4" />
     </ItemGroup>
 
     <ItemGroup>

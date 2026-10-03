@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer;
+namespace KONGOR.MasterServer;
 
 public class KONGOR
 {
@@ -25,8 +25,14 @@ public class KONGOR
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
-            // Specify Migrations History Table And Schema
-            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions => sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
+            // Specify Migrations History Table And Schema, And Split Queries That Load Multiple Collection Navigations Into Separate SQL Statements
+            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions =>
+            {
+                sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema);
+
+                // Avoids The Cartesian-Explosion Warning (And Its Performance Cost) For Queries That Include More Than One Collection Navigation
+                sqlServerOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
 
             // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
@@ -204,14 +210,21 @@ public class KONGOR
             RequestPath = "/swagger"
         });
 
+        // Serve CDN Files From A Local Directory, When Configured
+        LocalCDNFileHandler.Use(application, application.Services.GetRequiredService<IOptions<OperationalConfiguration>>().Value.CDN);
+
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();
 
         // Enforce HTTPS With Strict Transport Security
         application.UseHsts();
 
-        // Automatically Redirect HTTP Requests To HTTPS
-        application.UseHttpsRedirection();
+        /*
+            Service-Wide HTTP-To-HTTPS Redirection By Means Of "application.UseHttpsRedirection()" Is Not Used Here
+            The Game Client, Match Servers, And Match Server Manager Communicate Over Plain HTTP And Do Not Follow Redirects, So A Blanket Redirect Would Only Break Them
+            This Service Always Listens On HTTP And Honours The Forwarded "X-Forwarded-Proto" Scheme
+            TLS, Where It Is Used, Is Terminated By The Fronting Gateway Rather Than By This Service (That Gateway Is A Separate Host In Production, And The Local Machine In Development)
+        */
 
         // Add Security Headers Middleware
         application.Use(async (context, next) =>

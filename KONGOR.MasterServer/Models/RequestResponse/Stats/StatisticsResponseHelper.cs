@@ -142,9 +142,9 @@ public static class StatisticsResponseHelper
     ///     Mastery boost consumables are excluded, as their counts are surfaced via the match mastery response instead.
     ///     Owned mastery coupons are surfaced as discount coupon data so the client can offer their discount in the store.
     /// </summary>
-    public static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> GetOwnedStoreItemsData(Account account)
+    public static Dictionary<string, OwnedStoreItemData> GetOwnedStoreItemsData(Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = [];
+        Dictionary<string, OwnedStoreItemData> items = [];
 
         foreach (string ownedItem in account.User.OwnedStoreItems)
         {
@@ -183,4 +183,60 @@ public static class StatisticsResponseHelper
 
         return $"{averageKills:F1}/{averageDeaths:F1}/{averageAssists:F1}";
     }
+
+    /// <summary>
+    ///     Resolves the up-to-five most-played heroes for a statistics entry, ordered by the number of matches played with each hero descending.
+    ///     Each entry pairs the hero's icon texture name with the percentage of the account's matches played with that hero and the full hero identifier.
+    /// </summary>
+    public static IReadOnlyList<FavouriteHero> GetFavouriteHeroes(AccountStatistics statistics)
+    {
+        int matchesPlayed = statistics.MatchesPlayed;
+
+        return statistics.HeroStatistics.Heroes
+            .OrderByDescending(hero => hero.GamesPlayed)
+            .Take(5)
+            .Select(hero => new FavouriteHero
+            (
+                ResolveHeroTextureName(hero.HeroIdentifier),
+                matchesPlayed is 0 ? 0.0 : Math.Round((double) hero.GamesPlayed / matchesPlayed * 100.0, 2),
+                hero.HeroIdentifier
+            ))
+            .ToList();
+    }
+
+    /// <summary>
+    ///     Resolves the icon texture name (for example "pyromancer") for a hero identifier (for example "Hero_Pyromancer") by removing the "Hero_" prefix and lower-casing the remainder.
+    /// </summary>
+    private static string ResolveHeroTextureName(string heroIdentifier)
+        => heroIdentifier.StartsWith("Hero_", StringComparison.Ordinal)
+            ? heroIdentifier["Hero_".Length..].ToLowerInvariant()
+            : heroIdentifier.ToLowerInvariant();
+
+    /// <summary>
+    ///     Calculates a per-match average of a total quantity, rounded to two decimal places.
+    ///     Returns 0 when no matches have been played.
+    /// </summary>
+    public static double CalculatePerMatchAverage(int total, int matchesPlayed)
+        => matchesPlayed is 0 ? 0.0 : Math.Round((double) total / matchesPlayed, 2);
+
+    /// <summary>
+    ///     Calculates a per-minute average of a total quantity over a duration given in seconds, rounded to two decimal places.
+    ///     Returns 0 when no time has elapsed.
+    /// </summary>
+    public static double CalculatePerMinuteAverage(int total, int seconds)
+        => seconds is 0 ? 0.0 : Math.Round(total / (seconds / 60.0), 2);
 }
+
+/// <summary>
+///     A single favourite-hero entry in a show_stats response.
+/// </summary>
+/// <param name="TextureName">
+///     The hero's icon texture name (the hero identifier with its "Hero_" prefix removed and lower-cased).
+/// </param>
+/// <param name="PlayRatePercentage">
+///     The percentage of the account's matches that have been played with this hero.
+/// </param>
+/// <param name="Identifier">
+///     The full hero identifier (for example "Hero_Pyromancer").
+/// </param>
+public record FavouriteHero(string TextureName, double PlayRatePercentage, string Identifier);

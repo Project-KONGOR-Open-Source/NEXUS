@@ -45,6 +45,8 @@ public class Account
 
     public List<string> SystemInformationHashCollection { get; set; } = [];
 
+    public ConfigurationBackup? ConfigurationBackup { get; set; } = null;
+
     [NotMapped]
     public string NameWithClanTag => Equals(Clan, null) ? Name : $"[{Clan.Tag}]{Name}";
 

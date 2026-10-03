@@ -107,6 +107,11 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
+                    b.Property<string>("Logo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -120,12 +125,77 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<DateTimeOffset>("TimestampCreated")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.HasKey("ID");
 
                     b.HasIndex("Name", "Tag")
                         .IsUnique();
 
                     b.ToTable("Clans", "core");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Message", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("BodyTitle")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("Deletable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Footer")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool>("Read")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Subtitle")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTimeOffset?>("TimestampExpires")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("TimestampSent")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID");
+
+                    b.ToTable("Messages", "core");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.User", b =>
@@ -840,6 +910,37 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.ToTable("MatchStatistics", "stat");
                 });
 
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.ConfigurationBackup", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("AutomaticUpload")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("ConfigurationArchive")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileModificationTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("UseCloud")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID")
+                        .IsUnique();
+
+                    b.ToTable("ConfigurationBackups", "misc");
+                });
+
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.RedeemableCode", b =>
                 {
                     b.Property<int>("ID")
@@ -1074,6 +1175,17 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Navigation("IgnoredPeers");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Message", b =>
+                {
+                    b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.User", b =>
@@ -1447,6 +1559,17 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Navigation("FragHistory");
                 });
 
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.ConfigurationBackup", b =>
+                {
+                    b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "Account")
+                        .WithOne("ConfigurationBackup")
+                        .HasForeignKey("MERRICK.DatabaseContext.Entities.Utility.ConfigurationBackup", "AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.RedeemableCode", b =>
                 {
                     b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "RedeemedByAccount")
@@ -1454,6 +1577,11 @@ namespace MERRICK.DatabaseContext.Migrations
                         .HasForeignKey("RedeemedByAccountID");
 
                     b.Navigation("RedeemedByAccount");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Account", b =>
+                {
+                    b.Navigation("ConfigurationBackup");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Clan", b =>

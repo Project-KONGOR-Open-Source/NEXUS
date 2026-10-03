@@ -34,4 +34,67 @@ public class AdministrationController(MerrickContext databaseContext, ILogger<Ad
 
         return CreatedAtAction(nameof(IssueHostAccountAuthorisationToken), response);
     }
+
+    /// <summary>
+    ///     Broadcasts a system message to every account's in-game inbox.
+    ///     This is the retroactive counterpart to the system messages seeded at account creation: it reaches accounts that already exist.
+    /// </summary>
+    [HttpPost("Broadcast", Name = "Broadcast System Message To All Accounts")]
+    [Authorize(Policy = UserRoles.RolesWithElevatedPrivileges)]
+    [ProducesResponseType(typeof(BroadcastSystemMessageResultDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> BroadcastSystemMessage([FromBody] BroadcastSystemMessageDTO payload)
+    {
+        int messageSubjectMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Subject));
+        int messageSubtitleMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Subtitle));
+        int messageBodyTitleMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.BodyTitle));
+        int messageBodyMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Body));
+        int messageFooterMaximumLength = typeof(Message).GetMaximumLength(nameof(Message.Footer));
+
+        if (string.IsNullOrWhiteSpace(payload.Subject) || payload.Subject.Length > messageSubjectMaximumLength)
+            return BadRequest($@"The Subject Is Required And Must Not Exceed {messageSubjectMaximumLength} Characters");
+
+        if (string.IsNullOrWhiteSpace(payload.Body) || payload.Body.Length > messageBodyMaximumLength)
+            return BadRequest($@"The Body Is Required And Must Not Exceed {messageBodyMaximumLength} Characters");
+
+        if (payload.Subtitle?.Length > messageSubtitleMaximumLength)
+            return BadRequest($@"The Subtitle Must Not Exceed {messageSubtitleMaximumLength} Characters");
+
+        if (payload.BodyTitle?.Length > messageBodyTitleMaximumLength)
+            return BadRequest($@"The Body Title Must Not Exceed {messageBodyTitleMaximumLength} Characters");
+
+        if (payload.Footer?.Length > messageFooterMaximumLength)
+            return BadRequest($@"The Footer Must Not Exceed {messageFooterMaximumLength} Characters");
+
+        List<int> accountIDs = await MerrickContext.Accounts.Select(account => account.ID).ToListAsync();
+
+        // Messages Are Inserted In Batches So That A Broadcast To Many Accounts Does Not Build One Enormous Transaction Or Change-Tracker Graph.
+        const int messageBroadcastBatchSize = 1000;
+
+        for (int index = 0; index < accountIDs.Count; index += messageBroadcastBatchSize)
+        {
+            IEnumerable<Message> batch = accountIDs
+                .Skip(index)
+                .Take(messageBroadcastBatchSize)
+                .Select(accountID => new Message
+                {
+                    AccountID = accountID,
+                    Subject = payload.Subject,
+                    Subtitle = payload.Subtitle ?? string.Empty,
+                    BodyTitle = payload.BodyTitle ?? string.Empty,
+                    Body = payload.Body,
+                    Footer = payload.Footer ?? string.Empty
+                });
+
+            await MerrickContext.Messages.AddRangeAsync(batch);
+            await MerrickContext.SaveChangesAsync();
+
+            // Detach The Just-Saved Messages So The Change Tracker Does Not Accumulate Across Batches
+            MerrickContext.ChangeTracker.Clear();
+        }
+
+        Logger.LogInformation(@"Broadcast A System Message (""{Subject}"") To {AccountCount} Account(s)", payload.Subject, accountIDs.Count);
+
+        return Ok(new BroadcastSystemMessageResultDTO(accountIDs.Count));
+    }
 }

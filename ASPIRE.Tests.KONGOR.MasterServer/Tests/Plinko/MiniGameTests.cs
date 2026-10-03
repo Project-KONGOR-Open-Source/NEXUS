@@ -11,7 +11,7 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
 
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
     [Test]
     public async Task Index_With_Invalid_Cookie_Returns_Status_Zero()

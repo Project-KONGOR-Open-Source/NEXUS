@@ -3,13 +3,13 @@ namespace ASPIRE.Tests.Infrastructure.Hooks;
 /// <summary>
 ///     Provides shared assembly-level hooks for integration tests.
 ///     Call <see cref="EnsureContainerImagesArePulled"/> from each downstream test project's <c>[Before(HookType.Assembly)]</c> method so that Docker images are pulled up front and test timings remain accurate.
-///     This includes SQL Server, Redis, and any other containerised dependencies required by the test suite.
+///     This includes SQL Server, the distributed cache, and any other containerised dependencies required by the test suite.
 /// </summary>
 public static class IntegrationAssemblyHooks
 {
     /// <summary>
     ///     Pre-pulls every container image used by the integration test suite, and seeds the placeholder connection-string configuration that Aspire's service-specific integrations validate eagerly during host build.
-    ///     <c>ConnectionStrings:MERRICK</c> satisfies the SQL Server integration (<c>AddSqlServerDbContext</c>), and <c>ConnectionStrings:DISTRIBUTED-CACHE</c> satisfies the Redis integration (<c>AddStackExchangeRedisDistributedCaching</c>).
+    ///     <c>ConnectionStrings:MERRICK</c> satisfies the SQL Server integration (<c>AddSqlServerDbContext</c>), and <c>ConnectionStrings:DISTRIBUTED-CACHE</c> satisfies the distributed cache integration (<c>AddStackExchangeRedisDistributedCaching</c>).
     ///     The real per-test connection strings are wired up inside <see cref="ServiceIntegrationWebApplicationFactory{TSelf, TAssemblyMarker}.ConfigureWebHost"/> which removes and re-registers the relevant services before they are resolved.
     /// </summary>
     public static async Task EnsureContainerImagesArePulled()
@@ -22,7 +22,7 @@ public static class IntegrationAssemblyHooks
         string[] imagesToPull =
         [
             SQLServerContainer.Image,
-            RedisContainer.Image,
+            DistributedCacheContainer.Image,
             WireMockContainer.Image
         ];
 

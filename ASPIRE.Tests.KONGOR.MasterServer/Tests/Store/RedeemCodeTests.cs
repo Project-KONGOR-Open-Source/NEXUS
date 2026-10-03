@@ -17,7 +17,7 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
 
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
     [Test]
     public async Task Redeem_With_Currency_Only_Code_Grants_Currency_And_Returns_Success()

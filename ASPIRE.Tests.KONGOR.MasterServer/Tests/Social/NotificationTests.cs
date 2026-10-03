@@ -7,7 +7,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
 {
     [Before(HookType.Test)]
     public Task Before_Each_Test()
-        => webApplicationFactory.WithSQLServerContainer().WithRedisContainer().InitialiseAsync();
+        => webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
     [Test]
     public async Task Deleting_A_Friend_Request_Notification_Removes_The_Pending_Request_And_Returns_Success()

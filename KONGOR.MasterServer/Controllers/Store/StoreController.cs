@@ -195,7 +195,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         if (categoryIDString is null)
             return BadRequest(@"Missing Value For Form Parameter ""category_id""");
 
-        // The Match Stats Screen Signals A Post-Match Boost Purchase With A "MASTERY" Category; The Hero And Experience Are Resolved Server-Side From The Cached Boost Context
+        // The Match Stats Screen Signals A Post-Match Boost Purchase With A "MASTERY" Category; The Purchase Only Adds The Consumable, Which The Client Then Applies With A Follow-Up "boost_match_mastery" Request
         if (categoryIDString.StartsWith("MASTERY", StringComparison.Ordinal) && productID == MasteryBoost.Regular.ProductCode)
             return await PurchaseMasteryBoostFromMatchStatsScreen(account);
 
@@ -533,62 +533,33 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     }
 
     /// <summary>
-    ///     Purchases and immediately applies a regular mastery boost from the post-match stats screen.
-    ///     The hero and the experience to award are read from the boost context cached during the match stats request, so the values are server-computed rather than trusted from the client.
+    ///     Purchases a regular mastery boost consumable from the post-match stats screen.
+    ///     The client applies the purchased boost with a follow-up "boost_match_mastery" request, so the purchase itself only adds the consumable.
     /// </summary>
     private async Task<IActionResult> PurchaseMasteryBoostFromMatchStatsScreen(Account account)
     {
-        string cookie = Request.Form["cookie"].ToString();
+        StoreItem? storeItem = StoreItems.GetByID(MasteryBoost.Regular.ProductCode);
 
-        MasteryBoostContext? boostContext = await DistributedCache.GetMasteryBoostContext(cookie);
-
-        if (boostContext is null)
-            return UnprocessableEntity("Mastery Boost Context Was Not Found Or Has Expired");
-
-        string heroIdentifier = boostContext.HeroIdentifier;
-        int boostExperience = boostContext.Experience;
-
-        Mastery? mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID);
-
-        if (mastery is null)
+        if (storeItem is null)
         {
-            mastery = new Mastery { Account = account };
+            Dictionary<string, object> missingItemResponse = new ()
+            {
+                ["popupCode"] = (int) StorePopupCode.POP_UP_ERROR_MESSAGE,
+                ["errorCode"] = (int) StoreErrorCode.STORE_PURCHASE_ITEM_MISSING_ERROR
+            };
 
-            MerrickContext.Masteries.Add(mastery);
+            return Ok(PhpSerialization.Serialize(missingItemResponse));
         }
 
-        Dictionary<string, object> response = new ();
+        (Dictionary<string, object> response, bool success) = ExecuteMasteryBoostPurchase(account.User, storeItem);
 
-        if (account.User.GoldCoins < MasteryBoost.Regular.GoldCost)
+        if (success)
         {
-            response["popupCode"] = (int) StorePopupCode.POP_UP_ERROR_MESSAGE;
-            response["errorCode"] = (int) StoreErrorCode.STORE_PURCHASE_POINT_ERROR;
+            await MerrickContext.SaveChangesAsync();
 
-            return Ok(PhpSerialization.Serialize(response));
+            response["product_id"]         = MasteryBoost.Regular.ProductCode;
+            response["_confirm_submitted"] = true;
         }
-
-        int currentExperience = mastery.GetHeroExperienceByHeroIdentifier(heroIdentifier);
-        int previousLevel = Mastery.GetLevelFromExperience(currentExperience);
-
-        mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + boostExperience);
-
-        account.User.GoldCoins -= MasteryBoost.Regular.GoldCost;
-
-        int currentLevel = Mastery.GetLevelFromExperience(currentExperience + boostExperience);
-
-        // A Single Boost Can Never Award Enough Experience To Cross More Than One Mastery Level
-        if (currentLevel == previousLevel + 1)
-            MasteryConsumables.IssueHeroMasteryLevelReward(account.User, currentLevel, heroIdentifier, Logger);
-
-        await MerrickContext.SaveChangesAsync();
-
-        // The Boost Context Is Single-Use; Clear It So The Boost Cannot Be Re-Applied From A Stale Cache Entry
-        await DistributedCache.RemoveMasteryBoostContext(cookie);
-
-        response["popupCode"]          = (int) StorePopupCode.POP_UP_PRODUCT_PURCHASE_SUCCESS;
-        response["errorCode"]          = 0;
-        response["product_id"]         = MasteryBoost.Regular.ProductCode;
-        response["_confirm_submitted"] = true;
 
         return Ok(PhpSerialization.Serialize(response));
     }

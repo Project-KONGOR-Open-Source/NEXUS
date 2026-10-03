@@ -77,7 +77,7 @@ public static partial class DistributedCacheExtensions
     }
 
     /// <summary>
-    ///     The Redis pub/sub channel on which account logout notifications are published by the master server and consumed by the chat server.
+    ///     The distributed cache pub/sub channel on which account logout notifications are published by the master server and consumed by the chat server.
     ///     Used to force-terminate any active TCP chat session for the logged-out account, so that peers no longer see them as connected even if the client's chat socket has not closed.
     /// </summary>
     public const string AccountLogoutChannel = "ACCOUNT-LOGOUT";

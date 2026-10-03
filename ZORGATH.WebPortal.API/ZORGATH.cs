@@ -20,7 +20,13 @@ public class ZORGATH
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
             // Specify Migrations History Table And Schema
-            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions => sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
+            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions =>
+            {
+                sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema);
+
+                // Avoids The Cartesian-Explosion Warning (And Its Performance Cost) For Queries That Include More Than One Collection Navigation
+                sqlServerOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+            });
 
             // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());

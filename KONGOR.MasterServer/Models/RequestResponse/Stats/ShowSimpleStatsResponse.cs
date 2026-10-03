@@ -151,7 +151,7 @@ public class ShowSimpleStatsResponse
     ///     Metadata attached to each of the account's owned store items.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; set; }
 
     /// <summary>
     ///     Tokens for the Kros Dice random ability draft that players can use while dead or in spawn in a Kros Mode match.

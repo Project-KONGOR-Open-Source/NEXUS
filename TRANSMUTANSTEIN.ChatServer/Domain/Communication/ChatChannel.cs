@@ -49,7 +49,9 @@ public class ChatChannel
         if (channelName.Equals(ChatProtocol.CHAT_CHANNEL_BASE_NAME, StringComparison.OrdinalIgnoreCase))
             return GetOrCreateGeneralChannel();
 
-        bool isClanChannel = session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
+        Clan? clan = session.Account.Clan;
+
+        bool isClanChannel = clan is not null && channelName == clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
@@ -59,7 +61,7 @@ public class ChatChannel
         {
             Name = channelName,
             Flags = chatChannelType,
-            Topic = $"Welcome To The {channelName} Channel !"
+            Topic = clan is not null && isClanChannel ? clan.GetDefaultWelcomeMessage() : $"Welcome To The {channelName} Channel !"
         });
 
         return channel;
@@ -151,16 +153,16 @@ public class ChatChannel
         return channel;
     }
 
-    public static ChatChannel Get(ClientChatSession session, OneOf<string, int> channelIdentifier)
+    public static ChatChannel Get(ClientChatSession session, ChatChannelIdentifier channelIdentifier)
     {
-        ChatChannel channel = channelIdentifier.Match
-        (
-            channelName => Context.ChatChannels.Values
+        ChatChannel channel = channelIdentifier switch
+        {
+            string channelName => Context.ChatChannels.Values
                 .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.Account.Name)),
 
-            channelID => Context.ChatChannels.Values
+            int channelID      => Context.ChatChannels.Values
                 .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.Account.Name))
-        );
+        };
 
         return channel;
     }
@@ -190,8 +192,7 @@ public class ChatChannel
         // Reject Join Request If Client Is Already In The Channel
         if (Members.ContainsKey(session.Account.Name))
         {
-            // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
-            // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
+            SendSystemMessage(session, "You Are Already A Member Of This Channel");
 
             return this;
         }
@@ -214,20 +215,31 @@ public class ChatChannel
         {
             if (session.Account.Clan is null || Name != session.Account.Clan.GetChatChannelName())
             {
-                // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
-                // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
+                SendSystemMessage(session, "Only Clan Members Can Join This Channel");
 
                 return this;
             }
         }
 
-        // TODO: Reject Join Request If The Channel Has The CHAT_CHANNEL_FLAG_UNJOINABLE Flag
+        // Reject Manual Join Requests For Channels Flagged As Unjoinable, Such As Matchmaking Group Channels
+        // Internal Joins Bypass This Path By Adding Members Directly, Mirroring The Forced-Join Behaviour Of The Authoritative "CChannel::CanJoin"
+        if (Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_UNJOINABLE))
+        {
+            SendSystemMessage(session, "This Channel Cannot Be Joined");
 
-        // TODO: Reject Join Request As Non-Administrator If Channel Is Full
+            return this;
+        }
 
-        // TODO: Reject Join Request If Response Buffer Would Overlow With A Data Size Greater Than 16384 Bytes (16 Kilobytes)
-
+        // The New Member Is Constructed Here So That Its Channel Administrator Status Can Be Evaluated For The Capacity Check Below
         ChatChannelMember newMember = new (session, this);
+
+        // Reject Join Request If The Channel Is Full, Unless The Joining Client Is A Channel Administrator (Who May Still Join For Moderation)
+        if (IsFull && newMember.IsAdministrator is false)
+        {
+            SendSystemMessage(session, "This Channel Is Full");
+
+            return this;
+        }
 
         // Check For Password Protection On The Channel
         // Staff Accounts And Channel Administrators Bypass Password Checks
@@ -251,7 +263,7 @@ public class ChatChannel
                 // If Wrong Password Was Provided, Reject Join Request
                 if (Password is not null && Password.Equals(providedPassword, StringComparison.Ordinal) is false)
                 {
-                    // TODO: Send Error Response To Client Indicating Incorrect Password (Requires Direct User Messaging Implementation)
+                    SendSystemMessage(session, "Incorrect Channel Password");
 
                     return this;
                 }
@@ -294,6 +306,16 @@ public class ChatChannel
             response.WriteString(member.Account.NameColourNoPrefixCode);          // Name Colour
             response.WriteString(member.Account.IconNoPrefixCode);                // Account Icon
             response.WriteInt32(member.Account.AscensionLevel);                   // Ascension Level
+        }
+
+        // Reject The Join If The Serialised Channel State Would Exceed The Client's Receive Buffer, Rolling Back The Membership So The Client Is Not Left Half-Joined
+        if (response.Size > ChatProtocol.MAX_PACKET_SIZE)
+        {
+            Members.TryRemove(session.Account.Name, out _);
+
+            SendSystemMessage(session, "This Channel Is Too Large To Join At The Moment");
+
+            return this;
         }
 
         // Announce To The Requesting Client That They Have Joined The Channel
@@ -393,7 +415,6 @@ public class ChatChannel
             broadcast.WriteInt32(targetAccountID);             // Kicked Account ID
 
             // Announce To The Channel Members That A Client Will Be Kicked From The Channel
-            // If The Requester's Administrator Level Is Less Than Or Equal To The Target's, This Operation Fails Silently
             foreach (ChatChannelMember member in Members.Values)
                 member.Session.Send(broadcast);
 
@@ -403,7 +424,7 @@ public class ChatChannel
             Leave(targetSession);
         }
 
-        // TODO: Notify The Requester That Their Attempt To Kick The Target Failed Due To Insufficient Permissions
+        else SendSystemMessage(requesterSession, "You Do Not Have Permission To Kick That Member");
     }
 
     /// <summary>
@@ -433,7 +454,7 @@ public class ChatChannel
         // Requester Must Have Higher Administrator Level Than Target (Strict Inequality)
         if (requester.HasHigherAdministratorLevelThan(target) is false)
         {
-            // TODO: Notify Requester That They Don't Have Permission
+            SendSystemMessage(requesterSession, "You Do Not Have Permission To Silence That Member");
 
             return;
         }
@@ -471,6 +492,24 @@ public class ChatChannel
     }
 
     /// <summary>
+    ///     Sends a one-way system message to a single client to surface a channel-operation failure for which the chat protocol defines no dedicated response.
+    ///     The system message is delivered via <see cref="ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL"/>, which the client renders as a server message.
+    ///     The system message appears to originate from the channel itself, rather than from a specific user, and is sent only to the specified client session.
+    /// </summary>
+    /// <param name="session">The client session to notify.</param>
+    /// <param name="message">The human-readable message to display to the client.</param>
+    private void SendSystemMessage(ClientChatSession session, string message)
+    {
+        ChatBuffer response = new ();
+
+        response.WriteCommand(ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
+        response.WriteString(Name);    // Sender Name (The Channel The System Message Relates To)
+        response.WriteString(message); // System Message Text
+
+        session.Send(response);
+    }
+
+    /// <summary>
     ///     Sets the channel password. Requires elevated privileges.
     ///     User must be a member of the channel to set the password.
     ///     Broadcasts password change notification to all channel members.
@@ -487,7 +526,7 @@ public class ChatChannel
         // User Must Be A Member Of The Channel To Set Password
         if (Members.TryGetValue(session.Account.Name, out ChatChannelMember? member) is false)
         {
-            // TODO: Send Error Response To Client Indicating Not A Member (Requires Direct User Messaging Implementation)
+            SendSystemMessage(session, "You Must Be A Member Of This Channel To Set Its Password");
 
             return;
         }
@@ -495,7 +534,7 @@ public class ChatChannel
         // Check If Member Has Elevated Privileges, Which Are Required To Set Channel Password
         if (member.HasElevatedPrivileges() is false)
         {
-            // TODO: Send Error Response To Client Indicating Insufficient Permissions (Requires Direct User Messaging Implementation)
+            SendSystemMessage(session, "You Do Not Have Permission To Set This Channel's Password");
 
             return;
         }
@@ -822,3 +861,8 @@ public class ChatChannel
         requesterSession.Send(response);
     }
 }
+
+/// <summary>
+///     Identifies a chat channel by either its name or its ID.
+/// </summary>
+public union ChatChannelIdentifier(string, int);

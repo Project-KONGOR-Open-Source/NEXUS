@@ -2,7 +2,32 @@
 
 public static class EmailAddressHelpers
 {
-    public static IActionResult SanitizeEmailAddress(string email, IWebHostEnvironment hostEnvironment)
+    /// <summary>
+    ///     This method validates and sanitises the supplied email address.
+    ///     It returns <see langword="null"/> when sanitisation succeeds, exposing the result via <paramref name="sanitisedEmailAddress"/>, or an <see cref="IActionResult"/> describing the failure otherwise.
+    /// </summary>
+    public static IActionResult? TrySanitiseEmailAddress(string emailAddress, IWebHostEnvironment hostEnvironment, ILogger logger, out string sanitisedEmailAddress)
+    {
+        sanitisedEmailAddress = string.Empty;
+
+        IActionResult result = SanitiseEmailAddress(emailAddress, hostEnvironment);
+
+        if (result is not ContentResult contentResult)
+            return result;
+
+        if (contentResult.Content is null)
+        {
+            logger.LogError(@"[BUG] Sanitised Email Address ""{SubmittedEmailAddress}"" Is NULL", emailAddress);
+
+            return new UnprocessableEntityObjectResult($@"Unable To Process Email Address ""{emailAddress}""");
+        }
+
+        sanitisedEmailAddress = contentResult.Content;
+
+        return null;
+    }
+
+    private static IActionResult SanitiseEmailAddress(string email, IWebHostEnvironment hostEnvironment)
     {
         if (hostEnvironment.IsDevelopment() is false)
         {

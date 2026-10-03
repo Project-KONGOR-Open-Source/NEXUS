@@ -620,8 +620,8 @@ public class MatchmakingGroup
                 update.WriteInt8(member.Slot);                                           // Group Slot
 
                 // Calculate Rank Level From TMR (Campaign Level / Medal); No Medal Is Shown While The Rating's Placement Phase Is Incomplete
-                int normalRankLevel = member.IsInPlacementPhase ? 0 : CalculateCampaignLevel(member.TMR);
-                int casualRankLevel = member.IsInCasualPlacementPhase ? 0 : CalculateCampaignLevel(member.CasualTMR);
+                int normalRankLevel = member.IsInPlacementPhase ? 0 : RankExtensions.CalculateCampaignLevel(member.TMR);
+                int casualRankLevel = member.IsInCasualPlacementPhase ? 0 : RankExtensions.CalculateCampaignLevel(member.CasualTMR);
 
                 // Get Global Leaderboard Index
                 int normalGlobalLeaderboardIndex = -1; // TODO: Implement Global Leaderboard Index Calculation
@@ -891,48 +891,6 @@ public class MatchmakingGroup
         Terminal.Broadcast(Members.Count > 0 ? $"{Members.Count} Player(s) Left The Matchmaking Queue" : "A Disbanded Group Left The Matchmaking Queue", Terminal.UsersInQueuePerRegion());
 
         return true;
-    }
-
-    /// <summary>
-    ///     Calculates the campaign level (medal/rank) from TMR.
-    ///     Based on the original campaign level thresholds.
-    /// </summary>
-    /// <param name="tmr">The player's Team Match Rating.</param>
-    /// <returns>The campaign level (1-21).</returns>
-    private static int CalculateCampaignLevel(double tmr)
-    {
-        // Campaign Levels Based On TMR Thresholds
-        // Bronze 5-1: 0-999 (Levels 1-5)
-        // Silver 5-1: 1000-1249 (Levels 6-10)
-        // Gold 4-1: 1250-1449 (Levels 11-14)
-        // Diamond 3-1: 1450-1599 (Levels 15-17)
-        // Legendary 2-1: 1600-1749 (Levels 18-19)
-        // Immortal: 1750+ (Level 20-21)
-
-        return tmr switch
-        {
-            < 800  => 1,   // Bronze 5
-            < 850  => 2,   // Bronze 4
-            < 900  => 3,   // Bronze 3
-            < 950  => 4,   // Bronze 2
-            < 1000 => 5,   // Bronze 1
-            < 1050 => 6,   // Silver 5
-            < 1100 => 7,   // Silver 4
-            < 1150 => 8,   // Silver 3
-            < 1200 => 9,   // Silver 2
-            < 1250 => 10,  // Silver 1
-            < 1300 => 11,  // Gold 4
-            < 1350 => 12,  // Gold 3
-            < 1400 => 13,  // Gold 2
-            < 1450 => 14,  // Gold 1
-            < 1500 => 15,  // Diamond 3
-            < 1550 => 16,  // Diamond 2
-            < 1600 => 17,  // Diamond 1
-            < 1700 => 18,  // Legendary 2
-            < 1800 => 19,  // Legendary 1
-            < 2000 => 20,  // Immortal
-            _      => 21   // Immortal (Top Tier)
-        };
     }
 
     /// <summary>

@@ -34,27 +34,33 @@ public class ASPIRE
             : builder.AddParameter(distributedCachePasswordParameterName, secret: true);
 
         // Add Distributed Cache Resource
-        IResourceBuilder<RedisResource> distributedCache = builder.AddRedis("distributed-cache", password: distributedCachePassword)
-            .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
+        IResourceBuilder<ValkeyResource> distributedCache = builder.AddValkey("distributed-cache", password: distributedCachePassword)
+            .WithImageTag("latest") // Latest Valkey Image: https://github.com/valkey-io/valkey/releases/latest
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data As Docker-Managed Data Volume
-
-        // TODO: Consider Migrating To Valkey For Field-Level TTL Support And Native Namespace Scoping
-        // INFO: Valkey Namespaces Would Let ASPIRE.Tests Drop The Per-Factory Key-Prefix Wrapper Around IDatabase In Favour Of Real Keyspace Isolation
 
         // Create Resource Relationship After Parent Resource Is Defined
         distributedCachePassword
             .WithDescription("Distributed Cache Password") // Add Description To Parameter Resource
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
-        // Create Distributed Cache Dashboard Resource
-        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
-            .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
-            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-dashboard-data") // Persist Cached Data As Docker-Managed Data Volume
-            .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
-            .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
-
         // Add Distributed Cache Dashboard Resource
-        distributedCache.WithRedisInsight(distributedCacheDashboard, containerName: "distributed-cache-dashboard");
+        // Redis Insight Is Used Rather Than The Valkey-Native Valkey Admin Because It Pre-Configures Its Connection From "RI_REDIS_*" Environment Variables, Whereas Valkey Admin Cannot Pre-Configure A Connection For A Standalone (Non-Cluster) Node (TODO: Revisit If Valkey Admin Adds Standalone Pre-Configuration)
+        builder.AddContainer("distributed-cache-dashboard", "redis/redisinsight")
+            .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
+            .WithLifetime(ContainerLifetime.Persistent)
+            .WithHttpEndpoint(targetPort: 5540, name: "http") // Default Redis Insight Web UI Port
+            .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
+            .WithEnvironment("RI_REDIS_ALIAS0", "Distributed Cache") // Pre-Configured Connection Alias
+            .WithEnvironment("RI_REDIS_PASSWORD0", distributedCachePassword) // Pre-Configured Connection Password
+            .WithEnvironment(context => // Point The Pre-Configured Connection At The Distributed Cache Endpoint Within The Container Network
+            {
+                EndpointReference distributedCacheEndpoint = distributedCache.Resource.PrimaryEndpoint;
+
+                context.EnvironmentVariables["RI_REDIS_HOST0"] = distributedCacheEndpoint.Property(EndpointProperty.Host);
+                context.EnvironmentVariables["RI_REDIS_PORT0"] = distributedCacheEndpoint.Property(EndpointProperty.TargetPort);
+            })
+            .WaitFor(distributedCache) // Wait For The Distributed Cache To Start
+            .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
         // Set Database Password Parameter Name And Environment Variable Name
         const string databasePasswordParameterName = "database-password";

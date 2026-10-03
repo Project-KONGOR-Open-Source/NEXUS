@@ -24,7 +24,7 @@ public class GetUpgradesResponse
     ///     Detailed information about owned store items including mastery boosts and discount coupons.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; }
+    public required Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; init; }
 
     /// <summary>
     ///     The collection of selected store items.
@@ -194,10 +194,10 @@ public class FieldStatisticsEntry
         {
             AccountID = account.ID.ToString(),
             Level = account.User.TotalLevel,
-            LevelExperience = account.User.TotalExperience.ToString("F1"),
-            PublicSkillRating = GetRating(AccountStatisticsType.Public).ToString("F3"),
-            RankedMatchmakingRating = GetRating(AccountStatisticsType.Matchmaking).ToString("F3"),
-            CasualMatchmakingRating = GetRating(AccountStatisticsType.MatchmakingCasual).ToString("F3"),
+            LevelExperience = account.User.TotalExperience.ToString("F1", CultureInfo.InvariantCulture),
+            PublicSkillRating = GetRating(AccountStatisticsType.Public).ToString("F3", CultureInfo.InvariantCulture),
+            RankedMatchmakingRating = GetRating(AccountStatisticsType.Matchmaking).ToString("F3", CultureInfo.InvariantCulture),
+            CasualMatchmakingRating = GetRating(AccountStatisticsType.MatchmakingCasual).ToString("F3", CultureInfo.InvariantCulture),
             PublicGamesPlayed = aggregates.PublicGamesPlayed,
             PublicDisconnections = aggregates.PublicDisconnections,
             RankedGamesPlayed = aggregates.RankedGamesPlayed,

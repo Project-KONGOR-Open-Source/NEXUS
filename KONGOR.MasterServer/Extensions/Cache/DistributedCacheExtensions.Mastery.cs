@@ -2,30 +2,28 @@ namespace KONGOR.MasterServer.Extensions.Cache;
 
 public static partial class DistributedCacheExtensions
 {
-    private static string ConstructMasteryBoostContextKey(string cookie) => $@"MASTERY-BOOST-CONTEXT:[""{cookie}""]";
+    private static string ConstructMasteryBoostContextKey(int accountID, int matchID) => $@"MASTERY-BOOST-CONTEXT:[""{accountID}:{matchID}""]";
 
     /// <summary>
-    ///     Caches the post-match mastery boost context (the hero and the experience a regular boost would award) when the match stats screen is shown, so a subsequent boost purchase can be applied without trusting client-supplied data.
+    ///     Records the mastery boost applied to the given match, so that subsequent match statistics reads can report the applied boost and so that a second boost cannot be applied to the same match.
+    ///     The entry expires after the boost application window. Because it is written at application time, which is always within the window, it can never expire while its match is still eligible for boosting.
     /// </summary>
-    public static async Task SetMasteryBoostContext(this IDatabase distributedCacheStore, string cookie, MasteryBoostContext context)
-    {
-        string serializedContext = JsonSerializer.Serialize(context);
+    public static async Task SetMasteryBoostContext(this IDatabase distributedCacheStore, int accountID, int matchID, MasteryBoostContext masteryBoostContext)
+        => await distributedCacheStore.StringSetAsync(ConstructMasteryBoostContextKey(accountID, matchID), JsonSerializer.Serialize(masteryBoostContext), MasteryBoost.ApplicationWindow);
 
-        await distributedCacheStore.StringSetAsync(ConstructMasteryBoostContextKey(cookie), serializedContext, TimeSpan.FromHours(1));
-    }
-
-    public static async Task<MasteryBoostContext?> GetMasteryBoostContext(this IDatabase distributedCacheStore, string cookie)
+    /// <summary>
+    ///     Gets the mastery boost applied to the given match, or <see langword="null"/> if no boost has been applied to it.
+    /// </summary>
+    public static async Task<MasteryBoostContext?> GetMasteryBoostContext(this IDatabase distributedCacheStore, int accountID, int matchID)
     {
-        RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructMasteryBoostContextKey(cookie));
+        RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructMasteryBoostContextKey(accountID, matchID));
 
         return cachedValue.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MasteryBoostContext>(cachedValue.ToString());
     }
-
-    public static async Task RemoveMasteryBoostContext(this IDatabase distributedCacheStore, string cookie)
-        => await distributedCacheStore.KeyDeleteAsync(ConstructMasteryBoostContextKey(cookie));
 }
 
 /// <summary>
-///     The post-match mastery boost context: the hero played and the experience a regular mastery boost would award for that match.
+///     The mastery boost applied to a match, capturing the awarded experience and whether it was awarded by a super boost.
+///     The boost type is recorded because the client reports the experience of the two boost types in separate match statistics response fields.
 /// </summary>
-public sealed record MasteryBoostContext(string HeroIdentifier, int Experience);
+public record MasteryBoostContext(int Experience, bool IsSuperBoost);

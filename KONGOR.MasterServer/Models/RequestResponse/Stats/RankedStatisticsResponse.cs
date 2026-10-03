@@ -10,6 +10,11 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     /// </summary>
     private HeroStats Totals { get; } = statistics.HeroStatistics.AggregateTotals();
 
+    /// <summary>
+    ///     The account's up-to-five most-played heroes for this game mode, ordered by matches played descending.
+    /// </summary>
+    private IReadOnlyList<FavouriteHero> FavouriteHeroes { get; } = StatisticsResponseHelper.GetFavouriteHeroes(statistics);
+
     # region Account Information
 
     /// <summary>
@@ -128,7 +133,7 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Team/group queue matchmaking rating (MMR). Base rating is 1500.
     /// </summary>
     [PHPProperty("rnk_amm_team_rating")]
-    public string TeamRating { get; init; } = statistics.SkillRating.ToString("F3");
+    public string TeamRating { get; init; } = statistics.SkillRating.ToString("F3", CultureInfo.InvariantCulture);
 
     /// <summary>
     ///     Total team queue matches counted towards rating.
@@ -495,10 +500,10 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     public string TotalDisconnections { get; init; } = aggregates.TotalDisconnections.ToString();
 
     /// <summary>
-    ///     Number of possible disconnections (games where the player could have disconnected but did not).
+    ///     Total matches where disconnection was possible (used for leave percentage calculation).
     /// </summary>
     [PHPProperty("possible_discos")]
-    public string PossibleDisconnections { get; init; } = "0"; // TODO: Implement Data Tracking
+    public string PossibleDisconnections { get; init; } = statistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     Total games played across all PvP game modes.
@@ -621,94 +626,94 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     # region Favourite Heroes
 
     /// <summary>
-    ///     The display name of the player's most-played hero.
+    ///     The icon texture name of the player's most-played hero (the hero identifier with its "Hero_" prefix removed and lower-cased).
     /// </summary>
     [PHPProperty("favHero1")]
-    public string FavouriteHero1 { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero1 => FavouriteHeroes.ElementAtOrDefault(0)?.TextureName ?? string.Empty;
 
     /// <summary>
-    ///     The total time played (in seconds) with the player's most-played hero.
+    ///     The percentage of the player's matches played with their most-played hero.
     /// </summary>
     [PHPProperty("favHero1Time")]
-    public double FavouriteHero1Time { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double FavouriteHero1Time => FavouriteHeroes.ElementAtOrDefault(0)?.PlayRatePercentage ?? 0.0;
 
     /// <summary>
     ///     The internal identifier of the player's most-played hero (e.g., "Hero_Pyromancer").
     /// </summary>
     [PHPProperty("favHero1_2")]
-    public string FavouriteHero1Identifier { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero1Identifier => FavouriteHeroes.ElementAtOrDefault(0)?.Identifier ?? string.Empty;
 
     /// <summary>
-    ///     The display name of the player's second most-played hero.
+    ///     The icon texture name of the player's second most-played hero.
     /// </summary>
     [PHPProperty("favHero2")]
-    public string FavouriteHero2 { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero2 => FavouriteHeroes.ElementAtOrDefault(1)?.TextureName ?? string.Empty;
 
     /// <summary>
-    ///     The total time played (in seconds) with the player's second most-played hero.
+    ///     The percentage of the player's matches played with their second most-played hero.
     /// </summary>
     [PHPProperty("favHero2Time")]
-    public double FavouriteHero2Time { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double FavouriteHero2Time => FavouriteHeroes.ElementAtOrDefault(1)?.PlayRatePercentage ?? 0.0;
 
     /// <summary>
     ///     The internal identifier of the player's second most-played hero.
     /// </summary>
     [PHPProperty("favHero2_2")]
-    public string FavouriteHero2Identifier { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero2Identifier => FavouriteHeroes.ElementAtOrDefault(1)?.Identifier ?? string.Empty;
 
     /// <summary>
-    ///     The display name of the player's third most-played hero.
+    ///     The icon texture name of the player's third most-played hero.
     /// </summary>
     [PHPProperty("favHero3")]
-    public string FavouriteHero3 { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero3 => FavouriteHeroes.ElementAtOrDefault(2)?.TextureName ?? string.Empty;
 
     /// <summary>
-    ///     The total time played (in seconds) with the player's third most-played hero.
+    ///     The percentage of the player's matches played with their third most-played hero.
     /// </summary>
     [PHPProperty("favHero3Time")]
-    public double FavouriteHero3Time { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double FavouriteHero3Time => FavouriteHeroes.ElementAtOrDefault(2)?.PlayRatePercentage ?? 0.0;
 
     /// <summary>
     ///     The internal identifier of the player's third most-played hero.
     /// </summary>
     [PHPProperty("favHero3_2")]
-    public string FavouriteHero3Identifier { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero3Identifier => FavouriteHeroes.ElementAtOrDefault(2)?.Identifier ?? string.Empty;
 
     /// <summary>
-    ///     The display name of the player's fourth most-played hero.
+    ///     The icon texture name of the player's fourth most-played hero.
     /// </summary>
     [PHPProperty("favHero4")]
-    public string FavouriteHero4 { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero4 => FavouriteHeroes.ElementAtOrDefault(3)?.TextureName ?? string.Empty;
 
     /// <summary>
-    ///     The total time played (in seconds) with the player's fourth most-played hero.
+    ///     The percentage of the player's matches played with their fourth most-played hero.
     /// </summary>
     [PHPProperty("favHero4Time")]
-    public double FavouriteHero4Time { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double FavouriteHero4Time => FavouriteHeroes.ElementAtOrDefault(3)?.PlayRatePercentage ?? 0.0;
 
     /// <summary>
     ///     The internal identifier of the player's fourth most-played hero.
     /// </summary>
     [PHPProperty("favHero4_2")]
-    public string FavouriteHero4Identifier { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero4Identifier => FavouriteHeroes.ElementAtOrDefault(3)?.Identifier ?? string.Empty;
 
     /// <summary>
-    ///     The display name of the player's fifth most-played hero.
+    ///     The icon texture name of the player's fifth most-played hero.
     /// </summary>
     [PHPProperty("favHero5")]
-    public string FavouriteHero5 { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero5 => FavouriteHeroes.ElementAtOrDefault(4)?.TextureName ?? string.Empty;
 
     /// <summary>
-    ///     The total time played (in seconds) with the player's fifth most-played hero.
+    ///     The percentage of the player's matches played with their fifth most-played hero.
     /// </summary>
     [PHPProperty("favHero5Time")]
-    public double FavouriteHero5Time { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double FavouriteHero5Time => FavouriteHeroes.ElementAtOrDefault(4)?.PlayRatePercentage ?? 0.0;
 
     /// <summary>
     ///     The internal identifier of the player's fifth most-played hero.
     /// </summary>
     [PHPProperty("favHero5_2")]
-    public string FavouriteHero5Identifier { get; init; } = string.Empty; // TODO: Implement Data Tracking
+    public string FavouriteHero5Identifier => FavouriteHeroes.ElementAtOrDefault(4)?.Identifier ?? string.Empty;
 
     # endregion
 
@@ -754,7 +759,7 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     Detailed information about owned store items, including expiration and discount coupons.
     /// </summary>
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
-    public Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; } = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
+    public Dictionary<string, OwnedStoreItemData> OwnedStoreItemsData { get; init; } = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
     /// <summary>
     ///     The creep level for creep cosmetics progression.
@@ -798,43 +803,43 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     ///     The average game length in seconds.
     /// </summary>
     [PHPProperty("avgGameLength")]
-    public double AverageGameLength { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double AverageGameLength => StatisticsResponseHelper.CalculatePerMatchAverage(Totals.SecondsPlayed, statistics.MatchesPlayed);
 
     /// <summary>
     ///     The average experience earned per minute.
     /// </summary>
     [PHPProperty("avgXP_min")]
-    public double AverageExperiencePerMinute { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double AverageExperiencePerMinute => StatisticsResponseHelper.CalculatePerMinuteAverage(Totals.Experience, Totals.TimeEarningExperience);
 
     /// <summary>
     ///     The average denies per game.
     /// </summary>
     [PHPProperty("avgDenies")]
-    public double AverageDenies { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double AverageDenies => StatisticsResponseHelper.CalculatePerMatchAverage(Totals.Denies, statistics.MatchesPlayed);
 
     /// <summary>
     ///     The average creep kills per game.
     /// </summary>
     [PHPProperty("avgCreepKills")]
-    public double AverageCreepKills { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double AverageCreepKills => StatisticsResponseHelper.CalculatePerMatchAverage(Totals.TeamCreepKills, statistics.MatchesPlayed);
 
     /// <summary>
     ///     The average neutral creep kills per game.
     /// </summary>
     [PHPProperty("avgNeutralKills")]
-    public double AverageNeutralKills { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double AverageNeutralKills => StatisticsResponseHelper.CalculatePerMatchAverage(Totals.NeutralCreepKills, statistics.MatchesPlayed);
 
     /// <summary>
     ///     The average actions (commands issued) per minute.
     /// </summary>
     [PHPProperty("avgActions_min")]
-    public double AverageActionsPerMinute { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double AverageActionsPerMinute => StatisticsResponseHelper.CalculatePerMinuteAverage(Totals.Actions, Totals.SecondsPlayed);
 
     /// <summary>
     ///     The average wards placed per game.
     /// </summary>
     [PHPProperty("avgWardsUsed")]
-    public double AverageWardsUsed { get; init; } = 0.0; // TODO: Implement Data Tracking
+    public double AverageWardsUsed => StatisticsResponseHelper.CalculatePerMatchAverage(Totals.WardsPlaced, statistics.MatchesPlayed);
 
     # endregion
 
