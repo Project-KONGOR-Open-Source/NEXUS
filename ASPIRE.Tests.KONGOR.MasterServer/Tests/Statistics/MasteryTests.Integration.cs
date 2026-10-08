@@ -683,6 +683,55 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
         await Assert.That(Convert.ToInt32(body["error_code"])).IsEqualTo(5);
     }
 
+    [Test]
+    public async Task Purchasing_A_Heros_Last_Avatar_Exchanges_That_Heros_Mastery_Coupon_For_The_All_Avatar_Coupon()
+    {
+        List<string> qiAvatars = MasteryCouponHelper.ApplicableAvatars("Hero_Chi");
+
+        StoreItem lastAvatar = JSONConfiguration.StoreItemsConfiguration.GetEnabledItemsByType(StoreItemType.AlternativeAvatar)
+            .Single(item => item.PrefixedCode == qiAvatars[^1]);
+
+        (string cookie, int accountID, int userID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "coupon.exchange@kongor.com", "CouponExchange", goldCoins: lastAvatar.GoldCost, silverCoins: 0, plinkoTickets: 0);
+
+        using (IServiceScope scope = webApplicationFactory.Services.CreateScope())
+        {
+            MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+            User seededUser = await databaseContext.Users.SingleAsync(candidate => candidate.ID == userID);
+
+            seededUser.OwnedStoreItems.AddRange(qiAvatars.SkipLast(1));
+            seededUser.OwnedStoreItems.Add("cp.Qi Mastery Coupon * 1");
+
+            await databaseContext.SaveChangesAsync();
+        }
+
+        HttpClient client = webApplicationFactory.CreateClient();
+
+        HttpResponseMessage response = await client.PostAsync("/store_requester.php", new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["cookie"]       = cookie,
+            ["account_id"]   = accountID.ToString(),
+            ["request_code"] = "4",
+            ["product_id"]   = lastAvatar.ID.ToString(),
+            ["currency"]     = "0",
+            ["category_id"]  = "2", // The "Hero Avatars" Store Category (A File-Scoped Enumeration In The Store Controller)
+            ["page"]         = "1",
+            ["hostTime"]     = "0",
+            ["discount"]     = "0"
+        }));
+
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+
+        User user = await RedeemCodeTestsHelper.LoadUser(webApplicationFactory, userID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(user.OwnedStoreItems).Contains(lastAvatar.PrefixedCode);
+            await Assert.That(user.OwnedStoreItems.Any(item => item.StartsWith("cp.Qi Mastery Coupon * ", StringComparison.Ordinal))).IsFalse();
+            await Assert.That(user.OwnedStoreItems).Contains("cp.All Avatar Mastery Coupon * 1");
+        }
+    }
+
     /// <summary>
     ///     A deserialised PHP array is a list when its keys are consecutive integers and a dictionary otherwise, so both shapes are enumerated uniformly here.
     /// </summary>

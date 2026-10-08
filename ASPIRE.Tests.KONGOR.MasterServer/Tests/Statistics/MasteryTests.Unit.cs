@@ -174,6 +174,23 @@ public sealed class MasteryTests_Unit
     }
 
     [Test]
+    public async Task ResolveUnusableCoupons_Only_Considers_The_Avatars_Of_The_Coupons_Exact_Hero()
+    {
+        // "Hero_Chi" (Qi) Is A Prefix Of "Hero_Chipper", Whose Avatars Must Not Count Towards Qi's Coupon
+        List<string> qiAvatars = MasteryCouponHelper.ApplicableAvatars("Hero_Chi");
+
+        User user = BuildUser([.. qiAvatars, "cp.Qi Mastery Coupon * 1"]);
+
+        MasteryConsumables.ResolveUnusableCoupons(user);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(user.OwnedStoreItems.Any(item => item.StartsWith("cp.Qi Mastery Coupon * ", StringComparison.Ordinal))).IsFalse();
+            await Assert.That(user.OwnedStoreItems).Contains("cp.All Avatar Mastery Coupon * 1");
+        }
+    }
+
+    [Test]
     [Arguments("Blood Hunter", "Hero_Hunter")]
     [Arguments("Amun-Ra", "Hero_Ra")]
     [Arguments("amun-ra", "Hero_Ra")]
