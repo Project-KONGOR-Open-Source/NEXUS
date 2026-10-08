@@ -145,9 +145,7 @@ public static class MasteryConsumables
             if (ownedCoupon is null)
                 continue;
 
-            List<string> applicableAvatars = JSONConfiguration.StoreItemsConfiguration.GetEnabledItemsByType(StoreItemType.AlternativeAvatar)
-                .Where(item => item.Code.StartsWith(coupon.Hero, StringComparison.Ordinal))
-                .Select(item => item.PrefixedCode).ToList();
+            List<string> applicableAvatars = MasteryCouponHelper.ApplicableAvatars(coupon.Hero);
 
             bool unusable = applicableAvatars.Intersect(user.OwnedStoreItems).Count() == applicableAvatars.Count;
 

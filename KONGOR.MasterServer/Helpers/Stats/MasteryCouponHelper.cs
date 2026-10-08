@@ -60,7 +60,7 @@ public static class MasteryCouponHelper
     ///     The prefixed codes of the alternative avatars a coupon for the given hero applies to.
     ///     The all-avatar coupon (an empty hero identifier) applies to every alternative avatar.
     /// </summary>
-    private static List<string> ApplicableAvatars(string heroIdentifier)
+    public static List<string> ApplicableAvatars(string heroIdentifier)
     {
         IEnumerable<StoreItem> avatars = JSONConfiguration.StoreItemsConfiguration.GetEnabledItemsByType(StoreItemType.AlternativeAvatar);
 

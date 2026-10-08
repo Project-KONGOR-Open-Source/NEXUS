@@ -12,6 +12,7 @@ namespace MERRICK.DatabaseContext.Entities.Statistics;
 ///     </para>
 ///     <para>
 ///         Match experience for ranked normal matchmaking is the hero level multiplied by twenty, while ranked casual matchmaking and MidWars award the hero level multiplied by ten.
+///         Each hero at the maximum mastery level adds one point of bonus experience (half, rounded up, for the reduced-experience game modes), but the bonus never exceeds half of the match experience.
 ///         On average, the maximum mastery level is achieved in roughly one hundred full-experience matches or two hundred reduced-experience matches.
 ///     </para>
 /// </remarks>
@@ -38,6 +39,11 @@ public class Mastery
     public const int MaximumMasteryLevel = 15;
 
     /// <summary>
+    ///     The experience threshold of the maximum mastery level, at which a hero's mastery experience is capped.
+    /// </summary>
+    public const int MaximumMasteryExperience = 36100;
+
+    /// <summary>
     ///     The mastery experience accumulated for the hero with the given identifier (for example "Hero_Accursed"), or zero if the hero has no accumulated experience.
     /// </summary>
     public int GetHeroExperienceByHeroIdentifier(string identifier)
@@ -51,16 +57,19 @@ public class Mastery
 
     /// <summary>
     ///     Sets the mastery experience accumulated for the hero with the given identifier (for example "Hero_Accursed"), creating the entry if the hero has not been progressed before.
+    ///     The experience is capped at <see cref="MaximumMasteryExperience"/>, because a hero cannot progress beyond the maximum mastery level.
     /// </summary>
     public void SetHeroExperienceByHeroIdentifier(string identifier, int experience)
     {
+        int cappedExperience = Math.Min(experience, MaximumMasteryExperience);
+
         HeroMasteryExperience? entry = HeroExperiences.SingleOrDefault(entry => entry.HeroIdentifier.Equals(identifier));
 
         if (entry is null)
-            HeroExperiences.Add(new HeroMasteryExperience { HeroIdentifier = identifier, Experience = experience });
+            HeroExperiences.Add(new HeroMasteryExperience { HeroIdentifier = identifier, Experience = cappedExperience });
 
         else
-            entry.Experience = experience;
+            entry.Experience = cappedExperience;
     }
 
     /// <summary>
@@ -79,16 +88,9 @@ public class Mastery
     public int HeroesAtMaximumMasteryCount() => HeroExperiences.Count(entry => GetLevelFromExperience(entry.Experience) == MaximumMasteryLevel);
 
     /// <summary>
-    ///     The percentage of all heroes that have reached the maximum mastery level.
-    ///     The total number of heroes is supplied by the caller, because heroes with no accumulated experience are not stored.
-    /// </summary>
-    public float HeroesAtMaximumMasteryPercentage(int totalHeroCount)
-        => totalHeroCount <= 0 ? 0f : Convert.ToSingle(HeroesAtMaximumMasteryCount()) / Convert.ToSingle(totalHeroCount) * 100f;
-
-    /// <summary>
     ///     The base mastery experience awarded for a single match of the given type, scaled by the hero level reached during the match.
     /// </summary>
-    public int CalculateMatchExperience(AccountStatisticsType type, int heroLevel)
+    public static int CalculateMatchExperience(AccountStatisticsType type, int heroLevel)
     {
         const int factor = 20;
 
@@ -102,45 +104,27 @@ public class Mastery
     }
 
     /// <summary>
-    ///     The bonus mastery experience awarded for a single match, scaled by the percentage of all heroes already at the maximum mastery level.
-    ///     Ranked casual matchmaking and MidWars award half of the bonus that ranked normal matchmaking awards.
+    ///     The bonus mastery experience awarded for a single match, which is one point for each hero at the maximum mastery level.
+    ///     Ranked casual matchmaking and MidWars award half of the bonus, rounded up, in line with their halved match experience.
+    ///     The bonus never exceeds half of the match experience, so that a short match cannot earn more from the bonus than from playing.
     /// </summary>
-    public int CalculateBonusExperience(AccountStatisticsType type, int totalHeroCount)
+    public static int CalculateBonusExperience(AccountStatisticsType type, int matchExperience, int heroesAtMaximumMasteryCount)
     {
-        int experience = HeroesAtMaximumMasteryPercentage(totalHeroCount) switch
+        int experience = type switch
         {
-            float.NaN         =>  000,
-             < 05             =>  000,
-            >= 05  and  < 10  =>  010,
-            >= 10  and  < 20  =>  020,
-            >= 20  and  < 30  =>  030,
-            >= 30  and  < 40  =>  040,
-            >= 40  and  < 50  =>  050,
-            >= 50  and  < 60  =>  060,
-            >= 60  and  < 70  =>  070,
-            >= 70  and  < 80  =>  080,
-            >= 80  and  < 90  =>  090,
-            >= 90             =>  100
+            AccountStatisticsType.Matchmaking       => heroesAtMaximumMasteryCount,
+            AccountStatisticsType.MatchmakingCasual => (heroesAtMaximumMasteryCount + 1) / 2,
+            AccountStatisticsType.MidWars           => (heroesAtMaximumMasteryCount + 1) / 2,
+            _                                       => 0
         };
 
-        return type switch
-        {
-            AccountStatisticsType.Matchmaking        =>  experience,
-            AccountStatisticsType.MatchmakingCasual  =>  experience / 2,
-            AccountStatisticsType.MidWars            =>  experience / 2,
-            _                                        =>  0
-        };
+        return Math.Min(experience, matchExperience / 2);
     }
 
     /// <summary>
-    ///     The combined base and bonus mastery experience awarded for a single match.
+    ///     The mastery experience awarded by a regular mastery boost, which is double the combined match and bonus experience of the boosted match.
     /// </summary>
-    public int CalculateMatchAndBonusExperience(AccountStatisticsType type, int heroLevel, int totalHeroCount) => CalculateMatchExperience(type, heroLevel) + CalculateBonusExperience(type, totalHeroCount);
-
-    /// <summary>
-    ///     The mastery experience awarded by a regular mastery boost, which is double the combined base and bonus match experience.
-    /// </summary>
-    public int CalculateRegularMasteryBoostExperience(AccountStatisticsType type, int heroLevel, int totalHeroCount) => CalculateMatchAndBonusExperience(type, heroLevel, totalHeroCount) * 2;
+    public static int CalculateRegularMasteryBoostExperience(int matchExperience, int bonusExperience) => (matchExperience + bonusExperience) * 2;
 
     /// <summary>
     ///     The mastery level for the given mastery experience.

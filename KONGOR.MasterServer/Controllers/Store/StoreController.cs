@@ -494,6 +494,9 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         // Mark Any Featured Bundles As Owned If All Their Individual Products Are Now Owned
         MarkCompletedFeaturedBundlesAsOwned(user);
 
+        // Owning More Alternative Avatars Can Leave A Hero's Mastery Coupon Without Any Avatar To Apply It To, In Which Case It Is Exchanged For The All-Avatar Mastery Coupon
+        MasteryConsumables.ResolveUnusableCoupons(user);
+
         response["popupCode"] = (int) StorePopupCode.POP_UP_PRODUCT_PURCHASE_SUCCESS;
         response["errorCode"] = 0;
 

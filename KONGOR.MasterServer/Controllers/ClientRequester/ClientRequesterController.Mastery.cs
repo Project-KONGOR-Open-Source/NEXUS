@@ -70,6 +70,13 @@ public partial class ClientRequesterController
         if (account is null)
             return MasteryErrorResponse(1, $@"Account With Name ""{accountName}"" Could Not Be Found");
 
+        global::KONGOR.MasterServer.Configuration.Mastery.MasteryReward? reward = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards
+            .SingleOrDefault(reward => reward.RequiredLevel == level);
+
+        // Error Code 5 Matches The Original API's "Mastery Reward Invalid" Code
+        if (reward is null)
+            return MasteryErrorResponse(5, $"No Level {level} Reward Found");
+
         MasteryRewards? rewards = await MerrickContext.MasteryRewards.SingleOrDefaultAsync(record => record.AccountID == account.ID);
 
         if (rewards is null)
@@ -83,12 +90,11 @@ public partial class ClientRequesterController
         if (rewards.HasObtained(level))
             return MasteryErrorResponse(3, $"Level {level} Reward Has Already Been Obtained");
 
-        global::KONGOR.MasterServer.Configuration.Mastery.MasteryReward? reward = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards
-            .SingleOrDefault(reward => reward.RequiredLevel == level);
+        Mastery? mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID);
 
-        // Error Code 4 Matches The Original API's "Reward Does Not Exist" Code
-        if (reward is null)
-            return MasteryErrorResponse(4, $"No Level {level} Reward Found");
+        // Error Code 4 Matches The Original API's "Reward Does Not Exist" Code, Which It Returned For Reward Tiers The Account Had Not Unlocked Yet
+        if ((mastery?.TotalMasteryLevel() ?? 0) < level)
+            return MasteryErrorResponse(4, $"Level {level} Reward Requires A Total Mastery Level Of {level}");
 
         User user = account.User;
 
@@ -100,6 +106,8 @@ public partial class ClientRequesterController
                 case "Mastery Boost Bundle": MasteryConsumables.AddMasteryBoost(user, 10); break;
                 case "Super Mastery Boost":  MasteryConsumables.AddSuperMasteryBoost(user, reward.ProductQuantity); break;
 
+                // TODO: Implement Sub-Accounts
+                // The "Sub-Account" Reward Is Granted Here As An Owned Store Item, But Owning It Has No Effect Until Sub-Accounts Are Implemented
                 default:
                 {
                     if (reward.ProductCode is not null && user.OwnedStoreItems.Contains(reward.ProductCode).Equals(false))
@@ -122,8 +130,8 @@ public partial class ClientRequesterController
     }
 
     /// <summary>
-    ///     Applies an owned mastery boost to the hero played in the given match, consuming the boost and issuing a level reward if the hero crosses a mastery level.
-    ///     A regular boost adds double the combined base and bonus match experience, while a super boost advances the hero to the start of the next mastery level.
+    ///     Applies an owned mastery boost to the hero played in the given match, consuming the boost, recording it on the match, and issuing a level reward if the hero crosses a mastery level.
+    ///     A regular boost adds double the match and bonus experience of the match, while a super boost advances the hero to the start of the next mastery level.
     /// </summary>
     private async Task<IActionResult> BoostMatchMastery()
     {
@@ -143,6 +151,10 @@ public partial class ClientRequesterController
 
         string? isSuperBoost = Request.Form["is_super_boost"];
 
+        // Error Code 2 Matches The Original API's "Input Parameter Error" Code
+        if (isSuperBoost is not ("0" or "1"))
+            return MasteryErrorResponse(2, @"Invalid Value For Form Parameter ""is_super_boost""");
+
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
@@ -154,41 +166,11 @@ public partial class ClientRequesterController
         MatchParticipantStatistics? participant = await MerrickContext.MatchParticipantStatistics
             .SingleOrDefaultAsync(statistics => statistics.AccountID == account.ID && statistics.MatchID == matchID);
 
-        // Error Code 6 Matches The Original API's "Match Mastery Data Does Not Exist" Code
-        if (participant is null)
+        MasteryProgression? progression = participant?.MasteryProgression;
+
+        // Error Code 6 Matches The Original API's "Match Mastery Data Does Not Exist" Code, Because The Original API Recorded No Mastery Data For Matches That Award No Mastery Experience
+        if (participant is null || progression is null)
             return MasteryErrorResponse(6, $"No Mastery Data Exists For Match ID {matchID}");
-
-        // A Mastery Boost May Only Be Applied To The Account's Most Recent Match, Before Another Game Is Started
-        // Match IDs Are Not Chronological, So The Most Recent Match Is Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
-        int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
-            .Where(statistics => statistics.AccountID == account.ID)
-            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
-            .OrderByDescending(match => match.TimestampRecorded)
-            .Select(match => match.MatchID)
-            .FirstAsync();
-
-        // Error Code 5 Matches The Original API's "Match Outdated" Code
-        if (matchID != mostRecentMatchID)
-            return MasteryErrorResponse(5, "Hero Mastery Boosts May Only Be Applied To Your Most Recent Match");
-
-        // Error Code 4 Matches The Original API's "Match Already Boosted" Code
-        if (await DistributedCache.GetMasteryBoostContext(account.ID, matchID) is not null)
-            return MasteryErrorResponse(4, "A Hero Mastery Boost Has Already Been Applied To This Match");
-
-        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(statistics => statistics.MatchID == matchID);
-
-        // Error Code 6 Matches The Original API's "Match Mastery Data Does Not Exist" Code
-        if (matchStatistics is null)
-            return MasteryErrorResponse(6, $"No Mastery Data Exists For Match ID {matchID}");
-
-        // Error Code 5 Matches The Original API's "Match Outdated" Code
-        if (matchStatistics.TimestampRecorded < DateTimeOffset.UtcNow - MasteryBoost.ApplicationWindow)
-            return MasteryErrorResponse(5, $"Hero Mastery Boosts May Only Be Applied Within {MasteryBoost.ApplicationWindow.Days} Days Of The Match Being Played");
-
-        MatchInformation? matchInformation = matchStatistics.MatchInformationSnapshot is not null
-            ? JsonSerializer.Deserialize<MatchInformation>(matchStatistics.MatchInformationSnapshot) : null;
-
-        AccountStatisticsType statisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
 
         Mastery? mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID);
 
@@ -198,6 +180,11 @@ public partial class ClientRequesterController
 
             MerrickContext.Masteries.Add(mastery);
         }
+
+        MasteryBoostRejection? rejection = await MasteryBoostEligibility.GetRejection(MerrickContext, mastery, participant);
+
+        if (rejection is not null)
+            return MasteryErrorResponse(rejection.ErrorCode, rejection.ErrorMessage);
 
         User user = account.User;
 
@@ -212,36 +199,33 @@ public partial class ClientRequesterController
             if (MasteryConsumables.MasteryBoostsOwned(user) < 1)
                 return MasteryErrorResponse(3, "Not Enough Mastery Boosts");
 
-            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + mastery.CalculateRegularMasteryBoostExperience(statisticsType, participant.HeroLevel, Heroes.TotalHeroCount));
+            progression.BoostExperience = Mastery.CalculateRegularMasteryBoostExperience(progression.MatchExperience, progression.BonusExperience);
+
+            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + progression.BoostExperience);
 
             MasteryConsumables.RemoveMasteryBoost(user);
         }
 
-        else if (isSuperBoost is "1")
+        else
         {
             // Error Code 3 Matches The Original API's "Not Enough Mastery Boosts" Code
             if (MasteryConsumables.SuperMasteryBoostsOwned(user) < 1)
                 return MasteryErrorResponse(3, "Not Enough Super Mastery Boosts");
 
-            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, Mastery.GetUpperLevelBoundaryFromExperience(currentExperience));
+            progression.SuperBoostExperience = Mastery.GetUpperLevelBoundaryFromExperience(currentExperience) - currentExperience;
+
+            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + progression.SuperBoostExperience);
 
             MasteryConsumables.RemoveSuperMasteryBoost(user);
         }
 
-        // Error Code 2 Matches The Original API's "Input Parameter Error" Code
-        else
-            return MasteryErrorResponse(2, @"Invalid Value For Form Parameter ""is_super_boost""");
-
-        int currentLevel = Mastery.GetLevelFromExperience(mastery.GetHeroExperienceByHeroIdentifier(heroIdentifier));
+        int currentLevel = mastery.GetHeroLevelByHeroIdentifier(heroIdentifier);
 
         // A Single Boost Can Never Award Enough Experience To Cross More Than One Mastery Level
         if (currentLevel == previousLevel + 1)
             MasteryConsumables.IssueHeroMasteryLevelReward(user, currentLevel, heroIdentifier, Logger);
 
         await MerrickContext.SaveChangesAsync();
-
-        // Record The Applied Boost So That Subsequent Match Statistics Reads Report It And So That A Second Boost Cannot Be Applied To The Same Match
-        await DistributedCache.SetMasteryBoostContext(account.ID, matchID, new MasteryBoostContext(mastery.GetHeroExperienceByHeroIdentifier(heroIdentifier) - currentExperience, isSuperBoost is "1"));
 
         return Ok(PhpSerialization.Serialize(new Dictionary<string, object> { ["error_code"] = 0, ["error_msg"] = string.Empty }));
     }

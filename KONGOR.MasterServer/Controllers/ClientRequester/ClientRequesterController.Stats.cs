@@ -769,44 +769,22 @@ public partial class ClientRequesterController
             Mastery mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID)
                 ?? new Mastery { Account = account };
 
-            AccountStatisticsType masteryStatisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
+            // The Boost Controls Are Disabled Whenever The Boost Endpoint Would Reject The Boost, So The Client Never Offers A Boost Which The Server Would Refuse
+            MasteryBoostRejection? boostRejection = await MasteryBoostEligibility.GetRejection(MerrickContext, mastery, requestingPlayerStatistics);
 
-            int heroMatchExperience = mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
-            int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType, Heroes.TotalHeroCount);
-            int heroCurrentExperience = mastery.GetHeroExperienceByHeroIdentifier(requestingPlayerStatistics.HeroIdentifier);
+            // Matches That Awarded No Mastery Experience Report An Empty Progression, Whose Zero Match Experience Makes The Client Hide The Mastery Panel
+            MasteryProgression progression = requestingPlayerStatistics.MasteryProgression ?? new MasteryProgression();
 
-            MasteryBoostContext? masteryBoostContext = await DistributedCache.GetMasteryBoostContext(account.ID, matchStatistics.MatchID);
-
-            // The Match, Bonus, And Boost Experience Are Accrued Into The Persisted Total During Statistics Submission And Boost Application
-            // The Client Treats "mastery_exp_original" As The Pre-Match Starting Value And Adds The Match, Bonus, And Boost Experience On Top Of It, So The Accrued Amounts Are Subtracted Back Out Here
-            int preMatchExperience = Math.Max(0, heroCurrentExperience - heroMatchExperience - heroBonusExperience - (masteryBoostContext?.Experience ?? 0));
-
-            // A Mastery Boost May Only Be Applied Once, Only To The Account's Most Recent Match Before Another Game Is Started, And Only Within The Boost Application Window
-            // The Boost Is Therefore Disabled When An Older Match Is Viewed In The Match History
-            // Match IDs Are Not Chronological, So The Most Recent Match Is Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
-            int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
-                .Where(statistics => statistics.AccountID == account.ID)
-                .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
-                .OrderByDescending(match => match.TimestampRecorded)
-                .Select(match => match.MatchID)
-                .FirstAsync();
-
-            bool isMostRecentMatch = matchStatistics.MatchID == mostRecentMatchID;
-
-            bool masteryCanBoost = isMostRecentMatch && heroMatchExperience > 0 && masteryBoostContext is null
-                && matchStatistics.TimestampRecorded >= DateTimeOffset.UtcNow - MasteryBoost.ApplicationWindow
-                && Mastery.GetLevelFromExperience(heroCurrentExperience) < Mastery.MaximumMasteryLevel;
-
-            // The Applied Experience Is Reported In The Response Field Matching The Boost Type, Mirroring The Original API Contract
-            matchMastery = new MatchMastery(requestingPlayerStatistics.HeroIdentifier, preMatchExperience, heroMatchExperience, heroBonusExperience)
+            // The Mastery Progression Recorded For This Match Is Reported Rather Than The Hero's Current Experience, So That Viewing An Older Match Shows The Progression Of That Match
+            matchMastery = new MatchMastery(requestingPlayerStatistics.HeroIdentifier, progression.ExperienceAfterMatch(), progression.MatchExperience, progression.BonusExperience)
             {
-                MasteryExperienceBoost = masteryBoostContext is { IsSuperBoost: false } ? masteryBoostContext.Experience : 0,
-                MasteryExperienceSuperBoost = masteryBoostContext is { IsSuperBoost: true } ? masteryBoostContext.Experience : 0,
-                MasteryExperienceMaximumLevelHeroesCount = mastery.HeroesAtMaximumMasteryCount(),
+                MasteryExperienceBoost = progression.BoostExperience,
+                MasteryExperienceSuperBoost = progression.SuperBoostExperience,
+                MasteryExperienceMaximumLevelHeroesCount = progression.HeroesAtMaximumMasteryCount,
                 MasteryExperienceBoostProductCount = MasteryConsumables.MasteryBoostsOwned(account.User),
                 MasteryExperienceSuperBoostProductCount = MasteryConsumables.SuperMasteryBoostsOwned(account.User),
-                MasteryExperienceCanBoost = masteryCanBoost,
-                MasteryExperienceCanSuperBoost = masteryCanBoost
+                MasteryExperienceCanBoost = boostRejection is null,
+                MasteryExperienceCanSuperBoost = boostRejection is null
             };
         }
 
