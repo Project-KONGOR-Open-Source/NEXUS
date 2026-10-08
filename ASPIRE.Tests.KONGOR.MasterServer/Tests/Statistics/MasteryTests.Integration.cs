@@ -600,6 +600,89 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
         }
     }
 
+    [Test]
+    public async Task Take_Mastery_Reward_Grants_A_Tier_The_Account_Has_Reached()
+    {
+        (Account account, string cookie) = await SeedAuthenticatedAccount("reward.reached@kongor.com", "RewardReached");
+
+        // A Single Hero At 1400 Experience Is Level 1, So The Account's Total Mastery Level Is Exactly 1
+        await SetHeroExperience(account, "Hero_Accursed", 1400);
+
+        HttpResponseMessage response = await PostClientRequest("take_mastery_reward", new Dictionary<string, string>
+        {
+            ["cookie"] = cookie,
+            ["level"]  = "1"
+        });
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        MasteryRewards rewards = await databaseContext.MasteryRewards.SingleAsync(record => record.AccountID == account.ID);
+
+        User user = await databaseContext.Users.SingleAsync(candidate => candidate.ID == account.User.ID);
+
+        int expectedBoosts = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards.Single(reward => reward.RequiredLevel == 1).ProductQuantity;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(Convert.ToInt32(body["error_code"])).IsEqualTo(0);
+            await Assert.That(rewards.HasObtained(1)).IsTrue();
+            await Assert.That(MasteryConsumables.MasteryBoostsOwned(user)).IsEqualTo(expectedBoosts);
+        }
+    }
+
+    [Test]
+    public async Task Take_Mastery_Reward_Rejects_A_Tier_Above_The_Accounts_Total_Mastery_Level()
+    {
+        (Account account, string cookie) = await SeedAuthenticatedAccount("reward.locked@kongor.com", "RewardLocked");
+
+        HttpResponseMessage response = await PostClientRequest("take_mastery_reward", new Dictionary<string, string>
+        {
+            ["cookie"] = cookie,
+            ["level"]  = "1"
+        });
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        MasteryRewards? rewards = await databaseContext.MasteryRewards.SingleOrDefaultAsync(record => record.AccountID == account.ID);
+
+        User user = await databaseContext.Users.SingleAsync(candidate => candidate.ID == account.User.ID);
+
+        using (Assert.Multiple())
+        {
+            // Error Code 4 Is The Original API's "Reward Does Not Exist" Code, Which It Returned For Tiers The Account Had Not Unlocked
+            await Assert.That(Convert.ToInt32(body["error_code"])).IsEqualTo(4);
+            await Assert.That(rewards?.HasObtained(1) ?? false).IsFalse();
+            await Assert.That(MasteryConsumables.MasteryBoostsOwned(user)).IsEqualTo(0);
+        }
+    }
+
+    [Test]
+    public async Task Take_Mastery_Reward_Rejects_A_Tier_That_Is_Not_Configured()
+    {
+        (Account _, string cookie) = await SeedAuthenticatedAccount("reward.missing@kongor.com", "RewardMissing");
+
+        int unconfiguredLevel = Enumerable.Range(1, 10000).First(level => JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards.All(reward => reward.RequiredLevel != level));
+
+        HttpResponseMessage response = await PostClientRequest("take_mastery_reward", new Dictionary<string, string>
+        {
+            ["cookie"] = cookie,
+            ["level"]  = unconfiguredLevel.ToString()
+        });
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        // Error Code 5 Is The Original API's "Mastery Reward Invalid" Code
+        await Assert.That(Convert.ToInt32(body["error_code"])).IsEqualTo(5);
+    }
+
     /// <summary>
     ///     A deserialised PHP array is a list when its keys are consecutive integers and a dictionary otherwise, so both shapes are enumerated uniformly here.
     /// </summary>

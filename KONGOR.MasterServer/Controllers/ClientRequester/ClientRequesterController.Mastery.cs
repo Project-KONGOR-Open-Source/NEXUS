@@ -70,6 +70,13 @@ public partial class ClientRequesterController
         if (account is null)
             return MasteryErrorResponse(1, $@"Account With Name ""{accountName}"" Could Not Be Found");
 
+        global::KONGOR.MasterServer.Configuration.Mastery.MasteryReward? reward = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards
+            .SingleOrDefault(reward => reward.RequiredLevel == level);
+
+        // Error Code 5 Matches The Original API's "Mastery Reward Invalid" Code
+        if (reward is null)
+            return MasteryErrorResponse(5, $"No Level {level} Reward Found");
+
         MasteryRewards? rewards = await MerrickContext.MasteryRewards.SingleOrDefaultAsync(record => record.AccountID == account.ID);
 
         if (rewards is null)
@@ -83,12 +90,11 @@ public partial class ClientRequesterController
         if (rewards.HasObtained(level))
             return MasteryErrorResponse(3, $"Level {level} Reward Has Already Been Obtained");
 
-        global::KONGOR.MasterServer.Configuration.Mastery.MasteryReward? reward = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards
-            .SingleOrDefault(reward => reward.RequiredLevel == level);
+        Mastery? mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID);
 
-        // Error Code 4 Matches The Original API's "Reward Does Not Exist" Code
-        if (reward is null)
-            return MasteryErrorResponse(4, $"No Level {level} Reward Found");
+        // Error Code 4 Matches The Original API's "Reward Does Not Exist" Code, Which It Returned For Reward Tiers The Account Had Not Unlocked Yet
+        if ((mastery?.TotalMasteryLevel() ?? 0) < level)
+            return MasteryErrorResponse(4, $"Level {level} Reward Requires A Total Mastery Level Of {level}");
 
         User user = account.User;
 
@@ -100,6 +106,8 @@ public partial class ClientRequesterController
                 case "Mastery Boost Bundle": MasteryConsumables.AddMasteryBoost(user, 10); break;
                 case "Super Mastery Boost":  MasteryConsumables.AddSuperMasteryBoost(user, reward.ProductQuantity); break;
 
+                // TODO: Implement Sub-Accounts
+                // The "Sub-Account" Reward Is Granted Here As An Owned Store Item, But Owning It Has No Effect Until Sub-Accounts Are Implemented
                 default:
                 {
                     if (reward.ProductCode is not null && user.OwnedStoreItems.Contains(reward.ProductCode).Equals(false))
