@@ -765,10 +765,10 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
         {
             await Assert.That(mastery.GetHeroExperienceByHeroIdentifier("Hero_Accursed")).IsEqualTo(Mastery.MaximumMasteryExperience);
 
-            // The Progression Records What The Formula Awarded, While The Derived Experience After The Match Respects The Cap
+            // The Progression Records What The Formula Awarded, So Subtracting The Awarded Experience From The Experience After The Match Always Yields The Experience Before It, Even Though The Persisted Experience Respects The Cap
             await Assert.That(participant.MasteryProgression?.ExperienceBeforeMatch).IsEqualTo(36000);
             await Assert.That(participant.MasteryProgression?.MatchExperience).IsEqualTo(400);
-            await Assert.That(participant.MasteryProgression?.ExperienceAfterMatch()).IsEqualTo(Mastery.MaximumMasteryExperience);
+            await Assert.That(participant.MasteryProgression?.ExperienceAfterMatch()).IsEqualTo(36000 + 400);
         }
     }
 

@@ -274,8 +274,9 @@ public class MasteryProgression
     public int SuperBoostExperience { get; set; }
 
     /// <summary>
-    ///     The hero's mastery experience after this match, including any boost applied to it, capped at <see cref="Mastery.MaximumMasteryExperience"/>.
+    ///     The hero's mastery experience after this match, including any boost applied to it.
+    ///     This is not capped at <see cref="Mastery.MaximumMasteryExperience"/>, unlike the persisted hero experience, so that subtracting the awarded experience always yields <see cref="ExperienceBeforeMatch"/>.
     /// </summary>
     public int ExperienceAfterMatch()
-        => Math.Min(ExperienceBeforeMatch + MatchExperience + BonusExperience + BoostExperience + SuperBoostExperience, Mastery.MaximumMasteryExperience);
+        => ExperienceBeforeMatch + MatchExperience + BonusExperience + BoostExperience + SuperBoostExperience;
 }

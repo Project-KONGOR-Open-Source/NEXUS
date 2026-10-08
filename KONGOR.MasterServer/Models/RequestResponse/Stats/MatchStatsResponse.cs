@@ -814,6 +814,7 @@ public class MatchMastery(string heroIdentifier, int postMatchMasteryExperience,
     /// <summary>
     ///     The hero's mastery experience after the match, including any boost applied to it.
     ///     The client animates the progress bar up to this value, starting from the value before the match, which it derives by subtracting the match, bonus, and boost experience.
+    ///     The value is not capped at the maximum mastery level threshold, because a capped value would make the client derive a starting value one level below a hero which is already at the maximum mastery level, and show a false level-up for it.
     /// </summary>
     [PHPProperty("mastery_exp_original")]
     public int PostMatchMasteryExperience { get; init; } = postMatchMasteryExperience;

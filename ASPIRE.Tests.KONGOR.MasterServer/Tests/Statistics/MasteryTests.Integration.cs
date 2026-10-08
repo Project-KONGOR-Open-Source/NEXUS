@@ -237,11 +237,35 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
             await Assert.That(Convert.ToInt32(boostBody["error_code"])).IsEqualTo(1);
             await Assert.That(MasteryConsumables.SuperMasteryBoostsOwned(user)).IsEqualTo(1);
 
-            // The Match Statistics Report The Capped Experience And Disable The Boost Controls
-            await Assert.That(Convert.ToInt32(mastery["mastery_exp_original"])).IsEqualTo(Mastery.MaximumMasteryExperience);
+            // The Match Statistics Report The Uncapped Experience After The Match, From Which The Client Derives The Exact Experience Before It, And Disable The Boost Controls
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_original"])).IsEqualTo(36000 + 200);
             await Assert.That(Convert.ToBoolean(mastery["mastery_canboost"])).IsFalse();
             await Assert.That(Convert.ToBoolean(mastery["mastery_super_canboost"])).IsFalse();
         }
+    }
+
+    [Test]
+    public async Task Get_Match_Stats_For_A_Hero_Already_At_The_Maximum_Mastery_Level_Derives_A_Starting_Experience_At_The_Maximum_Level()
+    {
+        (Account account, string cookie) = await SeedAuthenticatedAccount("stats.maximum@kongor.com", "MaxLevelExp");
+
+        await SeedRankedMatch(account, matchID: 1, heroIdentifier: "Hero_Accursed", heroLevel: 10, masteryExperienceBeforeMatch: Mastery.MaximumMasteryExperience);
+
+        HttpResponseMessage response = await PostClientRequest("get_match_stats", new Dictionary<string, string>
+        {
+            ["cookie"]   = cookie,
+            ["match_id"] = "1"
+        });
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        IDictionary<object, object> mastery = (IDictionary<object, object>) body["match_mastery"];
+
+        int derivedExperienceBeforeMatch = Convert.ToInt32(mastery["mastery_exp_original"]) - Convert.ToInt32(mastery["mastery_exp_match"]) - Convert.ToInt32(mastery["mastery_exp_heroes_addon"])
+            - Convert.ToInt32(mastery["mastery_exp_boost"]) - Convert.ToInt32(mastery["mastery_exp_super_boost"]);
+
+        // The Client Derives The Starting Value By Subtracting The Awarded Experience And Shows A Level-Up Popup When The Starting Value Is One Level Below The End, So A Hero Already At The Maximum Level Must Derive A Starting Value At The Maximum Level
+        await Assert.That(derivedExperienceBeforeMatch).IsEqualTo(Mastery.MaximumMasteryExperience);
     }
 
     [Test]
