@@ -209,6 +209,12 @@ public class MatchParticipantStatistics
     public List<ItemEvent>? ItemHistory { get; set; }
 
     public List<AbilityEvent>? AbilityHistory { get; set; }
+
+    /// <summary>
+    ///     The mastery progression of the participant's hero in this match, persisted as a JSON column.
+    ///     This is <see langword="null"/> for matches that awarded no mastery experience.
+    /// </summary>
+    public MasteryProgression? MasteryProgression { get; set; }
 }
 
 public class ItemEvent
@@ -229,4 +235,47 @@ public class AbilityEvent
     public required int GameTimeSeconds { get; set; }
 
     public required byte SlotIndex { get; set; }
+}
+
+/// <summary>
+///     The mastery progression of a hero in a single match, stored as part of the <see cref="MatchParticipantStatistics.MasteryProgression"/> JSON column.
+///     Every component of the awarded experience is recorded, so that the experience after the match can be derived and the awarded experience can be audited if the formula changes.
+/// </summary>
+public class MasteryProgression
+{
+    /// <summary>
+    ///     The hero's accumulated mastery experience before this match.
+    /// </summary>
+    public int ExperienceBeforeMatch { get; set; }
+
+    /// <summary>
+    ///     The base mastery experience awarded for this match.
+    /// </summary>
+    public int MatchExperience { get; set; }
+
+    /// <summary>
+    ///     The number of heroes at the maximum mastery level when this match was recorded, from which the bonus experience is calculated.
+    /// </summary>
+    public int HeroesAtMaximumMasteryCount { get; set; }
+
+    /// <summary>
+    ///     The bonus mastery experience awarded for this match.
+    /// </summary>
+    public int BonusExperience { get; set; }
+
+    /// <summary>
+    ///     The mastery experience added by a regular mastery boost applied to this match, or zero if none has been applied.
+    /// </summary>
+    public int BoostExperience { get; set; }
+
+    /// <summary>
+    ///     The mastery experience added by a super mastery boost applied to this match, or zero if none has been applied.
+    /// </summary>
+    public int SuperBoostExperience { get; set; }
+
+    /// <summary>
+    ///     The hero's mastery experience after this match, including any boost applied to it, capped at <see cref="Mastery.MaximumMasteryExperience"/>.
+    /// </summary>
+    public int ExperienceAfterMatch()
+        => Math.Min(ExperienceBeforeMatch + MatchExperience + BonusExperience + BoostExperience + SuperBoostExperience, Mastery.MaximumMasteryExperience);
 }
