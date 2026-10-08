@@ -341,6 +341,9 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
             // If The Player Already Owns The Granted Product, Still Consume The Code But Do Not Duplicate The Ownership Entry
             if (user.OwnedStoreItems.Contains(grantedProduct.PrefixedCode).Equals(false))
                 user.OwnedStoreItems.Add(grantedProduct.PrefixedCode);
+
+            // Owning More Alternative Avatars Can Leave A Hero's Mastery Coupon Without Any Avatar To Apply It To, In Which Case It Is Exchanged For The All-Avatar Mastery Coupon
+            MasteryConsumables.ResolveUnusableCoupons(user);
         }
 
         user.GoldCoins += code.GoldCoinsReward;
