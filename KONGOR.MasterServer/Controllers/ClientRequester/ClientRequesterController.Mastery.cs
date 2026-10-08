@@ -113,6 +113,9 @@ public partial class ClientRequesterController
                     if (reward.ProductCode is not null && user.OwnedStoreItems.Contains(reward.ProductCode).Equals(false))
                         user.OwnedStoreItems.Add(reward.ProductCode);
 
+                    // Owning More Alternative Avatars Can Leave A Hero's Mastery Coupon Without Any Avatar To Apply It To, In Which Case It Is Exchanged For The All-Avatar Mastery Coupon
+                    MasteryConsumables.ResolveUnusableCoupons(user);
+
                     break;
                 }
             }
