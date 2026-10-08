@@ -771,8 +771,8 @@ public partial class ClientRequesterController
 
             AccountStatisticsType masteryStatisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
 
-            int heroMatchExperience = mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
-            int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType, Heroes.TotalHeroCount);
+            int heroMatchExperience = Mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
+            int heroBonusExperience = Mastery.CalculateBonusExperience(masteryStatisticsType, heroMatchExperience, mastery.HeroesAtMaximumMasteryCount());
             int heroCurrentExperience = mastery.GetHeroExperienceByHeroIdentifier(requestingPlayerStatistics.HeroIdentifier);
 
             MasteryBoostContext? masteryBoostContext = await DistributedCache.GetMasteryBoostContext(account.ID, matchStatistics.MatchID);

@@ -212,7 +212,9 @@ public partial class ClientRequesterController
             if (MasteryConsumables.MasteryBoostsOwned(user) < 1)
                 return MasteryErrorResponse(3, "Not Enough Mastery Boosts");
 
-            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + mastery.CalculateRegularMasteryBoostExperience(statisticsType, participant.HeroLevel, Heroes.TotalHeroCount));
+            int matchExperience = Mastery.CalculateMatchExperience(statisticsType, participant.HeroLevel);
+
+            mastery.SetHeroExperienceByHeroIdentifier(heroIdentifier, currentExperience + Mastery.CalculateRegularMasteryBoostExperience(matchExperience, Mastery.CalculateBonusExperience(statisticsType, matchExperience, mastery.HeroesAtMaximumMasteryCount())));
 
             MasteryConsumables.RemoveMasteryBoost(user);
         }

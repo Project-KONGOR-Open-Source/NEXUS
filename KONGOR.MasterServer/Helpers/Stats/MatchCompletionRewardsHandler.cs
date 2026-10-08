@@ -178,13 +178,13 @@ public static class MatchCompletionRewardsHandler
             databaseContext.Masteries.Add(mastery);
         }
 
-        int matchExperience = mastery.CalculateMatchExperience(statisticsType, matchParticipantStatistics.HeroLevel);
+        int matchExperience = Mastery.CalculateMatchExperience(statisticsType, matchParticipantStatistics.HeroLevel);
 
         // A Zero Match Experience Means The Game Mode Is Not Eligible For Mastery Progression
         if (matchExperience is 0)
             return;
 
-        int bonusExperience = mastery.CalculateBonusExperience(statisticsType, Heroes.TotalHeroCount);
+        int bonusExperience = Mastery.CalculateBonusExperience(statisticsType, matchExperience, mastery.HeroesAtMaximumMasteryCount());
 
         string heroIdentifier = matchParticipantStatistics.HeroIdentifier;
 
