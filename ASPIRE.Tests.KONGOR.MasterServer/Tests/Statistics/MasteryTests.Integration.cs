@@ -384,6 +384,34 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
     }
 
     [Test]
+    public async Task Get_Match_Stats_Reports_The_Maximum_Level_Hero_Count_And_Bonus_Recorded_For_The_Match()
+    {
+        (Account account, string cookie) = await SeedAuthenticatedAccount("stats.bonus@kongor.com", "RecordedBonus");
+
+        // The Match Was Recorded With 12 Maximum-Level Heroes, While The Account Currently Has None, So Only The Recorded Values Can Produce The Expected Response
+        await SeedRankedMatch(account, matchID: 1, heroIdentifier: "Hero_Accursed", heroLevel: 10, heroesAtMaximumMasteryCount: 12);
+
+        HttpResponseMessage response = await PostClientRequest("get_match_stats", new Dictionary<string, string>
+        {
+            ["cookie"]   = cookie,
+            ["match_id"] = "1"
+        });
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        IDictionary<object, object> mastery = (IDictionary<object, object>) body["match_mastery"];
+
+        using (Assert.Multiple())
+        {
+            // A Ranked Match At Hero Level 10 Earns 200, And 12 Maximum-Level Heroes Add 12 Points Of Bonus Experience
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_heroes_count"])).IsEqualTo(12);
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_heroes_addon"])).IsEqualTo(12);
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_original"])).IsEqualTo(200 + 12);
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_to_boost"])).IsEqualTo((200 + 12) * 2);
+        }
+    }
+
+    [Test]
     public async Task Get_Match_Stats_For_An_Older_Match_Reports_The_Progression_Of_That_Match()
     {
         (Account account, string cookie) = await SeedAuthenticatedAccount("stats.older@kongor.com", "OlderMatchExp");
@@ -781,11 +809,14 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
         return (account, cookie);
     }
 
-    private async Task SeedRankedMatch(Account account, int matchID, string heroIdentifier, int heroLevel, MatchType matchType = MatchType.AM_MATCHMAKING, string map = "caldavar", DateTimeOffset? timestampRecorded = null, int masteryExperienceBeforeMatch = 0)
+    private async Task SeedRankedMatch(Account account, int matchID, string heroIdentifier, int heroLevel, MatchType matchType = MatchType.AM_MATCHMAKING, string map = "caldavar", DateTimeOffset? timestampRecorded = null, int masteryExperienceBeforeMatch = 0, int heroesAtMaximumMasteryCount = 0)
     {
         MatchInformation matchInformation = MatchDataHelper.BuildMatchInformation(matchType, map: map);
 
-        int masteryMatchExperience = Mastery.CalculateMatchExperience(MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation), heroLevel);
+        AccountStatisticsType statisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
+
+        int masteryMatchExperience = Mastery.CalculateMatchExperience(statisticsType, heroLevel);
+        int masteryBonusExperience = Mastery.CalculateBonusExperience(statisticsType, masteryMatchExperience, heroesAtMaximumMasteryCount);
 
         using (IServiceScope scope = webApplicationFactory.Services.CreateScope())
         {
@@ -803,9 +834,17 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
             participant.HeroIdentifier = heroIdentifier;
             participant.HeroLevel = heroLevel;
 
-            // Mirror Statistics Submission, Which Records The Mastery Progression Only For Matches That Award Mastery Experience (Fresh Accounts Have No Maximum-Level Heroes, So The Bonus Is Zero)
+            // Mirror Statistics Submission, Which Records The Mastery Progression Only For Matches That Award Mastery Experience (Unless Stated Otherwise, The Account Has No Maximum-Level Heroes At The Time Of The Match, So The Bonus Is Zero)
             if (masteryMatchExperience > 0)
-                participant.MasteryProgression = new MasteryProgression { ExperienceBeforeMatch = masteryExperienceBeforeMatch, MatchExperience = masteryMatchExperience };
+            {
+                participant.MasteryProgression = new MasteryProgression
+                {
+                    ExperienceBeforeMatch = masteryExperienceBeforeMatch,
+                    MatchExperience = masteryMatchExperience,
+                    HeroesAtMaximumMasteryCount = heroesAtMaximumMasteryCount,
+                    BonusExperience = masteryBonusExperience
+                };
+            }
 
             await databaseContext.MatchStatistics.AddAsync(matchStatistics);
             await databaseContext.MatchParticipantStatistics.AddAsync(participant);
@@ -815,7 +854,7 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
 
         // Mirror Statistics Submission, Which Accrues The Match Experience Into The Hero's Persisted Total
         if (masteryMatchExperience > 0)
-            await SetHeroExperience(account, heroIdentifier, masteryExperienceBeforeMatch + masteryMatchExperience);
+            await SetHeroExperience(account, heroIdentifier, masteryExperienceBeforeMatch + masteryMatchExperience + masteryBonusExperience);
     }
 
     private async Task<MatchParticipantStatistics> LoadParticipant(Account account, int matchID)
