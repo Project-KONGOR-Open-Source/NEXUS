@@ -218,9 +218,8 @@ public class SimpleSeasonStats
     public required int InPlacementPhase { get; set; }
 
     /// <summary>
-    ///     Unknown.
-    ///     Potentially, the number of account levels gained during the season.
+    ///     The current season medal of the account, which is zero until the placement matches are complete.
     /// </summary>
     [PHPProperty("current_level")]
-    public required int LevelsGainedThisSeason { get; set; }
+    public required int CurrentMedal { get; set; }
 }

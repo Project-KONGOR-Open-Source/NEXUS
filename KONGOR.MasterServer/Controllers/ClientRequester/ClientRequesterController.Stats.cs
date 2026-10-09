@@ -256,7 +256,7 @@ public partial class ClientRequesterController
                 RankedMatchesLost = rankedLosses,
                 WinStreak = 0, // TODO: Implement Win Streak Tracking
                 InPlacementPhase = (rankedStatistics?.IsInPlacementPhase ?? false) ? 1 : 0,
-                LevelsGainedThisSeason = account.User.TotalLevel
+                CurrentMedal = (int) (rankedStatistics?.CurrentMedal() ?? Rank.NO_MEDAL)
             },
             SimpleCasualSeasonStats = new SimpleSeasonStats
             {
@@ -264,7 +264,7 @@ public partial class ClientRequesterController
                 RankedMatchesLost = casualLosses,
                 WinStreak = 0, // TODO: Implement Win Streak Tracking
                 InPlacementPhase = (casualStatistics?.IsInPlacementPhase ?? false) ? 1 : 0,
-                LevelsGainedThisSeason = account.User.TotalLevel
+                CurrentMedal = (int) (casualStatistics?.CurrentMedal() ?? Rank.NO_MEDAL)
             },
             MVPAwardsCount = aggregatedAwards.MVPAwards,
             Top4AwardNames = [.. top4Awards.Select(award => award.Name)],
