@@ -633,7 +633,7 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     ///     The highest campaign casual level (season medal) achieved in the current season.
     /// </summary>
     [PHPProperty("highest_level_current")]
-    public string HighestLevelCurrent => ((int) statistics.CurrentMedal()).ToString(); // TODO: Track The Highest Medal Reached In The Current Season, Which Can Exceed The Current Medal After Rating Losses
+    public string HighestLevelCurrent => ((int) statistics.HighestMedal).ToString();
 
     /// <summary>
     ///     The highest leaderboard ranking achieved in the current season (Immortal rank only).

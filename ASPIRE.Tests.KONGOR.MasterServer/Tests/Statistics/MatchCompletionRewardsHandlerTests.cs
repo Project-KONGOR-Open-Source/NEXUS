@@ -240,6 +240,45 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
+    public async Task Apply_Raises_The_Highest_Medal_With_The_Rating_And_Keeps_It_After_A_Rating_Loss()
+    {
+        Account account = await SeedMainAccount("medal.highest@kongor.com", "MedalHighest");
+
+        MatchInformation matchInformation = MatchDataHelper.BuildMatchInformation(MatchType.AM_MATCHMAKING);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account trackedAccount = await databaseContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+        AccountStatistics statistics = await databaseContext.AccountStatistics.SingleAsync(record => record.AccountID == trackedAccount.ID && record.Type == AccountStatisticsType.Matchmaking);
+
+        statistics.PlacementMatchesData = "110101";
+        statistics.SkillRating = 1800.0;
+
+        await databaseContext.SaveChangesAsync();
+
+        MatchParticipantStatistics winParticipant  = MatchDataHelper.BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, matchID: 1, publicMatch: 0, rankedMatch: 1, rankedSkillRatingChange: 10.0);
+        MatchParticipantStatistics lossParticipant = MatchDataHelper.BuildParticipant(account.ID, account.Name, groupNumber: 1, loss: 1, matchID: 2, publicMatch: 0, rankedMatch: 1, rankedSkillRatingChange: -20.0);
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, MatchDataHelper.BuildMatchStatistics(), winParticipant);
+
+        Rank highestMedalAfterWin = statistics.HighestMedal;
+
+        await MatchCompletionRewardsHandler.Apply(databaseContext, NullLogger.Instance, trackedAccount, matchInformation, MatchDataHelper.BuildMatchStatistics(), lossParticipant);
+        await databaseContext.SaveChangesAsync();
+
+        using (Assert.Multiple())
+        {
+            // A Win From 1800 To 1810 Reaches Diamond 1, And The Loss Down To 1790 Drops The Current Medal Back To Diamond 2
+            await Assert.That(highestMedalAfterWin).IsEqualTo(Rank.DIAMOND_1);
+            await Assert.That(statistics.CurrentMedal()).IsEqualTo(Rank.DIAMOND_2);
+            await Assert.That(statistics.HighestMedal).IsEqualTo(Rank.DIAMOND_1);
+        }
+    }
+
+    [Test]
     public async Task Apply_Public_Rating_Change_Adjusts_The_Public_Skill_Rating()
     {
         Account account = await SeedMainAccount("public.gain@kongor.com", "PublicGain");

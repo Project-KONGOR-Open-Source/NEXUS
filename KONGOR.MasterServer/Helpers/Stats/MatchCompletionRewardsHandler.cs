@@ -86,6 +86,9 @@ public static class MatchCompletionRewardsHandler
         RecordPlacementMatchResult(statistics, matchParticipantStatistics);
 
         ApplySkillRatingChange(statistics, matchParticipantStatistics);
+
+        if (statistics.CurrentMedal() > statistics.HighestMedal)
+            statistics.HighestMedal = statistics.CurrentMedal();
     }
 
     /// <summary>

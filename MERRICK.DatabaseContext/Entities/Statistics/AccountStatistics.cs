@@ -69,6 +69,11 @@ public class AccountStatistics
     public Rank CurrentMedal() => IsInPlacementPhase ? Rank.NO_MEDAL : RankExtensions.GetRank(SkillRating);
 
     /// <summary>
+    ///     The highest season medal reached by this statistics row, which is raised whenever a match raises the current medal above it, and is not lowered by rating losses.
+    /// </summary>
+    public Rank HighestMedal { get; set; } = Rank.NO_MEDAL;
+
+    /// <summary>
     ///     Aggregated per-hero statistics stored as JSON.
     ///     Updated automatically when matches are recorded.
     /// </summary>

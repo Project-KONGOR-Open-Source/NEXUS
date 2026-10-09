@@ -43,6 +43,41 @@ public sealed class SeasonStatisticsTests_Integration(KONGORIntegrationWebApplic
     }
 
     [Test]
+    public async Task Show_Stats_Reports_A_Highest_Medal_Above_The_Current_Medal_After_Rating_Losses()
+    {
+        (Account account, string cookie) = await SeedRankedAccount("season.highest@kongor.com", "SeasonHighest");
+
+        using (IServiceScope scope = webApplicationFactory.Services.CreateScope())
+        {
+            MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+            AccountStatistics rankedStatistics = await databaseContext.AccountStatistics.SingleAsync(statistics => statistics.AccountID == account.ID && statistics.Type == AccountStatisticsType.Matchmaking);
+
+            rankedStatistics.HighestMedal = Rank.IMMORTAL;
+
+            await databaseContext.SaveChangesAsync();
+        }
+
+        HttpResponseMessage response = await webApplicationFactory.CreateClient().PostAsync(ClientRequesterRoute, new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["f"]        = "show_stats",
+            ["nickname"] = account.Name,
+            ["cookie"]   = cookie,
+            ["table"]    = "campaign"
+        }));
+
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(Convert.ToString(body["current_level"])).IsEqualTo(((int) RankExtensions.GetRank(RankedSkillRating)).ToString());
+            await Assert.That(Convert.ToString(body["highest_level_current"])).IsEqualTo(((int) Rank.IMMORTAL).ToString());
+        }
+    }
+
+    [Test]
     public async Task Show_Simple_Stats_Reports_The_Season_Medal_As_The_Current_Level()
     {
         (Account account, string cookie) = await SeedRankedAccount("season.simple@kongor.com", "SeasonSimple");
@@ -92,6 +127,10 @@ public sealed class SeasonStatisticsTests_Integration(KONGORIntegrationWebApplic
 
         casualStatistics.SkillRating = RankedSkillRating;
         casualStatistics.PlacementMatchesData = "11";
+
+        // Statistics Submission Never Leaves The Highest Medal Below The Current Medal
+        rankedStatistics.HighestMedal = rankedStatistics.CurrentMedal();
+        casualStatistics.HighestMedal = casualStatistics.CurrentMedal();
 
         // An Account Level That Is Not A Valid Medal Distinguishes The Season Medal From The Account Level
         User user = await databaseContext.Users.SingleAsync(candidate => candidate.ID == account.User.ID);
