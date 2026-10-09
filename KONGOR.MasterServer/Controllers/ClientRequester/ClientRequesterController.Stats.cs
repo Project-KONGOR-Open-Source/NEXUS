@@ -216,20 +216,20 @@ public partial class ClientRequesterController
             aggregatedAwards.HighestCreepScoreAwards += statistics.AwardStatistics.HighestCreepScoreAwards;
         }
 
-        // Determine Top 4 Awards By Count
+        // Determine Top 4 Awards By Count; The Client Derives Each Award's Icon And Tooltip From Its Code, And Equal Counts Keep The Award Priority Order Of The Original API
         List<(string Name, int Count)> allAwards =
         [
+            ("awd_mkill", aggregatedAwards.MostKillsAwards),
             ("awd_masst", aggregatedAwards.MostAssistsAwards),
-            ("awd_mhdd", aggregatedAwards.MostHeroDamageDealtAwards),
             ("awd_mbdmg", aggregatedAwards.MostBuildingDamageAwards),
-            ("awd_lgks", aggregatedAwards.LongestKillStreakAwards),
-            ("awd_mkills", aggregatedAwards.MostKillsAwards),
-            ("awd_ldths", aggregatedAwards.LeastDeathsAwards),
+            ("awd_ledth", aggregatedAwards.LeastDeathsAwards),
+            ("awd_mann", aggregatedAwards.AnnihilationAwards),
             ("awd_mqk", aggregatedAwards.QuadKillAwards),
-            ("awd_smkd", aggregatedAwards.SmackdownAwards),
-            ("awd_annih", aggregatedAwards.AnnihilationAwards),
-            ("awd_mwk", aggregatedAwards.MostWardsDestroyedAwards),
-            ("awd_hcs", aggregatedAwards.HighestCreepScoreAwards)
+            ("awd_lgks", aggregatedAwards.LongestKillStreakAwards),
+            ("awd_msd", aggregatedAwards.SmackdownAwards),
+            ("awd_mhdd", aggregatedAwards.MostHeroDamageDealtAwards),
+            ("awd_hcs", aggregatedAwards.HighestCreepScoreAwards),
+            ("awd_mwk", aggregatedAwards.MostWardsDestroyedAwards)
         ];
 
         List<(string Name, int Count)> top4Awards = [.. allAwards.OrderByDescending(award => award.Count).Take(4)];
