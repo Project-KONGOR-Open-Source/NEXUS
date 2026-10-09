@@ -100,7 +100,7 @@ public partial class ClientRequesterController
             .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
             .OrderByDescending(match => match.TimestampRecorded)
             .Select(match => match.MatchID)
-            .Take(40)
+            .Take(50)
             .ToListAsync();
 
         Dictionary<string, object> response = new ()
