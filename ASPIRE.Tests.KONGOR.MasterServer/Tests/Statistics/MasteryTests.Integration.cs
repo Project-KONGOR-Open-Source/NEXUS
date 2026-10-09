@@ -784,6 +784,32 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
         }
     }
 
+    [Test]
+    public async Task Get_Account_All_Hero_Stats_Returns_The_Hero_Statistics_Of_The_Session_Account()
+    {
+        (Account _, string cookie) = await SeedAuthenticatedAccount("hero.stats@kongor.com", "HeroStats");
+
+        // The Client Requests The Hero Statistics For The Mastery Tab Of The Logged-In Account With Only The Session Cookie
+        HttpResponseMessage response = await PostClientRequest("get_account_all_hero_stats", new Dictionary<string, string>
+        {
+            ["cookie"] = cookie
+        });
+
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        IDictionary<object, object> heroStatistics = (IDictionary<object, object>) body["all_hero_stats"];
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(heroStatistics).ContainsKey("ranked");
+            await Assert.That(heroStatistics).ContainsKey("casual");
+            await Assert.That(heroStatistics).ContainsKey("campaign");
+            await Assert.That(heroStatistics).ContainsKey("campaign_casual");
+        }
+    }
+
     /// <summary>
     ///     A deserialised PHP array is a list when its keys are consecutive integers and a dictionary otherwise, so both shapes are enumerated uniformly here.
     /// </summary>

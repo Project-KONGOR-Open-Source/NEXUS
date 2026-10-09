@@ -379,10 +379,16 @@ public partial class ClientRequesterController
 
     private async Task<IActionResult> GetHeroStatistics()
     {
-        string? accountName = Request.Form["nickname"];
+        string? cookie = Request.Form["cookie"];
+
+        if (string.IsNullOrWhiteSpace(cookie))
+            return Unauthorized(@"Missing Value For Form Parameter ""cookie""");
+
+        // The Client Requests The Hero Statistics Of The Logged-In Account With Only The Session Cookie, So The Account Is Resolved From The Session
+        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountName is null)
-            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+            return Unauthorized($@"No Session Found For Cookie ""{cookie}""");
 
         Account? account = await MerrickContext.Accounts
             .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
