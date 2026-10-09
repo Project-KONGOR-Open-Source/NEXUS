@@ -122,9 +122,9 @@ public class Mastery
     }
 
     /// <summary>
-    ///     The mastery experience awarded by a regular mastery boost, which is double the combined match and bonus experience of the boosted match.
+    ///     The mastery experience awarded by a regular mastery boost, which equals the combined match and bonus experience of the boosted match, so that the boost doubles the experience gained from the match.
     /// </summary>
-    public static int CalculateRegularMasteryBoostExperience(int matchExperience, int bonusExperience) => (matchExperience + bonusExperience) * 2;
+    public static int CalculateRegularMasteryBoostExperience(int matchExperience, int bonusExperience) => matchExperience + bonusExperience;
 
     /// <summary>
     ///     The mastery level for the given mastery experience.

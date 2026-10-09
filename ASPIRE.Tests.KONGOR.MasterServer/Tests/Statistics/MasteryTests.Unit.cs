@@ -58,8 +58,8 @@ public sealed class MasteryTests_Unit
         => await Assert.That(Mastery.CalculateMatchExperience(type, heroLevel)).IsEqualTo(expected);
 
     [Test]
-    public async Task CalculateRegularMasteryBoostExperience_Is_Double_The_Combined_Match_And_Bonus_Experience()
-        => await Assert.That(Mastery.CalculateRegularMasteryBoostExperience(400, 8)).IsEqualTo(816);
+    public async Task CalculateRegularMasteryBoostExperience_Equals_The_Combined_Match_And_Bonus_Experience_So_That_A_Boost_Doubles_It()
+        => await Assert.That(Mastery.CalculateRegularMasteryBoostExperience(400, 8)).IsEqualTo(408);
 
     [Test]
     [Arguments(AccountStatisticsType.Matchmaking,       500, 000, 000)]

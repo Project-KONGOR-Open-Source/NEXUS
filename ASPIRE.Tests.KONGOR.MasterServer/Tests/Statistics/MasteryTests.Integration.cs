@@ -42,9 +42,9 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
         {
             await Assert.That(Convert.ToInt32(body["error_code"])).IsEqualTo(0);
 
-            // A Ranked Match At Hero Level 10 Earns 200; With No Maximum-Level Heroes The Bonus Is Zero, So A Regular Boost Adds (200 + 0) * 2 = 400 On Top Of The 200
-            await Assert.That(mastery.GetHeroExperienceByHeroIdentifier("Hero_Accursed")).IsEqualTo(600);
-            await Assert.That(participant.MasteryProgression?.BoostExperience).IsEqualTo(400);
+            // A Ranked Match At Hero Level 10 Earns 200; With No Maximum-Level Heroes The Bonus Is Zero, So A Regular Boost Doubles It By Adding Another 200
+            await Assert.That(mastery.GetHeroExperienceByHeroIdentifier("Hero_Accursed")).IsEqualTo(400);
+            await Assert.That(participant.MasteryProgression?.BoostExperience).IsEqualTo(200);
             await Assert.That(participant.MasteryProgression?.SuperBoostExperience).IsEqualTo(0);
             await Assert.That(MasteryConsumables.MasteryBoostsOwned(user)).IsEqualTo(0);
         }
@@ -149,7 +149,7 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
         using (Assert.Multiple())
         {
             await Assert.That(Convert.ToInt32(body["error_code"])).IsEqualTo(0);
-            await Assert.That(participant.MasteryProgression?.BoostExperience).IsEqualTo(400);
+            await Assert.That(participant.MasteryProgression?.BoostExperience).IsEqualTo(200);
         }
     }
 
@@ -193,7 +193,7 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
             // The Client Receives The Original API's "Match Already Boosted" Error Code, The Second Boost Is Not Consumed, And The Experience From The First Boost Is Unchanged
             await Assert.That(Convert.ToInt32(body["error_code"])).IsEqualTo(4);
             await Assert.That(MasteryConsumables.SuperMasteryBoostsOwned(user)).IsEqualTo(1);
-            await Assert.That(mastery.GetHeroExperienceByHeroIdentifier("Hero_Accursed")).IsEqualTo(600);
+            await Assert.That(mastery.GetHeroExperienceByHeroIdentifier("Hero_Accursed")).IsEqualTo(400);
         }
     }
 
@@ -407,7 +407,7 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
             await Assert.That(Convert.ToInt32(mastery["mastery_exp_heroes_count"])).IsEqualTo(12);
             await Assert.That(Convert.ToInt32(mastery["mastery_exp_heroes_addon"])).IsEqualTo(12);
             await Assert.That(Convert.ToInt32(mastery["mastery_exp_original"])).IsEqualTo(200 + 12);
-            await Assert.That(Convert.ToInt32(mastery["mastery_exp_to_boost"])).IsEqualTo((200 + 12) * 2);
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_to_boost"])).IsEqualTo(200 + 12);
         }
     }
 
@@ -532,10 +532,10 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
 
         using (Assert.Multiple())
         {
-            // The Experience After The Match Includes The Boost: 0 Before, 200 From The Match, And 400 From The Boost
-            await Assert.That(Convert.ToInt32(mastery["mastery_exp_original"])).IsEqualTo(600);
+            // The Experience After The Match Includes The Boost: 0 Before, 200 From The Match, And 200 From The Boost
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_original"])).IsEqualTo(400);
             await Assert.That(Convert.ToInt32(mastery["mastery_exp_match"])).IsEqualTo(200);
-            await Assert.That(Convert.ToInt32(mastery["mastery_exp_boost"])).IsEqualTo(400);
+            await Assert.That(Convert.ToInt32(mastery["mastery_exp_boost"])).IsEqualTo(200);
             await Assert.That(Convert.ToInt32(mastery["mastery_exp_super_boost"])).IsEqualTo(0);
 
             // A Non-Zero Applied Boost Makes The Client Display The Match As Already Boosted And Hide The Boost Purchase Controls

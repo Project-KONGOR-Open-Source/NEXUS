@@ -134,7 +134,7 @@ public partial class ClientRequesterController
 
     /// <summary>
     ///     Applies an owned mastery boost to the hero played in the given match, consuming the boost, recording it on the match, and issuing a level reward if the hero crosses a mastery level.
-    ///     A regular boost adds double the match and bonus experience of the match, while a super boost advances the hero to the start of the next mastery level.
+    ///     A regular boost adds an amount equal to the match and bonus experience of the match, so that the match yields twice its experience in total, while a super boost advances the hero to the start of the next mastery level.
     /// </summary>
     private async Task<IActionResult> BoostMatchMastery()
     {
