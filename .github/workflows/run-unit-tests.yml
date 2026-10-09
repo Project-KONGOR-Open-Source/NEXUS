@@ -5,7 +5,7 @@ on:
   workflow_dispatch: # enable manual trigger
 
   schedule:
-    - cron: "0 4 * * *"
+    - cron: "20 4 * * *"
 
   pull_request:
     branches: [ "main" ]
