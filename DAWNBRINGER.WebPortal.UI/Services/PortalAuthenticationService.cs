@@ -23,7 +23,13 @@ public class PortalAuthenticationService : AuthenticationStateProvider
         LocalStorage = localStorage;
     }
 
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    public override Task<AuthenticationState> GetAuthenticationStateAsync() => ResolveAuthenticationState();
+
+    /// <summary>
+    ///     Builds the current authentication state from the cached or stored JWT.
+    ///     The state change notifications use this method directly, because they announce freshly built state rather than consuming the provider's public authentication state.
+    /// </summary>
+    private async Task<AuthenticationState> ResolveAuthenticationState()
     {
         // Restore The Token From Browser Storage If The In-Memory Cache Is Empty (e.g. After A Page Refresh)
         if (string.IsNullOrWhiteSpace(CachedToken))
@@ -83,7 +89,7 @@ public class PortalAuthenticationService : AuthenticationStateProvider
 
         await LocalStorage.SetAsync(TokenStorageKey, token);
 
-        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        NotifyAuthenticationStateChanged(ResolveAuthenticationState());
     }
 
     /// <summary>
@@ -95,7 +101,7 @@ public class PortalAuthenticationService : AuthenticationStateProvider
 
         await ClearTokenFromStorageAsync();
 
-        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        NotifyAuthenticationStateChanged(ResolveAuthenticationState());
     }
 
     /// <summary>
