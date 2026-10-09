@@ -53,6 +53,25 @@ public sealed class SeasonProgressTests_Unit
     }
 
     [Test]
+    [Arguments("11", 2)]
+    [Arguments("110101", 6)]
+    [Arguments("", 0)]
+    [Arguments(null, 0)]
+    public async Task Campaign_Info_Reports_One_Placement_Match_For_Each_Recorded_Placement_Result(string? placementMatchesData, int expectedPlacementMatches)
+    {
+        AccountStatistics matchmakingStatistics = BuildStatistics(AccountStatisticsType.Matchmaking, 1600, placementMatchesData);
+
+        MatchPlayerStatistics playerRow = BuildPlayerRow(MatchType.AM_MATCHMAKING, "caldavar", matchmakingStatistics, matchmakingStatistics);
+
+        // The Client Animates One Placement Icon Per Placement Match And Reads Each Result From The Placement Wins, So Reporting More Placement Matches Than Results Breaks The Match Stats Screen
+        using (Assert.Multiple())
+        {
+            await Assert.That(playerRow.SeasonProgress.PlacementMatches).IsEqualTo(expectedPlacementMatches);
+            await Assert.That(playerRow.SeasonProgress.PlacementWins.Length).IsEqualTo(expectedPlacementMatches);
+        }
+    }
+
+    [Test]
     public async Task Campaign_Info_Is_Empty_For_A_MidWars_Match()
     {
         AccountStatistics midWarsStatistics = BuildStatistics(AccountStatisticsType.MidWars, 1669, null);

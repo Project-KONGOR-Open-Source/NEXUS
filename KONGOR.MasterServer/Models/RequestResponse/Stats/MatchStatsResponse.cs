@@ -1751,14 +1751,15 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     public string Season { get; init; } = SeasonInformation.CurrentSeasonIndex.ToString();
 
     /// <summary>
-    ///     The number of placement matches the player has completed in the current season.
+    ///     The number of placement matches the player has completed in the current season, which is the number of results in <see cref="PlacementWins"/>.
     ///     Players must complete placement matches before receiving their seasonal medal rank.
+    ///     The client animates one placement icon per placement match and reads each icon's result from <see cref="PlacementWins"/>, so reporting more placement matches than results breaks the match stats screen.
     /// </summary>
     [PHPProperty("placement_matches")]
-    public int PlacementMatches { get; init; } = seasonStatistics is null ? 0 : AccountStatistics.ExpectedPlacementMatchCount;
+    public int PlacementMatches { get; init; } = seasonStatistics?.PlacementMatchesData?.Length ?? 0;
 
     /// <summary>
-    ///     The number of placement matches won by the player in the current season.
+    ///     The results of the player's completed placement matches in the current season, one character per match ("1" for a win, "0" for a loss).
     /// </summary>
     [PHPProperty("placement_wins")]
     public string PlacementWins { get; init; } = seasonStatistics?.PlacementMatchesData ?? string.Empty;
