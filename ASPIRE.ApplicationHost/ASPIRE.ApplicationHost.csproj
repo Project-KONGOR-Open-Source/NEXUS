@@ -11,6 +11,9 @@
         <OutputType>exe</OutputType>
         <IsAspireHost>true</IsAspireHost>
         <UserSecretsId>00005072-6f6a-6563-7420-4b4f4e474f52</UserSecretsId> <!-- Decode Me ! -->
+
+        <!-- The Orchestration Dependencies (DCP And The Dashboard) Are Restored From NuGet Rather Than From The Aspire CLI Bundle, So Builds Do Not Depend On An Installed Aspire CLI -->
+        <NoWarn>$(NoWarn);ASPIRE010</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
