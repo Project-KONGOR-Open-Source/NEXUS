@@ -373,7 +373,7 @@ public partial class ClientRequesterController
                     Reward = new global::KONGOR.MasterServer.Models.RequestResponse.Stats.MasteryReward
                     {
                         ProductID = configuredReward.ProductIdentifier,
-                        ProductName = configuredReward.ProductName ?? string.Empty,
+                        ProductName = configuredReward.DisplayedProductName(),
                         ProductLocalContent = configuredReward.ProductLocalResource ?? string.Empty,
                         Quantity = configuredReward.ProductQuantity,
                         GoldCoins = configuredReward.GoldCoins,

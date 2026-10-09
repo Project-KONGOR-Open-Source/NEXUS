@@ -145,6 +145,29 @@ public sealed class MasteryTests_Unit
     }
 
     [Test]
+    [Arguments("Mastery Boost", 5, "Mastery Boosts")]
+    [Arguments("Super Mastery Boost", 1, "Super Mastery Boost")]
+    [Arguments("Gold Coins", 500, "Gold Coins")]
+    [Arguments(null, 0, "")]
+    public async Task DisplayedProductName_Pluralises_Only_Product_Names_With_A_Quantity_Above_One_That_Do_Not_Already_End_In_S(string? productName, int productQuantity, string expected)
+    {
+        global::KONGOR.MasterServer.Configuration.Mastery.MasteryReward reward = new ()
+        {
+            RequiredLevel = 1,
+            ProductIdentifier = 0,
+            ProductName = productName,
+            ProductCode = null,
+            ProductLocalResource = null,
+            ProductQuantity = productQuantity,
+            GoldCoins = 0,
+            SilverCoins = 0,
+            PlinkoTickets = 0
+        };
+
+        await Assert.That(reward.DisplayedProductName()).IsEqualTo(expected);
+    }
+
+    [Test]
     public async Task Mastery_Boost_Consumables_Add_And_Remove_Independently_Of_Super_Boosts()
     {
         User user = BuildUser();

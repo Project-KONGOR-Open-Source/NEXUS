@@ -736,6 +736,34 @@ public sealed class MasteryTests_Integration(KONGORIntegrationWebApplicationFact
     }
 
     [Test]
+    public async Task Show_Stats_Mastery_Pluralises_The_Product_Names_Of_Rewards_With_A_Quantity_Above_One()
+    {
+        (Account account, string cookie) = await SeedAuthenticatedAccount("reward.names@kongor.com", "RewardNames");
+
+        HttpResponseMessage response = await webApplicationFactory.CreateClient().PostAsync(ClientRequesterRoute, new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["f"]        = "show_stats",
+            ["nickname"] = account.Name,
+            ["cookie"]   = cookie,
+            ["table"]    = "mastery"
+        }));
+
+        IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+        Dictionary<int, string?> productNamesByLevel = EnumeratePHPArrayValues(body["mastery_rewards"]).Cast<IDictionary<object, object>>()
+            .ToDictionary(tier => Convert.ToInt32(tier["level"]), tier => Convert.ToString(((IDictionary<object, object>) tier["reward"])["product_name"]));
+
+        int regularBoostLevel = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards.First(reward => reward is { ProductName: "Mastery Boost", ProductQuantity: > 1 }).RequiredLevel;
+        int superBoostLevel = JSONConfiguration.MasteryRewardsConfiguration.MasteryRewards.First(reward => reward is { ProductName: "Super Mastery Boost", ProductQuantity: 1 }).RequiredLevel;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(productNamesByLevel[regularBoostLevel]).IsEqualTo("Mastery Boosts");
+            await Assert.That(productNamesByLevel[superBoostLevel]).IsEqualTo("Super Mastery Boost");
+        }
+    }
+
+    [Test]
     public async Task Purchasing_A_Heros_Last_Avatar_Exchanges_That_Heros_Mastery_Coupon_For_The_All_Avatar_Coupon()
     {
         List<string> qiAvatars = MasteryCouponHelper.ApplicableAvatars("Hero_Chi");
