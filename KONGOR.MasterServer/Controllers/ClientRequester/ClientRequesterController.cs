@@ -27,7 +27,10 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
     {
-        bool endpointRequiresCookieValidation = Request.Query["f"].SingleOrDefault() is not "auth" and not "pre_auth" and not "srpAuth";
+        string? function = Request.Query["f"].SingleOrDefault() ?? Request.Form["f"].SingleOrDefault();
+
+        // Authentication Establishes The Session, And The Client Sends The Recent Matches Lookup Without A Session Cookie Because The Original API Did Not Authenticate It
+        bool endpointRequiresCookieValidation = function is not "auth" and not "pre_auth" and not "srpAuth" and not "grab_last_matches_from_nick";
         bool accountSessionCookieIsValid = (await DistributedCache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString() ?? "NULL")).IsValid;
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
@@ -146,6 +149,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "get_hero_stats"                => await GetSelectedHeroStatistics(),
             "get_campaign_hero_stats"       => await GetCampaignHeroStatistics(),
             "get_hero_usage_list"           => await GetHeroUsageList(),
+            "grab_last_matches_from_nick"   => await GetLastMatchesFromNickname(),
 
             // store
             "get_daily_special"             => await GetDailySpecial(),

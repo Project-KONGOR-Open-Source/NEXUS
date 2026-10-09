@@ -78,6 +78,41 @@ public partial class ClientRequesterController
     }
 
     /// <summary>
+    ///     Returns the IDs of the most recent matches of the specified account, most recent first.
+    ///     Backs the recent games search of the match replays screen and the latest match lookup of the match statistics screen.
+    /// </summary>
+    private async Task<IActionResult> GetLastMatchesFromNickname()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        // Match IDs Are Not Chronological, So The Most Recent Matches Are Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
+        List<int> matchIDs = await MerrickContext.MatchParticipantStatistics
+            .Where(participant => participant.AccountID == account.ID)
+            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
+            .OrderByDescending(match => match.TimestampRecorded)
+            .Select(match => match.MatchID)
+            .Take(40)
+            .ToListAsync();
+
+        Dictionary<string, object> response = new ()
+        {
+            ["last_stats"] = matchIDs.ToDictionary(matchID => matchID, matchID => matchID.ToString()),
+            ["hosttime"] = Request.Form["hosttime"].ToString()
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
     ///     Returns a paginated overview of recent match history for the specified account.
     ///     Supports different table types: "player" (public matches), "campaign" and "campaign_casual" (ranked/casual matchmaking).
     ///     Each entry contains the match ID, outcome, team, hero information, duration, map, and datetime.
