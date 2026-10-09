@@ -260,6 +260,9 @@ public class MiniGameController(MerrickContext databaseContext, IDatabase distri
 
         user.OwnedStoreItems.Add(winner.PrefixedCode);
 
+        // Owning More Alternative Avatars Can Leave A Hero's Mastery Coupon Without Any Avatar To Apply It To, In Which Case It Is Exchanged For The All-Avatar Mastery Coupon
+        MasteryConsumables.ResolveUnusableCoupons(user);
+
         return new PlinkoDropOutcome
         {
             ProductID           = winner.ID,

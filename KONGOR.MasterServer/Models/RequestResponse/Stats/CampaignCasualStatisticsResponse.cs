@@ -630,10 +630,10 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     # region Season Information
 
     /// <summary>
-    ///     The highest campaign casual level achieved in the current season.
+    ///     The highest campaign casual level (season medal) achieved in the current season.
     /// </summary>
     [PHPProperty("highest_level_current")]
-    public string HighestLevelCurrent => account.User.TotalLevel.ToString();
+    public string HighestLevelCurrent => ((int) statistics.HighestMedal).ToString();
 
     /// <summary>
     ///     The highest leaderboard ranking achieved in the current season (Immortal rank only).
@@ -643,10 +643,10 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     public int? HighestRanking => RankExtensions.GetRank(statistics.SkillRating) is Rank.IMMORTAL ? 1 : null; // TODO: Implement Actual Leaderboard Ranking Retrieval
 
     /// <summary>
-    ///     The current campaign casual level in this season.
+    ///     The current campaign casual level (season medal) in this season, which the client translates into the rank name and the rank icon.
     /// </summary>
     [PHPProperty("current_level")]
-    public string CurrentLevel => account.User.TotalLevel.ToString();
+    public string CurrentLevel => ((int) statistics.CurrentMedal()).ToString();
 
     /// <summary>
     ///     The current leaderboard ranking position (Immortal rank only).

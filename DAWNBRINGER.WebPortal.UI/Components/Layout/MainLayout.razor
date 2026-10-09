@@ -137,6 +137,9 @@
     [Inject]
     private IJSRuntime JSRuntime { get; set; } = null!;
 
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = null!;
+
     private static readonly MudTheme Theme = new ()
     {
         PaletteDark = new PaletteDark
@@ -373,7 +376,19 @@
         if (firstRender)
         {
             IsDarkMode = await ThemeProvider.GetSystemDarkModeAsync();
-            CursorTrailEnabled = await JSRuntime.InvokeAsync<bool>("CursorTrail.isEnabled");
+
+            try
+            {
+                CursorTrailEnabled = await JSRuntime.InvokeAsync<bool>("CursorTrail.isEnabled");
+            }
+
+            catch (JSException)
+            {
+                CursorTrailEnabled = false;
+
+                Snackbar.Add("The cursor trail is unavailable.", Severity.Warning);
+            }
+
             StateHasChanged();
         }
     }
@@ -386,7 +401,19 @@
     private async Task ToggleCursorTrail()
     {
         CursorTrailEnabled = !CursorTrailEnabled;
-        await JSRuntime.InvokeVoidAsync(CursorTrailEnabled ? "CursorTrail.enable" : "CursorTrail.disable");
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync(CursorTrailEnabled ? "CursorTrail.enable" : "CursorTrail.disable");
+        }
+
+        catch (JSException)
+        {
+            // Revert The Toggle So That The Button Icon Keeps Reflecting The Actual Cursor Trail State
+            CursorTrailEnabled = !CursorTrailEnabled;
+
+            Snackbar.Add("Unable to toggle the cursor trail.", Severity.Warning);
+        }
     }
 
     private void ToggleDrawer()

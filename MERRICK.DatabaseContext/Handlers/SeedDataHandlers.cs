@@ -204,7 +204,7 @@ public static class SeedDataHandlers
 
         logger.LogInformation(@"Seeded {AccountCount} Accounts Across System, Sub-, Host, And Guest Account Types", seededAccountCount);
 
-        // Raise The Skill Rating Of The Non-Guest Staff Accounts Above The Default So They Appear Ranked During Testing
+        // Raise The Skill Rating Of The Non-Guest Staff Accounts Above The Default And Give Them The Highest Possible Medal So They Appear Ranked During Testing
 
         List<int> staffAccountIDs = await context.Accounts
             .Where(account => account.Type == AccountType.Staff).Select(account => account.ID).ToListAsync(cancellationToken);
@@ -213,7 +213,10 @@ public static class SeedDataHandlers
             .Where(statistics => staffAccountIDs.Contains(statistics.AccountID)).ToListAsync(cancellationToken);
 
         foreach (AccountStatistics statistics in staffAccountStatistics)
+        {
             statistics.SkillRating = 1850.0;
+            statistics.HighestMedal = Rank.IMMORTAL;
+        }
 
         await context.SaveChangesAsync(cancellationToken);
 

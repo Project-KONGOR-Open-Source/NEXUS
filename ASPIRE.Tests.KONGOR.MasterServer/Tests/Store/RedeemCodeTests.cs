@@ -208,4 +208,44 @@ public sealed class RedeemCodeTests(KONGORIntegrationWebApplicationFactory webAp
 
         await Assert.That(user.OwnedStoreItems.Count(code => code.Equals(superTaunt.PrefixedCode))).IsEqualTo(1);
     }
+
+    [Test]
+    public async Task Redeem_With_A_Heros_Last_Avatar_Exchanges_That_Heros_Mastery_Coupon_For_The_All_Avatar_Coupon()
+    {
+        (string cookie, int accountID, int userID) = await RedeemCodeTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "redeem.coupon@kongor.com", "RedeemCoupon", goldCoins: 0, silverCoins: 0, plinkoTickets: 0);
+
+        List<string> qiAvatars = MasteryCouponHelper.ApplicableAvatars("Hero_Chi");
+
+        StoreItem lastAvatar = JSONConfiguration.StoreItemsConfiguration.GetEnabledItemsByType(StoreItemType.AlternativeAvatar)
+            .Single(item => item.PrefixedCode == qiAvatars[^1]);
+
+        using (IServiceScope scope = webApplicationFactory.Services.CreateScope())
+        {
+            MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+            User preSeededUser = await databaseContext.Users.SingleAsync(candidate => candidate.ID == userID);
+
+            preSeededUser.OwnedStoreItems.AddRange(qiAvatars.SkipLast(1));
+            preSeededUser.OwnedStoreItems.Add("cp.Qi Mastery Coupon * 1");
+
+            await databaseContext.SaveChangesAsync();
+        }
+
+        await RedeemCodeTestsHelper.SeedCode(webApplicationFactory, "QIAVATAR", goldCoinsReward: 0, silverCoinsReward: 0, plinkoTicketsReward: 0, productID: lastAvatar.ID);
+
+        HttpResponseMessage response = await RedeemCodeTestsHelper.PostStore(webApplicationFactory, cookie, accountID, "QIAVATAR");
+
+        IDictionary<object, object> body = await RedeemCodeTestsHelper.DeserialisePhpResponse(response);
+
+        await Assert.That(Convert.ToInt32(body["popupCode"])).IsEqualTo(PopupSuccess);
+
+        User user = await RedeemCodeTestsHelper.LoadUser(webApplicationFactory, userID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(user.OwnedStoreItems).Contains(lastAvatar.PrefixedCode);
+            await Assert.That(user.OwnedStoreItems.Any(item => item.StartsWith("cp.Qi Mastery Coupon * ", StringComparison.Ordinal))).IsFalse();
+            await Assert.That(user.OwnedStoreItems).Contains("cp.All Avatar Mastery Coupon * 1");
+        }
+    }
 }

@@ -225,6 +225,54 @@ public sealed class MiniGameTests(KONGORIntegrationWebApplicationFactory webAppl
     }
 
     [Test]
+    public async Task Drop_Granting_A_Heros_Last_Avatar_Exchanges_That_Heros_Mastery_Coupon_For_The_All_Avatar_Coupon()
+    {
+        (string cookie, int userID) = await PlinkoTestsHelper.SeedAuthenticatedSession(webApplicationFactory, "plinko.coupon@kongor.com", "PlinkoCoupon", goldCoins: 5000, plinkoTickets: 0);
+
+        List<string> qiAvatars = MasteryCouponHelper.ApplicableAvatars("Hero_Chi");
+
+        StoreItem lastAvatar = JSONConfiguration.StoreItemsConfiguration.GetEnabledItemsByType(StoreItemType.AlternativeAvatar)
+            .Single(item => item.PrefixedCode == qiAvatars[^1]);
+
+        HashSet<string> seeded = CollectEveryChestTierPrefixedCode();
+
+        await Assert.That(seeded).Contains(lastAvatar.PrefixedCode);
+
+        seeded.Remove(lastAvatar.PrefixedCode);
+
+        await PlinkoTestsHelper.MutateUser(webApplicationFactory, userID, user =>
+        {
+            user.OwnedStoreItems.AddRange(seeded.Where(code => user.OwnedStoreItems.Contains(code).Equals(false)));
+            user.OwnedStoreItems.AddRange(qiAvatars.SkipLast(1).Where(code => user.OwnedStoreItems.Contains(code).Equals(false)));
+            user.OwnedStoreItems.Add("cp.Qi Mastery Coupon * 1");
+        });
+
+        // The Drop Tier Is Random, So Drops Are Repeated Until The Only Chest Product Left Unowned Is Granted (Every Other Drop Pays Tickets)
+        for (int attempt = 0; attempt < 100; attempt++)
+        {
+            HttpResponseMessage response = await PlinkoTestsHelper.PostForm(webApplicationFactory, PlinkoDropRoute, new Dictionary<string, string>
+            {
+                ["cookie"]      = cookie,
+                ["currency"]    = "gold"
+            });
+
+            IDictionary<object, object> body = await PlinkoTestsHelper.DeserialisePhpResponse(response);
+
+            if (Convert.ToInt32(body["product_id"]) == lastAvatar.ID)
+                break;
+        }
+
+        User user = await PlinkoTestsHelper.LoadUser(webApplicationFactory, userID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(user.OwnedStoreItems).Contains(lastAvatar.PrefixedCode);
+            await Assert.That(user.OwnedStoreItems.Any(item => item.StartsWith("cp.Qi Mastery Coupon * ", StringComparison.Ordinal))).IsFalse();
+            await Assert.That(user.OwnedStoreItems).Contains("cp.All Avatar Mastery Coupon * 1");
+        }
+    }
+
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]

@@ -64,6 +64,16 @@ public class AccountStatistics
     public bool IsInPlacementPhase => PlacementMatchesData is not null && PlacementMatchesData.Length < ExpectedPlacementMatchCount;
 
     /// <summary>
+    ///     The current season medal of this statistics row, which is <see cref="Rank.NO_MEDAL"/> until the placement phase is complete.
+    /// </summary>
+    public Rank CurrentMedal() => IsInPlacementPhase ? Rank.NO_MEDAL : RankExtensions.GetRank(SkillRating);
+
+    /// <summary>
+    ///     The highest season medal reached by this statistics row, which is raised whenever a match raises the current medal above it, and is not lowered by rating losses.
+    /// </summary>
+    public Rank HighestMedal { get; set; } = Rank.NO_MEDAL;
+
+    /// <summary>
     ///     Aggregated per-hero statistics stored as JSON.
     ///     Updated automatically when matches are recorded.
     /// </summary>

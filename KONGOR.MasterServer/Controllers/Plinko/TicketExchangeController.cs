@@ -103,6 +103,9 @@ public class TicketExchangeController(MerrickContext databaseContext, IDatabase 
         user.PlinkoTickets -= entry.TicketCost;
         user.OwnedStoreItems.Add(storeItem.PrefixedCode);
 
+        // Owning More Alternative Avatars Can Leave A Hero's Mastery Coupon Without Any Avatar To Apply It To, In Which Case It Is Exchanged For The All-Avatar Mastery Coupon
+        MasteryConsumables.ResolveUnusableCoupons(user);
+
         await MerrickContext.SaveChangesAsync();
 
         Logger.LogInformation(@"Ticket Exchange Purchase For Account ""{AccountID}"" Redeemed Product ""{ProductID}"" For ""{TicketCost}"" Tickets",

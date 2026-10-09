@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.6.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.6.1">
 
     <!--
         When There Is An Update To The "Aspire.Hosting.AppHost" NuGet Package:
@@ -14,11 +14,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.Browsers" Version="13.6.0-preview.1.26479.8" />
-        <PackageReference Include="Aspire.Hosting.EntityFrameworkCore" Version="13.6.0-preview.1.26479.8" />
-        <PackageReference Include="Aspire.Hosting.Seq" Version="13.6.0" />
-        <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.6.0" />
-        <PackageReference Include="Aspire.Hosting.Valkey" Version="13.6.0" />
+        <PackageReference Include="Aspire.Hosting.Browsers" Version="13.6.1-preview.1.26506.6" />
+        <PackageReference Include="Aspire.Hosting.EntityFrameworkCore" Version="13.6.1-preview.1.26506.6" />
+        <PackageReference Include="Aspire.Hosting.Seq" Version="13.6.1" />
+        <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.6.1" />
+        <PackageReference Include="Aspire.Hosting.Valkey" Version="13.6.1" />
     </ItemGroup>
 
     <ItemGroup>

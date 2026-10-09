@@ -803,7 +803,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipant
         => matchParticipantStatistics.DistinctBy(player => player.PublicMatch).Single().PublicMatch is 0 ? 1 : 0;
 }
 
-public class MatchMastery(string heroIdentifier, int preMatchMasteryExperience, int matchMasteryExperience, int bonusExperience)
+public class MatchMastery(string heroIdentifier, int postMatchMasteryExperience, int matchMasteryExperience, int bonusExperience)
 {
     /// <summary>
     ///     The identifier of the hero, in the format Hero_{Snake_Case_Name} (e.g. "Hero_Armadon").
@@ -812,12 +812,12 @@ public class MatchMastery(string heroIdentifier, int preMatchMasteryExperience, 
     public string HeroIdentifier { get; init; } = heroIdentifier;
 
     /// <summary>
-    ///     The hero's mastery experience before the match.
-    ///     The client treats this as the starting value of the progress bar and adds the match, bonus, and boost experience on top of it, both for the animation and for the displayed total.
-    ///     Because the match and bonus experience are accrued during statistics submission, this is the persisted total minus the experience accrued for this match.
+    ///     The hero's mastery experience after the match, including any boost applied to it.
+    ///     The client animates the progress bar up to this value, starting from the value before the match, which it derives by subtracting the match, bonus, and boost experience.
+    ///     The value is not capped at the maximum mastery level threshold, because a capped value would make the client derive a starting value one level below a hero which is already at the maximum mastery level, and show a false level-up for it.
     /// </summary>
     [PHPProperty("mastery_exp_original")]
-    public int PreMatchMasteryExperience { get; init; } = preMatchMasteryExperience;
+    public int PostMatchMasteryExperience { get; init; } = postMatchMasteryExperience;
 
     /// <summary>
     ///     The base mastery experience earned during the match.
@@ -850,8 +850,7 @@ public class MatchMastery(string heroIdentifier, int preMatchMasteryExperience, 
     public int MasteryExperienceSuperBoost { get; init; } = 0;
 
     /// <summary>
-    ///     The number of heroes the account has reached maximum mastery level with.
-    ///     Used to calculate the "max_heroes_addon" bonus multiplier.
+    ///     The number of heroes the account had at the maximum mastery level when the match was recorded, from which the bonus experience of the match was calculated.
     /// </summary>
     [PHPProperty("mastery_exp_heroes_count")]
     public required int MasteryExperienceMaximumLevelHeroesCount { get; init; }
@@ -868,7 +867,7 @@ public class MatchMastery(string heroIdentifier, int preMatchMasteryExperience, 
     ///     Displayed when hovering over the mastery boost button in the UI.
     /// </summary>
     [PHPProperty("mastery_exp_to_boost")]
-    public int MasteryExperienceToBoost { get; init; } = (matchMasteryExperience + bonusExperience) * 2;
+    public int MasteryExperienceToBoost { get; init; } = Mastery.CalculateRegularMasteryBoostExperience(matchMasteryExperience, bonusExperience);
 
     /// <summary>
     ///     Special event bonus mastery experience granted during promotional periods.
@@ -1752,14 +1751,15 @@ public class SeasonProgress(MatchInformation matchInformation, MatchParticipantS
     public string Season { get; init; } = SeasonInformation.CurrentSeasonIndex.ToString();
 
     /// <summary>
-    ///     The number of placement matches the player has completed in the current season.
+    ///     The number of placement matches the player has completed in the current season, which is the number of results in <see cref="PlacementWins"/>.
     ///     Players must complete placement matches before receiving their seasonal medal rank.
+    ///     The client animates one placement icon per placement match and reads each icon's result from <see cref="PlacementWins"/>, so reporting more placement matches than results breaks the match stats screen.
     /// </summary>
     [PHPProperty("placement_matches")]
-    public int PlacementMatches { get; init; } = seasonStatistics is null ? 0 : AccountStatistics.ExpectedPlacementMatchCount;
+    public int PlacementMatches { get; init; } = seasonStatistics?.PlacementMatchesData?.Length ?? 0;
 
     /// <summary>
-    ///     The number of placement matches won by the player in the current season.
+    ///     The results of the player's completed placement matches in the current season, one character per match ("1" for a win, "0" for a loss).
     /// </summary>
     [PHPProperty("placement_wins")]
     public string PlacementWins { get; init; } = seasonStatistics?.PlacementMatchesData ?? string.Empty;

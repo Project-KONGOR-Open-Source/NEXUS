@@ -179,6 +179,7 @@ public sealed class MerrickContext : DbContext
 
         builder.OwnsMany(statistics => statistics.ItemHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
         builder.OwnsMany(statistics => statistics.AbilityHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+        builder.OwnsOne(statistics => statistics.MasteryProgression, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
     }
 
     private static void ConfigureMatchStatistics(EntityTypeBuilder<MatchStatistics> builder)

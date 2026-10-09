@@ -55,17 +55,44 @@ public sealed class MasteryTests_Unit
     [Arguments(AccountStatisticsType.Public, 20, 0)]
     [Arguments(AccountStatisticsType.Cooperative, 20, 0)]
     public async Task CalculateMatchExperience_Scales_By_Game_Type_And_Hero_Level(AccountStatisticsType type, int heroLevel, int expected)
-        => await Assert.That(BuildMastery().CalculateMatchExperience(type, heroLevel)).IsEqualTo(expected);
+        => await Assert.That(Mastery.CalculateMatchExperience(type, heroLevel)).IsEqualTo(expected);
 
     [Test]
-    public async Task CalculateRegularMasteryBoostExperience_Is_Double_The_Combined_Match_And_Bonus_Experience()
+    public async Task CalculateRegularMasteryBoostExperience_Equals_The_Combined_Match_And_Bonus_Experience_So_That_A_Boost_Doubles_It()
+        => await Assert.That(Mastery.CalculateRegularMasteryBoostExperience(400, 8)).IsEqualTo(408);
+
+    [Test]
+    [Arguments(AccountStatisticsType.Matchmaking,       500, 000, 000)]
+    [Arguments(AccountStatisticsType.Matchmaking,       500, 012, 012)]
+    [Arguments(AccountStatisticsType.Matchmaking,       500, 138, 138)]
+    [Arguments(AccountStatisticsType.MatchmakingCasual, 250, 051, 026)]
+    [Arguments(AccountStatisticsType.MatchmakingCasual, 250, 052, 026)]
+    [Arguments(AccountStatisticsType.MidWars,           250, 138, 069)]
+    [Arguments(AccountStatisticsType.Public,            000, 138, 000)]
+    public async Task CalculateBonusExperience_Awards_One_Point_Per_Maximum_Level_Hero_Halved_And_Rounded_Up_For_Reduced_Experience_Modes(AccountStatisticsType type, int matchExperience, int heroesAtMaximumMasteryCount, int expected)
+        => await Assert.That(Mastery.CalculateBonusExperience(type, matchExperience, heroesAtMaximumMasteryCount)).IsEqualTo(expected);
+
+    [Test]
+    [Arguments(AccountStatisticsType.Matchmaking,       200, 138, 100)]
+    [Arguments(AccountStatisticsType.Matchmaking,       100, 138, 050)]
+    [Arguments(AccountStatisticsType.Matchmaking,       020, 138, 010)]
+    [Arguments(AccountStatisticsType.MatchmakingCasual, 050, 138, 025)]
+    [Arguments(AccountStatisticsType.Matchmaking,       020, 010, 010)]
+    public async Task CalculateBonusExperience_Never_Exceeds_Half_Of_The_Match_Experience(AccountStatisticsType type, int matchExperience, int heroesAtMaximumMasteryCount, int expected)
+        => await Assert.That(Mastery.CalculateBonusExperience(type, matchExperience, heroesAtMaximumMasteryCount)).IsEqualTo(expected);
+
+    [Test]
+    public async Task SetHeroExperienceByHeroIdentifier_Caps_The_Experience_At_The_Maximum_Mastery_Level_Threshold()
     {
         Mastery mastery = BuildMastery();
 
-        // A Fresh Mastery Has No Heroes At The Maximum Level, So The Bonus Experience Is Zero And The Boost Is Simply Double The Match Experience
-        int matchExperience = mastery.CalculateMatchExperience(AccountStatisticsType.Matchmaking, 20);
+        mastery.SetHeroExperienceByHeroIdentifier("Hero_Accursed", 40000);
 
-        await Assert.That(mastery.CalculateRegularMasteryBoostExperience(AccountStatisticsType.Matchmaking, 20, Heroes.TotalHeroCount)).IsEqualTo(matchExperience * 2);
+        using (Assert.Multiple())
+        {
+            await Assert.That(mastery.GetHeroExperienceByHeroIdentifier("Hero_Accursed")).IsEqualTo(Mastery.MaximumMasteryExperience);
+            await Assert.That(mastery.GetHeroLevelByHeroIdentifier("Hero_Accursed")).IsEqualTo(Mastery.MaximumMasteryLevel);
+        }
     }
 
     [Test]
@@ -118,6 +145,29 @@ public sealed class MasteryTests_Unit
     }
 
     [Test]
+    [Arguments("Mastery Boost", 5, "Mastery Boosts")]
+    [Arguments("Super Mastery Boost", 1, "Super Mastery Boost")]
+    [Arguments("Gold Coins", 500, "Gold Coins")]
+    [Arguments(null, 0, "")]
+    public async Task DisplayedProductName_Pluralises_Only_Product_Names_With_A_Quantity_Above_One_That_Do_Not_Already_End_In_S(string? productName, int productQuantity, string expected)
+    {
+        global::KONGOR.MasterServer.Configuration.Mastery.MasteryReward reward = new ()
+        {
+            RequiredLevel = 1,
+            ProductIdentifier = 0,
+            ProductName = productName,
+            ProductCode = null,
+            ProductLocalResource = null,
+            ProductQuantity = productQuantity,
+            GoldCoins = 0,
+            SilverCoins = 0,
+            PlinkoTickets = 0
+        };
+
+        await Assert.That(reward.DisplayedProductName()).IsEqualTo(expected);
+    }
+
+    [Test]
     public async Task Mastery_Boost_Consumables_Add_And_Remove_Independently_Of_Super_Boosts()
     {
         User user = BuildUser();
@@ -143,6 +193,23 @@ public sealed class MasteryTests_Unit
         {
             await Assert.That(MasteryConsumables.MasteryBoostsOwned(user)).IsEqualTo(0);
             await Assert.That(MasteryConsumables.SuperMasteryBoostsOwned(user)).IsEqualTo(1);
+        }
+    }
+
+    [Test]
+    public async Task ResolveUnusableCoupons_Only_Considers_The_Avatars_Of_The_Coupons_Exact_Hero()
+    {
+        // "Hero_Chi" (Qi) Is A Prefix Of "Hero_Chipper", Whose Avatars Must Not Count Towards Qi's Coupon
+        List<string> qiAvatars = MasteryCouponHelper.ApplicableAvatars("Hero_Chi");
+
+        User user = BuildUser([.. qiAvatars, "cp.Qi Mastery Coupon * 1"]);
+
+        MasteryConsumables.ResolveUnusableCoupons(user);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(user.OwnedStoreItems.Any(item => item.StartsWith("cp.Qi Mastery Coupon * ", StringComparison.Ordinal))).IsFalse();
+            await Assert.That(user.OwnedStoreItems).Contains("cp.All Avatar Mastery Coupon * 1");
         }
     }
 

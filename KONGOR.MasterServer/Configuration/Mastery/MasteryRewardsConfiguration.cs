@@ -33,4 +33,11 @@ public partial class MasteryReward
     public required string? ProductCode { get; set; }
 
     public required string? ProductLocalResource { get; set; }
+
+    /// <summary>
+    ///     The product name as displayed by the client, which places the quantity before the product name only when the quantity is greater than one (e.g. "5 Mastery Boosts"), so only those product names are pluralised.
+    ///     A product name which already ends in "s" is never pluralised again.
+    /// </summary>
+    public string DisplayedProductName()
+        => ProductName is not null && ProductQuantity > 1 && ProductName.EndsWith('s').Equals(false) ? $"{ProductName}s" : ProductName ?? string.Empty;
 }

@@ -78,6 +78,41 @@ public partial class ClientRequesterController
     }
 
     /// <summary>
+    ///     Returns the IDs of the most recent matches of the specified account, most recent first.
+    ///     Backs the recent games search of the match replays screen and the latest match lookup of the match statistics screen.
+    /// </summary>
+    private async Task<IActionResult> GetLastMatchesFromNickname()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        // Match IDs Are Not Chronological, So The Most Recent Matches Are Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
+        List<int> matchIDs = await MerrickContext.MatchParticipantStatistics
+            .Where(participant => participant.AccountID == account.ID)
+            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
+            .OrderByDescending(match => match.TimestampRecorded)
+            .Select(match => match.MatchID)
+            .Take(50)
+            .ToListAsync();
+
+        Dictionary<string, object> response = new ()
+        {
+            ["last_stats"] = matchIDs.ToDictionary(matchID => matchID, matchID => matchID.ToString()),
+            ["hosttime"] = Request.Form["hosttime"].ToString()
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
     ///     Returns a paginated overview of recent match history for the specified account.
     ///     Supports different table types: "player" (public matches), "campaign" and "campaign_casual" (ranked/casual matchmaking).
     ///     Each entry contains the match ID, outcome, team, hero information, duration, map, and datetime.
@@ -181,20 +216,20 @@ public partial class ClientRequesterController
             aggregatedAwards.HighestCreepScoreAwards += statistics.AwardStatistics.HighestCreepScoreAwards;
         }
 
-        // Determine Top 4 Awards By Count
+        // Determine Top 4 Awards By Count; The Client Derives Each Award's Icon And Tooltip From Its Code, And Equal Counts Keep The Award Priority Order Of The Original API
         List<(string Name, int Count)> allAwards =
         [
+            ("awd_mkill", aggregatedAwards.MostKillsAwards),
             ("awd_masst", aggregatedAwards.MostAssistsAwards),
-            ("awd_mhdd", aggregatedAwards.MostHeroDamageDealtAwards),
             ("awd_mbdmg", aggregatedAwards.MostBuildingDamageAwards),
-            ("awd_lgks", aggregatedAwards.LongestKillStreakAwards),
-            ("awd_mkills", aggregatedAwards.MostKillsAwards),
-            ("awd_ldths", aggregatedAwards.LeastDeathsAwards),
+            ("awd_ledth", aggregatedAwards.LeastDeathsAwards),
+            ("awd_mann", aggregatedAwards.AnnihilationAwards),
             ("awd_mqk", aggregatedAwards.QuadKillAwards),
-            ("awd_smkd", aggregatedAwards.SmackdownAwards),
-            ("awd_annih", aggregatedAwards.AnnihilationAwards),
-            ("awd_mwk", aggregatedAwards.MostWardsDestroyedAwards),
-            ("awd_hcs", aggregatedAwards.HighestCreepScoreAwards)
+            ("awd_lgks", aggregatedAwards.LongestKillStreakAwards),
+            ("awd_msd", aggregatedAwards.SmackdownAwards),
+            ("awd_mhdd", aggregatedAwards.MostHeroDamageDealtAwards),
+            ("awd_hcs", aggregatedAwards.HighestCreepScoreAwards),
+            ("awd_mwk", aggregatedAwards.MostWardsDestroyedAwards)
         ];
 
         List<(string Name, int Count)> top4Awards = [.. allAwards.OrderByDescending(award => award.Count).Take(4)];
@@ -221,7 +256,7 @@ public partial class ClientRequesterController
                 RankedMatchesLost = rankedLosses,
                 WinStreak = 0, // TODO: Implement Win Streak Tracking
                 InPlacementPhase = (rankedStatistics?.IsInPlacementPhase ?? false) ? 1 : 0,
-                LevelsGainedThisSeason = account.User.TotalLevel
+                CurrentMedal = (int) (rankedStatistics?.CurrentMedal() ?? Rank.NO_MEDAL)
             },
             SimpleCasualSeasonStats = new SimpleSeasonStats
             {
@@ -229,7 +264,7 @@ public partial class ClientRequesterController
                 RankedMatchesLost = casualLosses,
                 WinStreak = 0, // TODO: Implement Win Streak Tracking
                 InPlacementPhase = (casualStatistics?.IsInPlacementPhase ?? false) ? 1 : 0,
-                LevelsGainedThisSeason = account.User.TotalLevel
+                CurrentMedal = (int) (casualStatistics?.CurrentMedal() ?? Rank.NO_MEDAL)
             },
             MVPAwardsCount = aggregatedAwards.MVPAwards,
             Top4AwardNames = [.. top4Awards.Select(award => award.Name)],
@@ -338,7 +373,7 @@ public partial class ClientRequesterController
                     Reward = new global::KONGOR.MasterServer.Models.RequestResponse.Stats.MasteryReward
                     {
                         ProductID = configuredReward.ProductIdentifier,
-                        ProductName = configuredReward.ProductName ?? string.Empty,
+                        ProductName = configuredReward.DisplayedProductName(),
                         ProductLocalContent = configuredReward.ProductLocalResource ?? string.Empty,
                         Quantity = configuredReward.ProductQuantity,
                         GoldCoins = configuredReward.GoldCoins,
@@ -379,10 +414,16 @@ public partial class ClientRequesterController
 
     private async Task<IActionResult> GetHeroStatistics()
     {
-        string? accountName = Request.Form["nickname"];
+        string? cookie = Request.Form["cookie"];
+
+        if (string.IsNullOrWhiteSpace(cookie))
+            return Unauthorized(@"Missing Value For Form Parameter ""cookie""");
+
+        // The Client Requests The Hero Statistics Of The Logged-In Account With Only The Session Cookie, So The Account Is Resolved From The Session
+        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountName is null)
-            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+            return Unauthorized($@"No Session Found For Cookie ""{cookie}""");
 
         Account? account = await MerrickContext.Accounts
             .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
@@ -769,44 +810,22 @@ public partial class ClientRequesterController
             Mastery mastery = await MerrickContext.Masteries.SingleOrDefaultAsync(record => record.AccountID == account.ID)
                 ?? new Mastery { Account = account };
 
-            AccountStatisticsType masteryStatisticsType = MatchCompletionRewardsHandler.ResolveAccountStatisticsType(matchInformation);
+            // The Boost Controls Are Disabled Whenever The Boost Endpoint Would Reject The Boost, So The Client Never Offers A Boost Which The Server Would Refuse
+            MasteryBoostRejection? boostRejection = await MasteryBoostEligibility.GetRejection(MerrickContext, mastery, requestingPlayerStatistics);
 
-            int heroMatchExperience = mastery.CalculateMatchExperience(masteryStatisticsType, requestingPlayerStatistics.HeroLevel);
-            int heroBonusExperience = mastery.CalculateBonusExperience(masteryStatisticsType, Heroes.TotalHeroCount);
-            int heroCurrentExperience = mastery.GetHeroExperienceByHeroIdentifier(requestingPlayerStatistics.HeroIdentifier);
+            // Matches That Awarded No Mastery Experience Report An Empty Progression, Whose Zero Match Experience Makes The Client Hide The Mastery Panel
+            MasteryProgression progression = requestingPlayerStatistics.MasteryProgression ?? new MasteryProgression();
 
-            MasteryBoostContext? masteryBoostContext = await DistributedCache.GetMasteryBoostContext(account.ID, matchStatistics.MatchID);
-
-            // The Match, Bonus, And Boost Experience Are Accrued Into The Persisted Total During Statistics Submission And Boost Application
-            // The Client Treats "mastery_exp_original" As The Pre-Match Starting Value And Adds The Match, Bonus, And Boost Experience On Top Of It, So The Accrued Amounts Are Subtracted Back Out Here
-            int preMatchExperience = Math.Max(0, heroCurrentExperience - heroMatchExperience - heroBonusExperience - (masteryBoostContext?.Experience ?? 0));
-
-            // A Mastery Boost May Only Be Applied Once, Only To The Account's Most Recent Match Before Another Game Is Started, And Only Within The Boost Application Window
-            // The Boost Is Therefore Disabled When An Older Match Is Viewed In The Match History
-            // Match IDs Are Not Chronological, So The Most Recent Match Is Resolved By The Recorded Timestamp Rather Than By The Largest Match ID
-            int mostRecentMatchID = await MerrickContext.MatchParticipantStatistics
-                .Where(statistics => statistics.AccountID == account.ID)
-                .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => match)
-                .OrderByDescending(match => match.TimestampRecorded)
-                .Select(match => match.MatchID)
-                .FirstAsync();
-
-            bool isMostRecentMatch = matchStatistics.MatchID == mostRecentMatchID;
-
-            bool masteryCanBoost = isMostRecentMatch && heroMatchExperience > 0 && masteryBoostContext is null
-                && matchStatistics.TimestampRecorded >= DateTimeOffset.UtcNow - MasteryBoost.ApplicationWindow
-                && Mastery.GetLevelFromExperience(heroCurrentExperience) < Mastery.MaximumMasteryLevel;
-
-            // The Applied Experience Is Reported In The Response Field Matching The Boost Type, Mirroring The Original API Contract
-            matchMastery = new MatchMastery(requestingPlayerStatistics.HeroIdentifier, preMatchExperience, heroMatchExperience, heroBonusExperience)
+            // The Mastery Progression Recorded For This Match Is Reported Rather Than The Hero's Current Experience, So That Viewing An Older Match Shows The Progression Of That Match
+            matchMastery = new MatchMastery(requestingPlayerStatistics.HeroIdentifier, progression.ExperienceAfterMatch(), progression.MatchExperience, progression.BonusExperience)
             {
-                MasteryExperienceBoost = masteryBoostContext is { IsSuperBoost: false } ? masteryBoostContext.Experience : 0,
-                MasteryExperienceSuperBoost = masteryBoostContext is { IsSuperBoost: true } ? masteryBoostContext.Experience : 0,
-                MasteryExperienceMaximumLevelHeroesCount = mastery.HeroesAtMaximumMasteryCount(),
+                MasteryExperienceBoost = progression.BoostExperience,
+                MasteryExperienceSuperBoost = progression.SuperBoostExperience,
+                MasteryExperienceMaximumLevelHeroesCount = progression.HeroesAtMaximumMasteryCount,
                 MasteryExperienceBoostProductCount = MasteryConsumables.MasteryBoostsOwned(account.User),
                 MasteryExperienceSuperBoostProductCount = MasteryConsumables.SuperMasteryBoostsOwned(account.User),
-                MasteryExperienceCanBoost = masteryCanBoost,
-                MasteryExperienceCanSuperBoost = masteryCanBoost
+                MasteryExperienceCanBoost = boostRejection is null,
+                MasteryExperienceCanSuperBoost = boostRejection is null
             };
         }
 
