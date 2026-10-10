@@ -68,6 +68,45 @@ public class ChatChannel
     }
 
     /// <summary>
+    ///     Gets or creates the channel which a client has asked to join by name.
+    ///     The general channel names are routed through the load balancing across the general channels, so a numbered general channel is never joined or created directly.
+    ///     Returns <see langword="false"/>, after notifying the client, if the name belongs to a reserved channel which the client is not entitled to, such as the channel of another clan or another role, or a match or matchmaking group channel.
+    /// </summary>
+    public static bool TryGetOrCreateForJoinRequest(ClientChatSession session, string channelName, [NotNullWhen(true)] out ChatChannel? channel)
+    {
+        channel = null;
+
+        if (ChatChannels.IsGeneralChannel(channelName))
+        {
+            channel = GetOrCreateGeneralChannel();
+
+            return true;
+        }
+
+        if (ChatChannels.IsReservedChannel(channelName))
+        {
+            // The Reserved Channels Which A Client Is Entitled To Are Its Default Channels, Such As Its Clan Channel And The Channels Of Its Role
+            // Match And Matchmaking Group Channels Are Never Among Them, Since Their Members Are Added By The Chat Server Itself
+            string? defaultChannelName = session.Account.GetDefaultChatChannels()
+                .SingleOrDefault(defaultChannel => defaultChannel.Equals(channelName, StringComparison.OrdinalIgnoreCase));
+
+            if (defaultChannelName is null)
+            {
+                SendSystemMessage(session, channelName, ChatChannels.IsClanChannel(channelName) ? "Only Clan Members Can Join This Channel" : "This Channel Cannot Be Joined");
+
+                return false;
+            }
+
+            // Reserved Channels Are Matched Case-Insensitively, So That A Differently-Cased Request Cannot Create A Look-Alike Channel
+            channelName = defaultChannelName;
+        }
+
+        channel = GetOrCreate(session, channelName);
+
+        return true;
+    }
+
+    /// <summary>
     ///     Gets or creates a general chat channel with overflow support.
     ///     Finds the first general channel with fewer than <see cref="ChatProtocol.MAX_USERS_PER_HON_CHANNEL"/> members.
     ///     If all existing general channels are full, a new numbered channel is created (e.g. "KONGOR 2", "KONGOR 3").
@@ -78,28 +117,37 @@ public class ChatChannel
         string baseName = ChatProtocol.CHAT_CHANNEL_BASE_NAME;
 
         // Find The First General Channel With Capacity
+        // Several General Channels Can Have Capacity At Once (e.g. Once Members Leave The First One While An Overflow Channel Is Still In Use), So The First One In Order Is Taken
         ChatChannel? availableChannel = Context.ChatChannels.Values
             .Where(channel => channel.IsGeneralChannel)
             .OrderBy(channel => channel.Name.Length)
             .ThenBy(channel => channel.Name)
-            .SingleOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
+            .FirstOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
 
         if (availableChannel is not null)
             return availableChannel;
 
-        // All General Channels Are Full (Or None Exist); Determine The Next Channel Number
-        int existingCount = Context.ChatChannels.Values.Count(channel => channel.IsGeneralChannel);
+        // All General Channels Are Full (Or None Exist), So The First Channel Uses The Base Name, While Overflow Channels Are Numbered Starting At 2
+        bool isFirstChannel = Context.ChatChannels.ContainsKey(baseName) is false;
 
-        // The First Channel Uses The Base Name; Subsequent Channels Are Numbered Starting At 2
-        string channelName = existingCount == 0
-            ? baseName
-            : $"{baseName} {existingCount + 1}";
+        string channelName = baseName;
+
+        if (isFirstChannel is false)
+        {
+            int channelNumber = 2;
+
+            // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
+            while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
+                channelNumber++;
+
+            channelName = $"{baseName} {channelNumber}";
+        }
 
         // The First General Channel Is Permanent; Overflow Channels Are Not
         ChatProtocol.ChatChannelType flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
             | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE;
 
-        if (existingCount == 0)
+        if (isFirstChannel)
             flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
@@ -120,7 +168,7 @@ public class ChatChannel
     /// <returns>The match channel.</returns>
     public static ChatChannel GetOrCreateMatchChannel(int matchID)
     {
-        string matchChannelName = $"Match {matchID}";
+        string matchChannelName = $"{ChatChannels.MatchChannelPrefix} {matchID}";
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(matchChannelName, new ChatChannel
         {
@@ -140,7 +188,7 @@ public class ChatChannel
     /// <returns>The group channel.</returns>
     public static ChatChannel GetOrCreateGroupChannel(int groupID)
     {
-        string groupChannelName = $"TMM Group {groupID}";
+        string groupChannelName = $"{ChatChannels.GroupChannelPrefix} {groupID}";
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(groupChannelName, new ChatChannel
         {
@@ -503,12 +551,18 @@ public class ChatChannel
     /// <param name="session">The client session to notify.</param>
     /// <param name="message">The human-readable message to display to the client.</param>
     private void SendSystemMessage(ClientChatSession session, string message)
+        => SendSystemMessage(session, Name, message);
+
+    /// <summary>
+    ///     Sends a one-way system message to a single client on behalf of the named channel, which does not need to exist, such as when a request to join it is rejected before it is created.
+    /// </summary>
+    private static void SendSystemMessage(ClientChatSession session, string channelName, string message)
     {
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
-        response.WriteString(Name);    // Sender Name (The Channel The System Message Relates To)
-        response.WriteString(message); // System Message Text
+        response.WriteString(channelName); // Sender Name (The Channel The System Message Relates To)
+        response.WriteString(message);     // System Message Text
 
         session.Send(response);
     }

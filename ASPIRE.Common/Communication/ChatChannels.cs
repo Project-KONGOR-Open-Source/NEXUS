@@ -16,22 +16,48 @@ public static class ChatChannels
 
     public static readonly string[] AllDefaultChannels = [ GeneralChannel, GameMastersChannel, GuestsChannel, ServerHostsChannel, StreamersChannel, VIPChannel, StaffChannel ];
 
-    // Clan channels are named after their clan, following this prefix.
-    public const string ClanChannelPrefix = "Clan ";
+    // Clan channels are named after their clan, following this prefix and a space.
+    public const string ClanChannelPrefix = "Clan";
+
+    // Match channels are named after their match ID, following this prefix and a space.
+    public const string MatchChannelPrefix = "Match";
+
+    // Matchmaking group channels are named after their group ID, following this prefix and a space.
+    public const string GroupChannelPrefix = "TMM Group";
 
     /// <summary>
     ///     Determines whether the channel is one which accounts are placed in based on their state, rather than one which players choose freely.
-    ///     These are the general channel along with its numbered overflow channels, the clan channels, and the role channels.
+    ///     These are the general channel along with its numbered overflow channels, the clan channels, the role channels, and the match and matchmaking group channels.
     /// </summary>
     public static bool IsReservedChannel(string channelName)
     {
         if (AllDefaultChannels.Contains(channelName, StringComparer.OrdinalIgnoreCase))
             return true;
 
-        if (channelName.StartsWith(ClanChannelPrefix, StringComparison.OrdinalIgnoreCase))
+        if (IsGeneralChannel(channelName) || IsClanChannel(channelName))
+            return true;
+
+        return HasPrefix(channelName, MatchChannelPrefix) || HasPrefix(channelName, GroupChannelPrefix);
+    }
+
+    /// <summary>
+    ///     Determines whether the channel is the general channel or one of the numbered overflow channels which the general channel is load-balanced across.
+    /// </summary>
+    public static bool IsGeneralChannel(string channelName)
+    {
+        if (channelName.Equals(GeneralChannel, StringComparison.OrdinalIgnoreCase))
             return true;
 
         // Overflow General Channels Are Named After The General Channel, Followed By A Number
-        return channelName.StartsWith($"{GeneralChannel} ", StringComparison.OrdinalIgnoreCase) && int.TryParse(channelName.AsSpan(GeneralChannel.Length + 1), out _);
+        return HasPrefix(channelName, GeneralChannel) && int.TryParse(channelName.AsSpan(GeneralChannel.Length + 1), out _);
     }
+
+    /// <summary>
+    ///     Determines whether the channel is the channel of a clan, whether or not that clan exists.
+    /// </summary>
+    public static bool IsClanChannel(string channelName)
+        => HasPrefix(channelName, ClanChannelPrefix);
+
+    private static bool HasPrefix(string channelName, string prefix)
+        => channelName.StartsWith($"{prefix} ", StringComparison.OrdinalIgnoreCase);
 }

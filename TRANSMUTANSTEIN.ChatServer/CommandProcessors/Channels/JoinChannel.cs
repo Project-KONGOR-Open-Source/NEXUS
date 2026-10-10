@@ -7,9 +7,8 @@ public class JoinChannel : ISynchronousCommandProcessor<ClientChatSession>
     {
         JoinChannelRequestData requestData = new (buffer);
 
-        ChatChannel
-            .GetOrCreate(session, requestData.ChannelName)
-            .Join(session);
+        if (ChatChannel.TryGetOrCreateForJoinRequest(session, requestData.ChannelName, out ChatChannel? channel))
+            channel.Join(session);
     }
 }
 

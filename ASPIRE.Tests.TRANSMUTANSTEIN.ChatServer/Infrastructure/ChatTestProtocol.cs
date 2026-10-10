@@ -211,6 +211,18 @@ internal static class ChatTestProtocol
         return buffer;
     }
 
+    public static ChatBuffer BuildJoinedGame(string gameName, int matchID, bool joinMatchChannel)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOINED_GAME);
+        buffer.WriteString(gameName);
+        buffer.WriteInt32(matchID);
+        buffer.WriteInt8(Convert.ToByte(joinMatchChannel));
+
+        return buffer;
+    }
+
     private static async Task<byte[]> ReadExactly(NetworkStream stream, int count, CancellationToken cancellationToken)
     {
         byte[] buffer = new byte[count];
