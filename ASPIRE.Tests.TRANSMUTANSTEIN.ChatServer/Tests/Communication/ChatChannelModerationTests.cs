@@ -188,6 +188,52 @@ public sealed class ChatChannelModerationTests
         }
     }
 
+    [Test]
+    public async Task Kicking_A_Player_Who_Is_Not_In_The_Channel_Is_Ignored()
+    {
+        Account moderatorAccount = CreateAccount("AbsentKickModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Absent Kick Channel");
+
+        channel.Join(moderator.Session);
+
+        channel.Kick(moderator.Session, CreateAccount("AbsentKickTarget").ID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(channel.Members.Count).IsEqualTo(1);
+            await Assert.That(channel.Members.ContainsKey(moderatorAccount.Name)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task Kicking_A_Member_Removes_Them_From_The_Channel()
+    {
+        Account moderatorAccount = CreateAccount("KickingModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+        await using RunningClientSession target = RunningClientSession.Start(CreateAccount("KickedMember"));
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Member Kick Channel");
+
+        channel.Join(moderator.Session);
+        channel.Join(target.Session);
+
+        channel.Kick(moderator.Session, target.Session.Account.ID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(channel.Members.ContainsKey(target.Session.Account.Name)).IsFalse();
+            await Assert.That(target.Session.CurrentChannels).DoesNotContain(channel.ID);
+        }
+    }
+
     private static (ChatChannel Channel, ClientChatSession MemberSession) CreateChannelWithMember(string channelName, string memberAccountName)
     {
         ClientChatSession memberSession = CreateSession(memberAccountName);

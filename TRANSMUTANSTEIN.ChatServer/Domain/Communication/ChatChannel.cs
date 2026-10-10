@@ -590,7 +590,12 @@ public class ChatChannel
     public void Kick(ClientChatSession requesterSession, int targetAccountID)
     {
         ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
-        ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
+
+        // The Target May Have Left The Channel Before The Kick Arrived, In Which Case There Is Nobody To Kick
+        ChatChannelMember? target = Members.Values.SingleOrDefault(member => member.Account.ID == targetAccountID);
+
+        if (target is null)
+            return;
 
         if (requester.HasHigherAdministratorLevelThan(target))
         {
@@ -605,10 +610,8 @@ public class ChatChannel
             foreach (ChatChannelMember member in Members.Values)
                 member.Session.Send(broadcast);
 
-            ClientChatSession targetSession = Context.ClientChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
-
             // Remove The Target Member From The Channel
-            Leave(targetSession);
+            Leave(target.Session);
         }
 
         else SendSystemMessage(requesterSession, "You Do Not Have Permission To Kick That Member");
