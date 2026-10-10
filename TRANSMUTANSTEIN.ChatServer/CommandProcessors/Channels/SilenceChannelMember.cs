@@ -7,7 +7,8 @@ public class SilenceChannelMember : ISynchronousCommandProcessor<ClientChatSessi
     {
         SilenceChannelMemberRequestData requestData = new (buffer);
 
-        ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
+        if (ChatChannel.TryGet(session, requestData.ChannelID, out ChatChannel? channel) is false)
+            return;
 
         // Find The Target Account ID By Name
         ClientChatSession? targetSession = Context.ClientChatSessions.Values

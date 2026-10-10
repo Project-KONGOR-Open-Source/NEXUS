@@ -153,20 +153,6 @@ public class ChatChannel
         return channel;
     }
 
-    public static ChatChannel Get(ClientChatSession session, ChatChannelIdentifier channelIdentifier)
-    {
-        ChatChannel channel = channelIdentifier switch
-        {
-            string channelName => Context.ChatChannels.Values
-                .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.Account.Name)),
-
-            int channelID      => Context.ChatChannels.Values
-                .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.Account.Name))
-        };
-
-        return channel;
-    }
-
     /// <summary>
     ///     Attempts to get the channel, identified by either name or ID, which the session is a member of.
     ///     Returns <see langword="false"/> if no such channel exists or if the session is not a member of it.
