@@ -17,5 +17,7 @@ public class SRPAuthenticationData
 
     public string? Cookie { get; init; }
 
+    public List<string>? ChatChannels { get; init; }
+
     public string? ErrorMessage { get; init; }
 }
