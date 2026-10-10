@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Communication;
 
 /// <summary>
-///     Covers the channel moderation command processors (<see cref="SetChannelPassword"/>, <see cref="SilenceChannelMember"/>, and <see cref="KickFromChannel"/>) when the requesting client is not a member of the target channel.
+///     Covers channel moderation through the moderation command processors (<see cref="SetChannelPassword"/>, <see cref="SilenceChannelMember"/>, and <see cref="KickFromChannel"/>) and the channel operations behind them.
 /// </summary>
 public sealed class ChatChannelModerationTests
 {
@@ -61,6 +61,33 @@ public sealed class ChatChannelModerationTests
         {
             await Assert.That(channel.Members.ContainsKey(memberSession.Account.Name)).IsTrue();
             await Assert.That(memberSession.CurrentChannels).Contains(channel.ID);
+        }
+    }
+
+    [Test]
+    public async Task A_Silence_Survives_The_Silenced_Member_Leaving_And_Rejoining_The_Channel()
+    {
+        Account moderatorAccount = CreateAccount("SilencingModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+        await using RunningClientSession target = RunningClientSession.Start(CreateAccount("SilenceEvader"));
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Silence Evasion Channel");
+
+        channel.Join(moderator.Session);
+        channel.Join(target.Session);
+
+        channel.Silence(moderator.Session, target.Session.Account.ID, 60_000);
+
+        channel.Leave(target.Session);
+        channel.Join(target.Session);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(channel.Members.ContainsKey(target.Session.Account.Name)).IsTrue();
+            await Assert.That(channel.IsSilenced(target.Session)).IsTrue();
         }
     }
 

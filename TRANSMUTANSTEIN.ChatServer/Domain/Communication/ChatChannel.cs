@@ -18,6 +18,12 @@ public class ChatChannel
     public HashSet<int> BannedAccountIDs { get; set; } = [];
 
     /// <summary>
+    ///     Account IDs silenced in this channel, each mapped to the instant at which its silence expires.
+    ///     Silences are kept by account ID rather than on the channel membership, so that leaving and rejoining the channel does not lift them.
+    /// </summary>
+    public ConcurrentDictionary<int, DateTime> SilencedAccounts { get; set; } = [];
+
+    /// <summary>
     ///     Set of lowercase account names authenticated to join this channel when authentication is enabled.
     /// </summary>
     public HashSet<string> AuthenticatedAccountNames { get; set; } = [];
@@ -615,10 +621,22 @@ public class ChatChannel
     /// <returns><see langword="true"/> if the member is silenced, <see langword="false"/> otherwise.</returns>
     public bool IsSilenced(ClientChatSession session)
     {
-        ChatChannelMember? member = Members.Values
-            .SingleOrDefault(channelMember => channelMember.Account.ID == session.Account.ID);
+        // Staff Accounts Are Immune To Being Silenced
+        if (session.Account.Type is AccountType.Staff)
+            return false;
 
-        return member?.IsSilenced() ?? false;
+        if (SilencedAccounts.TryGetValue(session.Account.ID, out DateTime silencedUntil) is false)
+            return false;
+
+        // An Expired Silence Is Cleared When It Is Next Checked
+        if (DateTime.UtcNow > silencedUntil)
+        {
+            SilencedAccounts.TryRemove(session.Account.ID, out _);
+
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -640,8 +658,7 @@ public class ChatChannel
             return;
         }
 
-        // Set Silence Expiration On Target Member
-        target.SilencedUntil = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+        SilencedAccounts[targetAccountID] = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
 
         // Broadcast Silence Notification To All Channel Members
         ChatBuffer broadcast = new ();
