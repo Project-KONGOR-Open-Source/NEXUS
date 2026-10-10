@@ -7,9 +7,8 @@ public class KickFromChannel : ISynchronousCommandProcessor<ClientChatSession>
     {
         KickFromChannelRequestData requestData = new (buffer);
 
-        ChatChannel
-            .Get(session, requestData.ChannelID)
-            .Kick(session, requestData.TargetAccountID);
+        if (ChatChannel.TryGet(session, requestData.ChannelID, out ChatChannel? channel))
+            channel.Kick(session, requestData.TargetAccountID);
     }
 }
 

@@ -60,6 +60,41 @@ public class Account
         _                   => throw new ArgumentOutOfRangeException(@$"Unsupported Clan Tier ""{ClanTier}""")
     };
 
+    /// <summary>
+    ///     Gets the chat channels which the account joins on every login, regardless of its auto-connect list.
+    ///     These are the general channel, the account's clan channel, and the channels of the account's role.
+    /// </summary>
+    public List<string> GetDefaultChatChannels()
+    {
+        List<string> channels = [];
+
+        if (Type is not AccountType.ServerHost)
+            channels.Add(ChatChannels.GeneralChannel);
+
+        if (Clan is not null)
+            channels.Add(Clan.GetChatChannelName());
+
+        if (Type is AccountType.GameMaster or AccountType.Staff)
+            channels.Add(ChatChannels.GameMastersChannel);
+
+        if (Type is AccountType.Guest or AccountType.Staff)
+            channels.Add(ChatChannels.GuestsChannel);
+
+        if (Type is AccountType.ServerHost or AccountType.Staff)
+            channels.Add(ChatChannels.ServerHostsChannel);
+
+        if (Type is AccountType.Streamer or AccountType.Staff)
+            channels.Add(ChatChannels.StreamersChannel);
+
+        if (Type is AccountType.VIP or AccountType.Staff)
+            channels.Add(ChatChannels.VIPChannel);
+
+        if (Type is AccountType.Staff)
+            channels.Add(ChatChannels.StaffChannel);
+
+        return channels;
+    }
+
     public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string accountNameWithClanTag)
     {
         // If no '[' and ']' characters are found, then the account is not part of a clan and has no clan tag.

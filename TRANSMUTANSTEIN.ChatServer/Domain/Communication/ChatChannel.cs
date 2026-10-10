@@ -153,18 +153,22 @@ public class ChatChannel
         return channel;
     }
 
-    public static ChatChannel Get(ClientChatSession session, ChatChannelIdentifier channelIdentifier)
+    /// <summary>
+    ///     Attempts to get the channel, identified by either name or ID, which the session is a member of.
+    ///     Returns <see langword="false"/> if no such channel exists or if the session is not a member of it.
+    /// </summary>
+    public static bool TryGet(ClientChatSession session, ChatChannelIdentifier channelIdentifier, [NotNullWhen(true)] out ChatChannel? channel)
     {
-        ChatChannel channel = channelIdentifier switch
+        channel = channelIdentifier switch
         {
             string channelName => Context.ChatChannels.Values
-                .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.Account.Name)),
+                .SingleOrDefault(candidate => candidate.Name == channelName && candidate.Members.ContainsKey(session.Account.Name)),
 
             int channelID      => Context.ChatChannels.Values
-                .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.Account.Name))
+                .SingleOrDefault(candidate => candidate.ID == channelID && candidate.Members.ContainsKey(session.Account.Name))
         };
 
-        return channel;
+        return channel is not null;
     }
 
     public ChatChannel Join(ClientChatSession session, string? providedPassword = null)

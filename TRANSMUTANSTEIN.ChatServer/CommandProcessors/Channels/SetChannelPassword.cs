@@ -7,9 +7,8 @@ public class SetChannelPassword : ISynchronousCommandProcessor<ClientChatSession
     {
         SetChannelPasswordRequestData requestData = new (buffer);
 
-        ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
-
-        channel.SetPassword(session, requestData.Password);
+        if (ChatChannel.TryGet(session, requestData.ChannelID, out ChatChannel? channel))
+            channel.SetPassword(session, requestData.Password);
     }
 }
 
