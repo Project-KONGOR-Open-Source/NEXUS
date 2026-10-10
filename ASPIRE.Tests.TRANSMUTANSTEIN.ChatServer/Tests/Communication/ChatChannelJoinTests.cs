@@ -130,6 +130,22 @@ public sealed class ChatChannelJoinTests
     }
 
     [Test]
+    public async Task A_Join_Request_For_The_Hosts_Channel_Resolves_For_An_Account_Whose_User_Owns_A_Host_Account()
+    {
+        ClientChatSession session = CreateSession("HostingPlayer");
+
+        session.Account.User.Accounts = [session.Account, new Account { Name = "HostingPlayerHost", User = session.Account.User, IsMain = false, Type = AccountType.ServerHost }];
+
+        bool resolved = ChatChannel.TryGetOrCreateForJoinRequest(session, "HOSTS", out ChatChannel? channel);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(resolved).IsTrue();
+            await Assert.That(channel?.Name).IsEqualTo("HOSTS");
+        }
+    }
+
+    [Test]
     public async Task Joining_The_Channel_Of_Another_Clan_Is_Rejected_Without_Creating_It()
     {
         await using RunningClientSession client = RunningClientSession.Start(CreateAccount("ClanOutsider"));

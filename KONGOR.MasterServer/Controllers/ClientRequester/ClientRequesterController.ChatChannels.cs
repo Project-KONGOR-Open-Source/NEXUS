@@ -28,6 +28,7 @@ public partial class ClientRequesterController
 
         Account account = await MerrickContext.Accounts
             .Include(candidate => candidate.Clan)
+            .Include(candidate => candidate.User).ThenInclude(user => user.Accounts)
             .SingleAsync(candidate => candidate.Name.Equals(accountName));
 
         List<string> defaultChannels = account.GetDefaultChatChannels();
@@ -105,6 +106,7 @@ public partial class ClientRequesterController
 
         Account account = await MerrickContext.Accounts
             .Include(candidate => candidate.Clan)
+            .Include(candidate => candidate.User).ThenInclude(user => user.Accounts)
             .SingleAsync(candidate => candidate.Name.Equals(accountName));
 
         // A Failure Keeps The Game Client Showing The Default Channel As Saved, Which Reflects That It Is Still Joined On Every Login
