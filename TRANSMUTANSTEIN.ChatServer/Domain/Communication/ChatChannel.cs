@@ -158,6 +158,61 @@ public class ChatChannel
     }
 
     /// <summary>
+    ///     Compacts the general channels into as few general channels as their members need, since members leaving over time can spread the remaining members thinly across many general channels.
+    ///     The members of the highest-numbered general channels which are no longer needed are moved into the lowest-numbered general channels which are not full, and each emptied overflow channel is removed.
+    ///     Nothing is moved unless doing so removes at least one general channel, so that members are not moved without a reason.
+    /// </summary>
+    public static void CompactGeneralChannels()
+    {
+        List<ChatChannel> generalChannels = [.. Context.ChatChannels.Values
+            .Where(channel => channel.IsGeneralChannel)
+            .OrderBy(channel => channel.Name.Length)
+            .ThenBy(channel => channel.Name)];
+
+        int memberCount = generalChannels.Sum(channel => channel.Members.Count);
+
+        int requiredChannelCount = Math.Max(1, (int) Math.Ceiling(memberCount / (double) ChatProtocol.MAX_USERS_PER_CHANNEL));
+
+        if (generalChannels.Count <= requiredChannelCount)
+            return;
+
+        List<ChatChannel> targetChannels = [.. generalChannels.Take(requiredChannelCount)];
+
+        // The Highest-Numbered Channels Are Emptied First, So That The Lowest Numbers Stay In Use
+        foreach (ChatChannel sourceChannel in generalChannels.Skip(requiredChannelCount).Reverse())
+        {
+            List<ChatChannelMember> members = [.. sourceChannel.Members.Values];
+
+            foreach (ChatChannelMember member in members)
+            {
+                ClientChatSession session = member.Session;
+
+                // Members Can Leave On Their Own While The Channels Are Being Compacted
+                if (sourceChannel.Members.ContainsKey(session.Account.Name) is false)
+                    continue;
+
+                // A Member Already In One Of The Remaining Channels Only Needs To Leave This One, While Any Other Member Is Moved Into The First Remaining Channel Which Will Take Them
+                ChatChannel? targetChannel = targetChannels.FirstOrDefault(channel => channel.Members.ContainsKey(session.Account.Name))
+                    ?? targetChannels.FirstOrDefault(channel => channel.IsFull is false && channel.BannedAccountIDs.Contains(session.Account.ID) is false);
+
+                // A Member Who Cannot Be Moved Stays Where They Are, Which Keeps Their Channel Open
+                if (targetChannel is null)
+                    continue;
+
+                bool isMovedIntoTargetChannel = targetChannel.Members.ContainsKey(session.Account.Name) is false;
+
+                if (isMovedIntoTargetChannel && targetChannel.AddMember(session, new ChatChannelMember(session, targetChannel)) is false)
+                    continue;
+
+                sourceChannel.Leave(session);
+
+                if (isMovedIntoTargetChannel)
+                    targetChannel.SendSystemMessage(session, $"Moved Here From {sourceChannel.Name} To Consolidate The General Channels");
+            }
+        }
+    }
+
+    /// <summary>
     ///     Gets or creates a match-specific chat channel.
     ///     Match channels use SERVER flag (for post-match chat) and HIDDEN flag.
     /// </summary>
@@ -319,6 +374,17 @@ public class ChatChannel
             }
         }
 
+        AddMember(session, newMember);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Adds the member to the channel without any of the validation that <see cref="Join"/> performs, then announces the channel to the member and the member to the channel.
+    ///     Returns <see langword="false"/>, after notifying the client, if the channel state would not fit in a single packet to the client, in which case the member is not added.
+    /// </summary>
+    private bool AddMember(ClientChatSession session, ChatChannelMember newMember)
+    {
         if (Members.TryAdd(session.Account.Name, newMember) is false)
             Log.Error(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
 
@@ -364,7 +430,7 @@ public class ChatChannel
 
             SendSystemMessage(session, "This Channel Is Too Large To Join At The Moment");
 
-            return this;
+            return false;
         }
 
         // Announce To The Requesting Client That They Have Joined The Channel
@@ -380,7 +446,7 @@ public class ChatChannel
         if (Name == ChatChannels.StaffChannel)
             Terminal.AnnounceSyntheticMember(session);
 
-        return this;
+        return true;
     }
 
     private void BroadcastJoin(ClientChatSession session)

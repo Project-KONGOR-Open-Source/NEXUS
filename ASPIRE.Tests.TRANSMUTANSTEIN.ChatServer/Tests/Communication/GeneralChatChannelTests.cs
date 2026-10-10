@@ -1,26 +1,32 @@
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Communication;
 
 /// <summary>
-///     Covers the load balancing across the general chat channels in <see cref="ChatChannel.GetOrCreateGeneralChannel"/>.
+///     Covers the load balancing across the general chat channels in <see cref="ChatChannel.GetOrCreateGeneralChannel"/> and their compaction in <see cref="ChatChannel.CompactGeneralChannels"/>.
 ///     The general channels live in the process-wide channel registry, so these tests run in isolation from every other test and remove the general channels before and after each test.
 /// </summary>
 [NotInParallel]
 public sealed class GeneralChatChannelTests
 {
+    // Stand-In Members Are Constructed Against The Services Of A Minimal Host, Which Supply The Host Environment That A Chat Session Requires
+    private WebApplication StandInHost { get; } = WebApplication.CreateSlimBuilder().Build();
+
     [Before(HookType.Test)]
     public Task Before_Each_Test()
     {
+        // The Chat Server's Static Logger Facade Throws Until Initialised; A Sink-Less Serilog Logger Satisfies It Without Producing Output
+        Log.Initialise(new Serilog.LoggerConfiguration().CreateLogger());
+
         RemoveGeneralChannels();
 
         return Task.CompletedTask;
     }
 
     [After(HookType.Test)]
-    public Task After_Each_Test()
+    public async Task After_Each_Test()
     {
         RemoveGeneralChannels();
 
-        return Task.CompletedTask;
+        await StandInHost.DisposeAsync();
     }
 
     [Test]
@@ -87,6 +93,72 @@ public sealed class GeneralChatChannelTests
         }
     }
 
+    [Test]
+    public async Task Compaction_Moves_The_Members_Of_Unneeded_General_Channels_Into_The_Lowest_Numbered_Ones_And_Removes_The_Emptied_Channels()
+    {
+        int memberCap = (int) ChatProtocol.MAX_USERS_PER_CHANNEL;
+
+        // Every General Channel Has To Fill Up Before The Next One Is Created
+        ChatChannel firstChannel = ChatChannel.GetOrCreateGeneralChannel();
+
+        AddMembers(firstChannel, memberCap);
+
+        ChatChannel secondChannel = ChatChannel.GetOrCreateGeneralChannel();
+
+        AddMembers(secondChannel, memberCap);
+
+        ChatChannel thirdChannel = ChatChannel.GetOrCreateGeneralChannel();
+
+        AddMembers(thirdChannel, 30);
+
+        // Members Leaving The First Two Channels Leaves Enough Room In Them For Every Member Of The Third One
+        RemoveMembers(firstChannel, 20);
+        RemoveMembers(secondChannel, memberCap - 10);
+
+        await using RunningClientSession movedClient = RunningClientSession.Start(CreateAccount("CompactedMember"));
+
+        thirdChannel.Members.TryAdd(movedClient.Session.Account.Name, new ChatChannelMember(movedClient.Session, thirdChannel));
+        movedClient.Session.CurrentChannels.Add(thirdChannel.ID);
+
+        ChatChannel.CompactGeneralChannels();
+
+        // The First Channel Takes 20 Of The 31 Members Of The Third Channel, And The Second Channel Takes The Remaining 11
+        using (Assert.Multiple())
+        {
+            await Assert.That(firstChannel.Members.Count).IsEqualTo(memberCap);
+            await Assert.That(secondChannel.Members.Count).IsEqualTo(10 + 11);
+            await Assert.That(Context.ChatChannels.ContainsKey(thirdChannel.Name)).IsFalse();
+            await Assert.That(movedClient.Session.CurrentChannels).DoesNotContain(thirdChannel.ID);
+            await Assert.That(movedClient.Session.CurrentChannels.Count).IsEqualTo(1);
+            await Assert.That(await ReadNoticeMessage(movedClient)).StartsWith($"Moved Here From {thirdChannel.Name}");
+        }
+    }
+
+    [Test]
+    public async Task Compaction_Moves_Nobody_When_It_Would_Not_Remove_A_General_Channel()
+    {
+        int memberCap = (int) ChatProtocol.MAX_USERS_PER_CHANNEL;
+
+        ChatChannel firstChannel = ChatChannel.GetOrCreateGeneralChannel();
+
+        AddMembers(firstChannel, memberCap);
+
+        ChatChannel secondChannel = ChatChannel.GetOrCreateGeneralChannel();
+
+        AddMembers(secondChannel, 20);
+
+        // The Members Still Need Two Channels, Since They Outnumber What A Single Channel Holds
+        RemoveMembers(firstChannel, 10);
+
+        ChatChannel.CompactGeneralChannels();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(firstChannel.Members.Count).IsEqualTo(memberCap - 10);
+            await Assert.That(secondChannel.Members.Count).IsEqualTo(20);
+        }
+    }
+
     private static void Fill(ChatChannel channel)
     {
         // The Load Balancing Only Counts Members, So A Single Stand-In Session Serves Every Filler Member
@@ -94,6 +166,66 @@ public sealed class GeneralChatChannelTests
 
         for (int memberIndex = channel.Members.Count; memberIndex < ChatProtocol.MAX_USERS_PER_CHANNEL; memberIndex++)
             channel.Members.TryAdd($"Filler {memberIndex}", new ChatChannelMember(fillerSession, channel));
+    }
+
+    /// <summary>
+    ///     Adds stand-in members which can be sent to, since compaction announces the moved members to the other channel members, but whose sent frames nothing reads.
+    /// </summary>
+    private void AddMembers(ChatChannel channel, int memberCount)
+    {
+        for (int memberIndex = 0; memberIndex < memberCount; memberIndex++)
+        {
+            ClientChatSession session = new (new DefaultConnectionContext(), StandInHost.Services)
+            {
+                Account = CreateAccount($"{channel.Name} Member {memberIndex}"),
+                Metadata = (ClientChatSessionMetadata) RuntimeHelpers.GetUninitializedObject(typeof(ClientChatSessionMetadata))
+            };
+
+            channel.Members.TryAdd(session.Account.Name, new ChatChannelMember(session, channel));
+            session.CurrentChannels.Add(channel.ID);
+        }
+    }
+
+    private static void RemoveMembers(ChatChannel channel, int memberCount)
+    {
+        for (int memberIndex = 0; memberIndex < memberCount; memberIndex++)
+            channel.Members.TryRemove($"{channel.Name} Member {memberIndex}", out _);
+    }
+
+    /// <summary>
+    ///     Reads the frames sent to the client until a <see cref="ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL"/> notice arrives, skipping the channel announcements which precede it, and returns the notice's message.
+    /// </summary>
+    private static async Task<string> ReadNoticeMessage(RunningClientSession client)
+    {
+        while (true)
+        {
+            (ushort command, string message) = await client.ReadNotice();
+
+            if (command == (ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL)
+                return message;
+        }
+    }
+
+    private static Account CreateAccount(string accountName)
+    {
+        Role role = new () { Name = "Player" };
+
+        User user = new ()
+        {
+            EmailAddress    = $"{accountName}@test.local",
+            Role            = role,
+            SRPPasswordSalt = string.Empty,
+            SRPPasswordHash = string.Empty
+        };
+
+        return new Account
+        {
+            ID     = Math.Abs(Guid.NewGuid().GetHashCode()),
+            Name   = accountName,
+            User   = user,
+            IsMain = true,
+            Type   = AccountType.Normal
+        };
     }
 
     private static void RemoveGeneralChannels()
