@@ -28,11 +28,14 @@ public class ChatChannel
     /// </summary>
     public string? Password { get; set; } = null;
 
-    public bool IsFull => (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
+    // Clan Channels Have No Member Cap, So That Every Member Of A Clan Can Always Join The Clan's Channel
+    public bool IsFull => IsClanChannel is false && (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
 
     public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
 
     public bool IsGeneralChannel => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE);
+
+    public bool IsClanChannel => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN);
 
     public bool IsAuthenticationRequired => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED);
 
@@ -108,7 +111,7 @@ public class ChatChannel
 
     /// <summary>
     ///     Gets or creates a general chat channel with overflow support.
-    ///     Finds the first general channel with fewer than <see cref="ChatProtocol.MAX_USERS_PER_HON_CHANNEL"/> members.
+    ///     Finds the first general channel which is not full.
     ///     If all existing general channels are full, a new numbered channel is created (e.g. "KONGOR 2", "KONGOR 3").
     ///     The first channel is permanent, but overflow channels are removed automatically when they become empty.
     /// </summary>
@@ -122,7 +125,7 @@ public class ChatChannel
             .Where(channel => channel.IsGeneralChannel)
             .OrderBy(channel => channel.Name.Length)
             .ThenBy(channel => channel.Name)
-            .FirstOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
+            .FirstOrDefault(channel => channel.IsFull is false);
 
         if (availableChannel is not null)
             return availableChannel;

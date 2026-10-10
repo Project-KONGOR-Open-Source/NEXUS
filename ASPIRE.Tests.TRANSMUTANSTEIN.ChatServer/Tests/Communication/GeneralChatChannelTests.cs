@@ -91,7 +91,7 @@ public sealed class GeneralChatChannelTests
         // The Load Balancing Only Counts Members, So A Single Stand-In Session Serves Every Filler Member
         ClientChatSession fillerSession = (ClientChatSession) RuntimeHelpers.GetUninitializedObject(typeof(ClientChatSession));
 
-        for (int memberIndex = channel.Members.Count; memberIndex < ChatProtocol.MAX_USERS_PER_HON_CHANNEL; memberIndex++)
+        for (int memberIndex = channel.Members.Count; memberIndex < ChatProtocol.MAX_USERS_PER_CHANNEL; memberIndex++)
             channel.Members.TryAdd($"Filler {memberIndex}", new ChatChannelMember(fillerSession, channel));
     }
 

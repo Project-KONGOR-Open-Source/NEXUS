@@ -70,6 +70,30 @@ public sealed class ChatChannelJoinTests
     }
 
     [Test]
+    public async Task A_Clan_Channel_Is_Never_Full()
+    {
+        ClientChatSession creatorSession = CreateSession("UncappedClanCreator");
+
+        creatorSession.Account.Clan = new Clan { Name = "Uncapped Clan", Tag = "UNCP" };
+
+        ChatChannel channel = ChatChannel.GetOrCreate(creatorSession, creatorSession.Account.Clan.GetChatChannelName());
+
+        // Fill The Channel Beyond The Member Cap Via The Internal Path, Which Bypasses Join
+        for (int memberIndex = 0; memberIndex <= ChatProtocol.MAX_USERS_PER_CHANNEL; memberIndex++)
+        {
+            ClientChatSession existingSession = CreateSession($"UncappedClanMember{memberIndex}");
+
+            channel.Members.TryAdd(existingSession.Account.Name, new ChatChannelMember(existingSession, channel));
+        }
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(channel.IsClanChannel).IsTrue();
+            await Assert.That(channel.IsFull).IsFalse();
+        }
+    }
+
+    [Test]
     [Arguments("TERMINAL")]
     [Arguments("VIP")]
     public async Task Joining_A_Role_Channel_Without_The_Role_Is_Rejected_And_Notifies_The_Client(string channelName)
