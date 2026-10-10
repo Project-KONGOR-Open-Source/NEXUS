@@ -118,6 +118,48 @@ public sealed class ChatChannelModerationTests
     }
 
     [Test]
+    public async Task Silencing_A_Player_Named_With_Their_Clan_Tag_Silences_That_Player()
+    {
+        Account moderatorAccount = CreateAccount("TagSilenceModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        Account targetAccount = CreateAccount("TaggedSilenceTarget");
+
+        targetAccount.Clan = new Clan { Name = "Tagged Clan", Tag = "TAG" };
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+        await using RunningClientSession target = RunningClientSession.Start(targetAccount);
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Tagged Silence Channel");
+
+        channel.Join(moderator.Session);
+        channel.Join(target.Session);
+
+        // The Silence Is Resolved Against The Online Sessions, Which Only The Client Handshake Otherwise Registers
+        Context.ClientChatSessions.TryAdd(targetAccount.Name, target.Session);
+
+        try
+        {
+            ChatBuffer request = new ();
+
+            request.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_USER);
+            request.WriteInt32(channel.ID);
+            request.WriteString(targetAccount.NameWithClanTag);
+            request.WriteInt32(60_000);
+
+            new SilenceChannelMember().Process(moderator.Session, request);
+
+            await Assert.That(channel.IsSilenced(target.Session)).IsTrue();
+        }
+
+        finally
+        {
+            Context.ClientChatSessions.TryRemove(targetAccount.Name, out _);
+        }
+    }
+
+    [Test]
     public async Task Silencing_A_Player_Who_Is_Not_Online_Notifies_The_Requester()
     {
         Account moderatorAccount = CreateAccount("OfflineSilenceModerator");
