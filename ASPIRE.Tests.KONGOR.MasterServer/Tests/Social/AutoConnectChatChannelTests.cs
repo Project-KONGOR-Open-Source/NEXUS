@@ -40,8 +40,6 @@ public sealed class AutoConnectChatChannelTests(KONGORIntegrationWebApplicationF
     }
 
     [Test]
-    [Arguments("KONGOR 2")]
-    [Arguments("kongor 3")]
     [Arguments("Clan Other Clan")]
     [Arguments("TERMINAL")]
     [Arguments("Match 123")]
@@ -76,6 +74,7 @@ public sealed class AutoConnectChatChannelTests(KONGORIntegrationWebApplicationF
 
     [Test]
     [Arguments("kongor")]
+    [Arguments("KONGOR 2")]
     [Arguments("Clan Own Clan")]
     public async Task Adding_A_Default_Channel_Succeeds_Without_Saving_It(string channelName)
     {
@@ -182,6 +181,7 @@ public sealed class AutoConnectChatChannelTests(KONGORIntegrationWebApplicationF
 
     [Test]
     [Arguments("KONGOR")]
+    [Arguments("kongor 3")]
     [Arguments("clan own clan")]
     public async Task Removing_A_Default_Channel_Is_Rejected_With_A_Failure_The_Client_Reports(string channelName)
     {

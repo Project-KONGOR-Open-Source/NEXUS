@@ -310,8 +310,7 @@ public static class ChatProtocol
 
     public const int INVALID_CHAT_CHANNEL                                  = -1;
 
-    public const uint MAX_USERS_PER_HON_CHANNEL                            = 50;
-    public const uint MAX_USERS_PER_CHANNEL                                = 250;
+    public const uint MAX_USERS_PER_CHANNEL                                = 100;    // Applies To Every Channel Except Clan Channels; Low Enough For A Full Member List To Fit In A Single Packet, Even With The Longest Names And Cosmetics
     public const uint MAX_CHANNELS_PER_CLIENT                              = 8;
     public const uint MAX_PACKET_SIZE                                      = 16384;  // 16KB - Maximum Size For Entire Chat Protocol Packet
 

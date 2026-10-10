@@ -122,6 +122,9 @@ public class TRANSMUTANSTEIN
         // Register The Stale Host Reaper That Removes Cached Match Servers And Managers With No Live Chat Session
         builder.Services.AddHostedService<StaleHostReaper>();
 
+        // Register The General Chat Channel Compactor That Consolidates The Members Of The General Channels Into As Few Channels As They Need
+        builder.Services.AddHostedService<GeneralChatChannelCompactor>();
+
         // Register Database Context Service
         builder.Services.AddTransient<MerrickContext>();
 

@@ -62,7 +62,7 @@ public class Account
 
     /// <summary>
     ///     Gets the chat channels which the account joins on every login, regardless of its auto-connect list.
-    ///     These are the general channel, the account's clan channel, and the channels of the account's role.
+    ///     These are the general channel, the account's clan channel, and the channels of the account's role, where the hosts channel also extends to every account of a user who owns a host account.
     /// </summary>
     public List<string> GetDefaultChatChannels()
     {
@@ -80,7 +80,8 @@ public class Account
         if (Type is AccountType.Guest or AccountType.Staff)
             channels.Add(ChatChannels.GuestsChannel);
 
-        if (Type is AccountType.ServerHost or AccountType.Staff)
+        // Host Accounts Are Registered As Sub-Accounts Which Cannot Log Into The Game Client, So The Hosts Channel Also Belongs To Every Other Account Of A User Who Owns A Host Account
+        if (Type is AccountType.ServerHost or AccountType.Staff || User.Accounts.Any(subAccount => subAccount.Type is AccountType.ServerHost))
             channels.Add(ChatChannels.ServerHostsChannel);
 
         if (Type is AccountType.Streamer or AccountType.Staff)
@@ -93,6 +94,17 @@ public class Account
             channels.Add(ChatChannels.StaffChannel);
 
         return channels;
+    }
+
+    /// <summary>
+    ///     Determines whether the channel is one of the account's default chat channels, matching the channel name case-insensitively.
+    ///     Every general channel name counts as the general channel, since the general channel is load-balanced across its numbered channels.
+    /// </summary>
+    public bool IsDefaultChatChannel(string channelName)
+    {
+        string defaultChannelName = ChatChannels.IsGeneralChannel(channelName) ? ChatChannels.GeneralChannel : channelName;
+
+        return GetDefaultChatChannels().Contains(defaultChannelName, StringComparer.OrdinalIgnoreCase);
     }
 
     public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string accountNameWithClanTag)

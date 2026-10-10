@@ -6,7 +6,7 @@ public static class TextConstant
 
     public const char NULL = '\0';
 
-    public const string Whitespace = " ";
+    public const string Space = " ";
 
-    public const char WhitespaceCharacter = ' ';
+    public const char SpaceCharacter = ' ';
 }

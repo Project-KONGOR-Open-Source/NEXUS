@@ -28,11 +28,14 @@ public class ChatChannel
     /// </summary>
     public string? Password { get; set; } = null;
 
-    public bool IsFull => (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
+    // Clan Channels Have No Member Cap, So That Every Member Of A Clan Can Always Join The Clan's Channel
+    public bool IsFull => IsClanChannel is false && (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
 
     public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
 
     public bool IsGeneralChannel => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE);
+
+    public bool IsClanChannel => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN);
 
     public bool IsAuthenticationRequired => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED);
 
@@ -108,8 +111,9 @@ public class ChatChannel
 
     /// <summary>
     ///     Gets or creates a general chat channel with overflow support.
-    ///     Finds the first general channel with fewer than <see cref="ChatProtocol.MAX_USERS_PER_HON_CHANNEL"/> members.
+    ///     Finds the first general channel which is not full.
     ///     If all existing general channels are full, a new numbered channel is created (e.g. "KONGOR 2", "KONGOR 3").
+    ///     Every general channel is numbered, including the first one, while the unnumbered base name is reserved for joining whichever general channel is not full.
     ///     The first channel is permanent, but overflow channels are removed automatically when they become empty.
     /// </summary>
     public static ChatChannel GetOrCreateGeneralChannel()
@@ -122,32 +126,25 @@ public class ChatChannel
             .Where(channel => channel.IsGeneralChannel)
             .OrderBy(channel => channel.Name.Length)
             .ThenBy(channel => channel.Name)
-            .FirstOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
+            .FirstOrDefault(channel => channel.IsFull is false);
 
         if (availableChannel is not null)
             return availableChannel;
 
-        // All General Channels Are Full (Or None Exist), So The First Channel Uses The Base Name, While Overflow Channels Are Numbered Starting At 2
-        bool isFirstChannel = Context.ChatChannels.ContainsKey(baseName) is false;
+        // All General Channels Are Full (Or None Exist), So A New One Is Created, Numbered Starting At 1
+        // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
+        int channelNumber = 1;
 
-        string channelName = baseName;
+        while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
+            channelNumber++;
 
-        if (isFirstChannel is false)
-        {
-            int channelNumber = 2;
-
-            // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
-            while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
-                channelNumber++;
-
-            channelName = $"{baseName} {channelNumber}";
-        }
+        string channelName = $"{baseName} {channelNumber}";
 
         // The First General Channel Is Permanent; Overflow Channels Are Not
         ChatProtocol.ChatChannelType flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
             | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE;
 
-        if (isFirstChannel)
+        if (channelNumber is 1)
             flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
@@ -158,6 +155,61 @@ public class ChatChannel
         });
 
         return channel;
+    }
+
+    /// <summary>
+    ///     Compacts the general channels into as few general channels as their members need, since members leaving over time can spread the remaining members thinly across many general channels.
+    ///     The members of the highest-numbered general channels which are no longer needed are moved into the lowest-numbered general channels which are not full, and each emptied overflow channel is removed.
+    ///     Nothing is moved unless doing so removes at least one general channel, so that members are not moved without a reason.
+    /// </summary>
+    public static void CompactGeneralChannels()
+    {
+        List<ChatChannel> generalChannels = [.. Context.ChatChannels.Values
+            .Where(channel => channel.IsGeneralChannel)
+            .OrderBy(channel => channel.Name.Length)
+            .ThenBy(channel => channel.Name)];
+
+        int memberCount = generalChannels.Sum(channel => channel.Members.Count);
+
+        int requiredChannelCount = Math.Max(1, (int) Math.Ceiling(memberCount / (double) ChatProtocol.MAX_USERS_PER_CHANNEL));
+
+        if (generalChannels.Count <= requiredChannelCount)
+            return;
+
+        List<ChatChannel> targetChannels = [.. generalChannels.Take(requiredChannelCount)];
+
+        // The Highest-Numbered Channels Are Emptied First, So That The Lowest Numbers Stay In Use
+        foreach (ChatChannel sourceChannel in generalChannels.Skip(requiredChannelCount).Reverse())
+        {
+            List<ChatChannelMember> members = [.. sourceChannel.Members.Values];
+
+            foreach (ChatChannelMember member in members)
+            {
+                ClientChatSession session = member.Session;
+
+                // Members Can Leave On Their Own While The Channels Are Being Compacted
+                if (sourceChannel.Members.ContainsKey(session.Account.Name) is false)
+                    continue;
+
+                // A Member Already In One Of The Remaining Channels Only Needs To Leave This One, While Any Other Member Is Moved Into The First Remaining Channel Which Will Take Them
+                ChatChannel? targetChannel = targetChannels.FirstOrDefault(channel => channel.Members.ContainsKey(session.Account.Name))
+                    ?? targetChannels.FirstOrDefault(channel => channel.IsFull is false && channel.BannedAccountIDs.Contains(session.Account.ID) is false);
+
+                // A Member Who Cannot Be Moved Stays Where They Are, Which Keeps Their Channel Open
+                if (targetChannel is null)
+                    continue;
+
+                bool isMovedIntoTargetChannel = targetChannel.Members.ContainsKey(session.Account.Name) is false;
+
+                if (isMovedIntoTargetChannel && targetChannel.AddMember(session, new ChatChannelMember(session, targetChannel)) is false)
+                    continue;
+
+                sourceChannel.Leave(session);
+
+                if (isMovedIntoTargetChannel)
+                    targetChannel.SendSystemMessage(session, $"Moved Here From {sourceChannel.Name} To Consolidate The General Channels");
+            }
+        }
     }
 
     /// <summary>
@@ -322,6 +374,17 @@ public class ChatChannel
             }
         }
 
+        AddMember(session, newMember);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Adds the member to the channel without any of the validation that <see cref="Join"/> performs, then announces the channel to the member and the member to the channel.
+    ///     Returns <see langword="false"/>, after notifying the client, if the channel state would not fit in a single packet to the client, in which case the member is not added.
+    /// </summary>
+    private bool AddMember(ClientChatSession session, ChatChannelMember newMember)
+    {
         if (Members.TryAdd(session.Account.Name, newMember) is false)
             Log.Error(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
 
@@ -367,7 +430,7 @@ public class ChatChannel
 
             SendSystemMessage(session, "This Channel Is Too Large To Join At The Moment");
 
-            return this;
+            return false;
         }
 
         // Announce To The Requesting Client That They Have Joined The Channel
@@ -383,7 +446,7 @@ public class ChatChannel
         if (Name == ChatChannels.StaffChannel)
             Terminal.AnnounceSyntheticMember(session);
 
-        return this;
+        return true;
     }
 
     private void BroadcastJoin(ClientChatSession session)
@@ -423,6 +486,19 @@ public class ChatChannel
             // Remove This Channel From The Client's Current Channels List
             session.CurrentChannels.Remove(ID);
 
+            ChatBuffer broadcast = new ();
+
+            broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+            broadcast.WriteInt32(member.Account.ID); // Member Account ID
+            broadcast.WriteInt32(ID);                // Channel ID
+
+            List<ChatChannelMember> channelMembers = [member, .. Members.Values];
+
+            // Announce To The Channel Members (Including The Leaving Member, Even When It Was The Last One) That A Client Has Left The Channel
+            // The Leaving Member Needs The Announcement When It Is Removed By The Chat Server Rather Than By Its Own Request, So That The Game Client Closes The Channel
+            foreach (ChatChannelMember channelMember in channelMembers)
+                channelMember.Session.Send(broadcast);
+
             // If There Are No Remaining Members And The Channel Is Not Permanent, Dispose Of It
             if (Members.IsEmpty is true && IsPermanent is false)
             {
@@ -431,21 +507,6 @@ public class ChatChannel
 
                 if (channel is null)
                     Log.Error(@"[BUG] Chat Channel Instance For Channel ""{ChannelName}"" Is NULL", Name);
-            }
-
-            else if (Members.IsEmpty is false)
-            {
-                ChatBuffer broadcast = new ();
-
-                broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
-                broadcast.WriteInt32(member.Account.ID); // Member Account ID
-                broadcast.WriteInt32(ID);                // Channel ID
-
-                List<ChatChannelMember> channelMembers = [member, .. Members.Values];
-
-                // Announce To The Channel Members (Including The Leaving Member) That A Client Has Left The Channel
-                foreach (ChatChannelMember channelMember in channelMembers)
-                    channelMember.Session.Send(broadcast);
             }
         }
 

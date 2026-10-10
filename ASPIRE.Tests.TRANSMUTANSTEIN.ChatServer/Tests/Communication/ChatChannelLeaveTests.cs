@@ -38,21 +38,22 @@ public sealed class ChatChannelLeaveTests
     }
 
     [Test]
-    public async Task Leaving_A_Channel_The_Client_Is_In_Removes_The_Client_From_It()
+    public async Task Leaving_A_Channel_The_Client_Is_In_Removes_The_Client_From_It_And_Notifies_The_Client_Even_As_The_Last_Member()
     {
-        ClientChatSession session = CreateSession("MemberLeaver");
+        await using RunningClientSession client = RunningClientSession.Start(CreateAccount("MemberLeaver"));
 
-        ChatChannel channel = ChatChannel.GetOrCreate(session, "Member Leave Channel");
+        ChatChannel channel = ChatChannel.GetOrCreate(client.Session, "Member Leave Channel");
 
-        channel.Members.TryAdd(session.Account.Name, new ChatChannelMember(session, channel));
-        session.CurrentChannels.Add(channel.ID);
+        channel.Members.TryAdd(client.Session.Account.Name, new ChatChannelMember(client.Session, channel));
+        client.Session.CurrentChannels.Add(channel.ID);
 
-        new LeaveChannel().Process(session, BuildLeaveRequest(channel.Name));
+        new LeaveChannel().Process(client.Session, BuildLeaveRequest(channel.Name));
 
         using (Assert.Multiple())
         {
-            await Assert.That(channel.Members.ContainsKey(session.Account.Name)).IsFalse();
-            await Assert.That(session.CurrentChannels).DoesNotContain(channel.ID);
+            await Assert.That(channel.Members.ContainsKey(client.Session.Account.Name)).IsFalse();
+            await Assert.That(client.Session.CurrentChannels).DoesNotContain(channel.ID);
+            await Assert.That(await client.ReadCommand()).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
         }
     }
 
