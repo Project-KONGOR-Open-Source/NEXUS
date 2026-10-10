@@ -167,6 +167,24 @@ public class ChatChannel
         return channel;
     }
 
+    /// <summary>
+    ///     Attempts to get the channel, identified by either name or ID, which the session is a member of.
+    ///     Returns <see langword="false"/> if no such channel exists or if the session is not a member of it.
+    /// </summary>
+    public static bool TryGet(ClientChatSession session, ChatChannelIdentifier channelIdentifier, [NotNullWhen(true)] out ChatChannel? channel)
+    {
+        channel = channelIdentifier switch
+        {
+            string channelName => Context.ChatChannels.Values
+                .SingleOrDefault(candidate => candidate.Name == channelName && candidate.Members.ContainsKey(session.Account.Name)),
+
+            int channelID      => Context.ChatChannels.Values
+                .SingleOrDefault(candidate => candidate.ID == channelID && candidate.Members.ContainsKey(session.Account.Name))
+        };
+
+        return channel is not null;
+    }
+
     public ChatChannel Join(ClientChatSession session, string? providedPassword = null)
     {
         // Staff Accounts Are Exempt From Channel Limit Restrictions, For Moderation And Administration Purposes
