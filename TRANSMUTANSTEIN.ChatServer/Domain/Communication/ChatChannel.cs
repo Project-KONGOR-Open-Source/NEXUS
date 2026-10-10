@@ -113,7 +113,7 @@ public class ChatChannel
     ///     Gets or creates a general chat channel with overflow support.
     ///     Finds the first general channel which is not full.
     ///     If all existing general channels are full, a new numbered channel is created (e.g. "KONGOR 2", "KONGOR 3").
-    ///     Every general channel is numbered, including the first one, while the unnumbered base name is reserved for joining whichever general channel is not full.
+    ///     The first channel is named after the base name alone while it is the only general channel, and is renamed (e.g. "KONGOR 1") once the first overflow channel is created.
     ///     The first channel is permanent, but overflow channels are removed automatically when they become empty.
     /// </summary>
     public static ChatChannel GetOrCreateGeneralChannel()
@@ -131,20 +131,31 @@ public class ChatChannel
         if (availableChannel is not null)
             return availableChannel;
 
-        // All General Channels Are Full (Or None Exist), So A New One Is Created, Numbered Starting At 1
-        // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
-        int channelNumber = 1;
+        // All General Channels Are Full (Or None Exist), So A New One Is Created, With The First One Named After The Base Name Alone
+        bool isFirstChannel = Context.ChatChannels.Values.Any(channel => channel.IsGeneralChannel) is false;
 
-        while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
-            channelNumber++;
+        string channelName = baseName;
 
-        string channelName = $"{baseName} {channelNumber}";
+        if (isFirstChannel is false)
+        {
+            // The First Channel Takes A Number Alongside The Overflow Channels, So That The General Channels Are Named Consistently
+            if (Context.ChatChannels.TryGetValue(baseName, out ChatChannel? unnumberedChannel))
+                unnumberedChannel.Rename($"{baseName} 1");
+
+            int channelNumber = 2;
+
+            // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
+            while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
+                channelNumber++;
+
+            channelName = $"{baseName} {channelNumber}";
+        }
 
         // The First General Channel Is Permanent; Overflow Channels Are Not
         ChatProtocol.ChatChannelType flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
             | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE;
 
-        if (channelNumber is 1)
+        if (isFirstChannel)
             flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
@@ -161,8 +172,19 @@ public class ChatChannel
     ///     Compacts the general channels into as few general channels as their members need, since members leaving over time can spread the remaining members thinly across many general channels.
     ///     The members of the highest-numbered general channels which are no longer needed are moved into the lowest-numbered general channels which are not full, and each emptied overflow channel is removed.
     ///     Nothing is moved unless doing so removes at least one general channel, so that members are not moved without a reason.
+    ///     Once a single general channel remains, it is named after the base name alone again.
     /// </summary>
     public static void CompactGeneralChannels()
+    {
+        MoveMembersOutOfUnneededGeneralChannels();
+
+        List<ChatChannel> remainingChannels = [.. Context.ChatChannels.Values.Where(channel => channel.IsGeneralChannel)];
+
+        if (remainingChannels is [ChatChannel lastChannel] && lastChannel.Name != ChatProtocol.CHAT_CHANNEL_BASE_NAME)
+            lastChannel.Rename(ChatProtocol.CHAT_CHANNEL_BASE_NAME);
+    }
+
+    private static void MoveMembersOutOfUnneededGeneralChannels()
     {
         List<ChatChannel> generalChannels = [.. Context.ChatChannels.Values
             .Where(channel => channel.IsGeneralChannel)
@@ -388,6 +410,39 @@ public class ChatChannel
         if (Members.TryAdd(session.Account.Name, newMember) is false)
             Log.Error(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
 
+        ChatBuffer response = BuildChannelState();
+
+        // Reject The Join If The Serialised Channel State Would Exceed The Client's Receive Buffer, Rolling Back The Membership So The Client Is Not Left Half-Joined
+        if (response.Size > ChatProtocol.MAX_PACKET_SIZE)
+        {
+            Members.TryRemove(session.Account.Name, out _);
+
+            SendSystemMessage(session, "This Channel Is Too Large To Join At The Moment");
+
+            return false;
+        }
+
+        // Announce To The Requesting Client That They Have Joined The Channel
+        session.Send(response);
+
+        // Announce To The Existing Channel Members That A New Client Has Joined The Channel
+        BroadcastJoin(session);
+
+        // Track This Channel In The Client's Current Channels List
+        session.CurrentChannels.Add(ID);
+
+        // Announce The Synthetic TERMINAL Member To The Joining Client, So That It Can Render The Operational Log Messages Broadcast By <see cref="Terminal.Broadcast"/>
+        if (Name == ChatChannels.StaffChannel)
+            Terminal.AnnounceSyntheticMember(session);
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Builds the channel state which a client receives on joining the channel, which describes the channel along with its administrators and members.
+    /// </summary>
+    private ChatBuffer BuildChannelState()
+    {
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL);
@@ -423,30 +478,45 @@ public class ChatChannel
             response.WriteInt32(member.Account.AscensionLevel);                   // Ascension Level
         }
 
-        // Reject The Join If The Serialised Channel State Would Exceed The Client's Receive Buffer, Rolling Back The Membership So The Client Is Not Left Half-Joined
-        if (response.Size > ChatProtocol.MAX_PACKET_SIZE)
+        return response;
+    }
+
+    /// <summary>
+    ///     Renames the channel, which also changes its ID, since the ID is derived from the name.
+    ///     The game client cannot rename an open channel, so each member's channel is reset instead: the member leaves the channel under its old name and joins it under its new one.
+    /// </summary>
+    private void Rename(string newName)
+    {
+        string oldName = Name;
+        int oldID = ID;
+
+        if (Context.ChatChannels.TryRemove(oldName, out _) is false)
+            Log.Error(@"[BUG] Failed To Remove Channel ""{ChannelName}"" From Global Channel List", oldName);
+
+        Name = newName;
+
+        if (Context.ChatChannels.TryAdd(newName, this) is false)
+            Log.Error(@"[BUG] Failed To Add Channel ""{ChannelName}"" To Global Channel List", newName);
+
+        ChatBuffer channelState = BuildChannelState();
+
+        foreach (ChatChannelMember member in Members.Values)
         {
-            Members.TryRemove(session.Account.Name, out _);
+            ChatBuffer left = new ();
 
-            SendSystemMessage(session, "This Channel Is Too Large To Join At The Moment");
+            left.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+            left.WriteInt32(member.Account.ID); // Member Account ID
+            left.WriteInt32(oldID);             // Channel ID
 
-            return false;
+            member.Session.Send(left);
+
+            member.Session.CurrentChannels.Remove(oldID);
+            member.Session.CurrentChannels.Add(ID);
+
+            member.Session.Send(channelState);
+
+            SendSystemMessage(member.Session, $"This Channel Was Renamed From {oldName}");
         }
-
-        // Announce To The Requesting Client That They Have Joined The Channel
-        session.Send(response);
-
-        // Announce To The Existing Channel Members That A New Client Has Joined The Channel
-        BroadcastJoin(session);
-
-        // Track This Channel In The Client's Current Channels List
-        session.CurrentChannels.Add(ID);
-
-        // Announce The Synthetic TERMINAL Member To The Joining Client, So That It Can Render The Operational Log Messages Broadcast By <see cref="Terminal.Broadcast"/>
-        if (Name == ChatChannels.StaffChannel)
-            Terminal.AnnounceSyntheticMember(session);
-
-        return true;
     }
 
     private void BroadcastJoin(ClientChatSession session)
