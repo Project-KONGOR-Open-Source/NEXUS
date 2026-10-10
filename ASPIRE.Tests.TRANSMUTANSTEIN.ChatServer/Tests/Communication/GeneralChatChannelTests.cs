@@ -67,7 +67,6 @@ public sealed class GeneralChatChannelTests
         {
             await Assert.That(await client.ReadCommand()).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
             await Assert.That(await client.ReadCommand()).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL);
-            await Assert.That(await ReadNoticeMessage(client)).IsEqualTo($"This Channel Was Renamed From {ChatProtocol.CHAT_CHANNEL_BASE_NAME}");
         }
     }
 

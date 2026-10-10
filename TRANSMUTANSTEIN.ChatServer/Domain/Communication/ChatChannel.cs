@@ -514,8 +514,6 @@ public class ChatChannel
             member.Session.CurrentChannels.Add(ID);
 
             member.Session.Send(channelState);
-
-            SendSystemMessage(member.Session, $"This Channel Was Renamed From {oldName}");
         }
     }
 
