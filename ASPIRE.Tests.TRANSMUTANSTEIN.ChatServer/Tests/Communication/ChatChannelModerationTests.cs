@@ -189,6 +189,56 @@ public sealed class ChatChannelModerationTests
     }
 
     [Test]
+    public async Task A_Silenced_Member_Is_Told_When_The_Silence_Is_Lifted()
+    {
+        Account moderatorAccount = CreateAccount("LiftingModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+        await using RunningClientSession target = RunningClientSession.Start(CreateAccount("LiftedTarget"));
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Lifted Silence Channel");
+
+        channel.Join(moderator.Session);
+        channel.Join(target.Session);
+
+        channel.Silence(moderator.Session, target.Session, 100);
+
+        // The Silence Lifted Notice Follows The Channel Announcements And The Silence Placed Notice
+        while (await target.ReadCommand() != ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_LIFTED) { }
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(channel.IsSilenced(target.Session)).IsFalse();
+            await Assert.That(channel.SilencedAccounts.ContainsKey(target.Session.Account.ID)).IsFalse();
+        }
+    }
+
+    [Test]
+    public async Task A_Later_Silence_Is_Not_Lifted_When_An_Earlier_Silence_It_Replaced_Expires()
+    {
+        Account moderatorAccount = CreateAccount("ReplacingModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+        await using RunningClientSession target = RunningClientSession.Start(CreateAccount("ResilencedTarget"));
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Replaced Silence Channel");
+
+        channel.Join(moderator.Session);
+        channel.Join(target.Session);
+
+        channel.Silence(moderator.Session, target.Session, 100);
+        channel.Silence(moderator.Session, target.Session, 60_000);
+
+        await Task.Delay(TimeSpan.FromMilliseconds(500));
+
+        await Assert.That(channel.IsSilenced(target.Session)).IsTrue();
+    }
+
+    [Test]
     public async Task Kicking_A_Player_Who_Is_Not_In_The_Channel_Is_Ignored()
     {
         Account moderatorAccount = CreateAccount("AbsentKickModerator");

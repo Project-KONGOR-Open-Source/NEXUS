@@ -631,15 +631,8 @@ public class ChatChannel
         if (SilencedAccounts.TryGetValue(session.Account.ID, out DateTime silencedUntil) is false)
             return false;
 
-        // An Expired Silence Is Cleared When It Is Next Checked
-        if (DateTime.UtcNow > silencedUntil)
-        {
-            SilencedAccounts.TryRemove(session.Account.ID, out _);
-
-            return false;
-        }
-
-        return true;
+        // An Expired Silence Is Removed When It Is Lifted, Which Can Happen Fractionally After It Expires
+        return DateTime.UtcNow <= silencedUntil;
     }
 
     /// <summary>
@@ -666,7 +659,11 @@ public class ChatChannel
             return;
         }
 
-        SilencedAccounts[target.Account.ID] = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+        DateTime silencedUntil = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+
+        SilencedAccounts[target.Account.ID] = silencedUntil;
+
+        _ = LiftSilenceOnExpiry(target.Account.ID, silencedUntil);
 
         if (isTargetInChannel is false)
         {
@@ -685,6 +682,33 @@ public class ChatChannel
         broadcast.WriteInt32(durationMilliseconds);               // Duration In Milliseconds
 
         BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Lifts the silence once it expires, and lets the formerly silenced player know, provided that they are in the channel and have not asked not to be disturbed.
+    ///     A silence placed on the same player afterwards replaces this one, in which case this one is not lifted and the later silence is lifted when it expires instead.
+    /// </summary>
+    private async Task LiftSilenceOnExpiry(int accountID, DateTime silencedUntil)
+    {
+        TimeSpan remainingDuration = silencedUntil - DateTime.UtcNow;
+
+        if (remainingDuration > TimeSpan.Zero)
+            await Task.Delay(remainingDuration);
+
+        if (SilencedAccounts.TryRemove(new KeyValuePair<int, DateTime>(accountID, silencedUntil)) is false)
+            return;
+
+        ChatChannelMember? member = Members.Values.SingleOrDefault(candidate => candidate.Account.ID == accountID);
+
+        if (member is null || member.Session.Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_DND)
+            return;
+
+        ChatBuffer lifted = new ();
+
+        lifted.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_LIFTED);
+        lifted.WriteString(Name); // Channel Name
+
+        member.Session.Send(lifted);
     }
 
     /// <summary>
