@@ -640,15 +640,20 @@ public class ChatChannel
     }
 
     /// <summary>
-    ///     Silence a member in this channel.
+    ///     Silence a player in this channel.
+    ///     The target does not need to be in the channel, in which case the silence applies once the target joins it, and the silence is only announced to the channel if the target is in it.
     /// </summary>
     /// <param name="requesterSession">The session requesting the silence (must have higher administrator level).</param>
-    /// <param name="targetAccountID">The account ID of the member to silence.</param>
+    /// <param name="targetSession">The session of the player to silence.</param>
     /// <param name="durationMilliseconds">The duration of the silence in milliseconds.</param>
-    public void Silence(ClientChatSession requesterSession, int targetAccountID, int durationMilliseconds)
+    public void Silence(ClientChatSession requesterSession, ClientChatSession targetSession, int durationMilliseconds)
     {
         ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
-        ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
+
+        // A Target Who Is Not In The Channel Is Ranked As If It Were A Member
+        bool isTargetInChannel = Members.TryGetValue(targetSession.Account.Name, out ChatChannelMember? targetMember);
+
+        ChatChannelMember target = targetMember ?? new ChatChannelMember(targetSession, this);
 
         // Requester Must Have Higher Administrator Level Than Target (Strict Inequality)
         if (requester.HasHigherAdministratorLevelThan(target) is false)
@@ -658,7 +663,14 @@ public class ChatChannel
             return;
         }
 
-        SilencedAccounts[targetAccountID] = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+        SilencedAccounts[target.Account.ID] = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+
+        if (isTargetInChannel is false)
+        {
+            SendSystemMessage(requesterSession, "That Player Will Be Silenced Upon Joining This Channel");
+
+            return;
+        }
 
         // Broadcast Silence Notification To All Channel Members
         ChatBuffer broadcast = new ();
@@ -696,7 +708,7 @@ public class ChatChannel
     /// </summary>
     /// <param name="session">The client session to notify.</param>
     /// <param name="message">The human-readable message to display to the client.</param>
-    private void SendSystemMessage(ClientChatSession session, string message)
+    public void SendSystemMessage(ClientChatSession session, string message)
         => SendSystemMessage(session, Name, message);
 
     /// <summary>

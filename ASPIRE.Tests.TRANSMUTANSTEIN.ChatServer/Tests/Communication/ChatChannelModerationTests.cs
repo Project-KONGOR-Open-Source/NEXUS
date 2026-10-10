@@ -79,7 +79,7 @@ public sealed class ChatChannelModerationTests
         channel.Join(moderator.Session);
         channel.Join(target.Session);
 
-        channel.Silence(moderator.Session, target.Session.Account.ID, 60_000);
+        channel.Silence(moderator.Session, target.Session, 60_000);
 
         channel.Leave(target.Session);
         channel.Join(target.Session);
@@ -88,6 +88,61 @@ public sealed class ChatChannelModerationTests
         {
             await Assert.That(channel.Members.ContainsKey(target.Session.Account.Name)).IsTrue();
             await Assert.That(channel.IsSilenced(target.Session)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task Silencing_A_Player_Who_Is_Not_In_The_Channel_Silences_Them_Once_They_Join_And_Notifies_The_Requester()
+    {
+        Account moderatorAccount = CreateAccount("AbsentSilenceModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+        await using RunningClientSession target = RunningClientSession.Start(CreateAccount("AbsentSilenceTarget"));
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Absent Silence Channel");
+
+        channel.Join(moderator.Session);
+
+        channel.Silence(moderator.Session, target.Session, 60_000);
+
+        channel.Join(target.Session);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(channel.IsSilenced(target.Session)).IsTrue();
+            await Assert.That(await moderator.ReadCommand()).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL);
+            await Assert.That((await moderator.ReadNotice()).Message).IsEqualTo("That Player Will Be Silenced Upon Joining This Channel");
+        }
+    }
+
+    [Test]
+    public async Task Silencing_A_Player_Who_Is_Not_Online_Notifies_The_Requester()
+    {
+        Account moderatorAccount = CreateAccount("OfflineSilenceModerator");
+
+        moderatorAccount.Type = AccountType.Staff;
+
+        await using RunningClientSession moderator = RunningClientSession.Start(moderatorAccount);
+
+        ChatChannel channel = ChatChannel.GetOrCreate(moderator.Session, "Offline Silence Channel");
+
+        channel.Join(moderator.Session);
+
+        ChatBuffer request = new ();
+
+        request.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_USER);
+        request.WriteInt32(channel.ID);
+        request.WriteString("NobodyOnline");
+        request.WriteInt32(60_000);
+
+        new SilenceChannelMember().Process(moderator.Session, request);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(await moderator.ReadCommand()).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL);
+            await Assert.That((await moderator.ReadNotice()).Message).IsEqualTo("No Player Named NobodyOnline Is Online");
         }
     }
 
