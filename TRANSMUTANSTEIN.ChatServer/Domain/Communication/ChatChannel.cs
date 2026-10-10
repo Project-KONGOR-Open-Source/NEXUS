@@ -129,7 +129,7 @@ public class ChatChannel
     /// <returns>The match channel.</returns>
     public static ChatChannel GetOrCreateMatchChannel(int matchID)
     {
-        string matchChannelName = $"Match {matchID}";
+        string matchChannelName = $"{ChatChannels.MatchChannelPrefix} {matchID}";
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(matchChannelName, new ChatChannel
         {
@@ -149,7 +149,7 @@ public class ChatChannel
     /// <returns>The group channel.</returns>
     public static ChatChannel GetOrCreateGroupChannel(int groupID)
     {
-        string groupChannelName = $"TMM Group {groupID}";
+        string groupChannelName = $"{ChatChannels.GroupChannelPrefix} {groupID}";
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(groupChannelName, new ChatChannel
         {

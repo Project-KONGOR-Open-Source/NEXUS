@@ -44,6 +44,8 @@ public sealed class AutoConnectChatChannelTests(KONGORIntegrationWebApplicationF
     [Arguments("kongor 3")]
     [Arguments("Clan Other Clan")]
     [Arguments("TERMINAL")]
+    [Arguments("Match 123")]
+    [Arguments("TMM Group 456")]
     public async Task Adding_A_Reserved_Channel_Is_Rejected_With_A_Failure_The_Client_Reports(string channelName)
     {
         (string cookie, int accountID) = await SeedSession("channel.reserved@kongor.com", "ChannelReserved");
