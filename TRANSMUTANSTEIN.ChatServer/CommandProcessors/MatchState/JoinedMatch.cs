@@ -8,7 +8,7 @@ public class JoinedMatch(IDatabase distributedCacheStore) : IAsynchronousCommand
         JoinedMatchRequestData requestData = new (buffer);
 
         await session
-            .JoinMatch(distributedCacheStore, requestData.MatchID);
+            .JoinMatch(distributedCacheStore, requestData.MatchID, requestData.JoinMatchChannel);
     }
 }
 
