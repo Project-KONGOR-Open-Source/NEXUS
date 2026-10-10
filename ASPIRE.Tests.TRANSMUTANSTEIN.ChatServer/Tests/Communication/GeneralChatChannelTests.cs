@@ -67,6 +67,7 @@ public sealed class GeneralChatChannelTests
         {
             await Assert.That(await client.ReadCommand()).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
             await Assert.That(await client.ReadCommand()).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL);
+            await Assert.That(await ReadNoticeMessage(client)).IsEqualTo("A Forgetfulness Spell Was Cast, And The Old Scrolls Scattered To The Winds");
         }
     }
 

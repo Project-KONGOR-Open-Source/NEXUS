@@ -520,6 +520,9 @@ public class ChatChannel
             member.Session.CurrentChannels.Add(ID);
 
             member.Session.Send(channelState);
+
+            // The Reset Clears The Member's Chat History, So It Is Explained In Character Rather Than As A Rename
+            SendSystemMessage(member.Session, "A Forgetfulness Spell Was Cast, And The Old Scrolls Scattered To The Winds");
         }
     }
 
