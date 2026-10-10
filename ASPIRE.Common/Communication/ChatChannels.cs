@@ -16,8 +16,8 @@ public static class ChatChannels
 
     public static readonly string[] AllDefaultChannels = [ GeneralChannel, GameMastersChannel, GuestsChannel, ServerHostsChannel, StreamersChannel, VIPChannel, StaffChannel ];
 
-    // Clan channels are named after their clan, following this prefix.
-    public const string ClanChannelPrefix = "Clan ";
+    // Clan channels are named after their clan, following this prefix and a space.
+    public const string ClanChannelPrefix = "Clan";
 
     /// <summary>
     ///     Determines whether the channel is one which accounts are placed in based on their state, rather than one which players choose freely.
@@ -28,7 +28,7 @@ public static class ChatChannels
         if (AllDefaultChannels.Contains(channelName, StringComparer.OrdinalIgnoreCase))
             return true;
 
-        if (channelName.StartsWith(ClanChannelPrefix, StringComparison.OrdinalIgnoreCase))
+        if (channelName.StartsWith($"{ClanChannelPrefix} ", StringComparison.OrdinalIgnoreCase))
             return true;
 
         // Overflow General Channels Are Named After The General Channel, Followed By A Number

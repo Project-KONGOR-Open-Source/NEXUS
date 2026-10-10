@@ -28,7 +28,7 @@ public class Clan
 
     public DateTimeOffset TimestampCreated { get; set; } = DateTimeOffset.UtcNow;
 
-    public string GetChatChannelName() => $"{ChatChannels.ClanChannelPrefix}{Name}";
+    public string GetChatChannelName() => $"{ChatChannels.ClanChannelPrefix} {Name}";
 
     /// <summary>
     ///     The clan's default welcome message, used both as the clan chat channel's topic and as the "message" field of the clan member data point in the authentication response.
