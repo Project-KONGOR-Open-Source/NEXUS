@@ -34,12 +34,29 @@ public static class ChatChannels
         if (AllDefaultChannels.Contains(channelName, StringComparer.OrdinalIgnoreCase))
             return true;
 
-        if (HasPrefix(channelName, ClanChannelPrefix) || HasPrefix(channelName, MatchChannelPrefix) || HasPrefix(channelName, GroupChannelPrefix))
+        if (IsGeneralChannel(channelName) || IsClanChannel(channelName))
+            return true;
+
+        return HasPrefix(channelName, MatchChannelPrefix) || HasPrefix(channelName, GroupChannelPrefix);
+    }
+
+    /// <summary>
+    ///     Determines whether the channel is the general channel or one of the numbered overflow channels which the general channel is load-balanced across.
+    /// </summary>
+    public static bool IsGeneralChannel(string channelName)
+    {
+        if (channelName.Equals(GeneralChannel, StringComparison.OrdinalIgnoreCase))
             return true;
 
         // Overflow General Channels Are Named After The General Channel, Followed By A Number
         return HasPrefix(channelName, GeneralChannel) && int.TryParse(channelName.AsSpan(GeneralChannel.Length + 1), out _);
     }
+
+    /// <summary>
+    ///     Determines whether the channel is the channel of a clan, whether or not that clan exists.
+    /// </summary>
+    public static bool IsClanChannel(string channelName)
+        => HasPrefix(channelName, ClanChannelPrefix);
 
     private static bool HasPrefix(string channelName, string prefix)
         => channelName.StartsWith($"{prefix} ", StringComparison.OrdinalIgnoreCase);

@@ -2,6 +2,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Communication;
 
 /// <summary>
 ///     Covers the join validation on <see cref="ChatChannel.Join"/>: a channel flagged <see cref="ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_UNJOINABLE"/> and a full channel both reject a manual join and notify the requesting client, while the internal member additions used to populate matchmaking group and match channels are still accepted.
+///     It also covers join requests by name, which <see cref="ChatChannel.TryGetOrCreateForJoinRequest"/> resolves so that reserved channels are only joined by the clients entitled to them and the general channel names are routed through the load balancing.
 ///     The notifying paths run the session over an in-memory connection so the test reads the actual notice frame back off the wire, confirming it is genuinely sent rather than discarded.
 /// </summary>
 public sealed class ChatChannelJoinTests
@@ -65,6 +66,93 @@ public sealed class ChatChannelJoinTests
             await Assert.That(channel.Members.ContainsKey(client.Session.Account.Name)).IsFalse();
             await Assert.That(command).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
             await Assert.That(message).IsEqualTo("This Channel Is Full");
+        }
+    }
+
+    [Test]
+    [Arguments("TERMINAL")]
+    [Arguments("VIP")]
+    public async Task Joining_A_Role_Channel_Without_The_Role_Is_Rejected_And_Notifies_The_Client(string channelName)
+    {
+        await using RunningClientSession client = RunningClientSession.Start(CreateAccount("RoleOutsider"));
+
+        new JoinChannel().Process(client.Session, ChatTestProtocol.BuildJoinChannel(channelName));
+
+        (ushort command, string message) = await client.ReadNotice();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(command).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
+            await Assert.That(message).IsEqualTo("This Channel Cannot Be Joined");
+            await Assert.That(client.Session.CurrentChannels).IsEmpty();
+        }
+    }
+
+    [Test]
+    public async Task A_Join_Request_For_A_Role_Channel_With_The_Role_Resolves_To_The_Channel_Under_Its_Canonical_Name()
+    {
+        ClientChatSession session = CreateSession("RoleInsider");
+
+        session.Account.Type = AccountType.VIP;
+
+        bool resolved = ChatChannel.TryGetOrCreateForJoinRequest(session, "vip", out ChatChannel? channel);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(resolved).IsTrue();
+            await Assert.That(channel?.Name).IsEqualTo("VIP");
+            await Assert.That(Context.ChatChannels.ContainsKey("vip")).IsFalse();
+        }
+    }
+
+    [Test]
+    public async Task Joining_The_Channel_Of_Another_Clan_Is_Rejected_Without_Creating_It()
+    {
+        await using RunningClientSession client = RunningClientSession.Start(CreateAccount("ClanOutsider"));
+
+        new JoinChannel().Process(client.Session, ChatTestProtocol.BuildJoinChannel("Clan Someone Else"));
+
+        (ushort command, string message) = await client.ReadNotice();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(command).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
+            await Assert.That(message).IsEqualTo("Only Clan Members Can Join This Channel");
+            await Assert.That(Context.ChatChannels.ContainsKey("Clan Someone Else")).IsFalse();
+        }
+    }
+
+    [Test]
+    [Arguments("Match 424242")]
+    [Arguments("TMM Group 424242")]
+    public async Task Joining_A_Match_Or_Matchmaking_Group_Channel_By_Name_Is_Rejected_Without_Creating_It(string channelName)
+    {
+        await using RunningClientSession client = RunningClientSession.Start(CreateAccount("SystemChannelOutsider"));
+
+        new JoinChannel().Process(client.Session, ChatTestProtocol.BuildJoinChannel(channelName));
+
+        (ushort command, string message) = await client.ReadNotice();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(command).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
+            await Assert.That(message).IsEqualTo("This Channel Cannot Be Joined");
+            await Assert.That(Context.ChatChannels.ContainsKey(channelName)).IsFalse();
+        }
+    }
+
+    [Test]
+    public async Task A_Join_Request_For_A_Numbered_General_Channel_Resolves_Through_The_Load_Balancing()
+    {
+        string channelName = $"{ChatProtocol.CHAT_CHANNEL_BASE_NAME} 7";
+
+        bool resolved = ChatChannel.TryGetOrCreateForJoinRequest(CreateSession("GeneralJoiner"), channelName, out ChatChannel? channel);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(resolved).IsTrue();
+            await Assert.That(channel?.IsGeneralChannel).IsTrue();
+            await Assert.That(Context.ChatChannels.ContainsKey(channelName)).IsFalse();
         }
     }
 
