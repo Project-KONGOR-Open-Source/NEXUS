@@ -2,7 +2,7 @@
 
 public static class ChatChannels
 {
-    // "KONGOR" is a special channel name that maps to "KONGOR 1", then to "KONGOR 2" if "KONGOR 1" is full, then to "KONGOR 3" if "KONGOR 2" is full, and so on.
+    // "KONGOR" is the general channel while it is the only one, and is renamed "KONGOR 1" once it overflows into "KONGOR 2", "KONGOR 3", and so on; joining by any of these names joins whichever general channel is not full.
     public const string GeneralChannel = "KONGOR";
 
     public const string GameMastersChannel = "GAME MASTERS";
