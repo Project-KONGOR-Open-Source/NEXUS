@@ -10,18 +10,21 @@ public class SilenceChannelMember : ISynchronousCommandProcessor<ClientChatSessi
         if (ChatChannel.TryGet(session, requestData.ChannelID, out ChatChannel? channel) is false)
             return;
 
-        // Find The Target Account ID By Name
+        // The Game Client Sends The Name Which It Displays For The Target, Which Includes The Clan Tag Of A Target In A Clan
+        (string _, string targetAccountName) = Account.SeparateClanTagFromAccountName(requestData.TargetName);
+
+        // Find The Target Session By Name
         ClientChatSession? targetSession = Context.ClientChatSessions.Values
-            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase));
+            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetAccountName, StringComparison.OrdinalIgnoreCase));
 
         if (targetSession is null)
         {
-            // TODO: Notify Requester That Target User Was Not Found
+            channel.SendSystemMessage(session, $"No Player Named {targetAccountName} Is Online");
 
             return;
         }
 
-        channel.Silence(session, targetSession.Account.ID, requestData.DurationMilliseconds);
+        channel.Silence(session, targetSession, requestData.DurationMilliseconds);
     }
 }
 

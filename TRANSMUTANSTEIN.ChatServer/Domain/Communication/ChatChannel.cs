@@ -18,6 +18,12 @@ public class ChatChannel
     public HashSet<int> BannedAccountIDs { get; set; } = [];
 
     /// <summary>
+    ///     Account IDs silenced in this channel, each mapped to the instant at which its silence expires.
+    ///     Silences are kept by account ID rather than on the channel membership, so that leaving and rejoining the channel does not lift them.
+    /// </summary>
+    public ConcurrentDictionary<int, DateTime> SilencedAccounts { get; set; } = [];
+
+    /// <summary>
     ///     Set of lowercase account names authenticated to join this channel when authentication is enabled.
     /// </summary>
     public HashSet<string> AuthenticatedAccountNames { get; set; } = [];
@@ -584,7 +590,12 @@ public class ChatChannel
     public void Kick(ClientChatSession requesterSession, int targetAccountID)
     {
         ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
-        ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
+
+        // The Target May Have Left The Channel Before The Kick Arrived, In Which Case There Is Nobody To Kick
+        ChatChannelMember? target = Members.Values.SingleOrDefault(member => member.Account.ID == targetAccountID);
+
+        if (target is null)
+            return;
 
         if (requester.HasHigherAdministratorLevelThan(target))
         {
@@ -599,10 +610,8 @@ public class ChatChannel
             foreach (ChatChannelMember member in Members.Values)
                 member.Session.Send(broadcast);
 
-            ClientChatSession targetSession = Context.ClientChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
-
             // Remove The Target Member From The Channel
-            Leave(targetSession);
+            Leave(target.Session);
         }
 
         else SendSystemMessage(requesterSession, "You Do Not Have Permission To Kick That Member");
@@ -615,22 +624,39 @@ public class ChatChannel
     /// <returns><see langword="true"/> if the member is silenced, <see langword="false"/> otherwise.</returns>
     public bool IsSilenced(ClientChatSession session)
     {
-        ChatChannelMember? member = Members.Values
-            .SingleOrDefault(channelMember => channelMember.Account.ID == session.Account.ID);
+        // Staff Accounts Are Immune To Being Silenced
+        if (session.Account.Type is AccountType.Staff)
+            return false;
 
-        return member?.IsSilenced() ?? false;
+        if (SilencedAccounts.TryGetValue(session.Account.ID, out DateTime silencedUntil) is false)
+            return false;
+
+        // An Expired Silence Is Cleared When It Is Next Checked
+        if (DateTime.UtcNow > silencedUntil)
+        {
+            SilencedAccounts.TryRemove(session.Account.ID, out _);
+
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>
-    ///     Silence a member in this channel.
+    ///     Silence a player in this channel.
+    ///     The target does not need to be in the channel, in which case the silence applies once the target joins it, and the silence is only announced to the channel if the target is in it.
     /// </summary>
     /// <param name="requesterSession">The session requesting the silence (must have higher administrator level).</param>
-    /// <param name="targetAccountID">The account ID of the member to silence.</param>
+    /// <param name="targetSession">The session of the player to silence.</param>
     /// <param name="durationMilliseconds">The duration of the silence in milliseconds.</param>
-    public void Silence(ClientChatSession requesterSession, int targetAccountID, int durationMilliseconds)
+    public void Silence(ClientChatSession requesterSession, ClientChatSession targetSession, int durationMilliseconds)
     {
         ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
-        ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
+
+        // A Target Who Is Not In The Channel Is Ranked As If It Were A Member
+        bool isTargetInChannel = Members.TryGetValue(targetSession.Account.Name, out ChatChannelMember? targetMember);
+
+        ChatChannelMember target = targetMember ?? new ChatChannelMember(targetSession, this);
 
         // Requester Must Have Higher Administrator Level Than Target (Strict Inequality)
         if (requester.HasHigherAdministratorLevelThan(target) is false)
@@ -640,8 +666,14 @@ public class ChatChannel
             return;
         }
 
-        // Set Silence Expiration On Target Member
-        target.SilencedUntil = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+        SilencedAccounts[target.Account.ID] = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+
+        if (isTargetInChannel is false)
+        {
+            SendSystemMessage(requesterSession, "That Player Will Be Silenced Upon Joining This Channel");
+
+            return;
+        }
 
         // Broadcast Silence Notification To All Channel Members
         ChatBuffer broadcast = new ();
@@ -679,7 +711,7 @@ public class ChatChannel
     /// </summary>
     /// <param name="session">The client session to notify.</param>
     /// <param name="message">The human-readable message to display to the client.</param>
-    private void SendSystemMessage(ClientChatSession session, string message)
+    public void SendSystemMessage(ClientChatSession session, string message)
         => SendSystemMessage(session, Name, message);
 
     /// <summary>
