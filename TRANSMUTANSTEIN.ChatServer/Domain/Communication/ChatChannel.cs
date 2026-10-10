@@ -113,6 +113,7 @@ public class ChatChannel
     ///     Gets or creates a general chat channel with overflow support.
     ///     Finds the first general channel which is not full.
     ///     If all existing general channels are full, a new numbered channel is created (e.g. "KONGOR 2", "KONGOR 3").
+    ///     Every general channel is numbered, including the first one, while the unnumbered base name is reserved for joining whichever general channel is not full.
     ///     The first channel is permanent, but overflow channels are removed automatically when they become empty.
     /// </summary>
     public static ChatChannel GetOrCreateGeneralChannel()
@@ -130,27 +131,20 @@ public class ChatChannel
         if (availableChannel is not null)
             return availableChannel;
 
-        // All General Channels Are Full (Or None Exist), So The First Channel Uses The Base Name, While Overflow Channels Are Numbered Starting At 2
-        bool isFirstChannel = Context.ChatChannels.ContainsKey(baseName) is false;
+        // All General Channels Are Full (Or None Exist), So A New One Is Created, Numbered Starting At 1
+        // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
+        int channelNumber = 1;
 
-        string channelName = baseName;
+        while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
+            channelNumber++;
 
-        if (isFirstChannel is false)
-        {
-            int channelNumber = 2;
-
-            // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
-            while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
-                channelNumber++;
-
-            channelName = $"{baseName} {channelNumber}";
-        }
+        string channelName = $"{baseName} {channelNumber}";
 
         // The First General Channel Is Permanent; Overflow Channels Are Not
         ChatProtocol.ChatChannelType flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
             | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE;
 
-        if (isFirstChannel)
+        if (channelNumber is 1)
             flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel

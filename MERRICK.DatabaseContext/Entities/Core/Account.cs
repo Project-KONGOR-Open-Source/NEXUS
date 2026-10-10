@@ -95,6 +95,17 @@ public class Account
         return channels;
     }
 
+    /// <summary>
+    ///     Determines whether the channel is one of the account's default chat channels, matching the channel name case-insensitively.
+    ///     Every general channel name counts as the general channel, since the general channel is load-balanced across its numbered channels.
+    /// </summary>
+    public bool IsDefaultChatChannel(string channelName)
+    {
+        string defaultChannelName = ChatChannels.IsGeneralChannel(channelName) ? ChatChannels.GeneralChannel : channelName;
+
+        return GetDefaultChatChannels().Contains(defaultChannelName, StringComparer.OrdinalIgnoreCase);
+    }
+
     public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string accountNameWithClanTag)
     {
         // If no '[' and ']' characters are found, then the account is not part of a clan and has no clan tag.

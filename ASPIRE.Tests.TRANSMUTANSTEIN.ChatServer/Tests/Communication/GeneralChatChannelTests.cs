@@ -24,7 +24,7 @@ public sealed class GeneralChatChannelTests
     }
 
     [Test]
-    public async Task An_Overflow_General_Channel_Is_Created_Once_Every_General_Channel_Is_Full()
+    public async Task General_Channels_Are_Numbered_From_1_And_Overflow_Once_Every_General_Channel_Is_Full()
     {
         ChatChannel firstChannel = ChatChannel.GetOrCreateGeneralChannel();
 
@@ -34,7 +34,8 @@ public sealed class GeneralChatChannelTests
 
         using (Assert.Multiple())
         {
-            await Assert.That(firstChannel.Name).IsEqualTo(ChatProtocol.CHAT_CHANNEL_BASE_NAME);
+            await Assert.That(firstChannel.Name).IsEqualTo($"{ChatProtocol.CHAT_CHANNEL_BASE_NAME} 1");
+            await Assert.That(Context.ChatChannels.ContainsKey(ChatProtocol.CHAT_CHANNEL_BASE_NAME)).IsFalse();
             await Assert.That(firstChannel.IsPermanent).IsTrue();
             await Assert.That(overflowChannel.Name).IsEqualTo($"{ChatProtocol.CHAT_CHANNEL_BASE_NAME} 2");
             await Assert.That(overflowChannel.IsGeneralChannel).IsTrue();

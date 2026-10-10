@@ -33,11 +33,11 @@ public partial class ClientRequesterController
         List<string> defaultChannels = account.GetDefaultChatChannels();
 
         // Channel Names Are Matched Case-Insensitively, Consistent With How The Game Client Determines Whether A Channel Is Already Saved
-        // The Default Channels Are Joined On Every Login, So They Count As Saved Without Being Persisted
-        if (defaultChannels.Contains(channelName, StringComparer.OrdinalIgnoreCase))
+        // The Default Channels Are Joined On Every Login, So They Count As Saved Without Being Persisted, Which Also Keeps Any Numbered General Channel Load-Balanced
+        if (account.IsDefaultChatChannel(channelName))
             return Ok(PhpSerialization.Serialize(new Dictionary<string, string> { { "add_room", "OK" } }));
 
-        // Accounts Are Placed In Reserved Channels Based On Their State, And Joining A Numbered General Channel Directly Would Also Bypass The Load Balancing Across The General Channels
+        // Accounts Are Placed In Reserved Channels Based On Their State
         if (ChatChannels.IsReservedChannel(channelName))
         {
             Logger.LogInformation(@"Account ""{AccountName}"" (ID: {AccountID}) Could Not Save Reserved Chat Channel ""{ChatChannelName}"" To Its Auto-Connect List",
@@ -108,7 +108,7 @@ public partial class ClientRequesterController
             .SingleAsync(candidate => candidate.Name.Equals(accountName));
 
         // A Failure Keeps The Game Client Showing The Default Channel As Saved, Which Reflects That It Is Still Joined On Every Login
-        if (account.GetDefaultChatChannels().Contains(channelName, StringComparer.OrdinalIgnoreCase))
+        if (account.IsDefaultChatChannel(channelName))
         {
             Logger.LogInformation(@"Account ""{AccountName}"" (ID: {AccountID}) Could Not Remove Default Chat Channel ""{ChatChannelName}"" From Its Auto-Connect List",
                 account.Name, account.ID, channelName);
