@@ -420,6 +420,19 @@ public class ChatChannel
             // Remove This Channel From The Client's Current Channels List
             session.CurrentChannels.Remove(ID);
 
+            ChatBuffer broadcast = new ();
+
+            broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+            broadcast.WriteInt32(member.Account.ID); // Member Account ID
+            broadcast.WriteInt32(ID);                // Channel ID
+
+            List<ChatChannelMember> channelMembers = [member, .. Members.Values];
+
+            // Announce To The Channel Members (Including The Leaving Member, Even When It Was The Last One) That A Client Has Left The Channel
+            // The Leaving Member Needs The Announcement When It Is Removed By The Chat Server Rather Than By Its Own Request, So That The Game Client Closes The Channel
+            foreach (ChatChannelMember channelMember in channelMembers)
+                channelMember.Session.Send(broadcast);
+
             // If There Are No Remaining Members And The Channel Is Not Permanent, Dispose Of It
             if (Members.IsEmpty is true && IsPermanent is false)
             {
@@ -428,21 +441,6 @@ public class ChatChannel
 
                 if (channel is null)
                     Log.Error(@"[BUG] Chat Channel Instance For Channel ""{ChannelName}"" Is NULL", Name);
-            }
-
-            else if (Members.IsEmpty is false)
-            {
-                ChatBuffer broadcast = new ();
-
-                broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
-                broadcast.WriteInt32(member.Account.ID); // Member Account ID
-                broadcast.WriteInt32(ID);                // Channel ID
-
-                List<ChatChannelMember> channelMembers = [member, .. Members.Values];
-
-                // Announce To The Channel Members (Including The Leaving Member) That A Client Has Left The Channel
-                foreach (ChatChannelMember channelMember in channelMembers)
-                    channelMember.Session.Send(broadcast);
             }
         }
 
