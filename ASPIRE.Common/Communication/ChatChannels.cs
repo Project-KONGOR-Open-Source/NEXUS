@@ -59,5 +59,5 @@ public static class ChatChannels
         => HasPrefix(channelName, ClanChannelPrefix);
 
     private static bool HasPrefix(string channelName, string prefix)
-        => channelName.StartsWith($"{prefix} ", StringComparison.OrdinalIgnoreCase);
+        => channelName.StartsWith(prefix + TextConstant.Space, StringComparison.OrdinalIgnoreCase);
 }
