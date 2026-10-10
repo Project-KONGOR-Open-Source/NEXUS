@@ -118,6 +118,11 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // friends
             "remove_buddy2"                 => await RemoveFriend(),
 
+            // chat channels
+            "add_room"                      => await AddAutoConnectChatChannel(),
+            "remove_room"                   => await RemoveAutoConnectChatChannel(),
+            "clear_rooms"                   => await ClearAutoConnectChatChannels(),
+
             // clans
             "set_rank"                      => await SetClanRank(),
 

@@ -60,6 +60,53 @@ public class Account
         _                   => throw new ArgumentOutOfRangeException(@$"Unsupported Clan Tier ""{ClanTier}""")
     };
 
+    /// <summary>
+    ///     Gets the chat channels which the account joins on every login, regardless of its auto-connect list.
+    ///     These are the general channel, the account's clan channel, and the channels of the account's role, where the hosts channel also extends to every account of a user who owns a host account.
+    /// </summary>
+    public List<string> GetDefaultChatChannels()
+    {
+        List<string> channels = [];
+
+        if (Type is not AccountType.ServerHost)
+            channels.Add(ChatChannels.GeneralChannel);
+
+        if (Clan is not null)
+            channels.Add(Clan.GetChatChannelName());
+
+        if (Type is AccountType.GameMaster or AccountType.Staff)
+            channels.Add(ChatChannels.GameMastersChannel);
+
+        if (Type is AccountType.Guest or AccountType.Staff)
+            channels.Add(ChatChannels.GuestsChannel);
+
+        // Host Accounts Are Registered As Sub-Accounts Which Cannot Log Into The Game Client, So The Hosts Channel Also Belongs To Every Other Account Of A User Who Owns A Host Account
+        if (Type is AccountType.ServerHost or AccountType.Staff || User.Accounts.Any(subAccount => subAccount.Type is AccountType.ServerHost))
+            channels.Add(ChatChannels.ServerHostsChannel);
+
+        if (Type is AccountType.Streamer or AccountType.Staff)
+            channels.Add(ChatChannels.StreamersChannel);
+
+        if (Type is AccountType.VIP or AccountType.Staff)
+            channels.Add(ChatChannels.VIPChannel);
+
+        if (Type is AccountType.Staff)
+            channels.Add(ChatChannels.StaffChannel);
+
+        return channels;
+    }
+
+    /// <summary>
+    ///     Determines whether the channel is one of the account's default chat channels, matching the channel name case-insensitively.
+    ///     Every general channel name counts as the general channel, since the general channel is load-balanced across its numbered channels.
+    /// </summary>
+    public bool IsDefaultChatChannel(string channelName)
+    {
+        string defaultChannelName = ChatChannels.IsGeneralChannel(channelName) ? ChatChannels.GeneralChannel : channelName;
+
+        return GetDefaultChatChannels().Contains(defaultChannelName, StringComparer.OrdinalIgnoreCase);
+    }
+
     public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string accountNameWithClanTag)
     {
         // If no '[' and ']' characters are found, then the account is not part of a clan and has no clan tag.

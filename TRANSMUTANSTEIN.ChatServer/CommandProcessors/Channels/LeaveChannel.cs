@@ -7,9 +7,9 @@ public class LeaveChannel : ISynchronousCommandProcessor<ClientChatSession>
     {
         LeaveChannelRequestData requestData = new (buffer);
 
-        ChatChannel
-            .Get(session, requestData.ChannelName)
-            .Leave(session);
+        // The Game Client Sends Leave Requests Without Checking Whether It Is In The Channel (e.g. For Every Saved Channel When Clearing Its Auto-Connect List), So Requests For Channels The Client Is Not In Are Ignored
+        if (ChatChannel.TryGet(session, requestData.ChannelName, out ChatChannel? channel))
+            channel.Leave(session);
     }
 }
 

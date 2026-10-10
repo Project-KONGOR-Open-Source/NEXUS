@@ -7,9 +7,8 @@ public class JoinPasswordProtectedChannel : ISynchronousCommandProcessor<ClientC
     {
         JoinPasswordProtectedChannelRequestData requestData = new (buffer);
 
-        ChatChannel
-            .GetOrCreate(session, requestData.ChannelName)
-            .Join(session, requestData.Password);
+        if (ChatChannel.TryGetOrCreateForJoinRequest(session, requestData.ChannelName, out ChatChannel? channel))
+            channel.Join(session, requestData.Password);
     }
 }
 

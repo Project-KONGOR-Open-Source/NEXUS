@@ -1,4 +1,6 @@
-﻿global using Microsoft.AspNetCore.Builder;
+﻿global using ASPIRE.Common.Constants;
+
+global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
