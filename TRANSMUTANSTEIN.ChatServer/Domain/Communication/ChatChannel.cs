@@ -78,28 +78,37 @@ public class ChatChannel
         string baseName = ChatProtocol.CHAT_CHANNEL_BASE_NAME;
 
         // Find The First General Channel With Capacity
+        // Several General Channels Can Have Capacity At Once (e.g. Once Members Leave The First One While An Overflow Channel Is Still In Use), So The First One In Order Is Taken
         ChatChannel? availableChannel = Context.ChatChannels.Values
             .Where(channel => channel.IsGeneralChannel)
             .OrderBy(channel => channel.Name.Length)
             .ThenBy(channel => channel.Name)
-            .SingleOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
+            .FirstOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
 
         if (availableChannel is not null)
             return availableChannel;
 
-        // All General Channels Are Full (Or None Exist); Determine The Next Channel Number
-        int existingCount = Context.ChatChannels.Values.Count(channel => channel.IsGeneralChannel);
+        // All General Channels Are Full (Or None Exist), So The First Channel Uses The Base Name, While Overflow Channels Are Numbered Starting At 2
+        bool isFirstChannel = Context.ChatChannels.ContainsKey(baseName) is false;
 
-        // The First Channel Uses The Base Name; Subsequent Channels Are Numbered Starting At 2
-        string channelName = existingCount == 0
-            ? baseName
-            : $"{baseName} {existingCount + 1}";
+        string channelName = baseName;
+
+        if (isFirstChannel is false)
+        {
+            int channelNumber = 2;
+
+            // Empty Overflow Channels Are Removed, Which Can Leave Gaps In The Numbering, So The Lowest Free Number Is Taken
+            while (Context.ChatChannels.ContainsKey($"{baseName} {channelNumber}"))
+                channelNumber++;
+
+            channelName = $"{baseName} {channelNumber}";
+        }
 
         // The First General Channel Is Permanent; Overflow Channels Are Not
         ChatProtocol.ChatChannelType flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
             | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE;
 
-        if (existingCount == 0)
+        if (isFirstChannel)
             flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
         ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
