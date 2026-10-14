@@ -12,7 +12,7 @@
 
  - always use four spaces for indentation, and always terminate files with a newline character
 
- - always keep vertical whitespace usage consistent; if there is any already-existing code in the proximity, inspect it and use the same vertical whitespace usage conventions
+ - always keep vertical white-space usage consistent; if there is any already-existing code in the proximity, inspect it and use the same vertical white-space usage conventions
 
  - always keep syntax and formatting styles consistent with those of already-existing code; if there is any already-existing code in the proximity, inspect it and use the same syntax and formatting styles
 
@@ -77,10 +77,10 @@
  - always ensure that the generated code is syntactically correct and adheres to best practices for the target programming language
    - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest standards
 
- - always ensure that the generated code is efficient and optimized for performance, avoiding unnecessary computations or memory usage, unless readability and maintainability are significantly compromised
-   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest performance optimization techniques
+ - always ensure that the generated code is efficient and optimised for performance, avoiding unnecessary computations or memory usage, unless readability and maintainability are significantly compromised
+   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest performance optimisation techniques
 
- - always ensure that the generated code is secure, following best practices to prevent vulnerabilities such as injection attacks, data leaks, and unauthorized access
+ - always ensure that the generated code is secure, following best practices to prevent vulnerabilities such as injection attacks, data leaks, and unauthorised access
    - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest security standards
 
  - always keep the generated code consistent with the existing codebase in terms of style, conventions, and architecture
@@ -112,3 +112,19 @@
  - when writing tests, use an underscore between every word or logical sequence of numbers
    - RIGHT: Running_10_Instances_Of_The_Service_Does_Not_Exceed_100_MB_Of_Memory
    - WRONG: Running10Instances_OfTheService_DoesNotExceed100MBOfMemory
+
+### Version Control
+
+ - never create commits without the owner's explicit approval
+   - request approval once per session to create commits on the owner's behalf
+   - if a request to create commits was denied, don't ask again in the same session; the owner may still grant approval later in the session without being asked to do so
+
+ - if approval to create commits was granted, always use imperative Start Case for the commit message
+     - RIGHT: Update Connection String
+     - WRONG: updated connection string
+
+ - if approval to create commits was granted, never attribute yourself or another non-human anywhere in the commit
+
+ - if approval to create commits was granted, commits should always be atomic and self-descriptive; no commit description is necessary unless the commit is a merge commit
+   - if the commit is a merge commit, the commit description should be a one paragraph summary of the commits, not longer than a few sentences
+     - if there are valid reasons for which an exception should be made when writing a merge commit description, always seek the owners approval to make the exception
