@@ -71,6 +71,10 @@
  - never create comments or XML documentation with technical details which can cause a risk of drift
    - RIGHT: "Tests For The TCP Service"
    - WRONG: "Tests For The TCP Service Running On Port 12321"
+   
+ - always use Oxford commas in enumerations of three or more elements
+   - RIGHT: this thing, that thing, and the other thing
+   - WRONG: this thing, that thing and the other thing
 
 ### Code Generation
 
