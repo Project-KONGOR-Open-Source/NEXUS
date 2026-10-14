@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <OutputType>exe</OutputType>
+        <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled> <!-- Serves No Static Web Assets; The SDK-Generated Ones Would Otherwise Leak Into Referencing Web Projects And Break Their Build -->
     </PropertyGroup>
 
     <ItemGroup>
