@@ -4,11 +4,17 @@
         <OutputType>exe</OutputType>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <!-- INFO: The Problem Is That The .NET 11 RC2 SDK Generates "dotnet watch" Browser Assets For Every Web SDK Project And Exposes Them To Referencing Web Projects, Which Then Fail To Build Because Of Duplicate Asset Routes; This Project Serves No Static Web Assets, So Disabling Them Is Safe -->
+        <!-- TODO: Look Into This Again Once .NET 11 Releases, And Remove This Workaround If The SDK No Longer Exposes These Assets To Referencing Projects -->
+        <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.6.1" />
         <PackageReference Include="PhpSerializerNET" Version="2.1.2" />
         <PackageReference Include="srp" Version="1.0.7" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.0" />
     </ItemGroup>
 
     <ItemGroup>

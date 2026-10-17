@@ -52,7 +52,7 @@ public sealed class AutoConnectChatChannelTests(KONGORIntegrationWebApplicationF
 
         using (Assert.Multiple())
         {
-            await Assert.That(body["add_room"]).IsEqualTo(false);
+            await Assert.That(body["add_room"]).IsTypeOf<bool>().And.IsFalse();
             await Assert.That(body.ContainsKey("error")).IsTrue();
             await Assert.That(await LoadAutoConnectChatChannels(accountID)).IsEmpty();
         }
@@ -105,7 +105,7 @@ public sealed class AutoConnectChatChannelTests(KONGORIntegrationWebApplicationF
 
         using (Assert.Multiple())
         {
-            await Assert.That(body["add_room"]).IsEqualTo(false);
+            await Assert.That(body["add_room"]).IsTypeOf<bool>().And.IsFalse();
             await Assert.That(body.ContainsKey("error")).IsTrue();
             await Assert.That(await LoadAutoConnectChatChannels(accountID)).IsEquivalentTo(savedChannels);
         }
@@ -193,7 +193,7 @@ public sealed class AutoConnectChatChannelTests(KONGORIntegrationWebApplicationF
 
         using (Assert.Multiple())
         {
-            await Assert.That(body["remove_room"]).IsEqualTo(false);
+            await Assert.That(body["remove_room"]).IsTypeOf<bool>().And.IsFalse();
             await Assert.That(body.ContainsKey("error")).IsTrue();
         }
     }
