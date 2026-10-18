@@ -177,6 +177,16 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
+    public async Task Copy_On_Write_Master_Authentication_Without_A_Registered_Manager_Is_Rejected()
+    {
+        await InitialiseIn("Development");
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+    }
+
+    [Test]
     public async Task Copy_On_Write_Master_Authentication_With_An_Incorrect_Password_Is_Rejected()
     {
         await InitialiseIn("Development");
@@ -200,6 +210,8 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     public async Task Copy_On_Write_Master_Heartbeat_Is_Accepted_Without_Registering_A_Match_Server()
     {
         await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
 
         HttpResponseMessage authenticationResponse = await AuthenticateServer($"{DedicatedHostAccountName}:");
 

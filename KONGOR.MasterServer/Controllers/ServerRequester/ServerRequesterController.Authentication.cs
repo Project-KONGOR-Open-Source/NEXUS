@@ -168,9 +168,15 @@ public partial class ServerRequesterController
             return Unauthorized($@"The Built-In ""{OOTB.Accounts.OPERATOR.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
         }
 
+        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
+
         // The Copy-On-Write Master Needs A Session To Finish Starting Up, But It Never Hosts A Match, So It Is Not Registered As A Joinable Match Server; Each Match Server Forked From It Authenticates With Its Own Server Instance
         if (isCopyOnWriteMaster)
         {
+            // Only A Match Server Manager Starts A Copy-On-Write Master, After Authenticating With The Same Host Account, So Without A Registered Manager The Empty Server Instance Comes From A Misconfigured Match Server; A Copy-On-Write Master Which Races Ahead Of Its Manager Retries Until The Manager Is Registered
+            if (matchServerManager is null)
+                return BadRequest($@"Missing Server Instance In Form Parameter ""login"": A Match Server Needs An Instance Number After The Colon, For Example ""{hostAccountName}:1""; An Empty Server Instance Is Reserved For The Copy-On-Write Master Of A Registered Match Server Manager");
+
             string copyOnWriteMasterSessionCookie = Guid.CreateVersion7().ToString();
 
             await DistributedCache.SetCopyOnWriteMasterSessionCookie(hostAccountName, copyOnWriteMasterSessionCookie);
@@ -180,8 +186,6 @@ public partial class ServerRequesterController
 
             return Ok(ServerAuthenticationResponse(copyOnWriteMasterSessionCookie, serverIdentifier.GetDeterministicInt32Hash()));
         }
-
-        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
         MatchServer matchServer = new ()
         {
