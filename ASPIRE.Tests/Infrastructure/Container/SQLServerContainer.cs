@@ -52,6 +52,7 @@ public sealed class SQLServerContainer : IAsyncDisposable
     /// <summary>
     ///     Starts the SQL Server container if it has not already been started.
     ///     Idempotent and thread-safe: concurrent callers will await the same startup work.
+    ///     A container that exits during startup is replaced with a fresh one, up to a bounded number of attempts.
     /// </summary>
     public async Task StartAsync()
     {
@@ -62,13 +63,29 @@ public sealed class SQLServerContainer : IAsyncDisposable
                 return;
             }
 
-            MsSqlBuilder builder = new MsSqlBuilder(image: Image)
-                .WithPassword(Password)
-                .WithDockerEndpoint(DockerEndpointResolver.GetDockerEndpoint());
+            int maximumAttempts = 3;
 
-            Self = builder.Build();
+            for (int attempt = 1; attempt <= maximumAttempts; attempt++)
+            {
+                MsSqlBuilder builder = new MsSqlBuilder(image: Image)
+                    .WithPassword(Password)
+                    .WithDockerEndpoint(DockerEndpointResolver.GetDockerEndpoint());
 
-            await Self.StartAsync();
+                Self = builder.Build();
+
+                try
+                {
+                    await Self.StartAsync();
+
+                    break;
+                }
+
+                // SQL Server 2025 Intermittently Crashes While Starting Up, So A Container That Exits Before Becoming Ready Is Replaced With A Fresh One: https://github.com/microsoft/mssql-docker/issues/974
+                catch (ContainerNotRunningException) when (attempt < maximumAttempts)
+                {
+                    await Self.DisposeAsync();
+                }
+            }
         }
     }
 
