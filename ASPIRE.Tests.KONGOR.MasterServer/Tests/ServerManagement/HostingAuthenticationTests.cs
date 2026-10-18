@@ -9,6 +9,8 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 {
     private const string DedicatedHostAccountName = "DEDICATED-HOST";
 
+    private const string NonHostAccountName = "NON-HOST";
+
     private const string HostPassword = "HOST-PASSWORD";
 
     [Test]
@@ -231,6 +233,63 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
+    public async Task Non_Host_Account_Copy_On_Write_Master_Authentication_Is_Rejected()
+    {
+        await InitialiseIn("Development");
+
+        HttpResponseMessage response = await AuthenticateServer($"{NonHostAccountName}:");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+    }
+
+    [Test]
+    public async Task Copy_On_Write_Master_Session_Is_Rejected_By_Match_Server_Endpoints()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage authenticationResponse = await AuthenticateServer($"{DedicatedHostAccountName}:");
+
+        await Assert.That(authenticationResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        string session = (string) (await DeserialisePHPResponse(authenticationResponse))["session"];
+
+        HttpResponseMessage acceptKeyResponse = await SendServerRequest("accept_key", new () { { "session", session }, { "acc_key", "ACCOUNT-KEY" } });
+
+        HttpResponseMessage matchStartResponse = await SendServerRequest("start_game", new () { { "session", session } });
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(acceptKeyResponse.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(matchStartResponse.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+        }
+    }
+
+    [Test]
+    public async Task A_Second_Copy_On_Write_Master_Authentication_Replaces_The_First_Session()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        string firstSession = (string) (await DeserialisePHPResponse(await AuthenticateServer($"{DedicatedHostAccountName}:")))["session"];
+
+        string secondSession = (string) (await DeserialisePHPResponse(await AuthenticateServer($"{DedicatedHostAccountName}:")))["session"];
+
+        HttpResponseMessage firstHeartbeatResponse = await SendHeartbeat(firstSession);
+
+        HttpResponseMessage secondHeartbeatResponse = await SendHeartbeat(secondSession);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(secondSession).IsNotEqualTo(firstSession);
+            await Assert.That(firstHeartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(secondHeartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        }
+    }
+
+    [Test]
     public async Task Removing_The_Manager_Removes_Its_Copy_On_Write_Master_Session()
     {
         await InitialiseIn("Development");
@@ -272,8 +331,9 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     {
         await webApplicationFactory.WithEnvironment(environment).WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
-        await EnsureHostAccountExists(OOTB.Accounts.OPERATOR.Name, OOTB.Accounts.OPERATOR.EmailAddress);
-        await EnsureHostAccountExists(DedicatedHostAccountName, "dedicated-host@kongor.test");
+        await EnsureAccountExists(OOTB.Accounts.OPERATOR.Name, OOTB.Accounts.OPERATOR.EmailAddress, AccountType.ServerHost);
+        await EnsureAccountExists(DedicatedHostAccountName, "dedicated-host@kongor.test", AccountType.ServerHost);
+        await EnsureAccountExists(NonHostAccountName, "non-host@kongor.test", AccountType.Normal);
     }
 
     private async Task<HttpResponseMessage> AuthenticateManager(string login)
@@ -335,6 +395,15 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         return await httpClient.PostAsync("server_requester.php?f=set_online", new FormUrlEncodedContent(formData));
     }
 
+    private async Task<HttpResponseMessage> SendServerRequest(string function, Dictionary<string, string> formData)
+    {
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        return await httpClient.PostAsync($"server_requester.php?f={function}", new FormUrlEncodedContent(formData));
+    }
+
     private static async Task<IDictionary<object, object>> DeserialisePHPResponse(HttpResponseMessage response)
     {
         string body = await response.Content.ReadAsStringAsync();
@@ -350,7 +419,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     private static string ComputeServerPasswordHash(string password)
         => Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower();
 
-    private async Task EnsureHostAccountExists(string accountName, string emailAddress)
+    private async Task EnsureAccountExists(string accountName, string emailAddress, AccountType accountType)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -377,7 +446,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         {
             Name = accountName,
             User = user,
-            Type = AccountType.ServerHost,
+            Type = accountType,
             IsMain = true
         };
 
