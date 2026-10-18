@@ -193,6 +193,25 @@ public static partial class DistributedCacheExtensions
         }
     }
 
+    private const string CopyOnWriteMasterSessionCookiesKey = "COPY-ON-WRITE-MASTER-SESSION-COOKIES";
+
+    /// <summary>
+    ///     Stores the session cookie of the copy-on-write master (HON's "cowmaster") which a Linux match server manager forks its match servers from.
+    ///     A match server manager runs a single copy-on-write master, so the session cookie is keyed by the host account name and replaces any previous one.
+    /// </summary>
+    public static async Task SetCopyOnWriteMasterSessionCookie(this IDatabase distributedCacheStore, string hostAccountName, string sessionCookie)
+        => await distributedCacheStore.HashSetAsync(CopyOnWriteMasterSessionCookiesKey, [new HashEntry(hostAccountName, sessionCookie)]);
+
+    /// <summary>
+    ///     Returns <see langword="true"/> if the session cookie belongs to the copy-on-write master of any host account.
+    /// </summary>
+    public static async Task<bool> IsCopyOnWriteMasterSessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    {
+        HashEntry[] copyOnWriteMasterSessionCookies = await distributedCacheStore.HashGetAllAsync(CopyOnWriteMasterSessionCookiesKey);
+
+        return copyOnWriteMasterSessionCookies.Any(entry => entry.Value.ToString().Equals(sessionCookie));
+    }
+
     private static string ConstructMatchInformationKey(int matchID) => $@"MATCH-INFORMATION:[""{matchID}""]";
 
     /// <summary>

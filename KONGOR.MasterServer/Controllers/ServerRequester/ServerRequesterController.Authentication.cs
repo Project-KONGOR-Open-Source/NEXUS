@@ -99,6 +99,12 @@ public partial class ServerRequesterController
         string hostAccountName = serverIdentifier.Split(':').First();
         string serverInstance = serverIdentifier.Split(':').Last();
 
+        // Linux Match Server Managers Start A Copy-On-Write Master (HON's "cowmaster") Which Authenticates With An Empty Server Instance, And Then Fork Every Match Server From It
+        bool isCopyOnWriteMaster = serverInstance.Length is 0;
+
+        if (isCopyOnWriteMaster is false && int.TryParse(serverInstance, out _) is false)
+            return BadRequest($@"Invalid Server Instance ""{serverInstance}"" In Form Parameter ""login"": Expected An Integer, Or An Empty Server Instance For A Copy-On-Write Master");
+
         string? accountPasswordHash = Request.Form["pass"];
 
         if (accountPasswordHash is null) 
@@ -154,6 +160,19 @@ public partial class ServerRequesterController
             return Unauthorized($@"The Built-In ""{OOTB.Accounts.OPERATOR.Name}"" Account Cannot Host On The Production Server; Create A Dedicated Host Account");
         }
 
+        // The Copy-On-Write Master Needs A Session To Finish Starting Up, But It Never Hosts A Match, So It Is Not Registered As A Joinable Match Server; Each Match Server Forked From It Authenticates With Its Own Server Instance
+        if (isCopyOnWriteMaster)
+        {
+            string copyOnWriteMasterSessionCookie = Guid.CreateVersion7().ToString();
+
+            await DistributedCache.SetCopyOnWriteMasterSessionCookie(hostAccountName, copyOnWriteMasterSessionCookie);
+
+            Logger.LogInformation(@"Copy-On-Write Master For Host Account ""{HostAccountName}"" Was Authenticated At ""{CopyOnWriteMasterAddress}"" With Cookie ""{CopyOnWriteMasterCookie}""",
+                account.Name, serverIPAddress, copyOnWriteMasterSessionCookie);
+
+            return Ok(ServerAuthenticationResponse(copyOnWriteMasterSessionCookie, serverIdentifier.GetDeterministicInt32Hash()));
+        }
+
         MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
         MatchServer matchServer = new ()
@@ -182,6 +201,17 @@ public partial class ServerRequesterController
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
         // INFO: The Server Manager Doesn't Send Descriptions, So Use Name Instead Since We Can Override Them Anyway Via Remote Command (svr_name) On TCP Handshake
 
+        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
+            matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
+
+        return Ok(ServerAuthenticationResponse(matchServer.Cookie, matchServer.ID));
+    }
+
+    /// <summary>
+    ///     Builds the "new_session" response, which gives a match server, or a copy-on-write master, its session cookie, its server ID, and the chat server to connect to.
+    /// </summary>
+    private static string ServerAuthenticationResponse(string sessionCookie, int serverID)
+    {
         string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
             ?? throw new NullReferenceException("Chat Server Host Is NULL");
 
@@ -190,17 +220,14 @@ public partial class ServerRequesterController
 
         Dictionary<string, object> response = new ()
         {
-            ["session"] = matchServer.Cookie,
-            ["server_id"] = matchServer.ID,
+            ["session"] = sessionCookie,
+            ["server_id"] = serverID,
             ["chat_address"] = chatServerHost,
             ["chat_port"] = chatServerMatchServerConnectionsPort,
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
-            matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
-
-        return Ok(PhpSerialization.Serialize(response));
+        return PhpSerialization.Serialize(response);
     }
 
     private async Task<IActionResult> HandleConnectClient()
@@ -361,7 +388,13 @@ public partial class ServerRequesterController
         MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 
         if (matchServer is null)
+        {
+            // The Copy-On-Write Master Sends Heartbeats Too, But It Is Not A Match Server, So There Is No Match Server State To Update
+            if (await DistributedCache.IsCopyOnWriteMasterSessionCookie(session))
+                return Ok();
+
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
+        }
 
         matchServer.Status = (ServerStatus) int.Parse(connectionState);
 
