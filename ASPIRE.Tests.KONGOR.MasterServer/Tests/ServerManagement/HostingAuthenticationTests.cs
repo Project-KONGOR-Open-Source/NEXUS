@@ -92,6 +92,9 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     [Arguments("-1")]
     [Arguments("+1")]
     [Arguments(" 1")]
+    [Arguments("01")]
+    [Arguments("001")]
+    [Arguments("12345678901")]
     public async Task Server_Authentication_With_A_Malformed_Instance_Is_Rejected(string serverInstance)
     {
         await InitialiseIn("Development");
@@ -132,6 +135,8 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     [Arguments(" 11235")]
     [Arguments("0")]
     [Arguments("65536")]
+    [Arguments("011235")]
+    [Arguments("")]
     public async Task Server_Authentication_With_A_Malformed_Port_Is_Rejected(string port)
     {
         await InitialiseIn("Development");
@@ -145,6 +150,37 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
             await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
         }
+    }
+
+    [Test]
+    [Arguments("2147483647", 2147483647)]
+    public async Task Server_Authentication_With_The_Largest_Instance_Registers_A_Match_Server(string serverInstance, int expectedInstance)
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:{serverInstance}");
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That((await distributedCache.GetMatchServers()).Single().Instance).IsEqualTo(expectedInstance);
+        }
+    }
+
+    [Test]
+    public async Task Server_Authentication_With_The_Largest_Port_Registers_A_Match_Server()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", port: "65535");
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
     }
 
     [Test]

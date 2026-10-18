@@ -104,11 +104,11 @@ public partial class ServerRequesterController
         // Linux Match Server Managers Start A Copy-On-Write Master (HON's "cowmaster") Which Authenticates With An Empty Server Instance, And Then Fork Every Match Server From It
         bool isCopyOnWriteMaster = serverInstance.Length is 0;
 
-        // Match Server Managers Number Their Match Servers From One, So Zero Is Not A Valid Server Instance
-        bool serverInstanceIsValid = int.TryParse(serverInstance, NumberStyles.None, CultureInfo.InvariantCulture, out int serverInstanceNumber) && serverInstanceNumber > 0;
+        // Match Server Managers Number Their Match Servers From One Without Padding, So Zero And Zero-Padded Numbers Are Not Valid Server Instances, And The Server ID Is Derived From The Raw Login
+        bool serverInstanceIsValid = int.TryParse(serverInstance, NumberStyles.None, CultureInfo.InvariantCulture, out int serverInstanceNumber) && serverInstanceNumber > 0 && serverInstance.StartsWith('0') is false;
 
         if (isCopyOnWriteMaster is false && serverInstanceIsValid is false)
-            return BadRequest($@"Invalid Server Instance ""{serverInstance}"" In Form Parameter ""login"": Expected A Positive Integer, Or An Empty Server Instance For A Copy-On-Write Master");
+            return BadRequest($@"Invalid Server Instance ""{serverInstance}"" In Form Parameter ""login"": Expected A Positive Integer Without Leading Zeros, Or An Empty Server Instance For A Copy-On-Write Master");
 
         string? accountPasswordHash = Request.Form["pass"];
 
@@ -120,8 +120,8 @@ public partial class ServerRequesterController
         if (serverPort is null)
             return BadRequest(@"Missing Value For Form Parameter ""port""");
 
-        if (ushort.TryParse(serverPort, NumberStyles.None, CultureInfo.InvariantCulture, out ushort serverPortNumber) is false || serverPortNumber is 0)
-            return BadRequest($@"Invalid Value ""{serverPort}"" For Form Parameter ""port"": Expected A Port Number Between 1 And 65535");
+        if (ushort.TryParse(serverPort, NumberStyles.None, CultureInfo.InvariantCulture, out ushort serverPortNumber) is false || serverPortNumber is 0 || serverPort.StartsWith('0'))
+            return BadRequest($@"Invalid Value ""{serverPort}"" For Form Parameter ""port"": Expected A Port Number Between 1 And 65535 Without Leading Zeros");
 
         string? serverName = Request.Form["name"];
 
