@@ -39,7 +39,7 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
         {
             try
             {
-                await Sweep();
+                await Sweep(DateTimeOffset.UtcNow);
             }
 
             catch (Exception exception)
@@ -51,10 +51,11 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
         }
     }
 
-    private async Task Sweep()
+    /// <summary>
+    ///     Terminates the zombie match server sessions, and reaps the cached hosts which have had no live chat session for longer than the grace period, as of the given instant.
+    /// </summary>
+    internal async Task Sweep(DateTimeOffset now)
     {
-        DateTimeOffset now = DateTimeOffset.UtcNow;
-
         // Terminate Zombie Match Server Sessions Before Reconciling: A Hung Match Server Whose Socket Is Still Open Keeps Its Chat Session In The Pool (So It Is Never Reaped As Absent) But Has Stopped Sending Status Updates, So It Is Perpetually Skipped On Matchmaking Selection As Stale And Lingers As A Dead-But-Present Entry That Can Never Host A Match Until Its Socket Eventually Drops
         // Doing So, Removes The Zombie Match Server Session From The In-Memory Match Server Pool And From The Distributed Cache, So The Stale Server Is No Longer Considered As A Candidate For Matchmaking And Is Forced To Reconnect To The Chat Server And Re-Establish A Fresh Session Before It Can Host Again, Which Is The Only Way To Recover From A Hung State
         foreach (MatchServerChatSession zombieMatchServerSession in Context.MatchServerChatSessions.Values.Where(session => session.Metadata is not null && TCPSessionIsStale(session.Metadata.LastStatusUpdate, now, MatchServerSessionStaleStateThreshold)).ToList())

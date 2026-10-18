@@ -231,6 +231,34 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
+    public async Task Removing_The_Manager_Removes_Its_Copy_On_Write_Master_Session()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage authenticationResponse = await AuthenticateServer($"{DedicatedHostAccountName}:");
+
+        await Assert.That(authenticationResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        string session = (string) (await DeserialisePHPResponse(authenticationResponse))["session"];
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        MatchServerManager matchServerManager = (await distributedCache.GetMatchServerManagersByAccountName(DedicatedHostAccountName)).Single();
+
+        await distributedCache.RemoveMatchServerManagerByID(matchServerManager.ID);
+
+        HttpResponseMessage heartbeatResponse = await SendHeartbeat(session);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(await distributedCache.IsCopyOnWriteMasterSessionCookie(session)).IsFalse();
+            await Assert.That(heartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+        }
+    }
+
+    [Test]
     public async Task Heartbeat_With_An_Unrecognised_Session_Is_Rejected()
     {
         await InitialiseIn("Development");

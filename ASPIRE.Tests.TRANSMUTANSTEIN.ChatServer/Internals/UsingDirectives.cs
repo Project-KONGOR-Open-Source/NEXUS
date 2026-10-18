@@ -28,6 +28,7 @@ global using StackExchange.Redis;
 
 global using ASPIRE.Common;
 global using ASPIRE.Common.Constants;
+global using ASPIRE.Common.Extensions.Cryptography;
 
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Relational;

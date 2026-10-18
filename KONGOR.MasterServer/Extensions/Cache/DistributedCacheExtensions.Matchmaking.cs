@@ -91,6 +91,10 @@ public static partial class DistributedCacheExtensions
         // Remove Only The Manager's Own Cache Entry; Its Match Servers Are Independent Hosts With Their Own Chat Sessions, And Are Reaped On Their Own Liveness (Sessionless Past The Grace Period, Or A Stale Status Heartbeat)
         // A Manager Going Away Must Not Tear Down Its Still-Live Servers, Which Would Otherwise Interrupt In-Progress Matches Whenever The Manager Merely Reconnects After A Transient Disconnect
         await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, matchServerManager.HostAccountName);
+
+        // Unlike The Match Servers, The Copy-On-Write Master Is Not An Independent Host: Only Its Manager Starts It, It Never Hosts A Match, And It Is Only Accepted While Its Manager Is Registered, So Its Session Is Removed With The Manager
+        // Managers And Copy-On-Write Master Sessions Are Both Keyed By Host Account, So The Manager Removed Here Is Always The Last One Registered For That Host Account
+        await distributedCacheStore.HashDeleteAsync(CopyOnWriteMasterSessionCookiesKey, matchServerManager.HostAccountName);
     }
 
     private const string MatchServersKey = "MATCH-SERVERS";
@@ -198,6 +202,7 @@ public static partial class DistributedCacheExtensions
     /// <summary>
     ///     Stores the session cookie of the copy-on-write master (HON's "cowmaster") which a Linux match server manager forks its match servers from.
     ///     A match server manager runs a single copy-on-write master, so the session cookie is keyed by the host account name and replaces any previous one.
+    ///     The session cookie is removed with the match server manager, by <see cref="RemoveMatchServerManagerByID"/>.
     /// </summary>
     public static async Task SetCopyOnWriteMasterSessionCookie(this IDatabase distributedCacheStore, string hostAccountName, string sessionCookie)
         => await distributedCacheStore.HashSetAsync(CopyOnWriteMasterSessionCookiesKey, [new HashEntry(hostAccountName, sessionCookie)]);

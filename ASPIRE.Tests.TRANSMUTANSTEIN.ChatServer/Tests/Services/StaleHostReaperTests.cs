@@ -2,8 +2,9 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Services;
 
 /// <summary>
 ///     Tests for the reconciliation logic that decides which cached hosts the stale host reaper removes.
+///     Also tests that reaping a match server manager removes the session cookie of its copy-on-write master.
 /// </summary>
-public sealed class StaleHostReaperTests
+public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicationFactory webApplicationFactory)
 {
     private static readonly DateTimeOffset Now = DateTimeOffset.UnixEpoch.AddDays(1);
 
@@ -106,5 +107,41 @@ public sealed class StaleHostReaperTests
     public async Task A_Session_Beyond_The_Stale_Threshold_Is_Stale()
     {
         await Assert.That(StaleHostReaper.TCPSessionIsStale(Now - TimeSpan.FromSeconds(176), Now, TimeSpan.FromSeconds(175))).IsTrue();
+    }
+
+    [Test]
+    public async Task Reaping_A_Match_Server_Manager_Removes_Its_Copy_On_Write_Master_Session()
+    {
+        await webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        const string hostAccountName = "REAPED-HOST";
+
+        MatchServerManager matchServerManager = new ()
+        {
+            HostAccountID = 1,
+            HostAccountName = hostAccountName,
+            ID = hostAccountName.GetDeterministicInt32Hash(),
+            MatchServerIDs = [],
+            IPAddress = "127.0.0.1"
+        };
+
+        string copyOnWriteMasterSessionCookie = Guid.CreateVersion7().ToString();
+
+        await distributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
+        await distributedCache.SetCopyOnWriteMasterSessionCookie(hostAccountName, copyOnWriteMasterSessionCookie);
+
+        StaleHostReaper staleHostReaper = new (distributedCache, NullLogger<StaleHostReaper>.Instance);
+
+        // The Manager Has No Live Chat Session, So The First Sweep Marks It As Missing And The Sweep After The Grace Period Reaps It
+        await staleHostReaper.Sweep(Now);
+        await staleHostReaper.Sweep(Now + GracePeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(await distributedCache.GetMatchServerManagerByID(matchServerManager.ID)).IsNull();
+            await Assert.That(await distributedCache.IsCopyOnWriteMasterSessionCookie(copyOnWriteMasterSessionCookie)).IsFalse();
+        }
     }
 }
