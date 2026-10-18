@@ -93,27 +93,35 @@ public partial class ServerRequesterController
     {
         string serverIdentifier = Request.Form["login"].ToString();
 
-        if (serverIdentifier.Split(':').Length is not 2)
+        string[] serverIdentifierComponents = serverIdentifier.Split(':');
+
+        if (serverIdentifierComponents.Length is not 2)
             return BadRequest(@"Missing Or Incorrect Value For Form Parameter ""login""");
 
-        string hostAccountName = serverIdentifier.Split(':').First();
-        string serverInstance = serverIdentifier.Split(':').Last();
+        string hostAccountName = serverIdentifierComponents[0];
+        string serverInstance = serverIdentifierComponents[1];
 
         // Linux Match Server Managers Start A Copy-On-Write Master (HON's "cowmaster") Which Authenticates With An Empty Server Instance, And Then Fork Every Match Server From It
         bool isCopyOnWriteMaster = serverInstance.Length is 0;
 
-        if (isCopyOnWriteMaster is false && int.TryParse(serverInstance, out _) is false)
-            return BadRequest($@"Invalid Server Instance ""{serverInstance}"" In Form Parameter ""login"": Expected An Integer, Or An Empty Server Instance For A Copy-On-Write Master");
+        // Match Server Managers Number Their Match Servers From One, So Zero Is Not A Valid Server Instance
+        bool serverInstanceIsValid = int.TryParse(serverInstance, NumberStyles.None, CultureInfo.InvariantCulture, out int serverInstanceNumber) && serverInstanceNumber > 0;
+
+        if (isCopyOnWriteMaster is false && serverInstanceIsValid is false)
+            return BadRequest($@"Invalid Server Instance ""{serverInstance}"" In Form Parameter ""login"": Expected A Positive Integer, Or An Empty Server Instance For A Copy-On-Write Master");
 
         string? accountPasswordHash = Request.Form["pass"];
 
-        if (accountPasswordHash is null) 
+        if (accountPasswordHash is null)
             return BadRequest(@"Missing Value For Form Parameter ""pass""");
 
         string? serverPort = Request.Form["port"];
 
         if (serverPort is null)
             return BadRequest(@"Missing Value For Form Parameter ""port""");
+
+        if (ushort.TryParse(serverPort, NumberStyles.None, CultureInfo.InvariantCulture, out ushort serverPortNumber) is false || serverPortNumber is 0)
+            return BadRequest($@"Invalid Value ""{serverPort}"" For Form Parameter ""port"": Expected A Port Number Between 1 And 65535");
 
         string? serverName = Request.Form["name"];
 
@@ -182,9 +190,9 @@ public partial class ServerRequesterController
             ID = serverIdentifier.GetDeterministicInt32Hash(),
             Name = serverName,
             MatchServerManagerID = matchServerManager?.ID,
-            Instance = int.Parse(serverInstance),
+            Instance = serverInstanceNumber,
             IPAddress = serverIPAddress,
-            Port = int.Parse(serverPort),
+            Port = serverPortNumber,
             Location = serverLocation,
             Description = serverDescription
         };

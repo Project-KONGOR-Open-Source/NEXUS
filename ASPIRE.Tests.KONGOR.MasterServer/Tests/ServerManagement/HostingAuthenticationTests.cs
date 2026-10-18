@@ -86,11 +86,55 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     [Test]
     [Arguments("abc")]
     [Arguments("1.5")]
+    [Arguments(":1")]
+    [Arguments("-1")]
+    [Arguments("+1")]
+    [Arguments(" 1")]
     public async Task Server_Authentication_With_A_Malformed_Instance_Is_Rejected(string serverInstance)
     {
         await InitialiseIn("Development");
 
         HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:{serverInstance}");
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+            await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
+        }
+    }
+
+    [Test]
+    public async Task Server_Authentication_With_Instance_0_Is_Rejected()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:0");
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+            await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
+        }
+    }
+
+    [Test]
+    [Arguments("abc")]
+    [Arguments("-11235")]
+    [Arguments("+11235")]
+    [Arguments(" 11235")]
+    [Arguments("0")]
+    [Arguments("65536")]
+    public async Task Server_Authentication_With_A_Malformed_Port_Is_Rejected(string port)
+    {
+        await InitialiseIn("Development");
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", port: port);
 
         IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
 
@@ -207,7 +251,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         return await httpClient.PostAsync("server_requester.php?f=replay_auth", new FormUrlEncodedContent(formData));
     }
 
-    private async Task<HttpResponseMessage> AuthenticateServer(string login, string password = HostPassword)
+    private async Task<HttpResponseMessage> AuthenticateServer(string login, string password = HostPassword, string port = "11235")
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
@@ -217,7 +261,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         {
             { "login", login },
             { "pass", ComputeServerPasswordHash(password) },
-            { "port", "11235" },
+            { "port", port },
             { "name", "TEST-SERVER" },
             { "desc", "Test Server" },
             { "location", "EU" },
