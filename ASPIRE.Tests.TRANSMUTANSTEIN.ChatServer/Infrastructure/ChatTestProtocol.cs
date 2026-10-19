@@ -185,6 +185,19 @@ internal static class ChatTestProtocol
         return buffer;
     }
 
+    public static ChatBuffer BuildAnnounceMatch(int correlationID, int matchID)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_ANNOUNCE_MATCH);
+        buffer.WriteInt32(correlationID);
+        buffer.WriteInt32(0);       // Challenge
+        buffer.WriteInt32(0);       // Group Count
+        buffer.WriteInt32(matchID);
+
+        return buffer;
+    }
+
     public static ChatBuffer BuildWhisper(string targetName, string message)
     {
         ChatBuffer buffer = new ();

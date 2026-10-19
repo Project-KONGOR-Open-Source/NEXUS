@@ -111,6 +111,14 @@ public class MatchmakingMatch
     };
 
     /// <summary>
+    ///     The queue type partition of this match, which is co-op for a bot match and otherwise follows the game type.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">
+    ///     Thrown when the game type does not correspond to a queue type partition.
+    /// </exception>
+    public QueueType QueueType => MatchmakingService.GetQueueTypePartition(IsBotMatch ? ChatProtocol.TMMType.TMM_TYPE_COOP : ChatProtocol.TMMType.TMM_TYPE_PVP, GameType);
+
+    /// <summary>
     ///     The ID of the assigned game server, if any.
     /// </summary>
     public int? AssignedServerID { get; set; }
@@ -136,6 +144,12 @@ public class MatchmakingMatch
     public MatchmakingMatchState State { get; set; } = MatchmakingMatchState.Created;
 
     /// <summary>
+    ///     The players committed to the match server when the match was created, which no later change to the groups alters, so that a player who leaves their group or the chat server before the match is announced is still locked to it.
+    ///     Empty until <see cref="CommitRoster"/> is called.
+    /// </summary>
+    public IReadOnlyList<MatchmakingGroupMember> CommittedRoster { get; private set; } = [];
+
+    /// <summary>
     ///     The team size for this match, validated to be consistent across all teams.
     /// </summary>
     public int TeamSize => GetAllTeams().Select(team => team.TeamSize).Distinct().Single();
@@ -151,6 +165,12 @@ public class MatchmakingMatch
     /// </summary>
     public IEnumerable<MatchmakingGroupMember> GetAllPlayers()
         => GetAllTeams().SelectMany(team => team.GetAllMembers());
+
+    /// <summary>
+    ///     Snapshots the players into <see cref="CommittedRoster"/> as they are committed to the match server.
+    /// </summary>
+    public void CommitRoster()
+        => CommittedRoster = [.. GetAllPlayers()];
 
     /// <summary>
     ///     Gets all groups in this match from both teams.

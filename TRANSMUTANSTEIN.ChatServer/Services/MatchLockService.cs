@@ -1,7 +1,7 @@
 namespace TRANSMUTANSTEIN.ChatServer.Services;
 
 /// <summary>
-///     Decides whether a match lock still holds before its player is sent back to the locked match, and lifts the lock when it does not.
+///     Locks the players of a competitive matchmade match to it, decides whether a match lock still holds before its player is sent back to the locked match, and lifts the lock when it does not.
 ///     A lock holds only while its match server is registered and alive, still hosts the locked match, and can still seat the player, so that nobody is ever sent to a dead server, a finished match, or an unreclaimable slot.
 /// </summary>
 public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconnectQuery reconnectQuery, ILogger<MatchLockService> logger)
@@ -11,6 +11,47 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     ///     An ID is removed when its match server next answers, so that the match server is logged again if it becomes unreachable again.
     /// </summary>
     private ConcurrentDictionary<int, byte> UnreachableServerIDs { get; } = [];
+
+    /// <summary>
+    ///     Locks every committed player of a competitive matchmade match (Caldavar, MidWars, or RiftWars) to the match which its match server has announced.
+    ///     A co-op match locks nobody, and a guest or staff account is never locked.
+    /// </summary>
+    public async Task LockMatchRoster(MatchmakingMatch match, int matchID, int serverID, string serverAddress, ushort serverPort)
+    {
+        if (match.QueueType is not (QueueType.Caldavar or QueueType.MidWars or QueueType.RiftWars))
+            return;
+
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        int lockedPlayerCount = 0;
+
+        foreach (MatchmakingGroupMember member in match.CommittedRoster)
+        {
+            // Every Guest Account Shares One User, As Does Every Staff Account, So Locking One Of Them Would Lock All Of Them At Once
+            if (member.Account.Type is AccountType.Guest or AccountType.Staff)
+                continue;
+
+            MatchLock matchLock = new ()
+            {
+                UserID = member.Account.User.ID,
+                AccountID = member.Account.ID,
+                AccountName = member.Account.Name,
+                MatchID = matchID,
+                CorrelationID = match.CorrelationID,
+                ArrangedMatchType = match.ArrangedMatchType,
+                ServerID = serverID,
+                ServerAddress = serverAddress,
+                ServerPort = serverPort,
+                TimestampStarted = now
+            };
+
+            await distributedCacheStore.SetMatchLock(matchLock);
+
+            lockedPlayerCount++;
+        }
+
+        logger.LogInformation(@"Locked {LockedPlayerCount} Player(s) To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""", lockedPlayerCount, matchID, serverID);
+    }
 
     /// <summary>
     ///     Verifies a match lock against its match server, and lifts the lock unless the verdict is <see cref="MatchLockVerdict.SendBack"/>.

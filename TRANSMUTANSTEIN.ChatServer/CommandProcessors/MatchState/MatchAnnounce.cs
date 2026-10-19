@@ -5,7 +5,7 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 ///     This is sent by the game server after it has successfully set up the match.
 /// </summary>
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_ANNOUNCE_MATCH)]
-public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
+public class MatchAnnounce(IDatabase distributedCacheStore, MatchLockService matchLockService) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
     public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
@@ -68,6 +68,10 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
 
         Log.Information(@"Match Spawned: GUID={MatchGUID}, MatchID={MatchID}, Server={MatchServerAddress}:{MatchServerPort}",
             pendingMatch.GUID, requestData.MatchID, serverAddress, serverPort);
+
+        // The Players Are Locked Last, So That A Failure To Write A Lock Cannot Disturb The Announcement
+        // The Locks Hold The Address And Port Which The Players Were Sent, So That A Player Is Sent Back Exactly Where They First Connected
+        await matchLockService.LockMatchRoster(pendingMatch, requestData.MatchID, session.Metadata.ServerID, serverAddress, serverPort);
     }
 
     /// <summary>
