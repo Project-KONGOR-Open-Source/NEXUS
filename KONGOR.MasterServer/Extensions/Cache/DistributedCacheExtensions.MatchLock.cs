@@ -14,6 +14,11 @@ public static partial class DistributedCacheExtensions
     internal static string ConstructMatchLockServerKey(int serverID) => $@"MATCH-LOCK-SERVER:[""{serverID}""]";
 
     /// <summary>
+    ///     Constructs the key of the marker which records that the match lock's login trigger has run for the session cookie of a login.
+    /// </summary>
+    internal static string ConstructMatchLockLoginCheckedKey(string sessionCookie) => $@"MATCH-LOCK-LOGIN-CHECKED:[""{sessionCookie}""]";
+
+    /// <summary>
     ///     Stores the match lock of a user, replacing any previous one, and adds it to the index of its server.
     ///     Both expire when the lock reaches its safety limit, and a lock which is already past it is not stored.
     /// </summary>
@@ -45,6 +50,19 @@ public static partial class DistributedCacheExtensions
         RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructMatchLockKey(userID));
 
         return cachedValue.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MatchLock>(cachedValue.ToString());
+    }
+
+    /// <summary>
+    ///     Marks that the match lock's login trigger has run for the session cookie of a login, so that the chat reconnects of the same login do not run it again.
+    ///     Returns <see langword="true"/> only the first time for a session cookie, and the marker expires with the session cookie, or after <see cref="SessionCookieLifetime"/> when the session cookie's remaining lifetime is unknown.
+    /// </summary>
+    public static async Task<bool> MarkMatchLockLoginChecked(this IDatabase distributedCacheStore, string sessionCookie)
+    {
+        TimeSpan? sessionCookieTimeToLive = await distributedCacheStore.KeyTimeToLiveAsync(ConstructAccountSessionCookieKey(sessionCookie));
+
+        TimeSpan timeToLive = sessionCookieTimeToLive is { } remainingLifetime && remainingLifetime > TimeSpan.Zero ? remainingLifetime : SessionCookieLifetime;
+
+        return await distributedCacheStore.StringSetAsync(ConstructMatchLockLoginCheckedKey(sessionCookie), true, timeToLive, When.NotExists);
     }
 
     /// <summary>

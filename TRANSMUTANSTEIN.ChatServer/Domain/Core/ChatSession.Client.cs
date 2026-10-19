@@ -28,6 +28,23 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
     public HashSet<int> CurrentChannels { get; set; } = [];
 
     /// <summary>
+    ///     Holds <see cref="PendingMatchLockReturn"/>, which is read and replaced from any thread.
+    /// </summary>
+    private MatchLockReturn? PendingReturn;
+
+    /// <summary>
+    ///     The return of this session's player to their locked match which is under way, or <see langword="null"/> when there is none.
+    ///     It is only ever replaced through <see cref="TryReplacePendingMatchLockReturn"/>, and the session's cleanup ends it.
+    /// </summary>
+    public MatchLockReturn? PendingMatchLockReturn => Volatile.Read(ref PendingReturn);
+
+    /// <summary>
+    ///     Whether the client has reported joining a game on this chat connection, and has not reported leaving it since.
+    ///     A game client which is already connected to a match server reports joining it as soon as its chat connection is accepted, before it reports logging in.
+    /// </summary>
+    public bool ReportedJoiningGame { get; set; }
+
+    /// <summary>
     ///     Surfaces the authenticated account's identifier to the base session, so that it can be pushed into the ambient log context while commands are processed.
     /// </summary>
     protected override int? LoggingAccountID => Account?.ID;
@@ -293,6 +310,59 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
     }
 
     /// <summary>
+    ///     Sends the client to the match of a match server, which the game client connects to unless it is already connected to a match server.
+    ///     A reminder repeats an earlier request, and the game client acts on both alike, telling them apart only when it reports which one it acted on.
+    /// </summary>
+    public ClientChatSession SendAutoMatchConnect(MatchType arrangedMatchType, int matchID, string serverAddress, ushort serverPort, bool reminder)
+    {
+        ChatBuffer connect = new ();
+
+        connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT);
+        connect.WriteInt8((byte) arrangedMatchType);       // The Arranged Match Type (0 = None, 1 = Ranked, 2 = Tournament)
+        connect.WriteInt32(matchID);                       // The Match Server's Match ID
+        connect.WriteString(serverAddress);                // The Match Server's IP Address
+        connect.WriteInt16(unchecked((short) serverPort)); // The Match Server's Port, Which The Game Client Reads As Unsigned, So A Port Above The Signed Range Is Reinterpreted Rather Than Rejected
+
+        // A Random Integer To Prevent Routers/Firewalls From Dropping Packets As Duplicates When Multiple Players Share The Same IP Address
+        // A Value Of 0xFFFFFFFF (uint(-1) Which Wraps Around By Overflow) Indicates A Connection Reminder Rather Than The Initial Connection Request
+        connect.WriteInt32(reminder ? -1 : Random.Shared.Next());
+
+        Send(connect);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Sends a notice, which the game client shows as a server message from the given sender.
+    /// </summary>
+    public ClientChatSession SendNotice(string senderName, string message)
+    {
+        ChatBuffer notice = new ();
+
+        notice.WriteCommand(ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
+        notice.WriteString(senderName); // Sender's Name
+        notice.WriteString(message);    // Message Content
+
+        Send(notice);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Replaces the pending return to the locked match with the replacement, but only while the pending return is still the expected one, and cancels the expected return when it is replaced.
+    ///     Returns whether the pending return was replaced.
+    /// </summary>
+    public bool TryReplacePendingMatchLockReturn(MatchLockReturn? expected, MatchLockReturn? replacement)
+    {
+        if (Interlocked.CompareExchange(ref PendingReturn, replacement, expected) != expected)
+            return false;
+
+        expected?.Cancel();
+
+        return true;
+    }
+
+    /// <summary>
     ///     Tracks whether the per-account cleanup performed by <see cref="CleanUpSession"/> has already run for this session.
     ///     Required because both <see cref="Terminate"/> and <see cref="OnDisconnected"/> route through the same cleanup, and only one of them should take effect.
     /// </summary>
@@ -323,6 +393,9 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
 
         // Remove Any Pending Clan Creations Founded By This Account
         PendingClan.Creations.TryRemove(Account.ID, out _);
+
+        // End Any Pending Return To A Locked Match, Which Stops Its Reminders
+        Interlocked.Exchange(ref PendingReturn, null)?.Cancel();
 
         // Send Disconnection Notification To Online Peers (Friends And Clan Members)
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);

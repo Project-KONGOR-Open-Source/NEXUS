@@ -55,7 +55,8 @@ public class MatchAnnounce(IDatabase distributedCacheStore, MatchLockService mat
 
         // Send AutoMatchConnect To All Players
         // MatchFoundUpdate And FoundServerUpdate Were Already Sent From SpawnMatch
-        SendAutoMatchConnect(pendingMatch, requestData.MatchID, serverAddress, serverPort);
+        foreach (MatchmakingGroupMember member in pendingMatch.GetAllPlayers())
+            member.Session.SendAutoMatchConnect(pendingMatch.ArrangedMatchType, requestData.MatchID, serverAddress, serverPort, reminder: false);
 
         // Mark All Members As In-Game
         foreach (MatchmakingGroup group in pendingMatch.GetAllGroups())
@@ -72,29 +73,6 @@ public class MatchAnnounce(IDatabase distributedCacheStore, MatchLockService mat
         // The Players Are Locked Last, So That A Failure To Write A Lock Cannot Disturb The Announcement
         // The Locks Hold The Address And Port Which The Players Were Sent, So That A Player Is Sent Back Exactly Where They First Connected
         await matchLockService.LockMatchRoster(pendingMatch, requestData.MatchID, session.Metadata.ServerID, serverAddress, serverPort);
-    }
-
-    /// <summary>
-    ///     Sends AutoMatchConnect (0x0062) to all players with server connection details.
-    /// </summary>
-    private static void SendAutoMatchConnect(MatchmakingMatch match, int matchID, string serverAddress, ushort serverPort)
-    {
-        byte arrangedMatchType = (byte)match.ArrangedMatchType;
-
-        ChatBuffer connect = new ();
-
-        connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT);
-        connect.WriteInt8(arrangedMatchType);            // The Arranged Match Type (0 = None, 1 = Ranked, 2 = Tournament)
-        connect.WriteInt32(matchID);                     // The Match Server's Match ID
-        connect.WriteString(serverAddress);              // The Match Server's IP Address
-        connect.WriteInt16(Convert.ToInt16(serverPort)); // The Match Server's Port
-
-        // A Random Integer To Prevent Routers/Firewalls From Dropping Packets As Duplicates When Multiple Players Share The Same IP Address
-        // A Value Of 0xFFFFFFFF (uint(-1) Which Wraps Around By Overflow) Indicates A Connection Reminder Rather Than The Initial Connection Request
-        connect.WriteInt32(Random.Shared.Next());
-
-        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
-            member.Session.Send(connect);
     }
 }
 

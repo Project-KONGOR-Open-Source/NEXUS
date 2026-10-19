@@ -3,6 +3,21 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 public class MatchServerChatSession(ConnectionContext connection, IServiceProvider serviceProvider) : ChatSession(connection, serviceProvider)
 {
     /// <summary>
+    ///     The number of times the match server asks the master server to authenticate a connecting client before it refuses the connection, which <see cref="SendOptions"/> sends.
+    /// </summary>
+    internal const int AuthenticationRequestAttempts = 3;
+
+    /// <summary>
+    ///     How long the match server keeps asking the master server to authenticate a connecting client before it refuses the connection, which <see cref="SendOptions"/> sends.
+    /// </summary>
+    internal const int AuthenticationRequestTotalTimeoutMilliseconds = 30000;
+
+    /// <summary>
+    ///     How long the match server waits between its requests to authenticate a connecting client, which <see cref="SendOptions"/> sends.
+    /// </summary>
+    internal const int AuthenticationRequestIntervalMilliseconds = 10000;
+
+    /// <summary>
     ///     Gets set after a successful match server handshake.
     ///     Contains metadata about the match server connected to this chat session.
     /// </summary>
@@ -53,13 +68,13 @@ public class MatchServerChatSession(ConnectionContext connection, IServiceProvid
         options.WriteInt32(500);
 
         // Auth Request Attempts: Number Of Times The Server Will Attempt To Authenticate A Client
-        options.WriteInt32(3);
+        options.WriteInt32(AuthenticationRequestAttempts);
 
         // Auth Request Total Timeout: Milliseconds Before All Auth Requests Time Out
-        options.WriteInt32(30000);
+        options.WriteInt32(AuthenticationRequestTotalTimeoutMilliseconds);
 
         // Auth Request Interval: Milliseconds Between Auth Request Attempts
-        options.WriteInt32(10000);
+        options.WriteInt32(AuthenticationRequestIntervalMilliseconds);
 
         // Submit Stats: Whether The Server Should Submit Statistics
         options.WriteBool(true);

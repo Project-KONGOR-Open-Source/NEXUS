@@ -7,6 +7,42 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconnectQuery reconnectQuery, ILogger<MatchLockService> logger)
 {
     /// <summary>
+    ///     The sender of the notices which tell a locked player why another game is refused.
+    /// </summary>
+    internal const string MessageSenderName = "Matchmaking";
+
+    /// <summary>
+    ///     The notice to the account which holds the slot in the locked match, which is sent back to the match.
+    /// </summary>
+    internal const string SlotAccountMessage = "You left a match which is still in progress, so you cannot play another game until it ends. Sending you back to it.";
+
+    /// <summary>
+    ///     The notice to another account of the locked user, which is not sent back, because only the account which holds the slot can return to the match.
+    /// </summary>
+    internal static string OtherAccountMessage(string slotAccountName)
+        => $@"Your account ""{slotAccountName}"" is in a match which is still in progress, so you cannot play another game until it ends. Log in as ""{slotAccountName}"" to return to it.";
+
+    /// <summary>
+    ///     How often a player whose return is pending is reminded to return, which is also how long a verification of the lock is trusted, and how long a refused attempt waits before the player is told why again.
+    /// </summary>
+    internal static readonly TimeSpan ReturnResendInterval = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    ///     The match server's default "svr_AccountAuthInterval", which is how often it checks that the accounts of its players have not logged in elsewhere, and which the chat server does not change.
+    /// </summary>
+    internal static readonly TimeSpan EngineAccountAuthenticationInterval = TimeSpan.FromMinutes(2);
+
+    /// <summary>
+    ///     The match server's default "svr_AccountAuthTimeOut", which is how long it waits for that check to be answered, and which the chat server does not change.
+    /// </summary>
+    internal static readonly TimeSpan EngineAccountAuthenticationTimeout = TimeSpan.FromSeconds(15);
+
+    /// <summary>
+    ///     How long a player is reminded to return: as long as the match server keeps retrying the authentication of a refused connection, plus as long as its check of its players' accounts may take to remove the player's connection from another machine.
+    /// </summary>
+    internal static readonly TimeSpan ReturnWindow = TimeSpan.FromMilliseconds(MatchServerChatSession.AuthenticationRequestTotalTimeoutMilliseconds) + EngineAccountAuthenticationInterval + EngineAccountAuthenticationTimeout;
+
+    /// <summary>
     ///     The IDs of the match servers whose unanswered reconnect query has been logged as an error, so that an unreachable match server is logged once rather than at every verification.
     ///     An ID is removed when its match server next answers, so that the match server is logged again if it becomes unreachable again.
     /// </summary>
@@ -74,6 +110,121 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             await distributedCacheStore.RemoveMatchLock(matchLock.UserID, matchLock.MatchID);
 
         return verdict;
+    }
+
+    /// <summary>
+    ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
+    ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does.
+    ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once that interval has passed since the last notice.
+    /// </summary>
+    public async Task<bool> Enforce(ClientChatSession session)
+    {
+        if (IsExempt(session.Account))
+            return false;
+
+        MatchLockReturn? pendingReturn = session.PendingMatchLockReturn;
+
+        MatchLock? matchLock = await distributedCacheStore.GetMatchLock(session.Account.User.ID);
+
+        if (matchLock is null)
+        {
+            session.TryReplacePendingMatchLockReturn(pendingReturn, null);
+
+            return false;
+        }
+
+        MatchLockReturn? continuedReturn = pendingReturn is not null && pendingReturn.MatchID == matchLock.MatchID && pendingReturn.Expires > DateTimeOffset.UtcNow ? pendingReturn : null;
+
+        bool verificationIsDue = continuedReturn is null || DateTimeOffset.UtcNow - continuedReturn.LastVerified >= ReturnResendInterval;
+
+        if (verificationIsDue && await Verify(matchLock) is not MatchLockVerdict.SendBack)
+        {
+            session.TryReplacePendingMatchLockReturn(pendingReturn, null);
+
+            return false;
+        }
+
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        bool isSlotAccount = matchLock.AccountID == session.Account.ID;
+
+        if (continuedReturn is not null)
+        {
+            if (verificationIsDue)
+                continuedReturn.LastVerified = now;
+
+            if (now - continuedReturn.LastNotified >= ReturnResendInterval)
+            {
+                continuedReturn.LastNotified = now;
+
+                Notify(session, matchLock, isSlotAccount);
+            }
+
+            return true;
+        }
+
+        MatchLockReturn matchLockReturn = new (matchLock.MatchID, now + ReturnWindow) { LastVerified = now, LastNotified = now };
+
+        // The Pending Return Was Changed By A Concurrent Attempt, So This Attempt Is Refused Without Starting A Second Return
+        if (session.TryReplacePendingMatchLockReturn(pendingReturn, matchLockReturn) is false)
+            return true;
+
+        Notify(session, matchLock, isSlotAccount);
+
+        // Only The Account Which Holds The Slot Can Return To The Match, So Another Account Of The Same User Is Only Told Which Account That Is
+        if (isSlotAccount)
+            _ = RemindToReturn(session, matchLock, matchLockReturn);
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Enforces the match lock when a player logs in, once per login, so that the chat reconnects of the same login, which report logging in again, are left alone.
+    ///     A session which has reported joining a game, as the game client does when it is already connected to a match server, is left alone too.
+    /// </summary>
+    public async Task EnforceAtLogin(ClientChatSession session)
+    {
+        if (IsExempt(session.Account) || session.ReportedJoiningGame)
+            return;
+
+        if (await distributedCacheStore.MarkMatchLockLoginChecked(session.Metadata.SessionCookie) is false)
+            return;
+
+        await Enforce(session);
+    }
+
+    /// <summary>
+    ///     Ends the pending return when the game client reports joining the locked match server, which it reports only once it is loading there, so that its connection was accepted.
+    ///     Joining any other match server leaves the return and its reminders in place.
+    /// </summary>
+    public async Task EndReturnOnJoiningGame(ClientChatSession session, string serverAddress)
+    {
+        if (session.PendingMatchLockReturn is not { } pendingReturn)
+            return;
+
+        MatchLock? matchLock = await distributedCacheStore.GetMatchLock(session.Account.User.ID);
+
+        if (matchLock is null || matchLock.MatchID != pendingReturn.MatchID || await NamesLockedServer(matchLock, serverAddress) is false)
+            return;
+
+        if (session.TryReplacePendingMatchLockReturn(pendingReturn, null))
+        {
+            logger.LogInformation(@"Ending The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because It Is Joining Match Server ID ""{MatchServerID}""",
+                session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+        }
+    }
+
+    /// <summary>
+    ///     Records that the game client acknowledged an "AUTO_MATCH_CONNECT" while its return is pending, as telemetry only.
+    ///     Acting on it is not reaching the match, because the connection to the match server can still be refused, so the return carries on until the game client reports joining the locked match server.
+    /// </summary>
+    public void RecordReturnAcknowledgement(ClientChatSession session, ChatProtocol.ActionCampaign action)
+    {
+        if (session.PendingMatchLockReturn is { } pendingReturn)
+        {
+            logger.LogDebug(@"Account ""{AccountName}"" Acknowledged Its Return To Match ID ""{MatchID}"" With Action ""{Action}""",
+                session.Account.Name, pendingReturn.MatchID, action);
+        }
     }
 
     /// <summary>
@@ -215,5 +366,102 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             logger.LogInformation(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Reports Status ""{Status}"" With Match ID ""{ReportedMatchID}""",
                 matchLock.AccountName, matchLock.MatchID, matchLock.ServerID, serverSessionMetadata?.Status, serverSessionMetadata?.MatchID);
         }
+    }
+
+    /// <summary>
+    ///     Every guest account shares one user, as does every staff account, so such accounts are never locked and never sent back.
+    /// </summary>
+    private static bool IsExempt(Account account) => account.Type is AccountType.Guest or AccountType.Staff;
+
+    /// <summary>
+    ///     Tells a refused player why, naming the account which holds the slot when it is another account of the same user.
+    /// </summary>
+    private void Notify(ClientChatSession session, MatchLock matchLock, bool isSlotAccount)
+    {
+        session.SendNotice(MessageSenderName, isSlotAccount ? SlotAccountMessage : OtherAccountMessage(matchLock.AccountName));
+
+        logger.LogInformation(@"Refusing Account ""{AccountName}"" Another Game, Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"" As Account ""{SlotAccountName}""",
+            session.Account.Name, matchLock.MatchID, matchLock.ServerID, matchLock.AccountName);
+    }
+
+    /// <summary>
+    ///     Sends the account which holds the slot back to the locked match at once, and reminds it every <see cref="ReturnResendInterval"/> until the return ends.
+    ///     No chat message reaches the chat server when the match server refuses the connection, and the game client ignores a reminder while it is still connecting, so the reminders carry on until the game client reports joining the locked match server, the lock no longer holds, the session ends, or the return window expires.
+    ///     It runs without being awaited, so it handles its own exceptions.
+    /// </summary>
+    private async Task RemindToReturn(ClientChatSession session, MatchLock matchLock, MatchLockReturn matchLockReturn)
+    {
+        CancellationToken cancellationToken = matchLockReturn.Cancellation.Token;
+
+        try
+        {
+            session.SendAutoMatchConnect(matchLock.ArrangedMatchType, matchLock.MatchID, matchLock.ServerAddress, matchLock.ServerPort, reminder: false);
+
+            while (true)
+            {
+                await Task.Delay(ReturnResendInterval, cancellationToken);
+
+                if (session.IsConnected is false)
+                    return;
+
+                if (DateTimeOffset.UtcNow >= matchLockReturn.Expires)
+                {
+                    logger.LogInformation(@"Ending The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because It Did Not Join Match Server ID ""{MatchServerID}"" Within The Return Window",
+                        session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+
+                    return;
+                }
+
+                MatchLock? currentLock = await distributedCacheStore.GetMatchLock(matchLock.UserID);
+
+                if (currentLock is null || currentLock.MatchID != matchLock.MatchID)
+                    return;
+
+                if (await Verify(currentLock) is not MatchLockVerdict.SendBack)
+                    return;
+
+                // The Return May Have Ended While The Match Server Was Being Queried
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
+                matchLockReturn.LastVerified = DateTimeOffset.UtcNow;
+
+                session.SendAutoMatchConnect(currentLock.ArrangedMatchType, currentLock.MatchID, currentLock.ServerAddress, currentLock.ServerPort, reminder: true);
+
+                logger.LogDebug(@"Reminded Account ""{AccountName}"" To Return To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
+                    session.Account.Name, currentLock.MatchID, currentLock.ServerID);
+            }
+        }
+
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+
+        catch (Exception exception)
+        {
+            logger.LogError(exception, @"The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"" Failed", session.Account.Name, matchLock.MatchID);
+        }
+
+        finally
+        {
+            // A Return Which Ends Here Is Cleared, So That The Next Attempt Starts A New One, While A Return Which Was Replaced Or Ended Elsewhere Is Left As It Is
+            session.TryReplacePendingMatchLockReturn(matchLockReturn, null);
+        }
+    }
+
+    /// <summary>
+    ///     Decides whether the address which the game client reports joining names the locked match server, either exactly as the client was sent there, or as the match server is registered.
+    /// </summary>
+    private async Task<bool> NamesLockedServer(MatchLock matchLock, string serverAddress)
+    {
+        if (serverAddress.Equals($"{matchLock.ServerAddress}:{matchLock.ServerPort}", StringComparison.Ordinal))
+            return true;
+
+        string[] serverAddressParts = serverAddress.Split(':');
+
+        if (serverAddressParts.Length is not 2 || int.TryParse(serverAddressParts[1], out int serverPort) is false)
+            return false;
+
+        MatchServer? server = await distributedCacheStore.GetMatchServerByIPAddressAndPort(serverAddressParts[0], serverPort);
+
+        return server?.ID == matchLock.ServerID;
     }
 }

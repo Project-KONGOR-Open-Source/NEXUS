@@ -1,17 +1,19 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Actions;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_TRACK_PLAYER_ACTION)]
-public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
+public class TrackPlayerAction(MatchLockService matchLockService) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         TrackPlayerActionRequestData requestData = new (buffer);
 
         switch (requestData.Action)
         {
             // Daily Login Action
+            // The Game Client Sends It Last Whenever Its Chat Connection Is Accepted, So It Triggers The Match Lock At Login
             case ChatProtocol.ActionCampaign.AC_DAILY_LOGINS:
                 Log.Debug(@"Daily Login Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                await matchLockService.EnforceAtLogin(session);
                 break;
 
             // Analytics Events
@@ -47,10 +49,15 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
             // Matchmaking Actions
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_FOUND:
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_SERVER_FOUND:
-            case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY:
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_SERVER_NOT_IDLE:
+                Log.Debug(@"Matchmaking Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                break;
+
+            // Matchmaking Actions With Which The Game Client Acknowledges An "AUTO_MATCH_CONNECT" As It Acts On It
+            case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY:
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY_REMINDER:
                 Log.Debug(@"Matchmaking Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                matchLockService.RecordReturnAcknowledgement(session, requestData.Action);
                 break;
 
             default:

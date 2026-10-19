@@ -95,6 +95,31 @@ internal static class ChatTestProtocol
     }
 
     /// <summary>
+    ///     Reads frames until a notice arrives, returning its sender name and message, or <see langword="null"/> if the connection closed or the timeout elapsed first.
+    /// </summary>
+    public static async Task<(string SenderName, string Message)?> ReadNotice(NetworkStream stream, TimeSpan timeout)
+        => await ReadUntilCommand(stream, ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL, timeout) is { } frame ? ParseNotice(frame) : null;
+
+    /// <summary>
+    ///     Reads frames until an "AUTO_MATCH_CONNECT" arrives, returning its fields, or <see langword="null"/> if the connection closed or the timeout elapsed first.
+    /// </summary>
+    public static async Task<(byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)?> ReadAutoMatchConnect(NetworkStream stream, TimeSpan timeout)
+        => await ReadUntilCommand(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, timeout) is { } frame ? ParseAutoMatchConnect(frame) : null;
+
+    /// <summary>
+    ///     Reads the sender name and message of a notice frame which is positioned immediately after its command bytes.
+    /// </summary>
+    public static (string SenderName, string Message) ParseNotice(ChatBuffer frame)
+        => (frame.ReadString(), frame.ReadString());
+
+    /// <summary>
+    ///     Reads the fields of an "AUTO_MATCH_CONNECT" frame which is positioned immediately after its command bytes.
+    ///     The random integer is -1 for a reminder.
+    /// </summary>
+    public static (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger) ParseAutoMatchConnect(ChatBuffer frame)
+        => (frame.ReadInt8(), frame.ReadInt32(), frame.ReadString(), frame.ReadInt16(), frame.ReadInt32());
+
+    /// <summary>
     ///     Reads and discards from the stream until the peer closes the connection, returning whether it closed within the timeout.
     /// </summary>
     public static async Task<bool> WaitForClose(NetworkStream stream, TimeSpan timeout)
@@ -272,6 +297,35 @@ internal static class ChatTestProtocol
         buffer.WriteString(gameName);
         buffer.WriteInt32(matchID);
         buffer.WriteInt8(Convert.ToByte(joinMatchChannel));
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildTrackPlayerAction(ChatProtocol.ActionCampaign action)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_TRACK_PLAYER_ACTION);
+        buffer.WriteInt8((byte) action);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildJoiningGame(string serverAddress)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOINING_GAME);
+        buffer.WriteString(serverAddress);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildLeftGame()
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_GAME);
 
         return buffer;
     }

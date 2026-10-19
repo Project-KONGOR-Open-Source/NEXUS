@@ -40,8 +40,13 @@ public static partial class DistributedCacheExtensions
     // Additionally, Cached Values Cannot Be Retrieved Without Their Respective Key, So Iterating Just The Values Is Not Possible Without Complex Reflection
     private static string ConstructAccountSessionCookieKey(string cookie) => $@"ACCOUNT-SESSION-COOKIE:[""{cookie}""]";
 
+    /// <summary>
+    ///     How long a session cookie lives, which is also how long the records tied to a session cookie live.
+    /// </summary>
+    internal static readonly TimeSpan SessionCookieLifetime = TimeSpan.FromHours(24);
+
     public static async Task SetAccountNameForSessionCookie(this IDatabase distributedCacheStore, string cookie, string accountName)
-        => await distributedCacheStore.StringSetAsync(ConstructAccountSessionCookieKey(cookie), accountName, TimeSpan.FromHours(24));
+        => await distributedCacheStore.StringSetAsync(ConstructAccountSessionCookieKey(cookie), accountName, SessionCookieLifetime);
 
     public static async Task<string?> GetAccountNameForSessionCookie(this IDatabase distributedCacheStore, string cookie)
     {
