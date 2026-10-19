@@ -2,6 +2,7 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.ServerManagement;
 
 /// <summary>
 ///     Tests for how match locks are stored in the distributed cache: one lock per user, expiring one lifetime after it began, with an index of the locks on each match server.
+///     Also tests that removing a match server lifts the locks on it.
 /// </summary>
 public sealed class MatchLockStoreTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
 {
@@ -139,6 +140,31 @@ public sealed class MatchLockStoreTests(KONGORIntegrationWebApplicationFactory w
             await Assert.That(await DistributedCache.GetMatchLock(7)).IsNull();
             await Assert.That((await DistributedCache.GetMatchLock(8))?.MatchID).IsEqualTo(101);
         }
+    }
+
+    [Test]
+    public async Task Removing_A_Match_Server_Lifts_The_Locks_On_It()
+    {
+        MatchServer matchServer = new ()
+        {
+            HostAccountID = 1,
+            HostAccountName = "LOCKED-HOST",
+            ID = 1,
+            Name = "LOCKED-HOST:1",
+            MatchServerManagerID = null,
+            Instance = 1,
+            IPAddress = "127.0.0.1",
+            Port = 11235,
+            Location = "USE",
+            Description = "Match Lock Test Server"
+        };
+
+        await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
+        await DistributedCache.SetMatchLock(BuildLock(userID: 7, matchID: 100, serverID: matchServer.ID, timestampStarted: DateTimeOffset.UtcNow));
+
+        await DistributedCache.RemoveMatchServerByID(matchServer.ID);
+
+        await Assert.That(await DistributedCache.GetMatchLock(7)).IsNull();
     }
 
     private static MatchLock BuildLock(int userID, int matchID, int serverID, DateTimeOffset timestampStarted) => new()

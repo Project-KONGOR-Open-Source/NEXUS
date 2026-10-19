@@ -77,6 +77,9 @@ public partial class StatisticsRequesterController
         // Remove The Match Information From The Distributed Cache Now That The Database Snapshot Is The Single Source Of Truth
         await DistributedCache.RemoveMatchInformation(form.MatchStats.MatchID);
 
+        // Submitted Statistics Show That The Match Is Over, So Its Locks Are Lifted, While The Locks Of Any Newer Match On The Same Server Are Kept
+        await DistributedCache.RemoveMatchLocksForServer(matchServer.ID, matchLock => matchLock.MatchID == form.MatchStats.MatchID);
+
         return Ok(PhpSerialization.Serialize(new StatisticsSubmissionResponse()));
     }
 
@@ -171,6 +174,9 @@ public partial class StatisticsRequesterController
         }
 
         await MerrickContext.SaveChangesAsync();
+
+        // Resubmitted Statistics Show That The Match Is Over, So Its Locks Are Lifted, While The Locks Of Any Newer Match On The Same Server Are Kept
+        await DistributedCache.RemoveMatchLocksForServer(form.ServerID.Value, matchLock => matchLock.MatchID == form.MatchStats.MatchID);
 
         return Ok(PhpSerialization.Serialize(new StatisticsResubmissionResponse(form.MatchStats.MatchID)));
     }

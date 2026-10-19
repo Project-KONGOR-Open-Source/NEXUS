@@ -30,6 +30,9 @@ public class MatchAbandoned(IDatabase distributedCacheStore) : IAsynchronousComm
         // This Signal Fires Whenever The Match Server Resets (Both A Normal Ending And A Failed Start)
         // So It Is The Single Point At Which A Match Is Dropped From The Active Matches Registry And Its Groups Are Made Available To Queue Again
         MatchmakingService.CleanUpMatchesForServer(session.Metadata.ServerID);
+
+        // The Protocol Does Not Name The Abandoned Match, But A Match Server Hosts One Match At A Time, So Every Lock On The Server Is For The Match Which Has Just Ended
+        await distributedCacheStore.RemoveMatchLocksForServer(session.Metadata.ServerID);
     }
 }
 

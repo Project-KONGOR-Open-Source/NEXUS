@@ -198,6 +198,40 @@ internal static class ChatTestProtocol
         return buffer;
     }
 
+    public static ChatBuffer BuildMatchEnded(int matchupID)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ENDED);
+        buffer.WriteInt32(matchupID);
+        buffer.WriteInt8((byte) ChatProtocol.MatchEndedReason.MATCH_ENDED_FINISHED);
+        buffer.WriteInt8(1); // Winning Team
+        buffer.WriteInt8(0); // Player Count
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildAbandonMatch(bool failed)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_ABANDON_MATCH);
+        buffer.WriteBool(failed);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildMatchAborted(int matchupID)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ABORTED);
+        buffer.WriteInt32(matchupID);
+        buffer.WriteInt8((byte) ChatProtocol.MatchAbortedReason.MATCH_ABORT_PLAYER_LEFT);
+
+        return buffer;
+    }
+
     public static ChatBuffer BuildWhisper(string targetName, string message)
     {
         ChatBuffer buffer = new ();
