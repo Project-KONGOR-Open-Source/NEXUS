@@ -394,6 +394,58 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         }
     }
 
+    [Test]
+    public async Task Client_Connection_With_An_Unrecognised_Session_Returns_The_Account()
+    {
+        await InitialiseIn("Development");
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await ConnectClient(Guid.CreateVersion7().ToString(), cookie);
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+        await Assert.That(Convert.ToInt32(body["account_id"])).IsEqualTo(await GetAccountID(NonHostAccountName));
+    }
+
+    [Test]
+    public async Task Client_Connection_With_A_Copy_On_Write_Master_Session_Returns_The_Account()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateCopyOnWriteMaster();
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await ConnectClient(session, cookie);
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+        await Assert.That(Convert.ToInt32(body["account_id"])).IsEqualTo(await GetAccountID(NonHostAccountName));
+    }
+
+    [Test]
+    public async Task Client_Connection_With_A_Registered_Match_Server_Session_Returns_The_Account()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateMatchServer();
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await ConnectClient(session, cookie);
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+        await Assert.That(Convert.ToInt32(body["account_id"])).IsEqualTo(await GetAccountID(NonHostAccountName));
+    }
+
     private async Task InitialiseIn(string environment)
     {
         await webApplicationFactory.WithEnvironment(environment).WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
@@ -447,6 +499,45 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         return (string) (await DeserialisePHPResponse(await AuthenticateServer($"{DedicatedHostAccountName}:1")))["session"];
     }
+
+    /// <summary>
+    ///     Registers a match server manager and its copy-on-write master, and returns the copy-on-write master's session cookie.
+    /// </summary>
+    private async Task<string> AuthenticateCopyOnWriteMaster()
+    {
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        return (string) (await DeserialisePHPResponse(await AuthenticateServer($"{DedicatedHostAccountName}:")))["session"];
+    }
+
+    /// <summary>
+    ///     Stores a session cookie for the account, as the client's authentication does, and returns the session cookie.
+    /// </summary>
+    private async Task<string> CreateClientSessionCookie(string accountName)
+    {
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        string cookie = Guid.CreateVersion7().ToString();
+
+        await distributedCache.SetAccountNameForSessionCookie(cookie, accountName);
+
+        return cookie;
+    }
+
+    private async Task<int> GetAccountID(string accountName)
+    {
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        return await merrickContext.Accounts.Where(account => account.Name.Equals(accountName)).Select(account => account.ID).SingleAsync();
+    }
+
+    /// <summary>
+    ///     Sends the request which a match server sends to authenticate a connecting client.
+    /// </summary>
+    private async Task<HttpResponseMessage> ConnectClient(string session, string cookie)
+        => await SendServerRequest("c_conn", new () { { "session", session }, { "cookie", cookie }, { "ip", "127.0.0.1" }, { "cas", "0" }, { "new", "1" } });
 
     /// <summary>
     ///     Sends the periodic heartbeat which a match server, or a copy-on-write master, sends, by default while it is idle with no world loaded.

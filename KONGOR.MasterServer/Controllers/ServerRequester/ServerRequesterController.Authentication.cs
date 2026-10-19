@@ -251,6 +251,7 @@ public partial class ServerRequesterController
 
     private async Task<IActionResult> HandleConnectClient()
     {
+        // The Session Is Deliberately Not Checked Against The Registered Match Servers, So That A Player Reconnecting To A Match In Progress Is Still Authenticated After The Master Server Has Lost The Match Server's Session
         string? session = Request.Form["session"];
 
         if (session is null)
