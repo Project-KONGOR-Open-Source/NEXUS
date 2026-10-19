@@ -48,9 +48,8 @@ These would make the feature a failure even if it technically worked:
 - **Repositories avoid depending on each other.** Everything here is NEXUS, plus one existing HON engine setting that NEXUS switches on remotely. No CI depends on HON or GEMINI.
 - **State survives what it must.** The lock outlives the player's chat connection, logouts, and restarts of the chat server, so it lives in the distributed cache (Valkey), not in a chat session's memory, and it always has an expiry.
 - **The lock is NEXUS's default behaviour,** with no switch to turn it off (owner's decision). A case that cannot be confirmed fails safe (see "Sending a player back"), so no emergency switch is needed, and a switch would only add a way for the master and chat servers to disagree.
-- **There is no configuration** (owner's decision). The safety limit is a constant in code of one hour, about a long Caldavar match.
-  - **It counts from the last sign of life, not from the start.** Every server status report showing the match still in progress, and every successful verification, pushes the expiry an hour beyond that moment. So a long match stays locked until it ends, and a lock outlives a silent server by an hour at most.
-  - **It is only a backstop:** every attempt to play re-verifies the lock anyway.
+- **There is no configuration** (owner's decision). The safety limit is a constant in code of one hour from when the lock begins, about a long Caldavar match.
+  - **A longer match outliving it is fine:** rage-quitters want a new match right after leaving, so the first minutes are the hot zone, and every attempt to play re-verifies the lock anyway.
   - **Reaching it counts as an unconfirmed lift:** the player's game cookie stays unchanged, so they are never removed from a match that might still be running.
 
 ## The Owner's Decisions
@@ -91,7 +90,7 @@ The lock lifts on the first of these:
   - statistics submission for the match;
 - **the server goes:** the match server disappears from NEXUS (reaped, or silent beyond the stale threshold the reaper already uses);
 - **the slot goes:** the player no longer holds a reclaimable slot. That is checked whenever a trigger fires, and from the server's status reports where they say so;
-- **the safety limit:** an hour after NEXUS last heard the match is still running, so a missed signal can never lock anyone forever. Reaching it counts as an unconfirmed lift.
+- **the safety limit:** one hour after the lock began, so a missed signal can never lock anyone forever. Reaching it counts as an unconfirmed lift.
 
 ### Sending a player back
 
