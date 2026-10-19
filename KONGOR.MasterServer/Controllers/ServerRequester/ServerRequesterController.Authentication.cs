@@ -201,7 +201,16 @@ public partial class ServerRequesterController
             Description = serverDescription
         };
 
+        MatchServer? replacedMatchServer = await DistributedCache.GetMatchServerByID(matchServer.ID);
+
         await DistributedCache.SetMatchServer(hostAccountName, matchServer);
+
+        // Any Match Server Still Using The Replaced Session Is Told To Authenticate Again On Its Next Heartbeat
+        if (replacedMatchServer is not null && replacedMatchServer.Cookie.Equals(matchServer.Cookie) is false)
+        {
+            Logger.LogWarning(@"Server ID ""{MatchServerID}"" For Host Account ""{HostAccountName}"" And Instance ""{MatchServerInstance}"" Replaced Its Previous Session",
+                matchServer.ID, matchServer.HostAccountName, matchServer.Instance);
+        }
 
         // A Match Server Authenticates Again After Every Match And Whenever Its Session Is Renewed, So It Is Only Added To Its Manager When It Is Not Already Listed
         if (matchServerManager is not null && matchServerManager.MatchServerIDs.Add(matchServer.ID))
