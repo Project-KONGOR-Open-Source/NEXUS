@@ -563,6 +563,30 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         }
     }
 
+    [Test]
+    public async Task Server_Upgrades_Request_Never_Answers_With_An_Authentication_Failure()
+    {
+        await InitialiseIn("Development");
+
+        string matchServerSession = await AuthenticateMatchServer();
+
+        string copyOnWriteMasterSession = await AuthenticateCopyOnWriteMaster();
+
+        string clientCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        List<string> cookies = [Guid.CreateVersion7().ToString(), string.Empty, matchServerSession, copyOnWriteMasterSession, clientCookie];
+
+        using (Assert.Multiple())
+        {
+            foreach (string cookie in cookies)
+            {
+                HttpResponseMessage response = await SendServerRequest("get_upgrades", new () { { "cookie", cookie } });
+
+                await Assert.That(await response.Content.ReadAsStringAsync()).DoesNotContain("auth_failure");
+            }
+        }
+    }
+
     private async Task InitialiseIn(string environment)
     {
         await webApplicationFactory.WithEnvironment(environment).WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();

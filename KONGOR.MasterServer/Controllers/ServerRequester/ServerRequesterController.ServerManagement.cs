@@ -102,6 +102,7 @@ public partial class ServerRequesterController
 
         string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
+        // Never Answer "auth_failure" Here, Because The Match Server Checks This Reply From Inside Its Loop Over Its Clients, Where Acting Upon An Authentication Failure Before The Match Starts Deletes The Calling Client
         if (accountName is null)
             return Unauthorized($@"No Valid Session Cookie Could Be Found For Cookie ""{cookie}""");
 
