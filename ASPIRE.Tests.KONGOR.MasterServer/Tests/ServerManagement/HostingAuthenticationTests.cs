@@ -4,6 +4,7 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.ServerManagement;
 ///     Tests for the production-only block that prevents the built-in <see cref="OOTB.Accounts.OPERATOR"/> host account, which ships with a publicly-known password, from hosting match servers.
 ///     The block is applied at both server requester authentication endpoints (the match server manager's "replay_auth" and the match server's "new_session"), and only when the master server runs in the production environment, so that self-hosters running outside production are unaffected.
 ///     Also tests how the match server's "new_session" endpoint treats the server instance of the login, including the copy-on-write master (HON's "cowmaster") which Linux match server managers fork their match servers from, and which authenticates with an empty server instance.
+///     The copy-on-write master is a non-joinable match server: it is registered apart from the match servers, whether or not its manager is registered, its heartbeat is accepted, and it outlives the removal of its manager.
 ///     Also tests how the match server endpoints answer a session which is not registered: with the "auth_failure" reply, which makes the match server authenticate again, where acting upon it is safe, with a plain rejection where acting upon it would crash the match server, and as usual where a player reconnecting to a match in progress depends on the reply.
 /// </summary>
 public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
@@ -211,7 +212,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
-    public async Task Copy_On_Write_Master_Authentication_Returns_A_Session_Without_Registering_A_Match_Server()
+    public async Task Copy_On_Write_Master_Authentication_With_A_Registered_Manager_Registers_It_With_Its_Manager_Apart_From_The_Match_Servers()
     {
         await InitialiseIn("Development");
 
@@ -227,6 +228,8 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         MatchServerManager matchServerManager = (await distributedCache.GetMatchServerManagersByAccountName(DedicatedHostAccountName)).Single();
 
+        CopyOnWriteMaster? copyOnWriteMaster = await distributedCache.GetCopyOnWriteMasterBySessionCookie((string) body["session"]);
+
         using (Assert.Multiple())
         {
             await Assert.That(body).ContainsKey("session");
@@ -236,19 +239,40 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
             await Assert.That(body).ContainsKey("leaverthreshold");
 
             await Assert.That((string) body["session"]).IsNotEmpty();
+            await Assert.That(copyOnWriteMaster).IsNotNull();
+            await Assert.That(copyOnWriteMaster?.ID).IsEqualTo(Convert.ToInt32(body["server_id"]));
+            await Assert.That(copyOnWriteMaster?.HostAccountName).IsEqualTo(DedicatedHostAccountName);
+            await Assert.That(copyOnWriteMaster?.MatchServerManagerID).IsEqualTo(matchServerManager.ID);
             await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
             await Assert.That(matchServerManager.MatchServerIDs).IsEmpty();
         }
     }
 
+    /// <summary>
+    ///     The master server may lose a manager's registration while the manager keeps running, and a manager whose chat connection stays up never authenticates again, so its copy-on-write master is accepted without it, with a warning in case the empty server instance comes from a misconfigured standalone match server instead.
+    /// </summary>
     [Test]
-    public async Task Copy_On_Write_Master_Authentication_Without_A_Registered_Manager_Is_Rejected()
+    public async Task Copy_On_Write_Master_Authentication_Without_A_Registered_Manager_Registers_It_Without_A_Manager()
     {
         await InitialiseIn("Development");
 
         HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:");
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        CopyOnWriteMaster? copyOnWriteMaster = await distributedCache.GetCopyOnWriteMasterBySessionCookie((string) body["session"]);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(copyOnWriteMaster).IsNotNull();
+            await Assert.That(copyOnWriteMaster?.HostAccountName).IsEqualTo(DedicatedHostAccountName);
+            await Assert.That(copyOnWriteMaster?.MatchServerManagerID).IsNull();
+            await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
+        }
     }
 
     [Test]
@@ -258,7 +282,13 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:", "INCORRECT-PASSWORD");
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(await distributedCache.GetCopyOnWriteMasters()).IsEmpty();
+        }
     }
 
     [Test]
@@ -272,27 +302,49 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
-    public async Task Copy_On_Write_Master_Heartbeat_Is_Accepted_Without_Registering_A_Match_Server()
+    public async Task Copy_On_Write_Master_Heartbeat_Is_Accepted_And_Records_Its_Status()
     {
         await InitialiseIn("Development");
 
-        await AuthenticateManager(DedicatedHostAccountName);
+        string session = await AuthenticateCopyOnWriteMaster();
 
-        HttpResponseMessage authenticationResponse = await AuthenticateServer($"{DedicatedHostAccountName}:");
-
-        await Assert.That(authenticationResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
-
-        string session = (string) (await DeserialisePHPResponse(authenticationResponse))["session"];
-
-        HttpResponseMessage heartbeatResponse = await SendHeartbeat(session);
+        HttpResponseMessage heartbeatResponse = await SendHeartbeat(session, "0");
 
         IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        CopyOnWriteMaster? copyOnWriteMaster = await distributedCache.GetCopyOnWriteMasterBySessionCookie(session);
 
         using (Assert.Multiple())
         {
             await Assert.That(heartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
             await Assert.That(await heartbeatResponse.Content.ReadAsStringAsync()).IsEmpty();
+            await Assert.That(copyOnWriteMaster?.Status).IsEqualTo(ChatProtocol.ServerStatus.SERVER_STATUS_SLEEPING);
             await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
+        }
+    }
+
+    [Test]
+    public async Task Copy_On_Write_Master_Is_Never_Found_By_Match_Server_Lists_Look_Ups_Or_Matchmaking_Reads()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateCopyOnWriteMaster();
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        CopyOnWriteMaster copyOnWriteMaster = (await distributedCache.GetCopyOnWriteMasters()).Single();
+
+        MatchServerManager matchServerManager = (await distributedCache.GetMatchServerManagersByAccountName(DedicatedHostAccountName)).Single();
+
+        // The Server List And Matchmaking Read Every Match Server, And The Other Match Server Endpoints Look One Up By Session, ID, Host Account, Or Address
+        using (Assert.Multiple())
+        {
+            await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
+            await Assert.That(await distributedCache.GetMatchServersByAccountName(DedicatedHostAccountName)).IsEmpty();
+            await Assert.That(await distributedCache.GetMatchServerByID(copyOnWriteMaster.ID)).IsNull();
+            await Assert.That(await distributedCache.GetMatchServerBySessionCookie(session)).IsNull();
+            await Assert.That(await distributedCache.GetMatchServerByIPAddressAndPort(copyOnWriteMaster.IPAddress, copyOnWriteMaster.Port)).IsNull();
+            await Assert.That(matchServerManager.MatchServerIDs).IsEmpty();
         }
     }
 
@@ -356,17 +408,11 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
-    public async Task Removing_The_Manager_Removes_Its_Copy_On_Write_Master_Session()
+    public async Task Removing_The_Manager_Leaves_Its_Copy_On_Write_Master()
     {
         await InitialiseIn("Development");
 
-        await AuthenticateManager(DedicatedHostAccountName);
-
-        HttpResponseMessage authenticationResponse = await AuthenticateServer($"{DedicatedHostAccountName}:");
-
-        await Assert.That(authenticationResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
-
-        string session = (string) (await DeserialisePHPResponse(authenticationResponse))["session"];
+        string session = await AuthenticateCopyOnWriteMaster();
 
         IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
 
@@ -378,9 +424,26 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         using (Assert.Multiple())
         {
-            await Assert.That(await distributedCache.IsCopyOnWriteMasterSessionCookie(session)).IsFalse();
+            await Assert.That(await distributedCache.GetMatchServerManagersByAccountName(DedicatedHostAccountName)).IsEmpty();
+            await Assert.That(await distributedCache.GetCopyOnWriteMasterBySessionCookie(session)).IsNotNull();
             await Assert.That(heartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
-            await Assert.That(await heartbeatResponse.Content.ReadAsStringAsync()).IsEqualTo(AuthenticationFailureResponse);
+            await Assert.That(await heartbeatResponse.Content.ReadAsStringAsync()).IsEmpty();
+        }
+    }
+
+    [Test]
+    public async Task Heartbeat_With_An_Unrecognised_Session_Is_Answered_With_An_Authentication_Failure_While_A_Copy_On_Write_Master_Is_Registered()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateCopyOnWriteMaster();
+
+        HttpResponseMessage response = await SendHeartbeat(Guid.CreateVersion7().ToString());
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo(AuthenticationFailureResponse);
         }
     }
 

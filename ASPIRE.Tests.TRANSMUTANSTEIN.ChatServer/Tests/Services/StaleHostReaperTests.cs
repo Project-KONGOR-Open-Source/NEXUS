@@ -2,7 +2,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Services;
 
 /// <summary>
 ///     Tests for the reconciliation logic that decides which cached hosts the stale host reaper removes.
-///     Also tests that reaping a match server manager removes the session cookie of its copy-on-write master.
+///     Also tests that reaping a match server manager leaves its copy-on-write master in place.
 /// </summary>
 public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicationFactory webApplicationFactory)
 {
@@ -110,7 +110,7 @@ public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicatio
     }
 
     [Test]
-    public async Task Reaping_A_Match_Server_Manager_Removes_Its_Copy_On_Write_Master_Session()
+    public async Task Reaping_A_Match_Server_Manager_Leaves_Its_Copy_On_Write_Master()
     {
         await webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
 
@@ -127,10 +127,10 @@ public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicatio
             IPAddress = "127.0.0.1"
         };
 
-        string copyOnWriteMasterSessionCookie = Guid.CreateVersion7().ToString();
+        CopyOnWriteMaster copyOnWriteMaster = CreateCopyOnWriteMaster(hostAccountName, matchServerManager.ID);
 
         await distributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
-        await distributedCache.SetCopyOnWriteMasterSessionCookie(hostAccountName, copyOnWriteMasterSessionCookie);
+        await distributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
 
         StaleHostReaper staleHostReaper = new (distributedCache, NullLogger<StaleHostReaper>.Instance);
 
@@ -141,7 +141,20 @@ public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicatio
         using (Assert.Multiple())
         {
             await Assert.That(await distributedCache.GetMatchServerManagerByID(matchServerManager.ID)).IsNull();
-            await Assert.That(await distributedCache.IsCopyOnWriteMasterSessionCookie(copyOnWriteMasterSessionCookie)).IsFalse();
+            await Assert.That(await distributedCache.GetCopyOnWriteMasterBySessionCookie(copyOnWriteMaster.Cookie)).IsNotNull();
         }
     }
+
+    private static CopyOnWriteMaster CreateCopyOnWriteMaster(string hostAccountName, int? matchServerManagerID) => new ()
+    {
+        HostAccountID = 1,
+        HostAccountName = hostAccountName,
+        ID = $"{hostAccountName}:".GetDeterministicInt32Hash(),
+        Name = "TEST-SERVER",
+        MatchServerManagerID = matchServerManagerID,
+        IPAddress = "127.0.0.1",
+        Port = 11235,
+        Location = "EU",
+        Description = "Test Server"
+    };
 }

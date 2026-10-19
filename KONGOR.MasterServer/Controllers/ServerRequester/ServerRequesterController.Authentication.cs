@@ -170,21 +170,35 @@ public partial class ServerRequesterController
 
         MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
-        // The Copy-On-Write Master Needs A Session To Finish Starting Up, But It Never Hosts A Match, So It Is Not Registered As A Joinable Match Server; Each Match Server Forked From It Authenticates With Its Own Server Instance
+        // The Copy-On-Write Master Is A Non-Joinable Match Server: It Needs A Session To Finish Starting Up, But It Never Hosts A Match, So It Is Registered Apart From The Match Servers, Where No Server List, Matchmaking, Or Match Server Look-Up Finds It; Each Match Server Forked From It Authenticates With Its Own Server Instance
         if (isCopyOnWriteMaster)
         {
-            // Only A Match Server Manager Starts A Copy-On-Write Master, After Authenticating With The Same Host Account, So Without A Registered Manager The Empty Server Instance Comes From A Misconfigured Match Server; A Copy-On-Write Master Which Races Ahead Of Its Manager Retries Until The Manager Is Registered
+            // Only A Match Server Manager Starts A Copy-On-Write Master, But The Manager Is Not Required, Because The Master Server May Lose The Manager's Registration While The Manager Keeps Running, And A Manager Whose Chat Connection Stays Up Never Authenticates Again, So Refusing The Copy-On-Write Master Would Stall It Indefinitely
             if (matchServerManager is null)
-                return BadRequest($@"Missing Server Instance In Form Parameter ""login"": A Match Server Needs An Instance Number After The Colon, For Example ""{hostAccountName}:1""; An Empty Server Instance Is Reserved For The Copy-On-Write Master Of A Registered Match Server Manager");
+            {
+                Logger.LogWarning(@"Copy-On-Write Master For Host Account ""{HostAccountName}"" Authenticated With An Empty Server Instance While No Server Manager Is Registered For That Host Account; If This Is A Standalone Match Server, It Needs An Instance Number After The Colon, For Example ""{ExampleServerLogin}""",
+                    account.Name, $"{account.Name}:1");
+            }
 
-            string copyOnWriteMasterSessionCookie = Guid.CreateVersion7().ToString();
+            CopyOnWriteMaster copyOnWriteMaster = new ()
+            {
+                HostAccountID = account.ID,
+                HostAccountName = account.Name,
+                ID = serverIdentifier.GetDeterministicInt32Hash(),
+                Name = serverName,
+                MatchServerManagerID = matchServerManager?.ID,
+                IPAddress = serverIPAddress,
+                Port = serverPortNumber,
+                Location = serverLocation,
+                Description = serverDescription
+            };
 
-            await DistributedCache.SetCopyOnWriteMasterSessionCookie(hostAccountName, copyOnWriteMasterSessionCookie);
+            await DistributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
 
-            Logger.LogInformation(@"Copy-On-Write Master For Host Account ""{HostAccountName}"" Was Authenticated At ""{CopyOnWriteMasterAddress}"" With Cookie ""{CopyOnWriteMasterCookie}""",
-                account.Name, serverIPAddress, copyOnWriteMasterSessionCookie);
+            Logger.LogInformation(@"Copy-On-Write Master ID ""{CopyOnWriteMasterID}"" For Host Account ""{HostAccountName}"" Was Registered At ""{CopyOnWriteMasterAddress}"":""{CopyOnWriteMasterPort}""",
+                copyOnWriteMaster.ID, copyOnWriteMaster.HostAccountName, copyOnWriteMaster.IPAddress, copyOnWriteMaster.Port);
 
-            return Ok(ServerAuthenticationResponse(copyOnWriteMasterSessionCookie, serverIdentifier.GetDeterministicInt32Hash()));
+            return Ok(ServerAuthenticationResponse(copyOnWriteMaster.Cookie, copyOnWriteMaster.ID));
         }
 
         MatchServer matchServer = new ()
@@ -417,9 +431,17 @@ public partial class ServerRequesterController
 
         if (matchServer is null)
         {
-            // The Copy-On-Write Master Sends Heartbeats Too, But It Is Not A Match Server, So There Is No Match Server State To Update
-            if (await DistributedCache.IsCopyOnWriteMasterSessionCookie(session))
+            CopyOnWriteMaster? copyOnWriteMaster = await DistributedCache.GetCopyOnWriteMasterBySessionCookie(session);
+
+            // The Copy-On-Write Master Sends Heartbeats Too, But It Never Hosts A Match, So Its Heartbeat Only Refreshes Its Own Record
+            if (copyOnWriteMaster is not null)
+            {
+                copyOnWriteMaster.Status = (ServerStatus) int.Parse(connectionState);
+
+                await DistributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
+
                 return Ok();
+            }
 
             // A Session Which Is Not Registered Belongs To A Match Server Which Was Reaped Or Replaced, Or Whose Registration Was Lost, So The Match Server Is Told To Authenticate Again
             // A Match Server In A Lobby ("c_state" 2: World Loaded, Match Not Started) Also Ends That Match And Disconnects Its Players, As It Does For The Retail Master Server; This Is Kept, Because "start_game" Refuses The Unregistered Session, So That Match Could Never Start Anyway
