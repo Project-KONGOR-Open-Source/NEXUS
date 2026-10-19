@@ -446,6 +446,123 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         await Assert.That(Convert.ToInt32(body["account_id"])).IsEqualTo(await GetAccountID(NonHostAccountName));
     }
 
+    [Test]
+    public async Task Account_IDs_To_Cookie_Without_A_Session_Is_Rejected()
+    {
+        await InitialiseIn("Development");
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await RequestAccountCookies(null, await GetAccountID(NonHostAccountName));
+
+        string body = await response.Content.ReadAsStringAsync();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(body).DoesNotContain("aids2cookie");
+            await Assert.That(body).DoesNotContain("aids2gcookie");
+            await Assert.That(body).DoesNotContain(cookie);
+            await Assert.That(body).DoesNotContain("auth_failure");
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_With_An_Unrecognised_Session_Is_Rejected()
+    {
+        await InitialiseIn("Development");
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await RequestAccountCookies(Guid.CreateVersion7().ToString(), await GetAccountID(NonHostAccountName));
+
+        string body = await response.Content.ReadAsStringAsync();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(body).DoesNotContain("aids2cookie");
+            await Assert.That(body).DoesNotContain("aids2gcookie");
+            await Assert.That(body).DoesNotContain(cookie);
+            await Assert.That(body).DoesNotContain("auth_failure");
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_With_A_Copy_On_Write_Master_Session_Is_Rejected()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateCopyOnWriteMaster();
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await RequestAccountCookies(session, await GetAccountID(NonHostAccountName));
+
+        string body = await response.Content.ReadAsStringAsync();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(body).DoesNotContain("aids2cookie");
+            await Assert.That(body).DoesNotContain("aids2gcookie");
+            await Assert.That(body).DoesNotContain(cookie);
+            await Assert.That(body).DoesNotContain("auth_failure");
+        }
+    }
+
+    /// <summary>
+    ///     The master server finds live session cookies by scanning the whole distributed cache keyspace, which the per-test key prefix hides from it, so this test also stores each session cookie key without the prefix.
+    ///     The test runs in isolation, so that no other test's master server purges those session cookie keys while it starts up.
+    /// </summary>
+    [Test]
+    [NotInParallel]
+    public async Task Account_IDs_To_Cookie_With_A_Registered_Match_Server_Session_Returns_The_Cookies_Of_The_Requested_Accounts()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateMatchServer();
+
+        Dictionary<int, string> cookies = [];
+
+        foreach (string accountName in new List<string> { NonHostAccountName, DedicatedHostAccountName })
+            cookies.Add(await GetAccountID(accountName), await CreateClientSessionCookie(accountName));
+
+        IDatabase unprefixedDistributedCache = webApplicationFactory.Services.GetRequiredService<IConnectionMultiplexer>().GetDatabase();
+
+        List<RedisKey> unprefixedKeys = [.. cookies.Values.Select(cookie => new RedisKey($@"ACCOUNT-SESSION-COOKIE:[""{cookie}""]"))];
+
+        try
+        {
+            foreach (RedisKey unprefixedKey in unprefixedKeys)
+                await unprefixedDistributedCache.StringSetAsync(unprefixedKey, string.Empty, TimeSpan.FromMinutes(1));
+
+            HttpResponseMessage response = await RequestAccountCookies(session, [.. cookies.Keys]);
+
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+            IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+            IDictionary<object, object> clientCookies = (IDictionary<object, object>) body["aids2cookie"];
+
+            IDictionary<object, object> gameCookies = (IDictionary<object, object>) body["aids2gcookie"];
+
+            using (Assert.Multiple())
+            {
+                foreach ((int accountID, string cookie) in cookies)
+                {
+                    await Assert.That((string) clientCookies[accountID.ToString()]).IsEqualTo(cookie);
+                    await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(cookie);
+                }
+            }
+        }
+
+        finally
+        {
+            await unprefixedDistributedCache.KeyDeleteAsync([.. unprefixedKeys]);
+        }
+    }
+
     private async Task InitialiseIn(string environment)
     {
         await webApplicationFactory.WithEnvironment(environment).WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
@@ -538,6 +655,25 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     /// </summary>
     private async Task<HttpResponseMessage> ConnectClient(string session, string cookie)
         => await SendServerRequest("c_conn", new () { { "session", session }, { "cookie", cookie }, { "ip", "127.0.0.1" }, { "cas", "0" }, { "new", "1" } });
+
+    /// <summary>
+    ///     Sends the request which a match server sends to map account IDs to their session cookies, without a session when the session is <see langword="null"/>.
+    /// </summary>
+    private async Task<HttpResponseMessage> RequestAccountCookies(string? session, params int[] accountIDs)
+    {
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        Dictionary<string, string> formData = [];
+
+        if (session is not null)
+            formData.Add("session", session);
+
+        string accountIDsQuery = string.Join('&', accountIDs.Select((accountID, index) => $"aids[{index}]={accountID}"));
+
+        return await httpClient.PostAsync($"server_requester.php?f=aids2cookie&{accountIDsQuery}", new FormUrlEncodedContent(formData));
+    }
 
     /// <summary>
     ///     Sends the periodic heartbeat which a match server, or a copy-on-write master, sends, by default while it is idle with no world loaded.

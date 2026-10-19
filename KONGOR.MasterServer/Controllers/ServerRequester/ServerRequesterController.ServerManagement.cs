@@ -8,10 +8,17 @@ public partial class ServerRequesterController
     /// </summary>
     private async Task<IActionResult> HandleAccountIDsToCookie()
     {
+        // Only A Registered Match Server May Map Account IDs To Live Session Cookies, Because Those Session Cookies Authenticate Their Accounts
+        // Anything Else Is Rejected With Plain Text, And Never With "auth_failure", Because The Match Server Checks This Reply From Inside Its Game Frame, Where Acting Upon An Authentication Failure Before The Match Starts Frees The Game While The Frame Is Still Running
         string? session = Request.Form["session"];
 
         if (session is null)
-            return BadRequest(@"Missing Value For Form Parameter ""session""");
+            return Unauthorized(@"Missing Value For Form Parameter ""session""");
+
+        MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
+
+        if (matchServer is null)
+            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
 
         Dictionary<string, object> response = [];
 
