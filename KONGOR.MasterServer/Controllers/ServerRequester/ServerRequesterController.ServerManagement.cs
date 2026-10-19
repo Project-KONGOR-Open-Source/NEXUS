@@ -44,6 +44,8 @@ public partial class ServerRequesterController
             }
         }
 
+        // The Match Server ("CGameServer::GetAccountAuth") Posts The Account IDs As "aids[]" In The Request Body, While This Reads "aids[N]" From The Query String, So Real Match Servers Always Receive Empty Lists
+        // Fixing This Parsing Alone Would Make The Match Server Kick Or Terminate Every Player, Because The "game_cookie" Which "c_conn" Returns Differs From The Cookie Returned In "aids2gcookie", So Both Must Change Together, And Only Deliberately
         foreach (string key in Request.Query.Keys.Where(key => AccountIDsQueryParameterPattern().IsMatch(key)))
         {
             string? accountIDValue = Request.Query[key];
