@@ -3,25 +3,46 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.ServerManagement;
 /// <summary>
 ///     Tests for how match locks are stored in the distributed cache: one lock per user, expiring one lifetime after it began, with an index of the locks on each match server.
 /// </summary>
-[NotInParallel]
 public sealed class MatchLockStoreTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
 {
-    private static readonly int[] UserIDs = [7, 8, 9];
-
-    private static readonly int[] ServerIDs = [1, 2];
-
     private IDatabase DistributedCache => webApplicationFactory.Services.GetRequiredService<IDatabase>();
 
     [Before(Test)]
-    public async Task ClearMatchLocks()
+    public async Task InitialiseFactory()
     {
         await webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
+    }
 
-        foreach (int userID in UserIDs)
-            await DistributedCache.KeyDeleteAsync(DistributedCacheExtensions.ConstructMatchLockKey(userID));
+    [Test]
+    public async Task Removing_The_Lock_Of_The_Current_Match_Removes_It()
+    {
+        await DistributedCache.SetMatchLock(BuildLock(userID: 7, matchID: 100, serverID: 1, timestampStarted: DateTimeOffset.UtcNow));
 
-        foreach (int serverID in ServerIDs)
-            await DistributedCache.KeyDeleteAsync(DistributedCacheExtensions.ConstructMatchLockServerKey(serverID));
+        bool removed = await DistributedCache.RemoveMatchLock(7, 100);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(removed).IsTrue();
+            await Assert.That(await DistributedCache.GetMatchLock(7)).IsNull();
+        }
+    }
+
+    [Test]
+    public async Task Removing_The_Locks_Of_A_Server_Keeps_A_Lock_Moved_To_Another_Server()
+    {
+        await DistributedCache.SetMatchLock(BuildLock(userID: 7, matchID: 100, serverID: 1, timestampStarted: DateTimeOffset.UtcNow));
+        await DistributedCache.SetMatchLock(BuildLock(userID: 7, matchID: 200, serverID: 2, timestampStarted: DateTimeOffset.UtcNow));
+
+        int removed = await DistributedCache.RemoveMatchLocksForServer(1);
+
+        bool stillIndexed = await DistributedCache.SetContainsAsync(DistributedCacheExtensions.ConstructMatchLockServerKey(1), 7);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(removed).IsEqualTo(0);
+            await Assert.That((await DistributedCache.GetMatchLock(7))?.ServerID).IsEqualTo(2);
+            await Assert.That(stillIndexed).IsFalse();
+        }
     }
 
     [Test]

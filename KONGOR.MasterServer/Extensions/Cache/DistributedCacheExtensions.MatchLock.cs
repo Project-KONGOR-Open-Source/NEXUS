@@ -2,6 +2,9 @@ namespace KONGOR.MasterServer.Extensions.Cache;
 
 public static partial class DistributedCacheExtensions
 {
+    /// <summary>
+    ///     Constructs the key of the match lock of a user, of which there is at most one.
+    /// </summary>
     internal static string ConstructMatchLockKey(int userID) => $@"MATCH-LOCK:[""{userID}""]";
 
     /// <summary>
@@ -30,8 +33,9 @@ public static partial class DistributedCacheExtensions
         _ = transaction.StringSetAsync(ConstructMatchLockKey(matchLock.UserID), serializedMatchLock, timeToLive);
         _ = transaction.SetAddAsync(serverKey, matchLock.UserID);
 
-        // Every Real Lock Starts Now, So The Newest Lock Always Has The Latest Expiry, And The Index Is Reset To It On Every Add
-        _ = transaction.KeyExpireAsync(serverKey, timeToLive);
+        // The Index Only Ever Extends To The Latest Expiry, So That A Lock Which Started Earlier Never Shortens It Under The Locks Of Other Users
+        _ = transaction.KeyExpireAsync(serverKey, timeToLive, ExpireWhen.HasNoExpiry);
+        _ = transaction.KeyExpireAsync(serverKey, timeToLive, ExpireWhen.GreaterThanCurrentExpiry);
 
         await transaction.ExecuteAsync();
     }
@@ -89,12 +93,23 @@ public static partial class DistributedCacheExtensions
             if (!int.TryParse(member.ToString(), out int userID))
                 continue;
 
-            MatchLock? matchLock = await distributedCacheStore.GetMatchLock(userID);
+            string lockKey = ConstructMatchLockKey(userID);
+
+            RedisValue cachedValue = await distributedCacheStore.StringGetAsync(lockKey);
+
+            MatchLock? matchLock = cachedValue.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MatchLock>(cachedValue.ToString());
 
             // A Member Whose Lock Is Gone Or Now On Another Server Is Stale, So It Is Dropped From The Index
+            // The Drop Is Conditioned On What Was Read, So That A Lock Written In The Meantime Keeps Its Place In The Index
             if (matchLock is null || matchLock.ServerID != serverID)
             {
-                await distributedCacheStore.SetRemoveAsync(serverKey, member);
+                ITransaction staleTransaction = distributedCacheStore.CreateTransaction();
+
+                staleTransaction.AddCondition(cachedValue.IsNullOrEmpty ? Condition.KeyNotExists(lockKey) : Condition.StringEqual(lockKey, cachedValue));
+
+                _ = staleTransaction.SetRemoveAsync(serverKey, member);
+
+                await staleTransaction.ExecuteAsync();
 
                 continue;
             }
