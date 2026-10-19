@@ -255,6 +255,7 @@ git commit -m "Query Match Servers For Reconnectable Slots"
 - Modify: `TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.cs` (register `MatchLockService` as a singleton)
 - Modify: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestData.cs:63-81` (optional `port` and `ipAddress` on `SeedMatchServer`; add `GetUserID` and `SeedLockedMatch`)
 - Modify: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatServerHost.cs` (add `ConnectAndAuthenticateMatchServerAsync`)
+- Create: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/RecordingLogger.cs`
 - Modify: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Internals/UsingDirectives.cs` (add `global using ASPIRE.Common.Enumerations.Match;`) and `Internals/TypeAliases.cs` (add `global using MatchType = ASPIRE.Common.Enumerations.Match.MatchType;`, as the chat server does, because `System.IO.MatchType` would otherwise be ambiguous)
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockVerificationTests.cs`
 
@@ -271,7 +272,8 @@ git commit -m "Query Match Servers For Reconnectable Slots"
     - `ChatServerHost.ConnectAndAuthenticateMatchServerAsync(int serverID, string cookie)` returns the `TcpClient` once `Context.MatchServerChatSessions` holds the server.
     - `ChatTestData.GetUserID(IServiceProvider services, int accountID)` reads the account's user ID from the host's `MerrickContext`.
     - `ChatTestData.WaitUntilLockIsGone(ChatServerHost host, int userID, TimeSpan timeout)` polls `GetMatchLock` and returns whether the lock disappeared in time.
-    - `ChatTestData.SeedLockedMatch(ChatServerHost host, int userID, int accountID, string accountName, FakeMatchServerGameSocket gameSocket, GamePhase gamePhase = GamePhase.GAME_PHASE_ACTIVE, string registeredAddress = "127.0.0.1", bool withChatSession = true)` returns a `LockedMatch : IAsyncDisposable` with `MatchLock Lock` and the match server `TcpClient?`. It seeds a `ServerHost` account with `SeedAccount`, and a match server at `registeredAddress` and the game socket's port with `SeedMatchServer`. When `withChatSession` holds, it connects with `ConnectAndAuthenticateMatchServerAsync` and then sets `Context.MatchServerChatSessions[serverID].Metadata.Status = ChatProtocol.ServerStatus.SERVER_STATUS_ACTIVE`, `.GamePhase = (int) gamePhase`, and `.MatchID = matchID`. It writes the lock with `SetMatchLock`: random match and correlation IDs, `ServerAddress = registeredAddress`, and `TimestampStarted = now`. On disposal it removes the lock and closes the connection, because `ChatServerHost` databases restart their identifiers while the cache is shared and unprefixed.
+    - `internal sealed class RecordingLogger<TCategory> : ILogger<TCategory>` in `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/RecordingLogger.cs`, recording each entry's `LogLevel` and formatted message in a `ConcurrentQueue`, so a test can construct `MatchLockService` directly (as other service tests do with `NullLogger`) and count its error entries.
+    - `ChatTestData.SeedLockedMatch(ChatServerHost host, int userID, int accountID, string accountName, FakeMatchServerGameSocket gameSocket, GamePhase gamePhase = GamePhase.GAME_PHASE_ACTIVE, string registeredAddress = "127.0.0.1", bool withChatSession = true)` returns a `LockedMatch : IAsyncDisposable` with `MatchLock Lock` and `TcpClient? MatchServerConnection`. It seeds a `ServerHost` account with `SeedAccount`, and a match server at `registeredAddress` and the game socket's port with `SeedMatchServer`. When `withChatSession` holds, it connects with `ConnectAndAuthenticateMatchServerAsync` and then sets `Context.MatchServerChatSessions[serverID].Metadata.Status = ChatProtocol.ServerStatus.SERVER_STATUS_ACTIVE`, `.GamePhase = (int) gamePhase`, and `.MatchID = matchID`. It writes the lock with `SetMatchLock`: random match and correlation IDs, `ServerAddress = registeredAddress`, and `TimestampStarted = now`. On disposal it removes the lock and closes the connection, because `ChatServerHost` databases restart their identifiers while the cache is shared and unprefixed.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -305,6 +307,9 @@ public async Task A_Live_Server_Hosting_The_Match_Does_Not_Rule_The_Lock_Out(Cha
     // registeredAddress "192.0.2.1" (unroutable), game socket answers 120000: Verify == SendBack; the lock remains; gameSocket.Requests contains (Lock.MatchID, Lock.AccountID)
 [Test] public async Task Verifying_A_Lost_Slot_Lifts_The_Lock()                   // answers 0 in GAME_PHASE_ACTIVE: LiftSlotGone; GetMatchLock is NULL
 [Test] public async Task Verifying_Against_An_Unanswering_Server_Lifts_The_Lock()  // Answers = FALSE: LiftSlotUnconfirmed; GetMatchLock is NULL
+[Test] public async Task An_Unreachable_Server_Is_Logged_As_An_Error_Once()
+    // MatchLockService built with the host's IDatabase, a new MatchServerReconnectQuery, and a RecordingLogger; Answers = FALSE;
+    // Verify, store the same lock again, Verify again: exactly one Error entry, naming the game socket's address and port
 [Test] public async Task Verifying_A_Registered_Server_Without_A_Chat_Session_Queries_Its_Registered_Address_And_Keeps_The_Lock()
     // withChatSession FALSE, registeredAddress "127.0.0.1", answers 0: SendBack (unknown phase); the lock remains; the game socket received the request
 ```
@@ -324,7 +329,7 @@ Expected: FAIL to compile, because `MatchLockService`, `MatchLockVerdict`, and `
 5. A status of `IDLE`, `SLEEPING`, `CRASHED`, or `KILLED` gives `LiftMatchOver`.
 6. Anything else gives NULL.
 
-`EvaluateSlot` implements the reading table in Decisions. `Verify` reads the server with `GetMatchServerByID(matchLock.ServerID)` and the session from `Context.MatchServerChatSessions`, builds the end point as Decisions describes, queries only when `EvaluateServer` returns NULL, and passes the reported phase, or NULL without a session, to `EvaluateSlot`. When a server leaves a query unanswered, `Verify` logs at error level once per server ID (a `ConcurrentDictionary` of reported IDs, cleared for a server when it next answers), naming the server and the address and port tried. None of this is configurable.
+`EvaluateSlot` implements the reading table in Decisions. `Verify` reads the server with `GetMatchServerByID(matchLock.ServerID)` and the session from `Context.MatchServerChatSessions`. It builds the end point as Decisions describes: the chat connection's address when there is a session, and otherwise the registered server's `IPAddress`, never `matchLock.ServerAddress`, so the two cannot diverge. It queries only when `EvaluateServer` returns NULL, and passes the reported phase, or NULL without a session, to `EvaluateSlot`. When a server leaves a query unanswered, `Verify` logs at error level once per server ID (a `ConcurrentDictionary` of reported IDs, cleared for a server when it next answers), naming the server and the address and port tried. None of this is configurable.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
@@ -334,7 +339,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add ASPIRE.Common/Enumerations/Match/GamePhase.cs TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchLockVerdict.cs TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestData.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatServerHost.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Internals/UsingDirectives.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Internals/TypeAliases.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockVerificationTests.cs
+git add ASPIRE.Common/Enumerations/Match/GamePhase.cs TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchLockVerdict.cs TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/RecordingLogger.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestData.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatServerHost.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Internals/UsingDirectives.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Internals/TypeAliases.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockVerificationTests.cs
 git commit -m "Verify Match Locks Before Sending Players Back"
 ```
 
@@ -511,7 +516,7 @@ git commit -m "Lift Match Locks When Matches Or Servers End"
 - Consumes: Task 3's `Verify`, `SeedLockedMatch`, `GetUserID`, and `FakeMatchServerGameSocket`; Task 1's `GetMatchLock`.
 - Produces:
   - `internal static readonly TimeSpan SessionCookieLifetime` in `DistributedCacheExtensions`, used by `SetAccountNameForSessionCookie`.
-  - `public sealed class MatchLockReturn(int matchID, DateTimeOffset expires)` with `int MatchID`, `DateTimeOffset Expires`, `DateTimeOffset LastVerified { get; set; }`, `CancellationTokenSource Cancellation`, and `void Cancel()`.
+  - `public sealed class MatchLockReturn(int matchID, DateTimeOffset expires)` with `int MatchID`, `DateTimeOffset Expires`, `DateTimeOffset LastVerified { get; set; }`, `DateTimeOffset LastNotified { get; set; }`, `CancellationTokenSource Cancellation`, and `void Cancel()`.
   - On `ClientChatSession`:
     - `public MatchLockReturn? PendingMatchLockReturn` (a `Volatile.Read` of a private field);
     - `public bool TryReplacePendingMatchLockReturn(MatchLockReturn? expected, MatchLockReturn? replacement)` (`Interlocked.CompareExchange`; cancels `expected` when it is replaced);
@@ -560,6 +565,10 @@ public async Task Logging_In_While_Locked_Sends_The_Player_Back_To_Their_Match()
 [Test] public async Task A_Lifted_Lock_Stops_The_Reminders()                              // the game socket answers 0 in GAME_PHASE_ACTIVE after the first: no reminder; the lock is gone
 [Test] public async Task Repeated_Enforcements_Within_The_Return_Window_Message_Once()
     // two direct MatchLockService.Enforce calls on the session: both TRUE; exactly one notice within ReturnResendInterval; one game socket request (the second skips Verify)
+[Test] [Arguments(true)] [Arguments(false)]
+public async Task An_Attempt_After_The_Resend_Interval_Gets_The_Notice_Again(bool slotAccount)
+    // Enforce, wait ReturnResendInterval plus a second, Enforce again: both TRUE; a second notice (SlotAccountMessage or OtherAccountMessage) arrives;
+    // for another account still no AUTO_MATCH_CONNECT, and for the slot account only the one reminder loop's frames
 [Test] public async Task Leaving_The_Match_Alone_Triggers_Nothing()                        // LEFT_GAME: neither frame within two seconds; the lock remains
 [Test] public async Task A_Lock_Whose_Slot_Is_Gone_Lifts_At_Login_And_Sends_Nothing()      // the game socket answers 0 in GAME_PHASE_ACTIVE: no frames; GetMatchLock is NULL
 [Test] public async Task An_Unanswered_Slot_Query_Lifts_The_Lock_And_Lets_The_Attempt_Proceed()
@@ -580,10 +589,9 @@ Expected: FAIL to compile, because `Enforce`, `MatchLockReturn`, and the protoco
 `Enforce`, in order:
 1. Returns FALSE when the account is `Guest` or `Staff`.
 2. Reads the lock for `session.Account.User.ID`; when there is none, it clears any pending return and returns FALSE.
-3. When an unexpired return for the same match is pending and was verified within `ReturnResendInterval`, returns TRUE without verifying again.
-4. Otherwise calls `Verify`; any verdict but `SendBack` clears the pending return and returns FALSE.
-5. When an unexpired return for the same match is pending, refreshes its `LastVerified` and returns TRUE.
-6. Otherwise sends the slot account or other account notice and installs a new `MatchLockReturn` expiring after `ReturnWindow` with `TryReplacePendingMatchLockReturn`. For the slot account only, it starts the reminder loop without awaiting it, logging its exceptions. It returns TRUE.
+3. Calls `Verify`, unless an unexpired return for the same match is pending and was verified within `ReturnResendInterval`. Any verdict but `SendBack` clears the pending return and returns FALSE.
+4. When an unexpired return for the same match is pending, refreshes its `LastVerified` if it verified. It re-sends the slot account or other account notice only when `LastNotified` is at least `ReturnResendInterval` old, then records `LastNotified`, so every attempt after the interval is told why it was refused. It never starts a second reminder loop, and it returns TRUE.
+5. Otherwise sends the notice and installs a new `MatchLockReturn` (with `LastVerified` and `LastNotified` set to now) expiring after `ReturnWindow`, with `TryReplacePendingMatchLockReturn`. For the slot account only, it starts the reminder loop without awaiting it, logging its exceptions. It returns TRUE.
 
 The reminder loop:
 - sends `AUTO_MATCH_CONNECT` at once;
@@ -741,6 +749,8 @@ public async Task Client_Connection_Is_Never_Refused_For_Guest_And_Staff_Account
 }
 ```
 
+The four reconnect-safety tests (own server, own server after a session renewal, an unrecognised session, and a copy-on-write master session) already pass today, because `c_conn` serves everyone: they are regression guards, not red steps. Each also asserts, against the same lock, that a connection from another registered server is refused, which fails at the red step.
+
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `dotnet test --project ASPIRE.Tests.KONGOR.MasterServer --treenode-filter "/*/*/HostingAuthenticationTests/*"` and `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer --treenode-filter "/*/*/MatchLockRefusalMonitorTests/*"`
@@ -845,6 +855,7 @@ public async Task Reconnecting_To_The_Same_Match_Server_Returns_The_Same_Game_Co
     string second = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
 
     await Assert.That(second).IsEqualTo(first);
+    await Assert.That(await DistributedCache.GetGameCookie(await GetAccountID(NonHostAccountName))).IsEqualTo(first);
 }
 
 [Test] public async Task Reconnecting_After_The_Match_Server_Renews_Its_Session_Returns_The_Same_Game_Cookie()   // reconnect safety
@@ -861,7 +872,7 @@ public async Task Reconnecting_To_The_Same_Match_Server_Returns_The_Same_Game_Co
     // two PerformFullAuthentication calls: GetLatestSessionCookie(account.ID) equals the second cookie and not the first
 ```
 
-Tests that cause a refusal carry `[NotInParallel(DistributedCacheExtensions.MatchLockRefusalChannel)]`.
+Tests that cause a refusal carry `[NotInParallel(DistributedCacheExtensions.MatchLockRefusalChannel)]`. The three reconnect tests (same server, after a session renewal, and an unrecognised session) also pass against today's fixed cookie, so their equality of cookies is a regression guard, not a red step. Each also asserts that `GetGameCookie` for the account equals the cookie returned, which fails at the red step, as the first test shows.
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
