@@ -193,7 +193,17 @@ public partial class ServerRequesterController
                 Description = serverDescription
             };
 
+            CopyOnWriteMaster? replacedCopyOnWriteMaster = (await DistributedCache.GetCopyOnWriteMasters()).SingleOrDefault(master => master.HostAccountName.Equals(copyOnWriteMaster.HostAccountName));
+
             await DistributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
+
+            // A Copy-On-Write Master Renews Its Session From The Same Address And Port, Which Is Expected And Not Warned About
+            // A Replacement From A Different Address Or Port Means That Two Copy-On-Write Masters Share One Host Account, And Each Then Replaces The Other's Session
+            if (replacedCopyOnWriteMaster is not null && (replacedCopyOnWriteMaster.IPAddress.Equals(copyOnWriteMaster.IPAddress) is false || replacedCopyOnWriteMaster.Port != copyOnWriteMaster.Port))
+            {
+                Logger.LogWarning(@"Copy-On-Write Master ID ""{CopyOnWriteMasterID}"" For Host Account ""{HostAccountName}"" Replaced A Session Registered At ""{ReplacedCopyOnWriteMasterAddress}"":""{ReplacedCopyOnWriteMasterPort}"" With One At ""{CopyOnWriteMasterAddress}"":""{CopyOnWriteMasterPort}""",
+                    copyOnWriteMaster.ID, copyOnWriteMaster.HostAccountName, replacedCopyOnWriteMaster.IPAddress, replacedCopyOnWriteMaster.Port, copyOnWriteMaster.IPAddress, copyOnWriteMaster.Port);
+            }
 
             Logger.LogInformation(@"Copy-On-Write Master ID ""{CopyOnWriteMasterID}"" For Host Account ""{HostAccountName}"" Was Registered At ""{CopyOnWriteMasterAddress}"":""{CopyOnWriteMasterPort}""",
                 copyOnWriteMaster.ID, copyOnWriteMaster.HostAccountName, copyOnWriteMaster.IPAddress, copyOnWriteMaster.Port);
