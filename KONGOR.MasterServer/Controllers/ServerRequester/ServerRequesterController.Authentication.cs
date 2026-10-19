@@ -205,11 +205,12 @@ public partial class ServerRequesterController
 
         await DistributedCache.SetMatchServer(hostAccountName, matchServer);
 
-        // Any Match Server Still Using The Replaced Session Is Told To Authenticate Again On Its Next Heartbeat
-        if (replacedMatchServer is not null && replacedMatchServer.Cookie.Equals(matchServer.Cookie) is false)
+        // A Match Server Renews Its Session From The Same Address And Port After Every Match, Which Is Expected And Not Warned About
+        // A Replacement From A Different Address Or Port Means That Two Processes Share One Login, And Each Then Replaces The Other's Session, So That They Take Turns Being Told To Authenticate Again
+        if (replacedMatchServer is not null && (replacedMatchServer.IPAddress.Equals(matchServer.IPAddress) is false || replacedMatchServer.Port != matchServer.Port))
         {
-            Logger.LogWarning(@"Server ID ""{MatchServerID}"" For Host Account ""{HostAccountName}"" And Instance ""{MatchServerInstance}"" Replaced Its Previous Session",
-                matchServer.ID, matchServer.HostAccountName, matchServer.Instance);
+            Logger.LogWarning(@"Server ID ""{MatchServerID}"" For Host Account ""{HostAccountName}"" And Instance ""{MatchServerInstance}"" Replaced A Session Registered At ""{ReplacedMatchServerAddress}"":""{ReplacedMatchServerPort}"" With One At ""{MatchServerAddress}"":""{MatchServerPort}""",
+                matchServer.ID, matchServer.HostAccountName, matchServer.Instance, replacedMatchServer.IPAddress, replacedMatchServer.Port, matchServer.IPAddress, matchServer.Port);
         }
 
         // A Match Server Authenticates Again After Every Match And Whenever Its Session Is Renewed, So It Is Only Added To Its Manager When It Is Not Already Listed
