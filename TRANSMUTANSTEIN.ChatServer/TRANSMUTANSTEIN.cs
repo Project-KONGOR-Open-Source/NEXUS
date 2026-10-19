@@ -119,6 +119,9 @@ public class TRANSMUTANSTEIN
         // Register The Match Server Reconnect Query That Asks Match Servers Whether A Player's Slot Can Still Be Reclaimed
         builder.Services.AddSingleton<MatchServerReconnectQuery>();
 
+        // Register The Match Lock Service That Verifies A Match Lock Before Its Player Is Sent Back To The Locked Match
+        builder.Services.AddSingleton<MatchLockService>();
+
         // Register Account Logout Subscriber Service That Consumes Force-Logout Signals Published By The Master Server
         builder.Services.AddHostedService<LogoutMonitor>();
 

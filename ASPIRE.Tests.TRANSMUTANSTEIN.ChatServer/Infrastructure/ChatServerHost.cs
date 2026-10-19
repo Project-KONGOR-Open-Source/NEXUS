@@ -134,6 +134,32 @@ internal sealed class ChatServerHost : IAsyncDisposable
         return client;
     }
 
+    /// <summary>
+    ///     Connects a match server, performs a valid handshake, and waits until its session is registered in the match server pool, returning the connected match server.
+    ///     The match server must already be seeded with the given identifier and cookie.
+    /// </summary>
+    public async Task<TcpClient> ConnectAndAuthenticateMatchServerAsync(int serverID, string cookie)
+    {
+        TcpClient client = await ConnectMatchServerAsync();
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildServerHandshake(serverID, cookie));
+
+        using (CancellationTokenSource timeout = new (TimeSpan.FromSeconds(10)))
+        {
+            ushort command = await ChatTestProtocol.ReadCommand(stream, timeout.Token);
+
+            if (command != (ushort) ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT)
+                throw new InvalidOperationException(@$"The Match Server Handshake For Server ID ""{serverID}"" Was Not Accepted (Received Command {command})");
+        }
+
+        if (await ChatTestProtocol.WaitUntil(() => Context.MatchServerChatSessions.ContainsKey(serverID), TimeSpan.FromSeconds(10)) is false)
+            throw new InvalidOperationException(@$"The Match Server Session For Server ID ""{serverID}"" Was Not Registered Within The Timeout");
+
+        return client;
+    }
+
     public async ValueTask DisposeAsync()
     {
         await Application.StopAsync();

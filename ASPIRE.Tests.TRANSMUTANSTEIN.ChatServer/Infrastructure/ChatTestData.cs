@@ -46,6 +46,18 @@ internal static class ChatTestData
     }
 
     /// <summary>
+    ///     Reads the identifier of the user who owns the given account.
+    /// </summary>
+    public static async Task<int> GetUserID(IServiceProvider services, int accountID)
+    {
+        await using AsyncServiceScope scope = services.CreateAsyncScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        return await databaseContext.Accounts.Where(account => account.ID == accountID).Select(account => account.User.ID).SingleAsync();
+    }
+
+    /// <summary>
     ///     Seeds the client session cookie to account name mapping that the client handshake validates.
     /// </summary>
     public static async Task SeedClientSessionCookie(IServiceProvider services, string cookie, string accountName)
@@ -59,8 +71,9 @@ internal static class ChatTestData
 
     /// <summary>
     ///     Seeds a match server in the distributed cache so that a match server handshake with the matching cookie and identifier succeeds.
+    ///     The address and port are those at which the match server registers, which tests of the reconnect query point at a fake game socket.
     /// </summary>
-    public static async Task SeedMatchServer(IServiceProvider services, int serverID, int hostAccountID, string hostAccountName, string cookie)
+    public static async Task SeedMatchServer(IServiceProvider services, int serverID, int hostAccountID, string hostAccountName, string cookie, int port = 11235, string ipAddress = "127.0.0.1")
     {
         await using AsyncServiceScope scope = services.CreateAsyncScope();
 
@@ -74,8 +87,8 @@ internal static class ChatTestData
             Name = $"server-{serverID}",
             MatchServerManagerID = null,
             Instance = 1,
-            IPAddress = "127.0.0.1",
-            Port = 11235,
+            IPAddress = ipAddress,
+            Port = port,
             Location = "USE",
             Description = "Integration Test Server",
             Cookie = cookie
@@ -101,5 +114,81 @@ internal static class ChatTestData
         second.FriendedPeers.Add(new FriendedPeer { ID = firstAccount.ID, Name = firstAccount.Name, ClanTag = null, FriendGroup = "Friends" });
 
         await databaseContext.SaveChangesAsync();
+    }
+
+    /// <summary>
+    ///     Locks a user to a match in progress on a seeded match server, whose game socket is the given fake and whose registered address is the given one.
+    ///     With a chat session, the match server completes its handshake and reports the locked match in the given game phase, as a live match server does.
+    ///     Without one, the match server stays registered with no chat session, as it is while the stale host reaper waits out its grace period.
+    /// </summary>
+    public static async Task<LockedMatch> SeedLockedMatch(ChatServerHost host, int userID, int accountID, string accountName, FakeMatchServerGameSocket gameSocket,
+        GamePhase gamePhase = GamePhase.GAME_PHASE_ACTIVE, string registeredAddress = "127.0.0.1", bool withChatSession = true)
+    {
+        (int hostAccountID, string hostAccountName) = await SeedAccount(host.Services, AccountType.ServerHost);
+
+        int serverID = Random.Shared.Next(100_000, 999_999);
+        int matchID = Random.Shared.Next(100_000, 999_999);
+        string cookie = Guid.CreateVersion7().ToString();
+
+        await SeedMatchServer(host.Services, serverID, hostAccountID, hostAccountName, cookie, gameSocket.Port, registeredAddress);
+
+        TcpClient? matchServerConnection = null;
+
+        if (withChatSession)
+        {
+            matchServerConnection = await host.ConnectAndAuthenticateMatchServerAsync(serverID, cookie);
+
+            MatchServerChatSessionMetadata metadata = Context.MatchServerChatSessions[serverID].Metadata;
+
+            metadata.Status = ChatProtocol.ServerStatus.SERVER_STATUS_ACTIVE;
+            metadata.GamePhase = (int) gamePhase;
+            metadata.MatchID = matchID;
+        }
+
+        MatchLock matchLock = new ()
+        {
+            UserID = userID,
+            AccountID = accountID,
+            AccountName = accountName,
+            MatchID = matchID,
+            CorrelationID = Random.Shared.Next(),
+            ArrangedMatchType = MatchType.AM_MATCHMAKING,
+            ServerID = serverID,
+            ServerAddress = registeredAddress,
+            ServerPort = (ushort) gameSocket.Port,
+            TimestampStarted = DateTimeOffset.UtcNow
+        };
+
+        await using AsyncServiceScope scope = host.Services.CreateAsyncScope();
+
+        IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+        await distributedCacheStore.SetMatchLock(matchLock);
+
+        return new LockedMatch(host, matchLock, matchServerConnection);
+    }
+
+    /// <summary>
+    ///     Polls the distributed cache until the user's match lock is gone or the timeout elapses, returning whether it disappeared in time.
+    /// </summary>
+    public static async Task<bool> WaitUntilLockIsGone(ChatServerHost host, int userID, TimeSpan timeout)
+    {
+        await using AsyncServiceScope scope = host.Services.CreateAsyncScope();
+
+        IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+        using CancellationTokenSource cancellation = new (timeout);
+
+        while (cancellation.IsCancellationRequested is false)
+        {
+            if (await distributedCacheStore.GetMatchLock(userID) is null)
+                return true;
+
+            try { await Task.Delay(TimeSpan.FromMilliseconds(50), cancellation.Token); }
+
+            catch (OperationCanceledException) { break; }
+        }
+
+        return await distributedCacheStore.GetMatchLock(userID) is null;
     }
 }
