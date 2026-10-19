@@ -47,7 +47,8 @@ These would make the feature a failure even if it technically worked:
 - **NEXUS's conventions** (`claude.md` and `agents.md`). Work happens on branch `matchmaking-match-lock`, which is based on `server-session-recovery`, whose `c_conn`, `aids2cookie`, and session-recovery changes this feature builds on.
 - **Repositories avoid depending on each other.** Everything here is NEXUS, plus one existing HON engine setting that NEXUS switches on remotely. No CI depends on HON or GEMINI.
 - **State survives what it must.** The lock outlives the player's chat connection, logouts, and restarts of the chat server, so it lives in the distributed cache (Valkey), not in a chat session's memory, and it always has an expiry.
-- **Configuration holds tunable values,** such as the safety time limit and an on/off switch for the feature. Documentation names the settings file instead of copying values.
+- **The lock is NEXUS's default behaviour,** with no switch to turn it off (owner's decision). A case that cannot be confirmed fails safe (see "Sending a player back"), so no emergency switch is needed, and a switch would only add a way for the master and chat servers to disagree.
+- **Configuration holds the one tunable value,** the safety time limit. Documentation names the settings file instead of copying the value.
 
 ## The Owner's Decisions
 
@@ -104,6 +105,12 @@ If all three hold, the chat server refuses whatever the player attempted, with a
 The client ignores `AUTO_MATCH_CONNECT` while it counts as connected to a server, and it counts connecting and authenticating as connected (`CHost::IsConnected`). So a send-back must reach the client only once it is not on, or joining, any server.
 
 If any check fails, the lock lifts and the attempt proceeds normally.
+
+**When NEXUS cannot confirm** (the owner's decision: no punishment). If the match server does not answer the slot query, the lock lifts so that nobody is sent somewhere that may be dead. Two safeguards come with that:
+- **The player's game cookie stays exactly as it was,** for as long as that match could still be running. Joining another game therefore never makes the original server's guard remove them, and they can still reconnect. Leaving on purpose is then dealt with as before, by the disconnect window and the leaver percentage.
+- **It is logged as an error,** once per server, naming the address NEXUS tried. If NEXUS could not reach match servers at all, the feature would otherwise quietly enforce nothing.
+
+A match server that is still registered, but whose chat connection has dropped within the grace period the reaper allows, counts as alive, not gone.
 
 ### The triggers
 
@@ -163,7 +170,7 @@ If any check fails, the lock lifts and the attempt proceeds normally.
 - The exact source of slot validity: the reconnect query, status reports, or both. The requirement is that no player is ever sent to a slot they cannot reclaim.
 - How the master server notifies the chat server after refusing a `c_conn`.
 - The wording of the messages.
-- The configuration names and defaults, including the safety maximum and an on/off switch.
+- The configuration name and default of the safety maximum.
 - Tests: unit and integration tests in NEXUS's test projects for every trigger, every release condition, and every reconnect-safety rule. Live verification needs real game clients in a matchmade match; plan it with the owner.
 
 ## Follow-Ups (Not In This Design)
