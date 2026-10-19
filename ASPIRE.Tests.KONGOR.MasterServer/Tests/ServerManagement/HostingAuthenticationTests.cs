@@ -500,7 +500,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         using (Assert.Multiple())
         {
-            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
             await Assert.That(body).DoesNotContain("aids2cookie");
             await Assert.That(body).DoesNotContain("aids2gcookie");
             await Assert.That(body).DoesNotContain(cookie);

@@ -13,7 +13,7 @@ public partial class ServerRequesterController
         string? session = Request.Form["session"];
 
         if (session is null)
-            return Unauthorized(@"Missing Value For Form Parameter ""session""");
+            return BadRequest(@"Missing Value For Form Parameter ""session""");
 
         MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 
