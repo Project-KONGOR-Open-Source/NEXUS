@@ -40,7 +40,8 @@ These would make the feature a failure even if it technically worked:
 - **Breaking reconnect to the match in progress.** A player must always get back into their own match, even if NEXUS has lost track of that match server's session.
 - **Forcing a player back to a crashed or finished server,** or to a match they can no longer rejoin.
 - **Pulling a player back immediately after they leave,** rather than on their next attempt to play.
-- **Letting the guard terminate a player's match for them.** A rage-quitter who tries another game must be sent back, not removed from their first match: removal would make the leave official instead of preventing it.
+- **Letting the guard terminate a locked player's match for them.** While a lock holds, a rage-quitter who tries another game must be sent back, not removed from their first match: removal would make the leave official instead of preventing it.
+- **Keeping a player who has moved on in their old match.** Once a lock has lifted, for any reason, a player who joins another game has left, and their old match server must remove them promptly. A removed player's team shares their gold and can use or sell their items, so keeping them in the match only hurts that team.
 
 ## Constraints
 
@@ -50,7 +51,7 @@ These would make the feature a failure even if it technically worked:
 - **The lock is NEXUS's default behaviour,** with no switch to turn it off (owner's decision). A case that cannot be confirmed fails safe (see "Sending a player back"), so no emergency switch is needed, and a switch would only add a way for the master and chat servers to disagree.
 - **There is no configuration** (owner's decision). The safety limit is a constant in code of one hour from when the lock begins, about a long Caldavar match.
   - **A longer match outliving it is fine:** rage-quitters want a new match right after leaving, so the first minutes are the hot zone, and every attempt to play re-verifies the lock anyway.
-  - **Reaching it counts as an unconfirmed lift:** the player's game cookie stays unchanged, so they are never removed from a match that might still be running.
+  - **After it lifts,** a player who joins another game is removed from their old match by the duplicate-session guard, which is intended (see the Anti-Goals).
 
 ## The Owner's Decisions
 
@@ -90,7 +91,7 @@ The lock lifts on the first of these:
   - statistics submission for the match;
 - **the server goes:** the match server disappears from NEXUS (reaped, or silent beyond the stale threshold the reaper already uses);
 - **the slot goes:** the player no longer holds a reclaimable slot. That is checked whenever a trigger fires, and from the server's status reports where they say so;
-- **the safety limit:** one hour after the lock began, so a missed signal can never lock anyone forever. Reaching it counts as an unconfirmed lift.
+- **the safety limit:** one hour after the lock began, so a missed signal can never lock anyone forever.
 
 ### Sending a player back
 
@@ -108,8 +109,9 @@ The client ignores `AUTO_MATCH_CONNECT` while it counts as connected to a server
 
 If any check fails, the lock lifts and the attempt proceeds normally.
 
-**When NEXUS cannot confirm** (the owner's decision: no punishment). If the match server does not answer the slot query, the lock lifts so that nobody is sent somewhere that may be dead. Two safeguards come with that:
-- **The player's game cookie stays exactly as it was,** for as long as that match could still be running. Joining another game therefore never makes the original server's guard remove them, and they can still reconnect. Leaving on purpose is then dealt with as before, by the disconnect window and the leaver percentage.
+**When NEXUS cannot confirm,** because the match server does not answer the slot query, the lock lifts so that nobody is sent somewhere that may be dead.
+- **The player who simply waits, or goes back,** is untouched, and can still reconnect to their match.
+- **The player who joins another game has left.** That game gives them a new game cookie, and the old match server's guard removes them at its next account check (the owner's decision), so their team gets the leaver benefits straight away.
 - **It is logged as an error,** once per server, naming the address NEXUS tried. If NEXUS could not reach match servers at all, the feature would otherwise quietly enforce nothing.
 
 A match server that is still registered, but whose chat connection has dropped within the grace period the reaper allows, counts as alive, not gone.
