@@ -444,11 +444,19 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         HttpResponseMessage response = await ConnectClient(Guid.CreateVersion7().ToString(), cookie);
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await AssertClientConnectionReturnsTheAccount(response, NonHostAccountName);
+    }
 
-        IDictionary<object, object> body = await DeserialisePHPResponse(response);
+    [Test]
+    public async Task Client_Connection_With_An_Empty_Session_Returns_The_Account()
+    {
+        await InitialiseIn("Development");
 
-        await Assert.That(Convert.ToInt32(body["account_id"])).IsEqualTo(await GetAccountID(NonHostAccountName));
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await ConnectClient(string.Empty, cookie);
+
+        await AssertClientConnectionReturnsTheAccount(response, NonHostAccountName);
     }
 
     [Test]
@@ -462,11 +470,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         HttpResponseMessage response = await ConnectClient(session, cookie);
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-
-        IDictionary<object, object> body = await DeserialisePHPResponse(response);
-
-        await Assert.That(Convert.ToInt32(body["account_id"])).IsEqualTo(await GetAccountID(NonHostAccountName));
+        await AssertClientConnectionReturnsTheAccount(response, NonHostAccountName);
     }
 
     [Test]
@@ -480,11 +484,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
         HttpResponseMessage response = await ConnectClient(session, cookie);
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-
-        IDictionary<object, object> body = await DeserialisePHPResponse(response);
-
-        await Assert.That(Convert.ToInt32(body["account_id"])).IsEqualTo(await GetAccountID(NonHostAccountName));
+        await AssertClientConnectionReturnsTheAccount(response, NonHostAccountName);
     }
 
     [Test]
@@ -768,6 +768,26 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     /// </summary>
     private async Task<HttpResponseMessage> ConnectClient(string session, string cookie)
         => await SendServerRequest("c_conn", new () { { "session", session }, { "cookie", cookie }, { "ip", "127.0.0.1" }, { "cas", "0" }, { "new", "1" } });
+
+    /// <summary>
+    ///     Asserts that the client connection reply authenticates the account, with the "game_cookie" without which the match server disconnects the client, and without "auth_failure", which would make the match server drop its session, or end its match if the match has not started yet.
+    /// </summary>
+    private async Task AssertClientConnectionReturnsTheAccount(HttpResponseMessage response, string accountName)
+    {
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        string body = await response.Content.ReadAsStringAsync();
+
+        IDictionary<object, object> fields = await DeserialisePHPResponse(response);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(Convert.ToInt32(fields["account_id"])).IsEqualTo(await GetAccountID(accountName));
+            await Assert.That(fields).ContainsKey("game_cookie");
+            await Assert.That((string) fields["game_cookie"]).IsNotEmpty();
+            await Assert.That(body).DoesNotContain("auth_failure");
+        }
+    }
 
     /// <summary>
     ///     Sends the request which a match server sends to map account IDs to their session cookies, but with the account IDs in the query string, where the master server reads them, and without a session when the session is <see langword="null"/>.
