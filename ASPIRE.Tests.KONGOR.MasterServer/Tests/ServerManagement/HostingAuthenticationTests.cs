@@ -387,13 +387,30 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     [Test]
     [Arguments("0")]
     [Arguments("1")]
-    [Arguments("2")]
     [Arguments("3")]
     public async Task Heartbeat_With_An_Unrecognised_Session_Is_Answered_With_An_Authentication_Failure(string connectionState)
     {
         await InitialiseIn("Development");
 
         HttpResponseMessage response = await SendHeartbeat(Guid.CreateVersion7().ToString(), connectionState);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo(AuthenticationFailureResponse);
+        }
+    }
+
+    /// <summary>
+    ///     A match server in a lobby, with its world loaded and its match not started, ends that match and disconnects its players when it reads "auth_failure", as it does for the retail master server.
+    ///     This is the intended reply, because "start_game" refuses the unregistered session, so that match could never start anyway.
+    /// </summary>
+    [Test]
+    public async Task Heartbeat_With_An_Unrecognised_Session_From_A_Lobby_Is_Answered_With_An_Authentication_Failure_Which_Ends_The_Unstarted_Match()
+    {
+        await InitialiseIn("Development");
+
+        HttpResponseMessage response = await SendHeartbeat(Guid.CreateVersion7().ToString(), "2");
 
         using (Assert.Multiple())
         {
