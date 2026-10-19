@@ -588,6 +588,8 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
 
             IDictionary<object, object> gameCookies = (IDictionary<object, object>) body["aids2gcookie"];
 
+            // A Real Match Server Never Receives This Reply, Because It Posts The Account IDs In The Request Body Rather Than In The Query String
+            // If It Did, It Would Kick Every Listed Player, Because It Compares Each Player's "aids2gcookie" Value With The "game_cookie" Which "c_conn" Returned, And This Holds The Client Session Cookie Instead, So It Would Terminate Each Player And Disconnect Them As A Duplicate Connection
             using (Assert.Multiple())
             {
                 foreach ((int accountID, string cookie) in cookies)
@@ -595,6 +597,52 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
                     await Assert.That((string) clientCookies[accountID.ToString()]).IsEqualTo(cookie);
                     await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(cookie);
                 }
+            }
+        }
+
+        finally
+        {
+            await unprefixedDistributedCache.KeyDeleteAsync([.. unprefixedKeys]);
+        }
+    }
+
+    /// <summary>
+    ///     The match server ("CGameServer::GetAccountAuth") posts the account IDs as "aids[]" in the request body, where the master server does not read them, so both lists are empty, and the match server, which only checks the players listed, kicks none of them.
+    ///     The master server finds live session cookies by scanning the whole distributed cache keyspace, which the per-test key prefix hides from it, so this test also stores each session cookie key without the prefix, so that the lists are empty only because of where the account IDs are posted.
+    ///     The test runs in isolation, so that no other test's master server purges those session cookie keys while it starts up.
+    /// </summary>
+    [Test]
+    [NotInParallel]
+    public async Task Account_IDs_To_Cookie_Requested_As_The_Match_Server_Requests_It_Returns_Empty_Lists_Which_Kick_No_Player()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateMatchServer();
+
+        Dictionary<int, string> cookies = [];
+
+        foreach (string accountName in new List<string> { NonHostAccountName, DedicatedHostAccountName })
+            cookies.Add(await GetAccountID(accountName), await CreateClientSessionCookie(accountName));
+
+        IDatabase unprefixedDistributedCache = webApplicationFactory.Services.GetRequiredService<IConnectionMultiplexer>().GetDatabase();
+
+        List<RedisKey> unprefixedKeys = [.. cookies.Values.Select(cookie => new RedisKey($@"ACCOUNT-SESSION-COOKIE:[""{cookie}""]"))];
+
+        try
+        {
+            foreach (RedisKey unprefixedKey in unprefixedKeys)
+                await unprefixedDistributedCache.StringSetAsync(unprefixedKey, string.Empty, TimeSpan.FromMinutes(1));
+
+            HttpResponseMessage response = await RequestAccountCookiesInTheRequestBody(session, [.. cookies.Keys]);
+
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+            IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(((ICollection) body["aids2cookie"]).Count).IsEqualTo(0);
+                await Assert.That(((ICollection) body["aids2gcookie"]).Count).IsEqualTo(0);
             }
         }
 
@@ -722,7 +770,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         => await SendServerRequest("c_conn", new () { { "session", session }, { "cookie", cookie }, { "ip", "127.0.0.1" }, { "cas", "0" }, { "new", "1" } });
 
     /// <summary>
-    ///     Sends the request which a match server sends to map account IDs to their session cookies, without a session when the session is <see langword="null"/>.
+    ///     Sends the request which a match server sends to map account IDs to their session cookies, but with the account IDs in the query string, where the master server reads them, and without a session when the session is <see langword="null"/>.
     /// </summary>
     private async Task<HttpResponseMessage> RequestAccountCookies(string? session, params int[] accountIDs)
     {
@@ -738,6 +786,20 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         string accountIDsQuery = string.Join('&', accountIDs.Select((accountID, index) => $"aids[{index}]={accountID}"));
 
         return await httpClient.PostAsync($"server_requester.php?f=aids2cookie&{accountIDsQuery}", new FormUrlEncodedContent(formData));
+    }
+
+    /// <summary>
+    ///     Sends the request which a match server sends to map account IDs to their session cookies exactly as the match server ("CGameServer::GetAccountAuth") sends it, with each account ID posted as "aids[]" in the request body.
+    /// </summary>
+    private async Task<HttpResponseMessage> RequestAccountCookiesInTheRequestBody(string session, params int[] accountIDs)
+    {
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        List<KeyValuePair<string, string>> formData = [new ("session", session), .. accountIDs.Select(accountID => new KeyValuePair<string, string>("aids[]", accountID.ToString()))];
+
+        return await httpClient.PostAsync("server_requester.php?f=aids2cookie", new FormUrlEncodedContent(formData));
     }
 
     /// <summary>
