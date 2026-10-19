@@ -116,6 +116,9 @@ public class TRANSMUTANSTEIN
         // Register Flood Prevention Service
         builder.Services.AddSingleton<FloodPreventionService>();
 
+        // Register The Match Server Reconnect Query That Asks Match Servers Whether A Player's Slot Can Still Be Reclaimed
+        builder.Services.AddSingleton<MatchServerReconnectQuery>();
+
         // Register Account Logout Subscriber Service That Consumes Force-Logout Signals Published By The Master Server
         builder.Services.AddHostedService<LogoutMonitor>();
 
