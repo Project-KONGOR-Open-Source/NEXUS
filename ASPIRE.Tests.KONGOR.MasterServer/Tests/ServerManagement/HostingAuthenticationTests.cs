@@ -4,6 +4,7 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.ServerManagement;
 ///     Tests for the production-only block that prevents the built-in <see cref="OOTB.Accounts.OPERATOR"/> host account, which ships with a publicly-known password, from hosting match servers.
 ///     The block is applied at both server requester authentication endpoints (the match server manager's "replay_auth" and the match server's "new_session"), and only when the master server runs in the production environment, so that self-hosters running outside production are unaffected.
 ///     Also tests how the match server's "new_session" endpoint treats the server instance of the login, including the copy-on-write master (HON's "cowmaster") which Linux match server managers fork their match servers from, and which authenticates with an empty server instance.
+///     Also tests how the match server endpoints answer a session which is not registered: with the "auth_failure" reply, which makes the match server authenticate again, where acting upon it is safe, with a plain rejection where acting upon it would crash the match server, and as usual where a player reconnecting to a match in progress depends on the reply.
 /// </summary>
 public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
 {
@@ -12,6 +13,8 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     private const string NonHostAccountName = "NON-HOST";
 
     private const string HostPassword = "HOST-PASSWORD";
+
+    private const string AuthenticationFailureResponse = @"a:1:{i:0;s:12:""auth_failure"";}";
 
     [Test]
     public async Task Operator_Manager_Authentication_Is_Rejected_In_Production()
@@ -264,6 +267,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         using (Assert.Multiple())
         {
             await Assert.That(heartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await heartbeatResponse.Content.ReadAsStringAsync()).IsEmpty();
             await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
         }
     }
@@ -320,8 +324,10 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         using (Assert.Multiple())
         {
             await Assert.That(secondSession).IsNotEqualTo(firstSession);
-            await Assert.That(firstHeartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(firstHeartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await firstHeartbeatResponse.Content.ReadAsStringAsync()).IsEqualTo(AuthenticationFailureResponse);
             await Assert.That(secondHeartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await secondHeartbeatResponse.Content.ReadAsStringAsync()).IsEmpty();
         }
     }
 
@@ -349,18 +355,43 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         using (Assert.Multiple())
         {
             await Assert.That(await distributedCache.IsCopyOnWriteMasterSessionCookie(session)).IsFalse();
-            await Assert.That(heartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(heartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await heartbeatResponse.Content.ReadAsStringAsync()).IsEqualTo(AuthenticationFailureResponse);
         }
     }
 
     [Test]
-    public async Task Heartbeat_With_An_Unrecognised_Session_Is_Rejected()
+    [Arguments("0")]
+    [Arguments("1")]
+    [Arguments("2")]
+    [Arguments("3")]
+    public async Task Heartbeat_With_An_Unrecognised_Session_Is_Answered_With_An_Authentication_Failure(string connectionState)
     {
         await InitialiseIn("Development");
 
-        HttpResponseMessage response = await SendHeartbeat(Guid.CreateVersion7().ToString());
+        HttpResponseMessage response = await SendHeartbeat(Guid.CreateVersion7().ToString(), connectionState);
 
-        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo(AuthenticationFailureResponse);
+        }
+    }
+
+    [Test]
+    public async Task Heartbeat_From_A_Registered_Match_Server_Is_Accepted()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateMatchServer();
+
+        HttpResponseMessage response = await SendHeartbeat(session);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(await response.Content.ReadAsStringAsync()).IsEmpty();
+        }
     }
 
     private async Task InitialiseIn(string environment)
@@ -408,9 +439,19 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     /// <summary>
-    ///     Sends the periodic heartbeat which a match server, or a copy-on-write master, sends while it is idle with no world loaded.
+    ///     Registers a match server manager and its first match server, and returns the match server's session cookie.
     /// </summary>
-    private async Task<HttpResponseMessage> SendHeartbeat(string session)
+    private async Task<string> AuthenticateMatchServer()
+    {
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        return (string) (await DeserialisePHPResponse(await AuthenticateServer($"{DedicatedHostAccountName}:1")))["session"];
+    }
+
+    /// <summary>
+    ///     Sends the periodic heartbeat which a match server, or a copy-on-write master, sends, by default while it is idle with no world loaded.
+    /// </summary>
+    private async Task<HttpResponseMessage> SendHeartbeat(string session, string connectionState = "1")
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
@@ -424,7 +465,7 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
             { "map", string.Empty },
             { "private", "0" },
             { "vip", "0" },
-            { "c_state", "1" },
+            { "c_state", connectionState },
             { "prev_c_state", "-1" }
         };
 

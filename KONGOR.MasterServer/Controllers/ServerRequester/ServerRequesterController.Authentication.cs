@@ -242,6 +242,13 @@ public partial class ServerRequesterController
         return PhpSerialization.Serialize(response);
     }
 
+    /// <summary>
+    ///     Builds the "auth_failure" response, which tells a match server that its session is not registered, so that it discards the session and authenticates again.
+    ///     The match server reads this response whatever the HTTP status code, so it is sent with a success status code, as the protocol answer which it is, rather than as an error.
+    /// </summary>
+    private static string ServerAuthenticationFailureResponse()
+        => PhpSerialization.Serialize(new List<string> { "auth_failure" });
+
     private async Task<IActionResult> HandleConnectClient()
     {
         string? session = Request.Form["session"];
@@ -405,7 +412,8 @@ public partial class ServerRequesterController
             if (await DistributedCache.IsCopyOnWriteMasterSessionCookie(session))
                 return Ok();
 
-            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
+            // A Session Which Is Not Registered Belongs To A Match Server Which Was Reaped Or Replaced, Or Whose Registration Was Lost, So The Match Server Is Told To Authenticate Again
+            return Ok(ServerAuthenticationFailureResponse());
         }
 
         matchServer.Status = (ServerStatus) int.Parse(connectionState);
