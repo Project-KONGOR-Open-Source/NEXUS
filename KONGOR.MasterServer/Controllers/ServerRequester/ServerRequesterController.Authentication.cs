@@ -49,7 +49,7 @@ public partial class ServerRequesterController
         int matchServerManagerID = hostAccountName.GetDeterministicInt32Hash();
 
         // Re-Adopt Any Of This Manager's Match Servers Which Are Still Registered, So That A Manager Re-Authenticating After Being Reaped Recovers Its Child List Instead Of Resetting It And Losing Track Of Servers Which Are Still Live
-        List<int> matchServerIDs = [.. (await DistributedCache.GetMatchServersByAccountName(hostAccountName))
+        HashSet<int> matchServerIDs = [.. (await DistributedCache.GetMatchServersByAccountName(hostAccountName))
             .Where(matchServer => matchServer.MatchServerManagerID == matchServerManagerID).Select(matchServer => matchServer.ID)];
 
         MatchServerManager matchServerManager = new ()
@@ -203,12 +203,9 @@ public partial class ServerRequesterController
 
         await DistributedCache.SetMatchServer(hostAccountName, matchServer);
 
-        if (matchServerManager is not null)
-        {
-            matchServerManager.MatchServerIDs.Add(matchServer.ID);
-
+        // A Match Server Authenticates Again After Every Match And Whenever Its Session Is Renewed, So It Is Only Added To Its Manager When It Is Not Already Listed
+        if (matchServerManager is not null && matchServerManager.MatchServerIDs.Add(matchServer.ID))
             await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
-        }
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
         // INFO: The Server Manager Doesn't Send Descriptions, So Use Name Instead Since We Can Override Them Anyway Via Remote Command (svr_name) On TCP Handshake

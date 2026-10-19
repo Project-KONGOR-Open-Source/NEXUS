@@ -89,6 +89,30 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
+    public async Task Re_Authenticating_A_Match_Server_Lists_It_Once_In_Its_Manager()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        await AuthenticateServer($"{DedicatedHostAccountName}:1");
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1");
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        MatchServer matchServer = (await distributedCache.GetMatchServers()).Single();
+
+        MatchServerManager matchServerManager = (await distributedCache.GetMatchServerManagersByAccountName(DedicatedHostAccountName)).Single();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(matchServerManager.MatchServerIDs.Count(matchServerID => matchServerID == matchServer.ID)).IsEqualTo(1);
+        }
+    }
+
+    [Test]
     [Arguments("abc")]
     [Arguments("1.5")]
     [Arguments(":1")]
