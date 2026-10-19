@@ -17,9 +17,9 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     private const string SlotAccountName = "TEST:SlotAccount";
 
     /// <summary>
-    ///     The address of a match server which no test registers, from a block reserved for documentation.
+    ///     The IP address of a match server other than the locked one, which no other test registers, so that its address resolves to it alone.
     /// </summary>
-    private const string UnregisteredServerAddress = "198.51.100.1:11235";
+    private const string OtherServerIPAddress = "127.0.0.2";
 
     /// <summary>
     ///     How long a frame which is expected to arrive is awaited.
@@ -137,8 +137,9 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        // A Game Client Which Is Already Connected To A Match Server Reports It Before The Login Action, Whichever Match Server It Is
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame(UnregisteredServerAddress));
+        // A Game Client Which Is Already Connected To A Match Server Reports It Before The Login Action, As It Does When Its Chat Connection Is Restored During The Locked Match
+        // A Fresh Session Has No Pending Return, So Only The Reported Game Keeps The Login Trigger From Acting
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
 
         (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(stream, QuietPeriod);
@@ -234,17 +235,60 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
+        (int otherHostAccountID, string otherHostAccountName) = await ChatTestData.SeedAccount(host.Services, AccountType.ServerHost);
+
+        int otherServerPort = Random.Shared.Next(20_000, 30_000);
+
+        await ChatTestData.SeedMatchServer(host.Services, Random.Shared.Next(1_000_000, int.MaxValue), otherHostAccountID, otherHostAccountName, Guid.CreateVersion7().ToString(), otherServerPort, OtherServerIPAddress);
+
         using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
 
         NetworkStream stream = client.GetStream();
 
         await LogInAndReadSendBack(stream);
 
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame(UnregisteredServerAddress));
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{OtherServerIPAddress}:{otherServerPort}"));
 
         (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? reminder = await ChatTestProtocol.ReadAutoMatchConnect(stream, ReminderTimeout);
 
         await Assert.That(reminder?.RandomInteger).IsEqualTo(-1);
+    }
+
+    [Test]
+    public async Task Disconnecting_Stops_The_Reminders()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        await LogInAndReadSendBack(client.GetStream());
+
+        MatchLockReturn? pendingReturn = session.PendingMatchLockReturn;
+
+        client.Close();
+
+        // The Session's Cleanup Ends The Return At Once, Well Before The Reminder Loop Would Notice The Disconnection At Its Next Reminder
+        bool cancelled = await ChatTestProtocol.WaitUntil(() => pendingReturn?.Cancellation.IsCancellationRequested is true, MatchLockService.ReturnResendInterval / 2);
+
+        // The Reminder Loop Verifies The Lock Before Every Reminder, So A Loop Which Carried On Would Query The Match Server Again
+        int requestCount = gameSocket.Requests.Count;
+
+        await Task.Delay(MatchLockService.ReturnResendInterval * 2);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(pendingReturn).IsNotNull();
+            await Assert.That(cancelled).IsTrue();
+            await Assert.That(session.PendingMatchLockReturn).IsNull();
+            await Assert.That(gameSocket.Requests.Count).IsEqualTo(requestCount);
+        }
     }
 
     [Test]

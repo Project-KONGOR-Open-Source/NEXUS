@@ -63,8 +63,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
         foreach (MatchmakingGroupMember member in match.CommittedRoster)
         {
-            // Every Guest Account Shares One User, As Does Every Staff Account, So Locking One Of Them Would Lock All Of Them At Once
-            if (member.Account.Type is AccountType.Guest or AccountType.Staff)
+            if (IsExempt(member.Account))
                 continue;
 
             MatchLock matchLock = new ()
@@ -133,7 +132,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             return false;
         }
 
-        MatchLockReturn? continuedReturn = pendingReturn is not null && pendingReturn.MatchID == matchLock.MatchID && pendingReturn.Expires > DateTimeOffset.UtcNow ? pendingReturn : null;
+        MatchLockReturn? continuedReturn = IsContinuable(pendingReturn, matchLock) ? pendingReturn : null;
 
         bool verificationIsDue = continuedReturn is null || DateTimeOffset.UtcNow - continuedReturn.LastVerified >= ReturnResendInterval;
 
@@ -144,30 +143,42 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             return false;
         }
 
-        DateTimeOffset now = DateTimeOffset.UtcNow;
-
         bool isSlotAccount = matchLock.AccountID == session.Account.ID;
 
         if (continuedReturn is not null)
         {
-            if (verificationIsDue)
-                continuedReturn.LastVerified = now;
-
-            if (now - continuedReturn.LastNotified >= ReturnResendInterval)
-            {
-                continuedReturn.LastNotified = now;
-
-                Notify(session, matchLock, isSlotAccount);
-            }
+            ContinueReturn(session, matchLock, isSlotAccount, continuedReturn, verificationIsDue);
 
             return true;
         }
 
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
         MatchLockReturn matchLockReturn = new (matchLock.MatchID, now + ReturnWindow) { LastVerified = now, LastNotified = now };
 
-        // The Pending Return Was Changed By A Concurrent Attempt, So This Attempt Is Refused Without Starting A Second Return
         if (session.TryReplacePendingMatchLockReturn(pendingReturn, matchLockReturn) is false)
-            return true;
+        {
+            // A Concurrent Attempt Changed The Pending Return, So It Is Read Again: A Return It Started For This Match Is Continued, And Anything Else Is Replaced Once More
+            MatchLockReturn? concurrentReturn = session.PendingMatchLockReturn;
+
+            if (IsContinuable(concurrentReturn, matchLock))
+            {
+                ContinueReturn(session, matchLock, isSlotAccount, concurrentReturn, verified: true);
+
+                return true;
+            }
+
+            // A Refused Attempt Always Tells The Player Why, Even When No Return Could Be Started For It
+            if (session.TryReplacePendingMatchLockReturn(concurrentReturn, matchLockReturn) is false)
+            {
+                logger.LogWarning(@"Could Not Start The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because Its Pending Return Kept Changing",
+                    session.Account.Name, matchLock.MatchID);
+
+                Notify(session, matchLock, isSlotAccount);
+
+                return true;
+            }
+        }
 
         Notify(session, matchLock, isSlotAccount);
 
@@ -369,19 +380,55 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
-    ///     Every guest account shares one user, as does every staff account, so such accounts are never locked and never sent back.
+    ///     Decides whether an account is exempt from the match lock, so that it is never locked and never sent back.
+    ///     Every guest account shares one user, as does every staff account, so locking one of them would lock all of them at once.
     /// </summary>
     private static bool IsExempt(Account account) => account.Type is AccountType.Guest or AccountType.Staff;
+
+    /// <summary>
+    ///     Decides whether a pending return can be continued for the lock, which is the case while it is unexpired and for the lock's match.
+    /// </summary>
+    private static bool IsContinuable([NotNullWhen(true)] MatchLockReturn? pendingReturn, MatchLock matchLock)
+        => pendingReturn is not null && pendingReturn.MatchID == matchLock.MatchID && pendingReturn.Expires > DateTimeOffset.UtcNow;
+
+    /// <summary>
+    ///     Continues a pending return for a further refused attempt, recording the verification when the attempt verified the lock, and telling the player why again only once <see cref="ReturnResendInterval"/> has passed since the last notice.
+    /// </summary>
+    private void ContinueReturn(ClientChatSession session, MatchLock matchLock, bool isSlotAccount, MatchLockReturn pendingReturn, bool verified)
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        if (verified)
+            pendingReturn.LastVerified = now;
+
+        if (now - pendingReturn.LastNotified < ReturnResendInterval)
+            return;
+
+        pendingReturn.LastNotified = now;
+
+        Notify(session, matchLock, isSlotAccount);
+    }
 
     /// <summary>
     ///     Tells a refused player why, naming the account which holds the slot when it is another account of the same user.
     /// </summary>
     private void Notify(ClientChatSession session, MatchLock matchLock, bool isSlotAccount)
     {
-        session.SendNotice(MessageSenderName, isSlotAccount ? SlotAccountMessage : OtherAccountMessage(matchLock.AccountName));
+        if (isSlotAccount)
+        {
+            session.SendNotice(MessageSenderName, SlotAccountMessage);
 
-        logger.LogInformation(@"Refusing Account ""{AccountName}"" Another Game, Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"" As Account ""{SlotAccountName}""",
-            session.Account.Name, matchLock.MatchID, matchLock.ServerID, matchLock.AccountName);
+            logger.LogInformation(@"Sending Account ""{AccountName}"" Back To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"", Which Is Still In Progress",
+                session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+        }
+
+        else
+        {
+            session.SendNotice(MessageSenderName, OtherAccountMessage(matchLock.AccountName));
+
+            logger.LogInformation(@"Telling Account ""{AccountName}"" That Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"" As Account ""{SlotAccountName}""",
+                session.Account.Name, matchLock.MatchID, matchLock.ServerID, matchLock.AccountName);
+        }
     }
 
     /// <summary>
