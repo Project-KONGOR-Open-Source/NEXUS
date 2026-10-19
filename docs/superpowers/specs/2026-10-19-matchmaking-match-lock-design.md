@@ -48,7 +48,7 @@ These would make the feature a failure even if it technically worked:
 - **Repositories avoid depending on each other.** Everything here is NEXUS, plus one existing HON engine setting that NEXUS switches on remotely. No CI depends on HON or GEMINI.
 - **State survives what it must.** The lock outlives the player's chat connection, logouts, and restarts of the chat server, so it lives in the distributed cache (Valkey), not in a chat session's memory, and it always has an expiry.
 - **The lock is NEXUS's default behaviour,** with no switch to turn it off (owner's decision). A case that cannot be confirmed fails safe (see "Sending a player back"), so no emergency switch is needed, and a switch would only add a way for the master and chat servers to disagree.
-- **Configuration holds the one tunable value,** the safety time limit. Documentation names the settings file instead of copying the value.
+- **There is no configuration** (owner's decision). The safety limit is a constant in code, twice a long match, because every attempt to play re-verifies the lock anyway, so the limit is only a backstop. Reaching it counts as an unconfirmed lift: the player's game cookie stays unchanged, so they are never removed from a match that might still be running.
 
 ## The Owner's Decisions
 
@@ -88,7 +88,7 @@ The lock lifts on the first of these:
   - statistics submission for the match;
 - **the server goes:** the match server disappears from NEXUS (reaped, or silent beyond the stale threshold the reaper already uses);
 - **the slot goes:** the player no longer holds a reclaimable slot. That is checked whenever a trigger fires, and from the server's status reports where they say so;
-- **the safety limit:** a safety maximum from configuration, so a missed signal can never lock anyone forever.
+- **the safety limit:** a constant twice a long match, so a missed signal can never lock anyone forever. Reaching it counts as an unconfirmed lift.
 
 ### Sending a player back
 
@@ -170,7 +170,7 @@ A match server that is still registered, but whose chat connection has dropped w
 - The exact source of slot validity: the reconnect query, status reports, or both. The requirement is that no player is ever sent to a slot they cannot reclaim.
 - How the master server notifies the chat server after refusing a `c_conn`.
 - The wording of the messages.
-- The configuration name and default of the safety maximum.
+- Where the safety limit's constant lives.
 - Tests: unit and integration tests in NEXUS's test projects for every trigger, every release condition, and every reconnect-safety rule. Live verification needs real game clients in a matchmade match; plan it with the owner.
 
 ## Follow-Ups (Not In This Design)
