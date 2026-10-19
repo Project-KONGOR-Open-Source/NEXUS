@@ -6,6 +6,11 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 internal static class ChatTestProtocol
 {
     /// <summary>
+    ///     The game client version which the matchmaking requests carry, which is the version that the client handshake reports.
+    /// </summary>
+    private const string ClientVersion = "4.10.1.0";
+
+    /// <summary>
     ///     Wraps a buffer in the chat protocol's little-endian 2-byte length prefix and writes it to the stream.
     /// </summary>
     public static async Task WriteFrame(NetworkStream stream, ChatBuffer buffer)
@@ -326,6 +331,55 @@ internal static class ChatTestProtocol
         ChatBuffer buffer = new ();
 
         buffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_GAME);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildGroupCreate(ChatProtocol.TMMType groupType)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_CREATE);
+        buffer.WriteString(ClientVersion);                                               // Client Version
+        buffer.WriteInt8((byte) groupType);                                              // Group Type
+        buffer.WriteInt8((byte) ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL); // Game Type
+        buffer.WriteString("caldavar");                                                  // Map Name
+        buffer.WriteString("ap");                                                        // Game Modes
+        buffer.WriteString("USE");                                                       // Game Regions
+        buffer.WriteBool(true);                                                          // Ranked
+        buffer.WriteInt8(0);                                                             // Match Fidelity
+        buffer.WriteInt8(1);                                                             // Bot Difficulty
+        buffer.WriteBool(false);                                                         // Randomise Bots
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildGroupJoin(string inviteIssuerName)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN);
+        buffer.WriteString(ClientVersion);    // Client Version
+        buffer.WriteString(inviteIssuerName); // Invite Issuer Name
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildGroupJoinQueue()
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+
+        return buffer;
+    }
+
+    public static ChatBuffer BuildGroupPlayerLoadingStatus(byte loadingPercent)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS);
+        buffer.WriteInt8(loadingPercent);
 
         return buffer;
     }

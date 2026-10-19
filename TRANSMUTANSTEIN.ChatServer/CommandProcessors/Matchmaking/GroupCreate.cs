@@ -1,11 +1,15 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_CREATE)]
-public class GroupCreate(MerrickContext merrick) : IAsynchronousCommandProcessor<ClientChatSession>
+public class GroupCreate(MerrickContext merrick, MatchLockService matchLockService) : IAsynchronousCommandProcessor<ClientChatSession>
 {
     public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupCreateRequestData requestData = new (buffer);
+
+        // A Lock Refuses A Group Of Any Type, Co-Op Included, Because Every Group Leads To Another Game
+        if (await matchLockService.Enforce(session))
+            return;
 
         await MatchmakingGroup
             .Create(session, requestData.ToGroupInformation(), merrick);

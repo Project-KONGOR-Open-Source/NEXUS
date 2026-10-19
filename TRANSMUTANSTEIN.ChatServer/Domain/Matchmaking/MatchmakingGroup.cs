@@ -302,7 +302,7 @@ public class MatchmakingGroup
         return this;
     }
 
-    public async Task<MatchmakingGroup> SendLoadingStatusUpdate(ClientChatSession session, byte loadingPercent, MerrickContext merrick)
+    public async Task<MatchmakingGroup> SendLoadingStatusUpdate(ClientChatSession session, byte loadingPercent, MerrickContext merrick, MatchLockService matchLockService)
     {
         MatchmakingGroupMember groupMember = Members.Single(member => member.Account.ID == session.Account.ID);
 
@@ -313,7 +313,7 @@ public class MatchmakingGroup
 
         if (allMembersAreFullyLoaded)
         {
-            await JoinQueue(merrick);
+            await JoinQueue(merrick, matchLockService);
         }
 
         MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
@@ -486,9 +486,9 @@ public class MatchmakingGroup
 
     /// <summary>
     ///     Attempts to join the matchmaking queue.
-    ///     Validates that all members are ready and fully loaded (100%) before joining.
+    ///     Validates that no member is locked to a match in progress, and that all members are ready and fully loaded (100%), before joining.
     /// </summary>
-    public async Task JoinQueue(MerrickContext merrick)
+    public async Task JoinQueue(MerrickContext merrick, MatchLockService matchLockService)
     {
         // Prevent Double-Queuing (The Explicit Queue Join And The Loading-Status Auto-Join Can Legitimately Race)
         if (QueueStartTime is not null)
@@ -497,6 +497,10 @@ public class MatchmakingGroup
 
             return;
         }
+
+        // A Group With A Locked Member Is Refused Before Anything Else Is Validated Or Changed, So That Every Attempt To Queue Sends Its Locked Members Back, Ready Or Not
+        if (await matchLockService.EnforceForGroup(this))
+            return;
 
         // Validate That All Members Are Ready And Loaded Before Joining Queue
         bool allMembersReadyAndLoaded = Members.All(member => member.IsReady && member.LoadingPercent is 100);

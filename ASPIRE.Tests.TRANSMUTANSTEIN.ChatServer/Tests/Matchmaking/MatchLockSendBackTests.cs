@@ -42,7 +42,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -73,7 +73,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, gameSocket);
 
@@ -99,7 +99,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -129,7 +129,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -157,7 +157,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -184,7 +184,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -208,7 +208,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -231,7 +231,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -260,7 +260,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -297,7 +297,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket, GamePhase.GAME_PHASE_ACTIVE);
 
@@ -325,7 +325,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -364,7 +364,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         int slotAccountID = slotAccount ? accountID : Random.Shared.Next(1_000_000, int.MaxValue);
         string slotAccountName = slotAccount ? accountName : SlotAccountName;
@@ -406,7 +406,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -433,7 +433,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(0);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket, GamePhase.GAME_PHASE_ACTIVE);
 
@@ -461,7 +461,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         gameSocket.Answers = false;
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -488,7 +488,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
 
-        (int userID, int accountID, string accountName, string cookie) = await SeedPlayer(host, accountType);
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host, accountType);
 
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
 
@@ -510,20 +510,6 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
             await Assert.That(gameSocket.Requests.Count).IsEqualTo(0);
             await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
         }
-    }
-
-    /// <summary>
-    ///     Seeds an account of the given type, with a fresh session cookie for its login, and returns the identifier of its user with the account's identifier, name, and session cookie.
-    /// </summary>
-    private static async Task<(int UserID, int AccountID, string AccountName, string Cookie)> SeedPlayer(ChatServerHost host, AccountType accountType = AccountType.Normal)
-    {
-        (int accountID, string accountName) = await ChatTestData.SeedAccount(host.Services, accountType);
-
-        string cookie = Guid.CreateVersion7().ToString();
-
-        await ChatTestData.SeedClientSessionCookie(host.Services, cookie, accountName);
-
-        return (await ChatTestData.GetUserID(host.Services, accountID), accountID, accountName, cookie);
     }
 
     /// <summary>

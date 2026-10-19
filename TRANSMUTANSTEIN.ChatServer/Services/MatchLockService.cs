@@ -23,6 +23,12 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         => $@"Your account ""{slotAccountName}"" is in a match which is still in progress, so you cannot play another game until it ends. Log in as ""{slotAccountName}"" to return to it.";
 
     /// <summary>
+    ///     The notice to the leader of a group which cannot search for a match, because one of its members is locked to a match in progress.
+    /// </summary>
+    internal static string GroupMemberMessage(string lockedMemberName)
+        => $@"""{lockedMemberName}"" is in a match which is still in progress, so your group cannot search for a match until it ends.";
+
+    /// <summary>
     ///     How often a player whose return is pending is reminded to return, which is also how long a verification of the lock is trusted, and how long a refused attempt waits before the player is told why again.
     /// </summary>
     internal static readonly TimeSpan ReturnResendInterval = TimeSpan.FromSeconds(5);
@@ -185,6 +191,35 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         // Only The Account Which Holds The Slot Can Return To The Match, So Another Account Of The Same User Is Only Told Which Account That Is
         if (isSlotAccount)
             _ = RemindToReturn(session, matchLock, matchLockReturn);
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Decides whether a group's attempt to search for a match must be refused, which is while <see cref="Enforce"/> refuses any of its members.
+    ///     Every member is enforced, so that every locked member is sent back, and a leader who is not refused is told which member keeps the group from searching.
+    /// </summary>
+    public async Task<bool> EnforceForGroup(MatchmakingGroup group)
+    {
+        // The Members Are Read Once, Because The Group Can Change While They Are Enforced
+        MatchmakingGroupMember leader = group.Leader;
+
+        List<MatchmakingGroupMember> members = [.. group.Members];
+
+        // The Members Are Enforced Concurrently, Because Each Locked Member May Wait On Its Own Match Server's Answer
+        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session)));
+
+        List<MatchmakingGroupMember> refusedMembers = [.. members.Where((member, index) => refusals[index])];
+
+        if (refusedMembers.Count is 0)
+            return false;
+
+        logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
+            group.GUID, refusedMembers.Count);
+
+        // A Refused Leader Has Already Been Told Why
+        if (refusedMembers.Contains(leader) is false)
+            leader.Session.SendNotice(MessageSenderName, GroupMemberMessage(refusedMembers[0].Account.Name));
 
         return true;
     }

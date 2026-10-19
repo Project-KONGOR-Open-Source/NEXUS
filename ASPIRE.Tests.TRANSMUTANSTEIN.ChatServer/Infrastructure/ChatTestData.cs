@@ -46,6 +46,20 @@ internal static class ChatTestData
     }
 
     /// <summary>
+    ///     Seeds an account of the given type, with a fresh session cookie for its login, and returns the identifier of its user with the account's identifier, name, and session cookie.
+    /// </summary>
+    public static async Task<(int UserID, int AccountID, string AccountName, string Cookie)> SeedPlayer(ChatServerHost host, AccountType accountType = AccountType.Normal)
+    {
+        (int accountID, string accountName) = await SeedAccount(host.Services, accountType);
+
+        string cookie = Guid.CreateVersion7().ToString();
+
+        await SeedClientSessionCookie(host.Services, cookie, accountName);
+
+        return (await GetUserID(host.Services, accountID), accountID, accountName, cookie);
+    }
+
+    /// <summary>
     ///     Reads the identifier of the user who owns the given account.
     /// </summary>
     public static async Task<int> GetUserID(IServiceProvider services, int accountID)
