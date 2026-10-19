@@ -387,6 +387,36 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
+    [Arguments("server_requester.php?f=aids2cookie")]
+    [Arguments("server_requester.php?f=accept_key")]
+    [Arguments("server_requester.php?f=start_game")]
+    [Arguments("stats_requester.php")]
+    [Arguments("master/questserver/getplayerquests")]
+    [Arguments("master/questserver/getsysteminfo")]
+    public async Task Copy_On_Write_Master_Session_Authorises_No_Match_Server_Endpoint(string endpoint)
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateCopyOnWriteMaster();
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await SendMatchServerEndpointRequest(endpoint, session, await GetAccountID(NonHostAccountName));
+
+        string body = await response.Content.ReadAsStringAsync();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(body).DoesNotContain("aids2cookie");
+            await Assert.That(body).DoesNotContain("aids2gcookie");
+            await Assert.That(body).DoesNotContain("quest_status");
+            await Assert.That(body).DoesNotContain(cookie);
+            await Assert.That(body).DoesNotContain("auth_failure");
+        }
+    }
+
+    [Test]
     public async Task A_Second_Copy_On_Write_Master_Authentication_Replaces_The_First_Session()
     {
         await InitialiseIn("Development");
@@ -911,6 +941,48 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
         };
 
         return await httpClient.PostAsync("server_requester.php?f=set_online", new FormUrlEncodedContent(formData));
+    }
+
+    /// <summary>
+    ///     Sends a request to an endpoint which only a registered match server may use, carrying the session cookie under the form parameter which that endpoint reads it from.
+    ///     The statistics submission carries the smallest request which the model binder accepts, so that the session cookie is the only reason for the refusal.
+    /// </summary>
+    private async Task<HttpResponseMessage> SendMatchServerEndpointRequest(string endpoint, string session, int accountID)
+    {
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        Dictionary<string, string> formData = [];
+
+        if (endpoint.StartsWith("master/questserver/", StringComparison.Ordinal))
+        {
+            formData.Add("cookie", session);
+            formData.Add("account_ids[]", $"{accountID}");
+        }
+
+        else
+        {
+            formData.Add("session", session);
+            formData.Add("acc_key", "ACCOUNT-KEY");
+        }
+
+        if (endpoint.StartsWith("stats_requester.php", StringComparison.Ordinal))
+        {
+            formData.Add("f", "submit_stats");
+
+            foreach (string field in new [] { "server_id", "match_id", "time_played", "file_size", "c_state", "avgpsr", "avgpsr_team1", "avgpsr_team2", "teamscoregoal", "playerscoregoal", "numrounds",
+                "awd_mann", "awd_mqk", "awd_lgks", "awd_msd", "awd_mkill", "awd_masst", "awd_ledth", "awd_mbdmg", "awd_mwk", "awd_mhdd", "awd_hcs" })
+                formData.Add($"match_stats[{field}]", "1");
+
+            foreach (string field in new [] { "map", "map_version", "file_name", "version", "gamemode", "release_stage", "submission_debug" })
+                formData.Add($"match_stats[{field}]", "x");
+
+            formData.Add("team_stats[1][score]", "0");
+            formData.Add("player_stats[1][0][nickname]", "x");
+        }
+
+        return await httpClient.PostAsync(endpoint, new FormUrlEncodedContent(formData));
     }
 
     private async Task<HttpResponseMessage> SendServerRequest(string function, Dictionary<string, string> formData)
