@@ -29,4 +29,6 @@ public class CopyOnWriteMaster
     public string Cookie { get; set; } = Guid.CreateVersion7().ToString();
 
     public DateTimeOffset TimestampRegistered { get; set; } = DateTimeOffset.UtcNow;
+
+    public DateTimeOffset TimestampLastHeartbeat { get; set; } = DateTimeOffset.UtcNow;
 }

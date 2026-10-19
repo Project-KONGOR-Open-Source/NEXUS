@@ -2,7 +2,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Services;
 
 /// <summary>
 ///     Tests for the reconciliation logic that decides which cached hosts the stale host reaper removes.
-///     Also tests that reaping a match server manager leaves its copy-on-write master in place.
+///     Also tests that reaping a match server manager leaves its copy-on-write master in place, and that a copy-on-write master is reaped once its heartbeat is stale.
 /// </summary>
 public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicationFactory webApplicationFactory)
 {
@@ -94,19 +94,19 @@ public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicatio
     [Test]
     public async Task A_Session_Within_The_Stale_Threshold_Is_Not_Stale()
     {
-        await Assert.That(StaleHostReaper.TCPSessionIsStale(Now - TimeSpan.FromSeconds(174), Now, TimeSpan.FromSeconds(175))).IsFalse();
+        await Assert.That(StaleHostReaper.SessionIsStale(Now - TimeSpan.FromSeconds(174), Now, TimeSpan.FromSeconds(175))).IsFalse();
     }
 
     [Test]
     public async Task A_Session_Exactly_At_The_Stale_Threshold_Is_Not_Stale()
     {
-        await Assert.That(StaleHostReaper.TCPSessionIsStale(Now - TimeSpan.FromSeconds(175), Now, TimeSpan.FromSeconds(175))).IsFalse();
+        await Assert.That(StaleHostReaper.SessionIsStale(Now - TimeSpan.FromSeconds(175), Now, TimeSpan.FromSeconds(175))).IsFalse();
     }
 
     [Test]
     public async Task A_Session_Beyond_The_Stale_Threshold_Is_Stale()
     {
-        await Assert.That(StaleHostReaper.TCPSessionIsStale(Now - TimeSpan.FromSeconds(176), Now, TimeSpan.FromSeconds(175))).IsTrue();
+        await Assert.That(StaleHostReaper.SessionIsStale(Now - TimeSpan.FromSeconds(176), Now, TimeSpan.FromSeconds(175))).IsTrue();
     }
 
     [Test]
@@ -127,7 +127,8 @@ public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicatio
             IPAddress = "127.0.0.1"
         };
 
-        CopyOnWriteMaster copyOnWriteMaster = CreateCopyOnWriteMaster(hostAccountName, matchServerManager.ID);
+        // The Copy-On-Write Master Is Still Sending Heartbeats When Its Manager Is Reaped
+        CopyOnWriteMaster copyOnWriteMaster = CreateCopyOnWriteMaster(hostAccountName, matchServerManager.ID, Now + GracePeriod);
 
         await distributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
         await distributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
@@ -145,7 +146,33 @@ public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicatio
         }
     }
 
-    private static CopyOnWriteMaster CreateCopyOnWriteMaster(string hostAccountName, int? matchServerManagerID) => new ()
+    [Test]
+    public async Task A_Copy_On_Write_Master_Is_Reaped_Only_Once_Its_Heartbeat_Is_Stale()
+    {
+        await webApplicationFactory.WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        // A Copy-On-Write Master Has No Chat Session, So It Is Judged Only By Its Last Heartbeat, Against The Limit Which Applies To A Match Server's Last Status Update
+        CopyOnWriteMaster liveCopyOnWriteMaster = CreateCopyOnWriteMaster("LIVE-HOST", null, Now - StaleHostReaper.MatchServerSessionStaleStateThreshold);
+
+        CopyOnWriteMaster staleCopyOnWriteMaster = CreateCopyOnWriteMaster("STALE-HOST", null, Now - StaleHostReaper.MatchServerSessionStaleStateThreshold - TimeSpan.FromSeconds(1));
+
+        await distributedCache.SetCopyOnWriteMaster(liveCopyOnWriteMaster);
+        await distributedCache.SetCopyOnWriteMaster(staleCopyOnWriteMaster);
+
+        StaleHostReaper staleHostReaper = new (distributedCache, NullLogger<StaleHostReaper>.Instance);
+
+        await staleHostReaper.Sweep(Now);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(await distributedCache.GetCopyOnWriteMasterBySessionCookie(liveCopyOnWriteMaster.Cookie)).IsNotNull();
+            await Assert.That(await distributedCache.GetCopyOnWriteMasterBySessionCookie(staleCopyOnWriteMaster.Cookie)).IsNull();
+        }
+    }
+
+    private static CopyOnWriteMaster CreateCopyOnWriteMaster(string hostAccountName, int? matchServerManagerID, DateTimeOffset lastHeartbeat) => new ()
     {
         HostAccountID = 1,
         HostAccountName = hostAccountName,
@@ -155,6 +182,7 @@ public sealed class StaleHostReaperTests(TRANSMUTANSTEINIntegrationWebApplicatio
         IPAddress = "127.0.0.1",
         Port = 11235,
         Location = "EU",
-        Description = "Test Server"
+        Description = "Test Server",
+        TimestampLastHeartbeat = lastHeartbeat
     };
 }

@@ -4,6 +4,7 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 ///     Periodically reconciles the distributed cache of match servers and match server managers against the live in-memory chat sessions, removing cache entries that have had no live session for longer than a grace period.
 ///     This reaps hosts that registered through HTTP authentication but never completed (or lost) their chat handshake, and orphaned entries left behind when the chat server restarts, neither of which the per-session disconnect cleanup can catch.
 ///     The reconciliation treats the in-memory session pools as the authoritative record of live hosts, which holds for the single-instance chat server because those pools are process-local static state.
+///     It also removes the copy-on-write masters, which have no chat session to reconcile, once their heartbeats to the master server are stale.
 /// </summary>
 public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<StaleHostReaper> logger) : BackgroundService
 {
@@ -17,14 +18,15 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
     /// <summary>
     ///     The maximum age of a match server's last status update before its chat session is treated as a hung "zombie" and forcibly terminated, even though its socket is still open.
     ///     A healthy match server sends a status heartbeat at least once per minute, so a server silent for this long has stopped functioning while still holding its socket.
+    ///     The same limit applies to the last heartbeat of a copy-on-write master, which sends its heartbeats to the master server as often by default.
     /// </summary>
-    private static readonly TimeSpan MatchServerSessionStaleStateThreshold = TimeSpan.FromSeconds(175);
+    internal static readonly TimeSpan MatchServerSessionStaleStateThreshold = TimeSpan.FromSeconds(175);
 
     /// <summary>
-    ///     Determines whether a TCP session is stale.
-    ///     Stale means that the TCP session's last status update is older than the given threshold, relative to the current instant.
+    ///     Determines whether a session is stale.
+    ///     Stale means that the session's last status update, which is the last heartbeat for a copy-on-write master, is older than the given threshold, relative to the current instant.
     /// </summary>
-    public static bool TCPSessionIsStale(DateTimeOffset lastStatusUpdate, DateTimeOffset now, TimeSpan staleThreshold) => now - lastStatusUpdate > staleThreshold;
+    public static bool SessionIsStale(DateTimeOffset lastStatusUpdate, DateTimeOffset now, TimeSpan staleThreshold) => now - lastStatusUpdate > staleThreshold;
 
     private Dictionary<int, DateTimeOffset> MatchServersFirstObservedMissing { get; set; } = [];
 
@@ -52,13 +54,13 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
     }
 
     /// <summary>
-    ///     Terminates the zombie match server sessions, and reaps the cached hosts which have had no live chat session for longer than the grace period, as of the given instant.
+    ///     Terminates the zombie match server sessions, reaps the cached hosts which have had no live chat session for longer than the grace period, and reaps the copy-on-write masters whose heartbeats are stale, as of the given instant.
     /// </summary>
     internal async Task Sweep(DateTimeOffset now)
     {
         // Terminate Zombie Match Server Sessions Before Reconciling: A Hung Match Server Whose Socket Is Still Open Keeps Its Chat Session In The Pool (So It Is Never Reaped As Absent) But Has Stopped Sending Status Updates, So It Is Perpetually Skipped On Matchmaking Selection As Stale And Lingers As A Dead-But-Present Entry That Can Never Host A Match Until Its Socket Eventually Drops
         // Doing So, Removes The Zombie Match Server Session From The In-Memory Match Server Pool And From The Distributed Cache, So The Stale Server Is No Longer Considered As A Candidate For Matchmaking And Is Forced To Reconnect To The Chat Server And Re-Establish A Fresh Session Before It Can Host Again, Which Is The Only Way To Recover From A Hung State
-        foreach (MatchServerChatSession zombieMatchServerSession in Context.MatchServerChatSessions.Values.Where(session => session.Metadata is not null && TCPSessionIsStale(session.Metadata.LastStatusUpdate, now, MatchServerSessionStaleStateThreshold)).ToList())
+        foreach (MatchServerChatSession zombieMatchServerSession in Context.MatchServerChatSessions.Values.Where(session => session.Metadata is not null && SessionIsStale(session.Metadata.LastStatusUpdate, now, MatchServerSessionStaleStateThreshold)).ToList())
         {
             logger.LogWarning(@"Terminating Stale Match Server Session ID ""{MatchServerID}"" Which Has Not Sent A Status Update Since ""{LastStatusUpdate}""", zombieMatchServerSession.Metadata.ServerID, zombieMatchServerSession.Metadata.LastStatusUpdate);
 
@@ -93,6 +95,19 @@ public sealed class StaleHostReaper(IDatabase distributedCacheStore, ILogger<Sta
             logger.LogInformation(@"Reaping Stale Match Server Manager ID ""{MatchServerManagerID}"" Which Has Had No Live Chat Session For Longer Than The Grace Period", matchServerManagerID);
 
             await distributedCacheStore.RemoveMatchServerManagerByID(matchServerManagerID);
+        }
+
+        // Reap Stale Copy-On-Write Masters: A Copy-On-Write Master Has No Chat Session To Reconcile, So Its Heartbeat To The Master Server Is Its Only Sign Of Life, And It Outlives Its Manager Like A Match Server Does
+        // A Copy-On-Write Master Which Is Still Running When Reaped Is Told To Authenticate Again On Its Next Heartbeat, And Is Registered Again
+        List<CopyOnWriteMaster> staleCopyOnWriteMasters = [.. (await distributedCacheStore.GetCopyOnWriteMasters())
+            .Where(copyOnWriteMaster => SessionIsStale(copyOnWriteMaster.TimestampLastHeartbeat, now, MatchServerSessionStaleStateThreshold))];
+
+        foreach (CopyOnWriteMaster staleCopyOnWriteMaster in staleCopyOnWriteMasters)
+        {
+            logger.LogInformation(@"Reaping Stale Copy-On-Write Master ID ""{CopyOnWriteMasterID}"" For Host Account ""{HostAccountName}"" Which Has Not Sent A Heartbeat Since ""{LastHeartbeat}""",
+                staleCopyOnWriteMaster.ID, staleCopyOnWriteMaster.HostAccountName, staleCopyOnWriteMaster.TimestampLastHeartbeat);
+
+            await distributedCacheStore.RemoveCopyOnWriteMaster(staleCopyOnWriteMaster.HostAccountName);
         }
     }
 

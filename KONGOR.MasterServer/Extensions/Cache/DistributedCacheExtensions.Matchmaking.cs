@@ -90,7 +90,7 @@ public static partial class DistributedCacheExtensions
 
         // Remove Only The Manager's Own Cache Entry; Its Match Servers Are Independent Hosts With Their Own Chat Sessions, And Are Reaped On Their Own Liveness (Sessionless Past The Grace Period, Or A Stale Status Heartbeat)
         // A Manager Going Away Must Not Tear Down Its Still-Live Servers, Which Would Otherwise Interrupt In-Progress Matches Whenever The Manager Merely Reconnects After A Transient Disconnect
-        // The Same Holds For Its Copy-On-Write Master, A Non-Joinable Match Server Which The Manager Keeps Forking Its Match Servers From
+        // The Same Holds For Its Copy-On-Write Master, A Non-Joinable Match Server Which The Manager Keeps Forking Its Match Servers From, And Which Is Reaped Once Its Heartbeat Is Stale
         await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, matchServerManager.HostAccountName);
     }
 
@@ -226,6 +226,12 @@ public static partial class DistributedCacheExtensions
 
         return copyOnWriteMaster;
     }
+
+    /// <summary>
+    ///     Removes the copy-on-write master of the host account, which happens once its heartbeat is stale, because it has no chat session to show that it is still running.
+    /// </summary>
+    public static async Task RemoveCopyOnWriteMaster(this IDatabase distributedCacheStore, string hostAccountName)
+        => await distributedCacheStore.HashDeleteAsync(CopyOnWriteMastersKey, hostAccountName);
 
     private static string ConstructMatchInformationKey(int matchID) => $@"MATCH-INFORMATION:[""{matchID}""]";
 

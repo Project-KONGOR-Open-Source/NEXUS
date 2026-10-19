@@ -434,9 +434,11 @@ public partial class ServerRequesterController
             CopyOnWriteMaster? copyOnWriteMaster = await DistributedCache.GetCopyOnWriteMasterBySessionCookie(session);
 
             // The Copy-On-Write Master Sends Heartbeats Too, But It Never Hosts A Match, So Its Heartbeat Only Refreshes Its Own Record
+            // It Has No Chat Session, So Its Last Heartbeat Is What Keeps It From Being Reaped As Stale
             if (copyOnWriteMaster is not null)
             {
                 copyOnWriteMaster.Status = (ServerStatus) int.Parse(connectionState);
+                copyOnWriteMaster.TimestampLastHeartbeat = DateTimeOffset.UtcNow;
 
                 await DistributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
 

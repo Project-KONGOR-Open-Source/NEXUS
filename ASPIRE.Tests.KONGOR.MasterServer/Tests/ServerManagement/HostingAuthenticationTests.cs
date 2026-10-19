@@ -302,23 +302,27 @@ public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFa
     }
 
     [Test]
-    public async Task Copy_On_Write_Master_Heartbeat_Is_Accepted_And_Records_Its_Status()
+    public async Task Copy_On_Write_Master_Heartbeat_Is_Accepted_And_Refreshes_Its_Record()
     {
         await InitialiseIn("Development");
 
         string session = await AuthenticateCopyOnWriteMaster();
 
-        HttpResponseMessage heartbeatResponse = await SendHeartbeat(session, "0");
-
         IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
 
-        CopyOnWriteMaster? copyOnWriteMaster = await distributedCache.GetCopyOnWriteMasterBySessionCookie(session);
+        DateTimeOffset registeredHeartbeat = (await distributedCache.GetCopyOnWriteMasters()).Single().TimestampLastHeartbeat;
+
+        HttpResponseMessage heartbeatResponse = await SendHeartbeat(session, "0");
+
+        CopyOnWriteMaster copyOnWriteMaster = (await distributedCache.GetCopyOnWriteMasters()).Single();
 
         using (Assert.Multiple())
         {
             await Assert.That(heartbeatResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
             await Assert.That(await heartbeatResponse.Content.ReadAsStringAsync()).IsEmpty();
-            await Assert.That(copyOnWriteMaster?.Status).IsEqualTo(ChatProtocol.ServerStatus.SERVER_STATUS_SLEEPING);
+            await Assert.That(copyOnWriteMaster.Cookie).IsEqualTo(session);
+            await Assert.That(copyOnWriteMaster.Status).IsEqualTo(ChatProtocol.ServerStatus.SERVER_STATUS_SLEEPING);
+            await Assert.That(copyOnWriteMaster.TimestampLastHeartbeat).IsGreaterThan(registeredHeartbeat);
             await Assert.That(await distributedCache.GetMatchServers()).IsEmpty();
         }
     }
