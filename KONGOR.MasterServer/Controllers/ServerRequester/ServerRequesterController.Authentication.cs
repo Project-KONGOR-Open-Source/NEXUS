@@ -49,7 +49,7 @@ public partial class ServerRequesterController
         int matchServerManagerID = hostAccountName.GetDeterministicInt32Hash();
 
         // Re-Adopt Any Of This Manager's Match Servers Which Are Still Registered, So That A Manager Re-Authenticating After Being Reaped Recovers Its Child List Instead Of Resetting It And Losing Track Of Servers Which Are Still Live
-        List<int> matchServerIDs = [.. (await DistributedCache.GetMatchServersByAccountName(hostAccountName))
+        HashSet<int> matchServerIDs = [.. (await DistributedCache.GetMatchServersByAccountName(hostAccountName))
             .Where(matchServer => matchServer.MatchServerManagerID == matchServerManagerID).Select(matchServer => matchServer.ID)];
 
         MatchServerManager matchServerManager = new ()
@@ -170,21 +170,45 @@ public partial class ServerRequesterController
 
         MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
-        // The Copy-On-Write Master Needs A Session To Finish Starting Up, But It Never Hosts A Match, So It Is Not Registered As A Joinable Match Server; Each Match Server Forked From It Authenticates With Its Own Server Instance
+        // The Copy-On-Write Master Is A Non-Joinable Match Server: It Needs A Session To Finish Starting Up, But It Never Hosts A Match, So It Is Registered Apart From The Match Servers, Where No Server List, Matchmaking, Or Match Server Look-Up Finds It; Each Match Server Forked From It Authenticates With Its Own Server Instance
         if (isCopyOnWriteMaster)
         {
-            // Only A Match Server Manager Starts A Copy-On-Write Master, After Authenticating With The Same Host Account, So Without A Registered Manager The Empty Server Instance Comes From A Misconfigured Match Server; A Copy-On-Write Master Which Races Ahead Of Its Manager Retries Until The Manager Is Registered
+            // Only A Match Server Manager Starts A Copy-On-Write Master, But The Manager Is Not Required, Because The Master Server May Lose The Manager's Registration While The Manager Keeps Running, And A Manager Whose Chat Connection Stays Up Never Authenticates Again, So Refusing The Copy-On-Write Master Would Stall It Indefinitely
             if (matchServerManager is null)
-                return BadRequest($@"Missing Server Instance In Form Parameter ""login"": A Match Server Needs An Instance Number After The Colon, For Example ""{hostAccountName}:1""; An Empty Server Instance Is Reserved For The Copy-On-Write Master Of A Registered Match Server Manager");
+            {
+                Logger.LogWarning(@"Copy-On-Write Master For Host Account ""{HostAccountName}"" Authenticated With An Empty Server Instance While No Server Manager Is Registered For That Host Account; If This Is A Standalone Match Server, It Needs An Instance Number After The Colon, For Example ""{ExampleServerLogin}""",
+                    account.Name, $"{account.Name}:1");
+            }
 
-            string copyOnWriteMasterSessionCookie = Guid.CreateVersion7().ToString();
+            CopyOnWriteMaster copyOnWriteMaster = new ()
+            {
+                HostAccountID = account.ID,
+                HostAccountName = account.Name,
+                ID = serverIdentifier.GetDeterministicInt32Hash(),
+                Name = serverName,
+                MatchServerManagerID = matchServerManager?.ID,
+                IPAddress = serverIPAddress,
+                Port = serverPortNumber,
+                Location = serverLocation,
+                Description = serverDescription
+            };
 
-            await DistributedCache.SetCopyOnWriteMasterSessionCookie(hostAccountName, copyOnWriteMasterSessionCookie);
+            CopyOnWriteMaster? replacedCopyOnWriteMaster = (await DistributedCache.GetCopyOnWriteMasters()).SingleOrDefault(master => master.HostAccountName.Equals(copyOnWriteMaster.HostAccountName));
 
-            Logger.LogInformation(@"Copy-On-Write Master For Host Account ""{HostAccountName}"" Was Authenticated At ""{CopyOnWriteMasterAddress}"" With Cookie ""{CopyOnWriteMasterCookie}""",
-                account.Name, serverIPAddress, copyOnWriteMasterSessionCookie);
+            await DistributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
 
-            return Ok(ServerAuthenticationResponse(copyOnWriteMasterSessionCookie, serverIdentifier.GetDeterministicInt32Hash()));
+            // A Copy-On-Write Master Renews Its Session From The Same Address And Port, Which Is Expected And Not Warned About
+            // A Replacement From A Different Address Or Port Means That Two Copy-On-Write Masters Share One Host Account, And Each Then Replaces The Other's Session
+            if (replacedCopyOnWriteMaster is not null && (replacedCopyOnWriteMaster.IPAddress.Equals(copyOnWriteMaster.IPAddress) is false || replacedCopyOnWriteMaster.Port != copyOnWriteMaster.Port))
+            {
+                Logger.LogWarning(@"Copy-On-Write Master ID ""{CopyOnWriteMasterID}"" For Host Account ""{HostAccountName}"" Replaced A Session Registered At ""{ReplacedCopyOnWriteMasterAddress}"":""{ReplacedCopyOnWriteMasterPort}"" With One At ""{CopyOnWriteMasterAddress}"":""{CopyOnWriteMasterPort}""",
+                    copyOnWriteMaster.ID, copyOnWriteMaster.HostAccountName, replacedCopyOnWriteMaster.IPAddress, replacedCopyOnWriteMaster.Port, copyOnWriteMaster.IPAddress, copyOnWriteMaster.Port);
+            }
+
+            Logger.LogInformation(@"Copy-On-Write Master ID ""{CopyOnWriteMasterID}"" For Host Account ""{HostAccountName}"" Was Registered At ""{CopyOnWriteMasterAddress}"":""{CopyOnWriteMasterPort}""",
+                copyOnWriteMaster.ID, copyOnWriteMaster.HostAccountName, copyOnWriteMaster.IPAddress, copyOnWriteMaster.Port);
+
+            return Ok(ServerAuthenticationResponse(copyOnWriteMaster.Cookie, copyOnWriteMaster.ID));
         }
 
         MatchServer matchServer = new ()
@@ -201,14 +225,21 @@ public partial class ServerRequesterController
             Description = serverDescription
         };
 
+        MatchServer? replacedMatchServer = await DistributedCache.GetMatchServerByID(matchServer.ID);
+
         await DistributedCache.SetMatchServer(hostAccountName, matchServer);
 
-        if (matchServerManager is not null)
+        // A Match Server Renews Its Session From The Same Address And Port After Every Match, Which Is Expected And Not Warned About
+        // A Replacement From A Different Address Or Port Means That Two Processes Share One Login, And Each Then Replaces The Other's Session, So That They Take Turns Being Told To Authenticate Again
+        if (replacedMatchServer is not null && (replacedMatchServer.IPAddress.Equals(matchServer.IPAddress) is false || replacedMatchServer.Port != matchServer.Port))
         {
-            matchServerManager.MatchServerIDs.Add(matchServer.ID);
-
-            await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
+            Logger.LogWarning(@"Server ID ""{MatchServerID}"" For Host Account ""{HostAccountName}"" And Instance ""{MatchServerInstance}"" Replaced A Session Registered At ""{ReplacedMatchServerAddress}"":""{ReplacedMatchServerPort}"" With One At ""{MatchServerAddress}"":""{MatchServerPort}""",
+                matchServer.ID, matchServer.HostAccountName, matchServer.Instance, replacedMatchServer.IPAddress, replacedMatchServer.Port, matchServer.IPAddress, matchServer.Port);
         }
+
+        // A Match Server Authenticates Again After Every Match And Whenever Its Session Is Renewed, So It Is Only Added To Its Manager When It Is Not Already Listed
+        if (matchServerManager is not null && matchServerManager.MatchServerIDs.Add(matchServer.ID))
+            await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
         // INFO: The Server Manager Doesn't Send Descriptions, So Use Name Instead Since We Can Override Them Anyway Via Remote Command (svr_name) On TCP Handshake
@@ -242,8 +273,17 @@ public partial class ServerRequesterController
         return PhpSerialization.Serialize(response);
     }
 
+    /// <summary>
+    ///     Builds the "auth_failure" response, which tells a match server that its session is not registered, so that it discards the session and authenticates again.
+    ///     A match server which has loaded a world for a match which has not started yet also ends that match and disconnects its players, as it does for the retail master server, which is kept because "start_game" refuses the unregistered session, so that match could never start anyway.
+    ///     The match server reads this response whatever the HTTP status code, so it is sent with a success status code, as the protocol answer which it is, rather than as an error.
+    /// </summary>
+    private static string ServerAuthenticationFailureResponse()
+        => PhpSerialization.Serialize(new List<string> { "auth_failure" });
+
     private async Task<IActionResult> HandleConnectClient()
     {
+        // The Session Is Deliberately Not Checked Against The Registered Match Servers, So That A Player Reconnecting To A Match In Progress Is Still Authenticated After The Master Server Has Lost The Match Server's Session
         string? session = Request.Form["session"];
 
         if (session is null)
@@ -401,11 +441,23 @@ public partial class ServerRequesterController
 
         if (matchServer is null)
         {
-            // The Copy-On-Write Master Sends Heartbeats Too, But It Is Not A Match Server, So There Is No Match Server State To Update
-            if (await DistributedCache.IsCopyOnWriteMasterSessionCookie(session))
-                return Ok();
+            CopyOnWriteMaster? copyOnWriteMaster = await DistributedCache.GetCopyOnWriteMasterBySessionCookie(session);
 
-            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
+            // The Copy-On-Write Master Sends Heartbeats Too, But It Never Hosts A Match, So Its Heartbeat Only Refreshes Its Own Record
+            // It Has No Chat Session, So Its Last Heartbeat Is What Keeps It From Being Reaped As Stale
+            if (copyOnWriteMaster is not null)
+            {
+                copyOnWriteMaster.Status = (ServerStatus) int.Parse(connectionState);
+                copyOnWriteMaster.TimestampLastHeartbeat = DateTimeOffset.UtcNow;
+
+                await DistributedCache.SetCopyOnWriteMaster(copyOnWriteMaster);
+
+                return Ok();
+            }
+
+            // A Session Which Is Not Registered Belongs To A Match Server Which Was Reaped Or Replaced, Or Whose Registration Was Lost, So The Match Server Is Told To Authenticate Again
+            // A Match Server In A Lobby ("c_state" 2: World Loaded, Match Not Started) Also Ends That Match And Disconnects Its Players, As It Does For The Retail Master Server; This Is Kept, Because "start_game" Refuses The Unregistered Session, So That Match Could Never Start Anyway
+            return Ok(ServerAuthenticationFailureResponse());
         }
 
         matchServer.Status = (ServerStatus) int.Parse(connectionState);

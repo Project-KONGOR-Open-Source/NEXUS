@@ -90,11 +90,8 @@ public static partial class DistributedCacheExtensions
 
         // Remove Only The Manager's Own Cache Entry; Its Match Servers Are Independent Hosts With Their Own Chat Sessions, And Are Reaped On Their Own Liveness (Sessionless Past The Grace Period, Or A Stale Status Heartbeat)
         // A Manager Going Away Must Not Tear Down Its Still-Live Servers, Which Would Otherwise Interrupt In-Progress Matches Whenever The Manager Merely Reconnects After A Transient Disconnect
+        // The Same Holds For Its Copy-On-Write Master, A Non-Joinable Match Server Which The Manager Keeps Forking Its Match Servers From, And Which Is Reaped Once Its Heartbeat Is Stale
         await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, matchServerManager.HostAccountName);
-
-        // Unlike The Match Servers, The Copy-On-Write Master Is Not An Independent Host: Only Its Manager Starts It, It Never Hosts A Match, And It Is Only Accepted While Its Manager Is Registered, So Its Session Is Removed With The Manager
-        // Managers And Copy-On-Write Master Sessions Are Both Keyed By Host Account, So The Manager Removed Here Is Always The Last One Registered For That Host Account
-        await distributedCacheStore.HashDeleteAsync(CopyOnWriteMasterSessionCookiesKey, matchServerManager.HostAccountName);
     }
 
     private const string MatchServersKey = "MATCH-SERVERS";
@@ -197,25 +194,44 @@ public static partial class DistributedCacheExtensions
         }
     }
 
-    private const string CopyOnWriteMasterSessionCookiesKey = "COPY-ON-WRITE-MASTER-SESSION-COOKIES";
+    private const string CopyOnWriteMastersKey = "COPY-ON-WRITE-MASTERS";
 
     /// <summary>
-    ///     Stores the session cookie of the copy-on-write master (HON's "cowmaster") which a Linux match server manager forks its match servers from.
-    ///     A match server manager runs a single copy-on-write master, so the session cookie is keyed by the host account name and replaces any previous one.
-    ///     The session cookie is removed with the match server manager, by <see cref="RemoveMatchServerManagerByID"/>.
+    ///     Stores the copy-on-write master (HON's "cowmaster") which a Linux match server manager forks its match servers from.
+    ///     A match server manager runs a single copy-on-write master, so the copy-on-write master is keyed by the host account name and replaces any previous one.
+    ///     Copy-on-write masters are stored apart from the match servers, so that no server list, matchmaking, or match server look-up ever finds one.
     /// </summary>
-    public static async Task SetCopyOnWriteMasterSessionCookie(this IDatabase distributedCacheStore, string hostAccountName, string sessionCookie)
-        => await distributedCacheStore.HashSetAsync(CopyOnWriteMasterSessionCookiesKey, [new HashEntry(hostAccountName, sessionCookie)]);
-
-    /// <summary>
-    ///     Returns <see langword="true"/> if the session cookie belongs to the copy-on-write master of any host account.
-    /// </summary>
-    public static async Task<bool> IsCopyOnWriteMasterSessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    public static async Task SetCopyOnWriteMaster(this IDatabase distributedCacheStore, CopyOnWriteMaster copyOnWriteMaster)
     {
-        HashEntry[] copyOnWriteMasterSessionCookies = await distributedCacheStore.HashGetAllAsync(CopyOnWriteMasterSessionCookiesKey);
+        string serializedCopyOnWriteMaster = JsonSerializer.Serialize(copyOnWriteMaster);
 
-        return copyOnWriteMasterSessionCookies.Any(entry => entry.Value.ToString().Equals(sessionCookie));
+        await distributedCacheStore.HashSetAsync(CopyOnWriteMastersKey, [new HashEntry(copyOnWriteMaster.HostAccountName, serializedCopyOnWriteMaster)]);
     }
+
+    public static async Task<List<CopyOnWriteMaster>> GetCopyOnWriteMasters(this IDatabase distributedCacheStore)
+    {
+        HashEntry[] serializedCopyOnWriteMasters = await distributedCacheStore.HashGetAllAsync(CopyOnWriteMastersKey);
+
+        List<CopyOnWriteMaster> copyOnWriteMasters = [.. serializedCopyOnWriteMasters
+            .Select(entry => JsonSerializer.Deserialize<CopyOnWriteMaster>(entry.Value.ToString())).OfType<CopyOnWriteMaster>()];
+
+        return copyOnWriteMasters;
+    }
+
+    public static async Task<CopyOnWriteMaster?> GetCopyOnWriteMasterBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    {
+        List<CopyOnWriteMaster> copyOnWriteMasters = await distributedCacheStore.GetCopyOnWriteMasters();
+
+        CopyOnWriteMaster? copyOnWriteMaster = copyOnWriteMasters.SingleOrDefault(master => master.Cookie.Equals(sessionCookie));
+
+        return copyOnWriteMaster;
+    }
+
+    /// <summary>
+    ///     Removes the copy-on-write master of the host account, which happens once its heartbeat is stale, because it has no chat session to show that it is still running.
+    /// </summary>
+    public static async Task RemoveCopyOnWriteMaster(this IDatabase distributedCacheStore, string hostAccountName)
+        => await distributedCacheStore.HashDeleteAsync(CopyOnWriteMastersKey, hostAccountName);
 
     private static string ConstructMatchInformationKey(int matchID) => $@"MATCH-INFORMATION:[""{matchID}""]";
 
