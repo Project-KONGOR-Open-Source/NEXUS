@@ -171,24 +171,6 @@ internal static class ChatTestData
     /// <summary>
     ///     Polls the distributed cache until the user's match lock is gone or the timeout elapses, returning whether it disappeared in time.
     /// </summary>
-    public static async Task<bool> WaitUntilLockIsGone(ChatServerHost host, int userID, TimeSpan timeout)
-    {
-        await using AsyncServiceScope scope = host.Services.CreateAsyncScope();
-
-        IDatabase distributedCacheStore = scope.ServiceProvider.GetRequiredService<IDatabase>();
-
-        using CancellationTokenSource cancellation = new (timeout);
-
-        while (cancellation.IsCancellationRequested is false)
-        {
-            if (await distributedCacheStore.GetMatchLock(userID) is null)
-                return true;
-
-            try { await Task.Delay(TimeSpan.FromMilliseconds(50), cancellation.Token); }
-
-            catch (OperationCanceledException) { break; }
-        }
-
-        return await distributedCacheStore.GetMatchLock(userID) is null;
-    }
+    public static Task<bool> WaitUntilLockIsGone(ChatServerHost host, int userID, TimeSpan timeout)
+        => ChatTestProtocol.WaitUntil(async () => await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID) is null, timeout);
 }

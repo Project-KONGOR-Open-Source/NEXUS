@@ -97,10 +97,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     {
         IPEndPoint? gameEndPoint = ResolveGameEndPoint(matchLock, registeredServer, serverSession);
 
-        uint? slotTimeRemaining = gameEndPoint is null ? null : await reconnectQuery.QuerySlotTimeRemaining(gameEndPoint, matchLock.MatchID, matchLock.AccountID);
-
         // Without A Chat Session, The Match Server Has No Reported Phase Which Is Known To Be Current
+        // The Phase Is Read Before The Query, Because A Status Reported During The Query's Retries Could Pair A Zero Given During A Pick Phase With A Later Phase And Lift The Lock During That Pick Phase
         GamePhase? lastReportedGamePhase = serverSession is null ? null : (GamePhase) serverSession.Metadata.GamePhase;
+
+        uint? slotTimeRemaining = gameEndPoint is null ? null : await reconnectQuery.QuerySlotTimeRemaining(gameEndPoint, matchLock.MatchID, matchLock.AccountID);
 
         string gamePhaseName = lastReportedGamePhase?.ToString() ?? "Unknown";
 
@@ -125,7 +126,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
         if (verdict is MatchLockVerdict.SendBack)
         {
-            logger.LogInformation(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Reports {SlotTimeRemaining} Milliseconds Remaining On The Slot In Game Phase ""{GamePhase}""",
+            logger.LogDebug(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Reports {SlotTimeRemaining} Milliseconds Remaining On The Slot In Game Phase ""{GamePhase}""",
                 matchLock.AccountName, matchLock.MatchID, matchLock.ServerID, slotTimeRemaining, gamePhaseName);
         }
 

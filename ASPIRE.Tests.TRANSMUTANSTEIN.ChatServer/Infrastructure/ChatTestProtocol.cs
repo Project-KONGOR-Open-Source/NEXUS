@@ -122,13 +122,19 @@ internal static class ChatTestProtocol
     /// <summary>
     ///     Polls a condition until it holds or the timeout elapses, returning whether it became true.
     /// </summary>
-    public static async Task<bool> WaitUntil(Func<bool> condition, TimeSpan timeout)
+    public static Task<bool> WaitUntil(Func<bool> condition, TimeSpan timeout)
+        => WaitUntil(() => Task.FromResult(condition()), timeout);
+
+    /// <summary>
+    ///     Polls an asynchronous condition until it holds or the timeout elapses, returning whether it became true.
+    /// </summary>
+    public static async Task<bool> WaitUntil(Func<Task<bool>> condition, TimeSpan timeout)
     {
         using CancellationTokenSource cancellation = new (timeout);
 
         while (cancellation.IsCancellationRequested is false)
         {
-            if (condition())
+            if (await condition())
                 return true;
 
             try { await Task.Delay(TimeSpan.FromMilliseconds(50), cancellation.Token); }
@@ -136,7 +142,7 @@ internal static class ChatTestProtocol
             catch (OperationCanceledException) { break; }
         }
 
-        return condition();
+        return await condition();
     }
 
     public static ChatBuffer BuildClientHandshake(int accountID, string cookie, string remoteIP, string authenticationHash)

@@ -211,6 +211,41 @@ public sealed class MatchLockVerificationTests(ServiceContainerContext container
 
     [Test]
     [NotInParallel(nameof(ChatServerHost))]
+    public async Task An_Unreachable_Server_Is_Logged_Again_After_It_Answers_In_Between()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(120000);
+
+        (int userID, int accountID, string accountName) = await SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        IDatabase distributedCacheStore = host.Services.GetRequiredService<IDatabase>();
+
+        RecordingLogger<MatchLockService> logger = new ();
+
+        MatchLockService matchLockService = new (distributedCacheStore, new MatchServerReconnectQuery(), logger);
+
+        gameSocket.Answers = false;
+
+        await matchLockService.Verify(lockedMatch.Lock);
+
+        await distributedCacheStore.SetMatchLock(lockedMatch.Lock);
+
+        gameSocket.Answers = true;
+
+        MatchLockVerdict answeredVerdict = await matchLockService.Verify(lockedMatch.Lock);
+
+        gameSocket.Answers = false;
+
+        await matchLockService.Verify(lockedMatch.Lock);
+
+        await Assert.That(answeredVerdict).IsEqualTo(MatchLockVerdict.SendBack);
+        await Assert.That(logger.Entries.Count(entry => entry.Level is LogLevel.Error)).IsEqualTo(2);
+    }
+
+    [Test]
+    [NotInParallel(nameof(ChatServerHost))]
     public async Task Verifying_A_Registered_Server_Without_A_Chat_Session_Queries_Its_Registered_Address_And_Keeps_The_Lock()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
