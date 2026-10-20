@@ -75,6 +75,42 @@ internal static class ChatTestProtocol
     }
 
     /// <summary>
+    ///     Reads frames and collects the text of every remote command frame up to the first one starting with "echo ", which the server always sends last, returning whatever was collected if the connection closes or the timeout elapses first.
+    /// </summary>
+    public static async Task<List<string>> ReadRemoteCommandsUntilEcho(NetworkStream stream, TimeSpan timeout)
+    {
+        List<string> remoteCommands = [];
+
+        using CancellationTokenSource cancellation = new (timeout);
+
+        try
+        {
+            while (true)
+            {
+                ChatBuffer frame = new (await ReadFramePayload(stream, cancellation.Token));
+
+                ushort command = BitConverter.ToUInt16(frame.ReadCommandBytes(), 0);
+
+                if (command != ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND)
+                    continue;
+
+                frame.ReadString();                        // Session Cookie
+
+                string remoteCommand = frame.ReadString(); // Command Text
+
+                remoteCommands.Add(remoteCommand);
+
+                if (remoteCommand.StartsWith("echo ", StringComparison.Ordinal))
+                    return remoteCommands;
+            }
+        }
+
+        catch (OperationCanceledException) { return remoteCommands; }
+
+        catch (Exception exception) when (exception is IOException or SocketException or InvalidOperationException) { return remoteCommands; }
+    }
+
+    /// <summary>
     ///     Reads frames until one carrying the expected command identifier is seen, returning that frame positioned immediately after the command bytes so the caller can read its fields, or <see langword="null"/> if the connection closed or the timeout elapsed first.
     /// </summary>
     public static async Task<ChatBuffer?> ReadUntilCommand(NetworkStream stream, ushort expectedCommand, TimeSpan timeout)
