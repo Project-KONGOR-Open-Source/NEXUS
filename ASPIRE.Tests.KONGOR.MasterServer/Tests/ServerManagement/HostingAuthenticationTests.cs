@@ -794,6 +794,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
 
     /// <summary>
     ///     Sends the request which a match server sends to map account IDs to their session cookies, but with the account IDs in the query string, where the match server never posts them, and without a session when the session is <see langword="null"/>.
+    ///     Each account ID is sent both under an indexed "aids[N]" key and under the literal "aids[]" key which the match server posts in the request body, so that reading either from the query string is detected.
     /// </summary>
     private async Task<HttpResponseMessage> RequestAccountCookies(string? session, params int[] accountIDs)
     {
@@ -806,7 +807,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
         if (session is not null)
             formData.Add("session", session);
 
-        string accountIDsQuery = string.Join('&', accountIDs.Select((accountID, index) => $"aids[{index}]={accountID}"));
+        string accountIDsQuery = string.Join('&', accountIDs.Select((accountID, index) => $"aids[{index}]={accountID}&aids[]={accountID}"));
 
         return await httpClient.PostAsync($"server_requester.php?f=aids2cookie&{accountIDsQuery}", new FormUrlEncodedContent(formData));
     }

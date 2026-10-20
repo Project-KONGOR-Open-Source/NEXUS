@@ -8,6 +8,11 @@ public sealed partial class HostingAuthenticationTests
     private const string NonHostSubAccountName = "NON-HOST-SUB";
 
     /// <summary>
+    ///     The name of the main account of a user other than the user of <see cref="NonHostAccountName"/>.
+    /// </summary>
+    private const string OtherNonHostAccountName = "OTHER-NON-HOST";
+
+    /// <summary>
     ///     How long a published refusal is awaited.
     /// </summary>
     private static readonly TimeSpan RefusalTimeout = TimeSpan.FromSeconds(5);
@@ -554,6 +559,45 @@ public sealed partial class HostingAuthenticationTests
         {
             await Assert.That(sessionCookies.Count).IsEqualTo(2);
             await Assert.That(gameCookies.Keys).IsEquivalentTo(sessionCookies.Keys, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_Keeps_Both_Lists_Aligned_Around_An_Omitted_Account()
+    {
+        await InitialiseIn("Development");
+
+        await CreateSubAccount(NonHostAccountName, NonHostSubAccountName);
+
+        await EnsureAccountExists(OtherNonHostAccountName, "other-non-host@kongor.test", AccountType.Normal);
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        int firstAccountID = await GetAccountID(NonHostAccountName);
+        int omittedAccountID = await GetAccountID(NonHostSubAccountName);
+        int lastAccountID = await GetAccountID(OtherNonHostAccountName);
+
+        string firstCookie = await CreateClientSessionCookie(NonHostAccountName);
+        string omittedCookie = await CreateClientSessionCookie(NonHostSubAccountName);
+        string lastCookie = await CreateClientSessionCookie(OtherNonHostAccountName);
+
+        string firstGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, firstCookie)))["game_cookie"];
+        string omittedGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, omittedCookie)))["game_cookie"];
+        string lastGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, lastCookie)))["game_cookie"];
+
+        // The Middle Account Lacks Its Latest Session Cookie, So That It Is Left Out While Accounts Are Answered On Either Side Of It
+        await webApplicationFactory.Services.GetRequiredService<IDatabase>().KeyDeleteAsync(DistributedCacheExtensions.ConstructAccountLatestSessionCookieKey(omittedAccountID));
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, firstAccountID, omittedAccountID, lastAccountID));
+
+        // The Match Server Pairs Both Lists By Position, So Leaving An Account Out Of Only One List Would Pair Every Later Account With Another Account's Game Cookie
+        using (Assert.Multiple())
+        {
+            await Assert.That(omittedGameCookie).IsNotEmpty();
+            await Assert.That(sessionCookies.Keys.Select(key => (string) key)).IsEquivalentTo([firstAccountID.ToString(), lastAccountID.ToString()], TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await Assert.That(gameCookies.Keys.Select(key => (string) key)).IsEquivalentTo([firstAccountID.ToString(), lastAccountID.ToString()], TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await Assert.That(sessionCookies.Values.Select(value => (string) value)).IsEquivalentTo([firstCookie, lastCookie], TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            await Assert.That(gameCookies.Values.Select(value => (string) value)).IsEquivalentTo([firstGameCookie, lastGameCookie], TUnit.Assertions.Enums.CollectionOrdering.Matching);
         }
     }
 
