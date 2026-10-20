@@ -3,7 +3,7 @@ namespace KONGOR.MasterServer.Extensions.Cache;
 public static partial class DistributedCacheExtensions
 {
     /// <summary>
-    ///     Constructs the key of the session cookie of an account's newest login.
+    ///     Constructs the key of the session cookie of an account's newest login, which the next login of the account's user retires.
     /// </summary>
     internal static string ConstructAccountLatestSessionCookieKey(int accountID) => $@"ACCOUNT-LATEST-SESSION-COOKIE:[""{accountID}""]";
 
@@ -16,12 +16,6 @@ public static partial class DistributedCacheExtensions
     ///     Constructs the key of the per-server index which lists the accounts whose client connections the match server has served.
     /// </summary>
     internal static string ConstructMatchServerAccountsKey(int serverID) => $@"MATCH-SERVER-ACCOUNTS:[""{serverID}""]";
-
-    /// <summary>
-    ///     Records the session cookie of an account's newest login, replacing that of any earlier login, so that a client of an earlier login can be told apart.
-    /// </summary>
-    public static async Task SetLatestSessionCookie(this IDatabase distributedCacheStore, int accountID, string cookie)
-        => await distributedCacheStore.StringSetAsync(ConstructAccountLatestSessionCookieKey(accountID), cookie, SessionCookieLifetime);
 
     public static async Task<string?> GetLatestSessionCookie(this IDatabase distributedCacheStore, int accountID)
     {

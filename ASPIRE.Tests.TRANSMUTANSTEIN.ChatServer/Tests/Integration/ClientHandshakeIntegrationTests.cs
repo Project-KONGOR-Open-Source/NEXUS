@@ -60,6 +60,37 @@ public sealed class ClientHandshakeIntegrationTests(ServiceContainerContext cont
     }
 
     [Test]
+    public async Task Handshake_With_A_Retired_Session_Cookie_Is_Rejected()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        (int accountID, string accountName) = await ChatTestData.SeedAccount(host.Services, AccountType.Normal);
+
+        IDatabase distributedCacheStore = host.Services.GetRequiredService<IDatabase>();
+
+        string retiredCookie = Guid.CreateVersion7().ToString();
+
+        await distributedCacheStore.SupersedeSessionCookies(accountID, accountName, retiredCookie, []);
+
+        // The Player Logs In Again, Which Retires The Earlier Login
+        await distributedCacheStore.SupersedeSessionCookies(accountID, accountName, Guid.CreateVersion7().ToString(), []);
+
+        string authenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountID, RemoteIP, retiredCookie);
+
+        using TcpClient client = await host.ConnectClientAsync();
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildClientHandshake(accountID, retiredCookie, RemoteIP, authenticationHash));
+
+        using CancellationTokenSource timeout = new (TimeSpan.FromSeconds(10));
+
+        ushort command = await ChatTestProtocol.ReadCommand(stream, timeout.Token);
+
+        await Assert.That(command).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+    }
+
+    [Test]
     public async Task Second_Login_Disconnects_The_First_Session()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

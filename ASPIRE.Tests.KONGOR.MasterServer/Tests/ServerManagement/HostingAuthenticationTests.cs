@@ -8,6 +8,7 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.ServerManagement;
 ///     Also tests how the match server endpoints answer a session which is not registered: with the "auth_failure" reply, which makes the match server authenticate again, where acting upon it is safe, with a plain rejection where acting upon it would crash the match server, and as usual where a player reconnecting to a match in progress depends on the reply.
 ///     Also tests how the client connection request treats a player locked to a match in progress: another registered match server is refused, and the refusal is published, while the locked match server, an unrecognised session, and a copy-on-write master are always served, so that reconnecting to the match never breaks.
 ///     Also tests the game cookie which the client connection request issues per account and match server: reconnecting keeps it, whether through the same match server, after that match server renews its session, or through an unrecognised session, while connecting to another match server replaces it, and a refused client connection leaves it unchanged.
+///     Also tests that the client connection request refuses the session cookie of a login which a later login has retired, as it refuses any unknown session cookie.
 ///     Also tests the match server's duplicate session check ("aids2cookie"), which reads the account IDs from the request body, as the match server posts them, and answers, for each account which the asking match server has served, with the account's latest session cookie and its game cookie, so that the match server removes a player who has logged in elsewhere or joined another game, while a reconnecting player, or one refused elsewhere, is never removed.
 ///     The tests which cause or observe a refusal run apart from each other, because the refusal channel is shared by every test's master server, unlike the keys of the distributed cache.
 /// </summary>
@@ -742,7 +743,8 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     }
 
     /// <summary>
-    ///     Stores a session cookie for the account, and records it as the account's latest session cookie, as the client's authentication does, and returns the session cookie.
+    ///     Logs the account in with a new session cookie, as the client's authentication does, which retires the account's earlier login, and returns the session cookie.
+    ///     Unlike the client's authentication, it retires none of the logins of the user's other accounts, so that the tests which log two accounts of one user in keep both logins.
     /// </summary>
     private async Task<string> CreateClientSessionCookie(string accountName)
     {
@@ -750,9 +752,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
 
         string cookie = Guid.CreateVersion7().ToString();
 
-        await distributedCache.SetAccountNameForSessionCookie(cookie, accountName);
-
-        await distributedCache.SetLatestSessionCookie(await GetAccountID(accountName), cookie);
+        await distributedCache.SupersedeSessionCookies(await GetAccountID(accountName), accountName, cookie, []);
 
         return cookie;
     }

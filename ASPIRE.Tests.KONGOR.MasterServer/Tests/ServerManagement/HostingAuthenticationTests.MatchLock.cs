@@ -214,6 +214,34 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    public async Task Client_Connection_With_A_Retired_Session_Cookie_Is_Refused_Without_Blacklisting_It()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string retiredCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        // The Player Logs In Again, Which Retires The Earlier Login
+        await CreateClientSessionCookie(NonHostAccountName);
+
+        HttpResponseMessage response = await ConnectClient(session, retiredCookie);
+
+        string body = await response.Content.ReadAsStringAsync();
+
+        // A Retired Session Cookie Is Refused As Any Unknown Session Cookie Is, Never With "auth_failure", Which Makes The Match Server Drop Its Own Session, Nor With "Invalid cookie.", Which Makes It Blacklist The Session Cookie
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(body).DoesNotContain("account_id");
+            await Assert.That(body).DoesNotContain("game_cookie");
+            await Assert.That(body).DoesNotContain("auth_failure");
+            await Assert.That(body).DoesNotContain("Invalid cookie.");
+            await Assert.That(await webApplicationFactory.Services.GetRequiredService<IDatabase>().GetGameCookie(await GetAccountID(NonHostAccountName))).IsNull();
+        }
+    }
+
+    [Test]
     [NotInParallel(DistributedCacheExtensions.MatchLockRefusalChannel)]
     public async Task A_Refused_Client_Connection_Publishes_The_User_ID_And_Account_Name()
     {
