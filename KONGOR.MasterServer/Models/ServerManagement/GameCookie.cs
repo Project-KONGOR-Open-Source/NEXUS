@@ -12,4 +12,10 @@ public class GameCookie
     ///     The ID of the match server which the game cookie was issued for, or <see langword="null"/> when the session of the match server which asked was not a registered match server's.
     /// </summary>
     public required int? ServerID { get; set; }
+
+    /// <summary>
+    ///     The session cookie of the latest client connection which was served this game cookie, or which has since reported joining its match server.
+    ///     The match server's duplicate session check is answered with it, so that the answer agrees with the session cookie which the client on the match server holds, and the client is never kicked as a duplicate login.
+    /// </summary>
+    public required string SessionCookie { get; set; }
 }

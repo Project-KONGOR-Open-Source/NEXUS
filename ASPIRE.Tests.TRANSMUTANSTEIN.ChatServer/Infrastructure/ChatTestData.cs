@@ -56,6 +56,34 @@ internal static class ChatTestData
     }
 
     /// <summary>
+    ///     Inserts an account of the given type, which is not the main account, into the user of the given main account, returning the generated account identifier and name.
+    /// </summary>
+    public static async Task<(int AccountID, string AccountName)> SeedSubAccount(IServiceProvider services, int mainAccountID, AccountType accountType = AccountType.Normal)
+    {
+        await using AsyncServiceScope scope = services.CreateAsyncScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        User user = await databaseContext.Users.SingleAsync(candidate => candidate.Accounts.Any(account => account.ID == mainAccountID));
+
+        // The Random Trailing Characters Of A Version 7 GUID Keep The Name Unique, As In "SeedAccount"
+        string suffix = Guid.CreateVersion7().ToString("N")[^8..];
+
+        Account account = new ()
+        {
+            Name = $"TEST:{suffix}",
+            User = user,
+            IsMain = false,
+            Type = accountType
+        };
+
+        await databaseContext.Accounts.AddAsync(account);
+        await databaseContext.SaveChangesAsync();
+
+        return (account.ID, account.Name);
+    }
+
+    /// <summary>
     ///     Seeds an account of the given type, with a fresh session cookie for its login, and returns the identifier of its user with the account's identifier, name, and session cookie.
     /// </summary>
     public static async Task<(int UserID, int AccountID, string AccountName, string Cookie)> SeedPlayer(ChatServerHost host, AccountType accountType = AccountType.Normal)

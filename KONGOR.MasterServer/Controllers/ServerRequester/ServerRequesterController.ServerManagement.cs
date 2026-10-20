@@ -4,13 +4,15 @@ public partial class ServerRequesterController
 {
     /// <summary>
     ///     Answers the match server's periodic duplicate session check ("CGameServer::GetAccountAuth"), which posts the account IDs of its players as "aids[]" in the request body.
-    ///     For each account which the asking match server has served, the reply holds the session cookie of the account's latest login in "aids2cookie", and the account's game cookie in "aids2gcookie".
-    ///     The match server terminates a player whose game cookie differs as a duplicate connection, and kicks a connection whose session cookie differs as a duplicate login, so that a player who has joined another game, or logged in elsewhere, is removed.
+    ///     For each account which the asking match server has served, the reply holds, in "aids2cookie", the session cookie which the account's client on that match server holds, and, in "aids2gcookie", the account's game cookie.
+    ///     The match server terminates a player whose game cookie differs as a duplicate connection, so that a player who has joined another game is removed from the match which they left.
+    ///     The match server also kicks a connection whose session cookie differs as a duplicate login, and every kick is a strike toward the engine's kick ban, which, once reached, refuses the player's every reconnect until the match ends.
+    ///     So NEXUS never causes a duplicate-login kick: the session cookie answered follows the client on the match server, and never a later login elsewhere.
     ///     Reconnecting to a match in progress keeps the game cookie, so that a reconnecting player is never removed.
     /// </summary>
     private async Task<IActionResult> HandleAccountIDsToCookie()
     {
-        // Only A Registered Match Server May Map Account IDs To Live Session Cookies, Because Those Session Cookies Authenticate Their Accounts
+        // Only A Registered Match Server May Map Account IDs To Session Cookies, Because A Session Cookie Which Is Still Live Authenticates Its Account
         // Anything Else Is Rejected With Plain Text, And Never With "auth_failure", Because The Match Server Checks This Reply From Inside Its Game Frame, Where Acting Upon An Authentication Failure Before The Match Starts Frees The Game While The Frame Is Still Running
         string? session = Request.Form["session"];
 
@@ -38,16 +40,15 @@ public partial class ServerRequesterController
 
         foreach (int accountID in accountIDs)
         {
-            string? clientCookie = await DistributedCache.GetLatestSessionCookie(accountID);
-            string? gameCookie = await DistributedCache.GetGameCookie(accountID);
+            GameCookie? gameCookie = await DistributedCache.GetStoredGameCookie(accountID);
 
-            // The Match Server Removes A Listed Player Whose Cookie Is Empty, While It Leaves Alone An Account Which Is Not Listed, So An Account Lacking Either Cookie Is Left Out Of Both Lists
-            if (clientCookie is null || gameCookie is null)
+            // The Match Server Removes A Listed Player Whose Cookie Is Empty, While It Leaves Alone An Account Which Is Not Listed, So An Account Without A Readable Game Cookie Is Left Out Of Both Lists
+            if (gameCookie is null)
                 continue;
 
             // The Match Server Pairs Both Lists By Position Rather Than By Account ID, So Both Hold The Same Accounts In The Same Order
-            clientCookies.Add(accountID.ToString(), clientCookie);
-            gameCookies.Add(accountID.ToString(), gameCookie);
+            clientCookies.Add(accountID.ToString(), gameCookie.SessionCookie);
+            gameCookies.Add(accountID.ToString(), gameCookie.Cookie);
         }
 
         response["aids2cookie"] = clientCookies;

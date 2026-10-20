@@ -113,11 +113,42 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
             return this;
         }
 
+        await RefreshMatchServerSessionCookie(distributedCacheStore, server);
+
         Metadata.MatchServerConnectedTo = server;
 
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME, server);
 
         return this;
+    }
+
+    /// <summary>
+    ///     Records this session's session cookie as the one which the client holds on the match server, so that the match server's duplicate session check is answered with it, and never kicks the client as a duplicate login.
+    ///     The record of the session's own account is refreshed, or else that of the first other account of the same user which the match server served, and a failure is logged rather than thrown, so that it never disturbs joining the match.
+    /// </summary>
+    private async Task RefreshMatchServerSessionCookie(IDatabase distributedCacheStore, MatchServer server)
+    {
+        try
+        {
+            if (await distributedCacheStore.RefreshClientSessionCookie(Account.ID, server.ID, Metadata.SessionCookie))
+                return;
+
+            // Every Guest Account Shares One User, As Does Every Staff Account, So Their Other Accounts Belong To Other Players
+            if (Account.Type is AccountType.Guest or AccountType.Staff)
+                return;
+
+            // A Client Which Logs In Again During Its Match Pushes The Session Cookie Of Whichever Account It Logged In With To Its Match Server ("CHostClient::UpdateCookie"), So The Match Server May Hold It For Another Account Of The Same User
+            foreach (Account otherAccount in Account.User.Accounts.Where(account => account.ID != Account.ID))
+            {
+                if (await distributedCacheStore.RefreshClientSessionCookie(otherAccount.ID, server.ID, Metadata.SessionCookie))
+                    return;
+            }
+        }
+
+        catch (Exception exception)
+        {
+            Log.Error(exception, @"Failed To Refresh The Session Cookie Of Account ""{AccountName}"" On Match Server ID ""{MatchServerID}""", Account.Name, server.ID);
+        }
     }
 
     public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID, bool joinMatchChannel = true)

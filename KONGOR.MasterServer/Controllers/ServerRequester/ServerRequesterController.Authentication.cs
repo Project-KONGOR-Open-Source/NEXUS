@@ -390,7 +390,7 @@ public partial class ServerRequesterController
         response.Add("infos", new List<DataPoint> { DataPoint.FromAccount(account, aggregates, statisticsByType) });
 
         // The Game Cookie Is Only Issued Once The Client Connection Is Served, So That A Refused Attempt To Join Another Game Never Replaces The Game Cookie Of The Locked Match
-        response.Add("game_cookie", await DistributedCache.IssueGameCookie(account.ID, askingServer?.ID));
+        response.Add("game_cookie", await DistributedCache.IssueGameCookie(account.ID, askingServer?.ID, cookie));
 
         response.Add("my_upgrades", account.User.OwnedStoreItems);
         response.Add("selected_upgrades", account.SelectedStoreItems);
