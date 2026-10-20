@@ -237,21 +237,31 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         (int otherHostAccountID, string otherHostAccountName) = await ChatTestData.SeedAccount(host.Services, AccountType.ServerHost);
 
+        int otherServerID = ChatTestData.NextSeededServerID();
         int otherServerPort = Random.Shared.Next(20_000, 30_000);
 
-        await ChatTestData.SeedMatchServer(host.Services, Random.Shared.Next(1_000_000, int.MaxValue), otherHostAccountID, otherHostAccountName, Guid.CreateVersion7().ToString(), otherServerPort, OtherServerIPAddress);
+        await ChatTestData.SeedMatchServer(host.Services, otherServerID, otherHostAccountID, otherHostAccountName, Guid.CreateVersion7().ToString(), otherServerPort, OtherServerIPAddress);
 
-        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+        try
+        {
+            using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
 
-        NetworkStream stream = client.GetStream();
+            NetworkStream stream = client.GetStream();
 
-        await LogInAndReadSendBack(stream);
+            await LogInAndReadSendBack(stream);
 
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{OtherServerIPAddress}:{otherServerPort}"));
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{OtherServerIPAddress}:{otherServerPort}"));
 
-        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? reminder = await ChatTestProtocol.ReadAutoMatchConnect(stream, ReminderTimeout);
+            (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? reminder = await ChatTestProtocol.ReadAutoMatchConnect(stream, ReminderTimeout);
 
-        await Assert.That(reminder?.RandomInteger).IsEqualTo(-1);
+            await Assert.That(reminder?.RandomInteger).IsEqualTo(-1);
+        }
+
+        finally
+        {
+            // The Other Match Server Has No Chat Session To Remove It, And Every Chat Server Host Shares The Unprefixed Distributed Cache
+            await host.Services.GetRequiredService<IDatabase>().RemoveMatchServerByID(otherServerID);
+        }
     }
 
     [Test]

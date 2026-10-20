@@ -6,6 +6,16 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 internal static class ChatTestData
 {
     /// <summary>
+    ///     The last match server ID which <see cref="NextSeededServerID"/> issued, which starts high, above the range from which most other tests pick their match server IDs at random.
+    /// </summary>
+    private static int LastSeededServerID = 2_000_000_000;
+
+    /// <summary>
+    ///     Issues a match server ID which no other match server seeded through it during the test run shares, because every chat server host shares the unprefixed distributed cache, where a match server left behind by one test would otherwise be mistaken for another test's.
+    /// </summary>
+    public static int NextSeededServerID() => Interlocked.Increment(ref LastSeededServerID);
+
+    /// <summary>
     ///     Inserts a user and a single account of the given type, returning the generated account identifier and name.
     ///     The SRP and password fields are placeholders, because the chat handshakes validate the session cookie and authentication hash rather than the password.
     /// </summary>
@@ -140,7 +150,7 @@ internal static class ChatTestData
     {
         (int hostAccountID, string hostAccountName) = await SeedAccount(host.Services, AccountType.ServerHost);
 
-        int serverID = Random.Shared.Next(100_000, 999_999);
+        int serverID = NextSeededServerID();
         int matchID = Random.Shared.Next(100_000, 999_999);
         string cookie = Guid.CreateVersion7().ToString();
 
