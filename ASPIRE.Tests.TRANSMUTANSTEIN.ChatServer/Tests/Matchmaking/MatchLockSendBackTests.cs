@@ -400,6 +400,44 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     }
 
     [Test]
+    public async Task A_Player_Still_In_The_Match_Is_Told_Why_Once_Per_Notice_Repeat_Interval()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
+
+        bool reportedJoiningGame = await ChatTestProtocol.WaitUntil(() => session.ReportedJoiningGame, FrameTimeout);
+
+        MatchLockService matchLockService = host.Services.GetRequiredService<MatchLockService>();
+
+        bool firstRefused = await matchLockService.Enforce(session);
+        bool secondRefused = await matchLockService.Enforce(session);
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(reportedJoiningGame).IsTrue();
+            await Assert.That(firstRefused).IsTrue();
+            await Assert.That(secondRefused).IsTrue();
+            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.InMatchMessage]);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+            await Assert.That(session.PendingMatchLockReturn).IsNull();
+        }
+    }
+
+    [Test]
     [Arguments(true)]
     [Arguments(false)]
     public async Task An_Attempt_After_The_Notice_Repeat_Interval_Gets_The_Notice_Again(bool slotAccount)

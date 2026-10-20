@@ -17,6 +17,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal const string SlotAccountMessage = "You left a match which is still in progress, so you cannot play another game until it ends. Sending you back to it.";
 
     /// <summary>
+    ///     The notice to a player who is still in the locked match, whose own attempt to play another game is refused, and who is not sent anywhere.
+    /// </summary>
+    internal const string InMatchMessage = "You are in a match which is still in progress, so you cannot start another game until it ends.";
+
+    /// <summary>
     ///     The notice to another account of the locked user, which is not sent back, because only the account which holds the slot can return to the match.
     /// </summary>
     internal static string OtherAccountMessage(string slotAccountName)
@@ -125,10 +130,12 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
-    ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed.
+    ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed, apart from a short notice which is sent at most once per <see cref="NoticeRepeatInterval"/>.
+    ///     A refused connection proves that the game client is connecting elsewhere, so it is always sent back, whatever the game client reports.
+    ///     A group member whose group is enforced because another member acted is never given the notice, because the attempt is not its own.
     ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
-    public async Task<bool> Enforce(ClientChatSession session)
+    public async Task<bool> Enforce(ClientChatSession session, bool refusedConnection = false, bool groupMember = false)
     {
         if (IsExempt(session.Account))
             return false;
@@ -156,8 +163,12 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         }
 
         // A Game Client Which Reports Being In A Game Is On A Match Server, Where It Cannot Be Sent Back, And Is Usually A Player Still In The Locked Match, Who Must Not Be Told That They Left It
-        if (session.ReportedJoiningGame)
+        // A Refused Connection Is Never Such A Player, Because A Chat Reconnect Reports Joining A Game While The Client Is Still Connecting
+        if (session.ReportedJoiningGame && refusedConnection is false)
         {
+            if (groupMember is false && session.TryClaimInMatchNotice(NoticeRepeatInterval))
+                session.SendNotice(MessageSenderName, InMatchMessage);
+
             logger.LogDebug(@"Refusing Account ""{AccountName}"" Without Sending It Back To Match ID ""{MatchID}"", Because It Reports Being In A Game",
                 session.Account.Name, matchLock.MatchID);
 
@@ -222,7 +233,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         List<MatchmakingGroupMember> members = [.. group.Members];
 
         // The Members Are Enforced Concurrently, Because Each Locked Member May Wait On Its Own Match Server's Answer
-        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session)));
+        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, groupMember: true)));
 
         List<MatchmakingGroupMember> refusedMembers = [.. members.Where((member, index) => refusals[index])];
 
@@ -262,7 +273,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     {
         if (Context.ClientChatSessions.TryGetValue(refusal.AccountName, out ClientChatSession? session))
         {
-            await Enforce(session);
+            await Enforce(session, refusedConnection: true);
 
             return;
         }

@@ -390,6 +390,27 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
     }
 
     /// <summary>
+    ///     The ticks of the last claim of the in-match notice, which is zero while none has been claimed.
+    /// </summary>
+    private long LastInMatchNoticeTicks;
+
+    /// <summary>
+    ///     Claims the in-match notice, recording that it is sent now, but only when none was claimed within the repeat interval.
+    ///     Returns whether the notice was claimed, atomically, so that concurrent attempts send it once.
+    /// </summary>
+    public bool TryClaimInMatchNotice(TimeSpan repeatInterval)
+    {
+        long lastTicks = Interlocked.Read(ref LastInMatchNoticeTicks);
+
+        long nowTicks = DateTime.UtcNow.Ticks;
+
+        if (lastTicks is not 0 && nowTicks - lastTicks < repeatInterval.Ticks)
+            return false;
+
+        return Interlocked.CompareExchange(ref LastInMatchNoticeTicks, nowTicks, lastTicks) == lastTicks;
+    }
+
+    /// <summary>
     ///     Replaces the pending return to the locked match with the replacement, but only while the pending return is still the expected one, and cancels the expected return when it is replaced.
     ///     Returns whether the pending return was replaced.
     /// </summary>

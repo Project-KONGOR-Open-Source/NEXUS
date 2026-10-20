@@ -62,6 +62,38 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
     }
 
     [Test]
+    public async Task A_Published_Refusal_Sends_The_Player_Back_Even_After_The_Client_Reported_Joining_A_Game()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        // A Chat Reconnect While The Refused Join Is Still Connecting Reports Joining The Other Game's Server
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame("127.0.0.2:11236"));
+
+        bool reportedJoiningGame = await ChatTestProtocol.WaitUntil(() => Context.ClientChatSessions[accountName].ReportedJoiningGame, FrameTimeout);
+
+        await PublishRefusal(host, userID, accountName);
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? connect = await ChatTestProtocol.ReadAutoMatchConnect(stream, FrameTimeout);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(reportedJoiningGame).IsTrue();
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.SlotAccountMessage);
+            await Assert.That(connect?.MatchID).IsEqualTo(lockedMatch.Lock.MatchID);
+        }
+    }
+
+    [Test]
     public async Task A_Malformed_Refusal_Does_Not_Stop_The_Monitor()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
