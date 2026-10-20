@@ -119,7 +119,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
-    ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does.
+    ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed.
     ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once that interval has passed since the last notice.
     /// </summary>
     public async Task<bool> Enforce(ClientChatSession session)
@@ -147,6 +147,15 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             session.TryReplacePendingMatchLockReturn(pendingReturn, null);
 
             return false;
+        }
+
+        // A Game Client Which Reports Being In A Game Is On A Match Server, Where It Cannot Be Sent Back, And Is Usually A Player Still In The Locked Match, Who Must Not Be Told That They Left It
+        if (session.ReportedJoiningGame)
+        {
+            logger.LogDebug(@"Refusing Account ""{AccountName}"" Without Sending It Back To Match ID ""{MatchID}"", Because It Reports Being In A Game",
+                session.Account.Name, matchLock.MatchID);
+
+            return true;
         }
 
         bool isSlotAccount = matchLock.AccountID == session.Account.ID;
@@ -197,7 +206,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Decides whether a group's attempt to search for a match must be refused, which is while <see cref="Enforce"/> refuses any of its members.
-    ///     Every member is enforced, so that every locked member is sent back, and a leader who is not refused is told which member keeps the group from searching.
+    ///     Every member is enforced, so that every locked member who is not in a game is sent back, and a leader who is not refused is told which member keeps the group from searching.
     /// </summary>
     public async Task<bool> EnforceForGroup(MatchmakingGroup group)
     {
@@ -217,7 +226,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
             group.GUID, refusedMembers.Count);
 
-        // A Refused Leader Has Already Been Told Why
+        // A Refused Leader Has Already Been Told Why, Or Is Still In Its Match And Is Left Undisturbed
         if (refusedMembers.Contains(leader) is false)
             leader.Session.SendNotice(MessageSenderName, GroupMemberMessage(refusedMembers[0].Account.Name));
 

@@ -16,6 +16,11 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     /// </summary>
     private static readonly TimeSpan FrameTimeout = TimeSpan.FromSeconds(10);
 
+    /// <summary>
+    ///     How long a test listens to be sure that a frame which is not expected does not arrive.
+    /// </summary>
+    private static readonly TimeSpan QuietPeriod = TimeSpan.FromSeconds(2);
+
     [Test]
     [Arguments(ChatProtocol.TMMType.TMM_TYPE_PVP)]
     [Arguments(ChatProtocol.TMMType.TMM_TYPE_COOP)]
@@ -184,6 +189,110 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             {
                 await Assert.That(leaderNotice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
                 await Assert.That(leaderNotice?.Message).IsEqualTo(MatchLockService.GroupMemberMessage(memberAccountName));
+                await Assert.That(group.QueueStartTime).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(leaderAccountID, memberAccountID);
+        }
+    }
+
+    [Test]
+    public async Task Queueing_A_Group_With_A_Member_Still_In_The_Match_Does_Not_Message_The_Member()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (_, int leaderAccountID, string leaderAccountName, string leaderCookie) = await ChatTestData.SeedPlayer(host);
+        (int memberUserID, int memberAccountID, string memberAccountName, string memberCookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient leaderClient = await host.ConnectAndAuthenticateClientAsync(leaderAccountID, leaderAccountName, leaderCookie, RemoteIP);
+        using TcpClient memberClient = await host.ConnectAndAuthenticateClientAsync(memberAccountID, memberAccountName, memberCookie, RemoteIP);
+
+        NetworkStream leaderStream = leaderClient.GetStream();
+        NetworkStream memberStream = memberClient.GetStream();
+
+        ClientChatSession memberSession = Context.ClientChatSessions[memberAccountName];
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(leaderStream, leaderAccountID);
+
+            await JoinGroup(memberStream, leaderAccountName);
+
+            await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, memberUserID, memberAccountID, memberAccountName, gameSocket);
+
+            // A Teammate Who Is Still Connected To The Locked Match Reports Joining Its Match Server, And Is Still In The Group Which Its Leader Queues
+            await ChatTestProtocol.WriteFrame(memberStream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
+
+            bool reportedJoiningGame = await ChatTestProtocol.WaitUntil(() => memberSession.ReportedJoiningGame, FrameTimeout);
+
+            MakeReadyToQueue(group);
+
+            await ChatTestProtocol.WriteFrame(leaderStream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            (string SenderName, string Message)? leaderNotice = await ChatTestProtocol.ReadNotice(leaderStream, FrameTimeout);
+
+            (List<string> memberNoticeMessages, List<int> memberConnectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(memberStream, MatchLockService.ReturnResendInterval * 2);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(reportedJoiningGame).IsTrue();
+                await Assert.That(leaderNotice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+                await Assert.That(leaderNotice?.Message).IsEqualTo(MatchLockService.GroupMemberMessage(memberAccountName));
+                await Assert.That(group.QueueStartTime).IsNull();
+                await Assert.That(memberNoticeMessages.Count).IsEqualTo(0);
+                await Assert.That(memberConnectRandomIntegers.Count).IsEqualTo(0);
+                await Assert.That(memberSession.PendingMatchLockReturn).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(leaderAccountID, memberAccountID);
+        }
+    }
+
+    [Test]
+    public async Task Queueing_As_A_Locked_Leader_Sends_The_Leader_Back_Without_A_Group_Message()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int leaderUserID, int leaderAccountID, string leaderAccountName, string leaderCookie) = await ChatTestData.SeedPlayer(host);
+        (_, int memberAccountID, string memberAccountName, string memberCookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient leaderClient = await host.ConnectAndAuthenticateClientAsync(leaderAccountID, leaderAccountName, leaderCookie, RemoteIP);
+        using TcpClient memberClient = await host.ConnectAndAuthenticateClientAsync(memberAccountID, memberAccountName, memberCookie, RemoteIP);
+
+        NetworkStream leaderStream = leaderClient.GetStream();
+        NetworkStream memberStream = memberClient.GetStream();
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(leaderStream, leaderAccountID);
+
+            await JoinGroup(memberStream, leaderAccountName);
+
+            await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, leaderUserID, leaderAccountID, leaderAccountName, gameSocket);
+
+            MakeReadyToQueue(group);
+
+            await ChatTestProtocol.WriteFrame(leaderStream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            // The Leader's Own Notice Tells It Why, So A Group Message Naming The Leader Would Only Repeat It
+            (List<string> leaderNoticeMessages, List<int> leaderConnectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(leaderStream, QuietPeriod);
+            (List<string> memberNoticeMessages, List<int> memberConnectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(memberStream, QuietPeriod);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(leaderNoticeMessages.Count).IsEqualTo(1);
+                await Assert.That(leaderNoticeMessages.SingleOrDefault()).IsEqualTo(MatchLockService.SlotAccountMessage);
+                await Assert.That(leaderConnectRandomIntegers.Count(randomInteger => randomInteger is not -1)).IsEqualTo(1);
+                await Assert.That(memberNoticeMessages.Count).IsEqualTo(0);
+                await Assert.That(memberConnectRandomIntegers.Count).IsEqualTo(0);
                 await Assert.That(group.QueueStartTime).IsNull();
             }
         }

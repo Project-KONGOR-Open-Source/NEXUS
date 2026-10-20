@@ -161,6 +161,38 @@ internal static class ChatTestProtocol
         => (frame.ReadInt8(), frame.ReadInt32(), frame.ReadString(), frame.ReadInt16(), frame.ReadInt32());
 
     /// <summary>
+    ///     Reads every frame which arrives within the period, and returns the messages of the match lock's notices and the random integers of the "AUTO_MATCH_CONNECT" frames among them, so that frames of either kind are counted however they interleave.
+    ///     Notices from other senders are left out, because the chat server also sends notices about chat channels.
+    /// </summary>
+    public static async Task<(List<string> NoticeMessages, List<int> ConnectRandomIntegers)> ReadSendBackFrames(NetworkStream stream, TimeSpan period)
+    {
+        List<string> noticeMessages = [];
+        List<int> connectRandomIntegers = [];
+
+        using CancellationTokenSource cancellation = new (period);
+
+        try
+        {
+            while (true)
+            {
+                ChatBuffer frame = new (await ReadFramePayload(stream, cancellation.Token));
+
+                ushort command = BitConverter.ToUInt16(frame.ReadCommandBytes(), 0);
+
+                if (command == ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL && ParseNotice(frame) is { SenderName: MatchLockService.MessageSenderName } notice)
+                    noticeMessages.Add(notice.Message);
+
+                else if (command == ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT)
+                    connectRandomIntegers.Add(ParseAutoMatchConnect(frame).RandomInteger);
+            }
+        }
+
+        catch (OperationCanceledException) { }
+
+        return (noticeMessages, connectRandomIntegers);
+    }
+
+    /// <summary>
     ///     Reads and discards from the stream until the peer closes the connection, returning whether it closed within the timeout.
     /// </summary>
     public static async Task<bool> WaitForClose(NetworkStream stream, TimeSpan timeout)

@@ -83,7 +83,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(stream, QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
 
         using (Assert.Multiple())
         {
@@ -114,7 +114,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(stream, QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
 
         using (Assert.Multiple())
         {
@@ -142,7 +142,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(stream, QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
 
         using (Assert.Multiple())
         {
@@ -383,7 +383,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         bool secondRefused = await matchLockService.Enforce(session);
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(client.GetStream(), QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(client.GetStream(), QuietPeriod);
 
         string expectedMessage = slotAccount ? MatchLockService.SlotAccountMessage : MatchLockService.OtherAccountMessage(slotAccountName);
 
@@ -416,7 +416,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildLeftGame());
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(stream, QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
 
         using (Assert.Multiple())
         {
@@ -443,7 +443,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(stream, QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
 
         using (Assert.Multiple())
         {
@@ -469,7 +469,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         bool refused = await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(client.GetStream(), QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(client.GetStream(), QuietPeriod);
 
         using (Assert.Multiple())
         {
@@ -498,7 +498,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
 
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ReadSendBackFrames(stream, QuietPeriod);
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
 
         bool refused = await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
@@ -524,37 +524,5 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await Assert.That(notice?.Message).IsEqualTo(MatchLockService.SlotAccountMessage);
         await Assert.That(connect is { RandomInteger: not -1 }).IsTrue();
-    }
-
-    /// <summary>
-    ///     Reads every frame which arrives within the period, and returns the messages of the match lock's notices and the random integers of the "AUTO_MATCH_CONNECT" frames among them, so that frames of either kind are counted however they interleave.
-    ///     Notices from other senders are left out, because the chat server also sends notices about chat channels.
-    /// </summary>
-    private static async Task<(List<string> NoticeMessages, List<int> ConnectRandomIntegers)> ReadSendBackFrames(NetworkStream stream, TimeSpan period)
-    {
-        List<string> noticeMessages = [];
-        List<int> connectRandomIntegers = [];
-
-        using CancellationTokenSource cancellation = new (period);
-
-        try
-        {
-            while (true)
-            {
-                ChatBuffer frame = new (await ChatTestProtocol.ReadFramePayload(stream, cancellation.Token));
-
-                ushort command = BitConverter.ToUInt16(frame.ReadCommandBytes(), 0);
-
-                if (command == ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL && ChatTestProtocol.ParseNotice(frame) is { SenderName: MatchLockService.MessageSenderName } notice)
-                    noticeMessages.Add(notice.Message);
-
-                else if (command == ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT)
-                    connectRandomIntegers.Add(ChatTestProtocol.ParseAutoMatchConnect(frame).RandomInteger);
-            }
-        }
-
-        catch (OperationCanceledException) { }
-
-        return (noticeMessages, connectRandomIntegers);
     }
 }
