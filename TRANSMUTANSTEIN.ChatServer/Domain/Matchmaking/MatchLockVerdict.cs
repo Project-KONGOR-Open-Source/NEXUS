@@ -2,7 +2,7 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 /// <summary>
 ///     The outcome of verifying a match lock before its player is sent back to the locked match.
-///     Every verdict except <see cref="SendBack"/> and <see cref="WaitForSlot"/> lifts the lock.
+///     Every verdict except <see cref="SendBack"/> and <see cref="WaitForSlot"/> lifts the lock, apart from <see cref="LiftSlotUnconfirmed"/> while a return waits for another machine and has sent nobody anywhere yet.
 /// </summary>
 public enum MatchLockVerdict
 {
@@ -34,6 +34,7 @@ public enum MatchLockVerdict
 
     /// <summary>
     ///     The match server did not answer whether the player's slot can be reclaimed, so the lock is lifted rather than trapping the player behind an outage.
+    ///     A return which waits for another machine to leave the match keeps the lock instead, and waits on, because it has sent nobody anywhere, so nobody can be trapped by it.
     /// </summary>
     LiftSlotUnconfirmed
 }

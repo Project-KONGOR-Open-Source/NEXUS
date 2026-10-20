@@ -781,13 +781,11 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
 
-        // The Match Server Stops Answering While The Player Waits, As It Does Once It Has Gone Down
-        gameSocket.Answers = false;
+        // The Match Server Stops Reporting Its Status While The Player Waits, As It Does Once It Has Gone Down, While Its Game Socket Still Reads The Slot As Connected
+        Context.MatchServerChatSessions[lockedMatch.Lock.ServerID].Metadata.LastStatusUpdate = DateTimeOffset.UtcNow - StaleHostReaper.MatchServerSessionStaleStateThreshold * 2;
 
-        // The Reminder Loop Verifies The Lock Again One Resend Interval After The Wait Begins, And That Verification Gives Up Once Every Attempt Of The Reconnect Query Has Timed Out
-        TimeSpan liftTimeout = MatchLockService.ReturnResendInterval + MatchServerReconnectQuery.AttemptTimeout * MatchServerReconnectQuery.RequestAttempts + QuietPeriod;
-
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, liftTimeout);
+        // The Reminder Loop Verifies The Lock Again One Resend Interval After The Wait Begins
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, ReminderTimeout);
 
         using (Assert.Multiple())
         {
@@ -796,6 +794,60 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
             await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
             await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNull();
             await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn).IsNull();
+        }
+    }
+
+    [Test]
+    public async Task An_Unanswered_Query_During_The_Wait_Keeps_Waiting()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+        // The Match Server's Game Socket Stops Answering While The Player Waits, As It Does When A Few Datagrams Are Lost, While The Match Server Still Reports Its Status
+        gameSocket.Answers = false;
+
+        int requestCount = gameSocket.Requests.Count;
+
+        // The Reminder Loop Verifies The Lock Again One Resend Interval After The Wait Begins, And That Verification Gives Up Once Every Attempt Of The Reconnect Query Has Timed Out
+        TimeSpan unansweredVerificationTimeout = MatchLockService.ReturnResendInterval + MatchServerReconnectQuery.AttemptTimeout * MatchServerReconnectQuery.RequestAttempts + QuietPeriod;
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, unansweredVerificationTimeout);
+
+        int unansweredRequestCount = gameSocket.Requests.Count - requestCount;
+
+        MatchLock? lockDuringOutage = await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID);
+
+        bool? slotConnectedDuringOutage = Context.ClientChatSessions[accountName].PendingMatchLockReturn?.SlotConnected;
+
+        // The Game Is Closed On The Other Machine, And The Match Server's Game Socket Answers Again
+        gameSocket.SlotTimeRemaining = SlotTimeRemaining;
+        gameSocket.Answers = true;
+
+        // A Verification Which Was Already Under Way When The Game Socket Answered Again Still Goes Unanswered, So The Send-Back May Follow One Verification Later
+        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? connect = await ChatTestProtocol.ReadAutoMatchConnect(stream, unansweredVerificationTimeout + ReminderTimeout);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.ConnectedElsewhereMessage);
+            await Assert.That(unansweredRequestCount).IsGreaterThanOrEqualTo(MatchServerReconnectQuery.RequestAttempts);
+            await Assert.That(noticeMessages.Count).IsEqualTo(0);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+            await Assert.That(lockDuringOutage).IsNotNull();
+            await Assert.That(slotConnectedDuringOutage).IsTrue();
+            await Assert.That(connect?.MatchID).IsEqualTo(lockedMatch.Lock.MatchID);
+            await Assert.That(connect?.RandomInteger).IsNotEqualTo(-1);
         }
     }
 

@@ -120,7 +120,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     ///     Verifies a match lock against its match server, and lifts the lock unless <see cref="KeepsLock"/> accepts the verdict.
     ///     The player's slot is queried only when the match server does not rule the lock out by itself.
     /// </summary>
-    public async Task<MatchLockVerdict> Verify(MatchLock matchLock)
+    /// <param name="matchLock">The match lock to verify.</param>
+    /// <param name="unconfirmedSlotLifts">Whether an unanswered reconnect query lifts the lock, which it does unless the caller is a return which waits for another machine and has sent nobody anywhere yet; a match server which is gone, or has ended the match, lifts the lock either way.</param>
+    public async Task<MatchLockVerdict> Verify(MatchLock matchLock, bool unconfirmedSlotLifts = true)
     {
         MatchServer? registeredServer = await distributedCacheStore.GetMatchServerByID(matchLock.ServerID);
 
@@ -131,9 +133,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (serverVerdict is not null)
             LogServerVerdict(matchLock, serverVerdict.Value, registeredServer, serverSession?.Metadata);
 
-        MatchLockVerdict verdict = serverVerdict ?? await VerifySlot(matchLock, registeredServer, serverSession);
+        MatchLockVerdict verdict = serverVerdict ?? await VerifySlot(matchLock, registeredServer, serverSession, unconfirmedSlotLifts);
 
-        if (KeepsLock(verdict) is false)
+        bool lifts = KeepsLock(verdict) is false && (verdict is not MatchLockVerdict.LiftSlotUnconfirmed || unconfirmedSlotLifts);
+
+        if (lifts)
             await distributedCacheStore.RemoveMatchLock(matchLock.UserID, matchLock.MatchID);
 
         return verdict;
@@ -402,8 +406,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Queries the match server for the time remaining on the player's slot, and reads the reply with the game phase which the match server last reported.
+    ///     An unanswered query is logged as lifting the lock only when <paramref name="unconfirmedSlotLifts"/> holds, because a waiting return keeps the lock through it.
     /// </summary>
-    private async Task<MatchLockVerdict> VerifySlot(MatchLock matchLock, MatchServer? registeredServer, MatchServerChatSession? serverSession)
+    private async Task<MatchLockVerdict> VerifySlot(MatchLock matchLock, MatchServer? registeredServer, MatchServerChatSession? serverSession, bool unconfirmedSlotLifts)
     {
         IPEndPoint? gameEndPoint = ResolveGameEndPoint(matchLock, registeredServer, serverSession);
 
@@ -425,8 +430,17 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                     matchLock.ServerID, gameEndPoint?.Address.ToString() ?? registeredServer?.IPAddress, matchLock.ServerPort);
             }
 
-            logger.LogWarning(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"" Without Confirmation, Because Match Server ID ""{MatchServerID}"" Did Not Answer The Reconnect Query",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+            if (unconfirmedSlotLifts)
+            {
+                logger.LogWarning(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"" Without Confirmation, Because Match Server ID ""{MatchServerID}"" Did Not Answer The Reconnect Query",
+                    matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+            }
+
+            else
+            {
+                logger.LogDebug(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"" While Its Return Waits, Although Match Server ID ""{MatchServerID}"" Did Not Answer The Reconnect Query, Because Nobody Has Been Sent There Yet",
+                    matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+            }
 
             return verdict;
         }
@@ -557,6 +571,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     Sends the account which holds the slot back to the locked match at once, unless the account is still connected to the match from another machine, and reminds it every <see cref="ReturnResendInterval"/> until the return ends.
     ///     While the account is still connected from another machine, the slot is verified again at every interval and nothing is sent, and the account is sent back as soon as the slot is no longer connected.
+    ///     An unanswered verification never ends that wait, because nobody has been sent anywhere yet, and the wait carries on until the match server answers again, the match server is gone or has ended the match, or the wait expires.
     ///     No chat message reaches the chat server when the match server refuses the connection, and the game client ignores a reminder while it is still connecting, so the reminders carry on until the game client reports joining the locked match server, the lock no longer holds, the session ends, or the return expires.
     ///     It never sends a notice, because the game client's own connection to the locked match server reads as connected while it loads.
     ///     It runs without being awaited, so it handles its own exceptions.
@@ -601,7 +616,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                 if (currentLock is null || currentLock.MatchID != matchLock.MatchID)
                     return;
 
-                MatchLockVerdict verdict = await Verify(currentLock);
+                // Until The Player Has Been Sent Back, Nobody Is Sent To The Match Server, So An Unanswered Query Keeps The Wait Rather Than Ending It, While A Match Server Which Is Gone Or Has Ended The Match Still Lifts The Lock
+                MatchLockVerdict verdict = await Verify(currentLock, unconfirmedSlotLifts: sentBack);
+
+                if (verdict is MatchLockVerdict.LiftSlotUnconfirmed && sentBack is false)
+                    continue;
 
                 if (KeepsLock(verdict) is false)
                     return;
