@@ -299,6 +299,101 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     [Test]
+    public async Task Queueing_While_Still_In_The_Match_Gives_The_Leader_Only_The_In_Match_Notice()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(stream, accountID);
+
+            await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
+
+            bool reportedJoiningGame = await ChatTestProtocol.WaitUntil(() => session.ReportedJoiningGame, FrameTimeout);
+
+            MakeReadyToQueue(group);
+
+            // The Leader's Own Request To Queue Is Its Own Attempt To Play, So It Is Told Why, Once Per Notice Repeat Interval
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(reportedJoiningGame).IsTrue();
+                await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.InMatchMessage]);
+                await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+                await Assert.That(session.PendingMatchLockReturn).IsNull();
+                await Assert.That(group.QueueStartTime).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(accountID);
+        }
+    }
+
+    [Test]
+    public async Task Reaching_Full_Loading_While_Still_In_The_Match_Gives_No_Notice()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(stream, accountID);
+
+            await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
+
+            bool reportedJoiningGame = await ChatTestProtocol.WaitUntil(() => session.ReportedJoiningGame, FrameTimeout);
+
+            // The Leader Is Ready Before Loading Starts, So That Full Loading Alone Would Queue The Group, Which Is Not The Leader's Own Request To Queue
+            group.Leader.IsReady = true;
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupPlayerLoadingStatus(100));
+
+            (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(reportedJoiningGame).IsTrue();
+                await Assert.That(noticeMessages.Count).IsEqualTo(0);
+                await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+                await Assert.That(session.PendingMatchLockReturn).IsNull();
+                await Assert.That(group.QueueStartTime).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(accountID);
+        }
+    }
+
+    [Test]
     public async Task Queueing_As_A_Locked_Leader_Sends_The_Leader_Back_Without_A_Group_Message()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

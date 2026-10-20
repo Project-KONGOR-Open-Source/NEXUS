@@ -488,7 +488,10 @@ public class MatchmakingGroup
     ///     Attempts to join the matchmaking queue.
     ///     Validates that no member is locked to a match in progress, and that all members are ready and fully loaded (100%), before joining.
     /// </summary>
-    public async Task JoinQueue(MerrickContext merrick, MatchLockService matchLockService)
+    /// <param name="merrick">The database context from which the members' statistics are loaded.</param>
+    /// <param name="matchLockService">The service which refuses the queue while a member is locked to a match in progress.</param>
+    /// <param name="leaderActed">Whether the group's leader asked to queue, rather than the group's loading having started the queue by itself, so that a leader who is still in its match is told why its own request is refused.</param>
+    public async Task JoinQueue(MerrickContext merrick, MatchLockService matchLockService, bool leaderActed = false)
     {
         // Prevent Double-Queuing (The Explicit Queue Join And The Loading-Status Auto-Join Can Legitimately Race)
         if (QueueStartTime is not null)
@@ -499,7 +502,7 @@ public class MatchmakingGroup
         }
 
         // A Group With A Locked Member Is Refused Before Anything Else Is Validated Or Changed, So That Every Attempt To Queue Sends Its Locked Members Back, Ready Or Not
-        if (await matchLockService.EnforceForGroup(this))
+        if (await matchLockService.EnforceForGroup(this, leaderActed))
             return;
 
         // Validate That All Members Are Ready And Loaded Before Joining Queue

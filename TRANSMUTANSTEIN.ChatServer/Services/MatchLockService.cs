@@ -252,8 +252,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     Decides whether a group's attempt to search for a match must be refused, which is while <see cref="Enforce"/> refuses any of its members.
     ///     Every member is enforced, so that every locked member who is not in a game is sent back, and a leader who is not refused is told which member keeps the group from searching.
+    ///     Only a leader who asked to queue is enforced as acting on its own, so that a leader who is still in its match is told why, while a queue which full loading started tells nobody who is still in their match.
     /// </summary>
-    public async Task<bool> EnforceForGroup(MatchmakingGroup group)
+    /// <param name="group">The group which is about to search for a match.</param>
+    /// <param name="leaderActed">Whether the group's leader asked to queue, rather than the group's loading having started the queue by itself.</param>
+    public async Task<bool> EnforceForGroup(MatchmakingGroup group, bool leaderActed = false)
     {
         // The Members Are Read Once, Because The Group Can Change While They Are Enforced
         MatchmakingGroupMember leader = group.Leader;
@@ -261,7 +264,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         List<MatchmakingGroupMember> members = [.. group.Members];
 
         // The Members Are Enforced Concurrently, Because Each Locked Member May Wait On Its Own Match Server's Answer
-        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, groupMember: true)));
+        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, groupMember: leaderActed is false || member != leader)));
 
         List<MatchmakingGroupMember> refusedMembers = [.. members.Where((member, index) => refusals[index])];
 
@@ -271,7 +274,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
             group.GUID, refusedMembers.Count);
 
-        // A Refused Leader Has Already Been Told Why, Or Is Still In Its Match And Is Left Undisturbed
+        // A Refused Leader Has Already Been Told Why, Unless It Is Still In Its Match And Did Not Ask To Queue, Which Leaves It Undisturbed
         if (refusedMembers.Contains(leader) is false)
             leader.Session.SendNotice(MessageSenderName, GroupMemberMessage(refusedMembers[0].Account.Name));
 
