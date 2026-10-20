@@ -46,11 +46,7 @@ public static partial class DistributedCacheExtensions
     }
 
     public static async Task<MatchLock?> GetMatchLock(this IDatabase distributedCacheStore, int userID)
-    {
-        RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructMatchLockKey(userID));
-
-        return cachedValue.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MatchLock>(cachedValue.ToString());
-    }
+        => DeserialiseMatchLock(await distributedCacheStore.StringGetAsync(ConstructMatchLockKey(userID)));
 
     /// <summary>
     ///     Marks that the match lock's login trigger has run for the session cookie of a login, so that the chat reconnects of the same login do not run it again.
@@ -75,10 +71,7 @@ public static partial class DistributedCacheExtensions
 
         RedisValue cachedValue = await distributedCacheStore.StringGetAsync(key);
 
-        if (cachedValue.IsNullOrEmpty)
-            return false;
-
-        MatchLock? matchLock = JsonSerializer.Deserialize<MatchLock>(cachedValue.ToString());
+        MatchLock? matchLock = DeserialiseMatchLock(cachedValue);
 
         if (matchLock is null || matchLock.MatchID != matchID)
             return false;
@@ -115,15 +108,15 @@ public static partial class DistributedCacheExtensions
 
             RedisValue cachedValue = await distributedCacheStore.StringGetAsync(lockKey);
 
-            MatchLock? matchLock = cachedValue.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MatchLock>(cachedValue.ToString());
+            MatchLock? matchLock = DeserialiseMatchLock(cachedValue);
 
-            // A Member Whose Lock Is Gone Or Now On Another Server Is Stale, So It Is Dropped From The Index
+            // A Member Whose Lock Is Gone, Unreadable, Or Now On Another Server Is Stale, So It Is Dropped From The Index
             // The Drop Is Conditioned On What Was Read, So That A Lock Written In The Meantime Keeps Its Place In The Index
             if (matchLock is null || matchLock.ServerID != serverID)
             {
                 ITransaction staleTransaction = distributedCacheStore.CreateTransaction();
 
-                staleTransaction.AddCondition(cachedValue.IsNullOrEmpty ? Condition.KeyNotExists(lockKey) : Condition.StringEqual(lockKey, cachedValue));
+                staleTransaction.AddCondition(cachedValue.IsNull ? Condition.KeyNotExists(lockKey) : Condition.StringEqual(lockKey, cachedValue));
 
                 _ = staleTransaction.SetRemoveAsync(serverKey, member);
 
@@ -154,4 +147,23 @@ public static partial class DistributedCacheExtensions
     /// </summary>
     public static async Task PublishMatchLockRefusal(this IDatabase distributedCacheStore, MatchLockRefusal refusal)
         => await distributedCacheStore.Multiplexer.GetSubscriber().PublishAsync(RedisChannel.Literal(MatchLockRefusalChannel), JsonSerializer.Serialize(refusal));
+
+    /// <summary>
+    ///     Deserialises a stored match lock, which counts as absent when it cannot be deserialised, as after a change to the shape of the match lock, so that it never fails the requests which check for a lock, and the index of its server drops it as stale.
+    /// </summary>
+    private static MatchLock? DeserialiseMatchLock(RedisValue cachedValue)
+    {
+        if (cachedValue.IsNullOrEmpty)
+            return null;
+
+        try
+        {
+            return JsonSerializer.Deserialize<MatchLock>(cachedValue.ToString());
+        }
+
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
 }

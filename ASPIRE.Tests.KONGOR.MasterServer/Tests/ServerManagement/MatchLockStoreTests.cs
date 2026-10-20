@@ -47,6 +47,31 @@ public sealed class MatchLockStoreTests(KONGORIntegrationWebApplicationFactory w
     }
 
     [Test]
+    public async Task An_Unreadable_Lock_Reads_As_Absent_And_Is_Dropped_With_The_Locks_Of_Its_Server()
+    {
+        await DistributedCache.SetMatchLock(BuildLock(userID: 7, matchID: 100, serverID: 1, timestampStarted: DateTimeOffset.UtcNow));
+
+        // The Stored Lock No Longer Deserialises, As It Would After A Change To The Shape Of The Lock
+        await DistributedCache.StringSetAsync(DistributedCacheExtensions.ConstructMatchLockKey(7), "NOT-A-MATCH-LOCK", MatchLock.Lifetime);
+
+        MatchLock? stored = await DistributedCache.GetMatchLock(7);
+
+        bool removedForMatch = await DistributedCache.RemoveMatchLock(7, 100);
+
+        int removedForServer = await DistributedCache.RemoveMatchLocksForServer(1);
+
+        bool stillIndexed = await DistributedCache.SetContainsAsync(DistributedCacheExtensions.ConstructMatchLockServerKey(1), 7);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(stored).IsNull();
+            await Assert.That(removedForMatch).IsFalse();
+            await Assert.That(removedForServer).IsEqualTo(0);
+            await Assert.That(stillIndexed).IsFalse();
+        }
+    }
+
+    [Test]
     public async Task A_Match_Lock_Is_Stored_Per_User_Until_One_Lifetime_After_It_Began()
     {
         MatchLock matchLock = BuildLock(userID: 7, matchID: 100, serverID: 1, timestampStarted: DateTimeOffset.UtcNow);
