@@ -157,6 +157,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     ///     A group member whose group is enforced because another member acted is never given the notice, because the attempt is not its own.
     ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
+    /// <param name="session">The chat session of the player whose attempt to play another game is decided.</param>
+    /// <param name="refusedConnection">Whether the attempt is a client connection which the master server refused on another match server, which proves that the game client is connecting elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
+    /// <param name="groupMember">Whether the player is enforced only because its group is, as when another member asked to queue or the group's loading started the queue, so that a player who is still in its match is not told why an attempt which is not its own was refused.</param>
     public async Task<bool> Enforce(ClientChatSession session, bool refusedConnection = false, bool groupMember = false)
     {
         if (IsExempt(session.Account))
