@@ -1,5 +1,3 @@
-using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
-
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 
 /// <summary>
@@ -71,25 +69,38 @@ public sealed class ClientHandshakeIntegrationTests(ServiceContainerContext cont
         IDatabase distributedCacheStore = host.Services.GetRequiredService<IDatabase>();
 
         string retiredCookie = Guid.CreateVersion7().ToString();
+        string liveCookie = Guid.CreateVersion7().ToString();
 
-        await distributedCacheStore.SupersedeSessionCookies(accountID, accountName, retiredCookie, []);
+        try
+        {
+            await distributedCacheStore.SupersedeSessionCookies(accountID, accountName, retiredCookie, []);
 
-        // The Player Logs In Again, Which Retires The Earlier Login
-        await distributedCacheStore.SupersedeSessionCookies(accountID, accountName, Guid.CreateVersion7().ToString(), []);
+            // The Player Logs In Again, Which Retires The Earlier Login
+            await distributedCacheStore.SupersedeSessionCookies(accountID, accountName, liveCookie, []);
 
-        string authenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountID, RemoteIP, retiredCookie);
+            string authenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountID, RemoteIP, retiredCookie);
 
-        using TcpClient client = await host.ConnectClientAsync();
+            using TcpClient client = await host.ConnectClientAsync();
 
-        NetworkStream stream = client.GetStream();
+            NetworkStream stream = client.GetStream();
 
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildClientHandshake(accountID, retiredCookie, RemoteIP, authenticationHash));
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildClientHandshake(accountID, retiredCookie, RemoteIP, authenticationHash));
 
-        using CancellationTokenSource timeout = new (TimeSpan.FromSeconds(10));
+            using CancellationTokenSource timeout = new (TimeSpan.FromSeconds(10));
 
-        ushort command = await ChatTestProtocol.ReadCommand(stream, timeout.Token);
+            ushort command = await ChatTestProtocol.ReadCommand(stream, timeout.Token);
 
-        await Assert.That(command).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+            await Assert.That(command).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+        }
+
+        finally
+        {
+            // Every Chat Server Host Shares The Unprefixed Distributed Cache While Each Host's Database Restarts Its Identifiers, So A Latest-Login Record Left Behind Would Be Retired By The Login Of A Later Test's Account With The Same ID
+            await distributedCacheStore.RemoveLatestSessionCookie(accountID, retiredCookie);
+            await distributedCacheStore.RemoveLatestSessionCookie(accountID, liveCookie);
+            await distributedCacheStore.RemoveAccountNameForSessionCookie(retiredCookie);
+            await distributedCacheStore.RemoveAccountNameForSessionCookie(liveCookie);
+        }
     }
 
     [Test]

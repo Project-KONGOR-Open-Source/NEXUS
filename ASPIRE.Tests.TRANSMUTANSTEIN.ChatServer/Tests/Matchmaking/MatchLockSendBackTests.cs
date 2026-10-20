@@ -12,11 +12,6 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     private const uint SlotTimeRemaining = 120000;
 
     /// <summary>
-    ///     The reply for a slot which is still connected to the match, as the match server gives while the slot account plays on from another machine, which is the largest possible time less the game time so far.
-    /// </summary>
-    private const uint ConnectedSlotTimeRemaining = uint.MaxValue - 60_000u;
-
-    /// <summary>
     ///     The name of an account of the locked user other than the one which logs in, which holds the user's slot in the locked match.
     /// </summary>
     private const string SlotAccountName = "TEST:SlotAccount";
@@ -40,6 +35,11 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     ///     How long a reminder is awaited after the frame which precedes it.
     /// </summary>
     private static readonly TimeSpan ReminderTimeout = MatchLockService.ReturnResendInterval + QuietPeriod;
+
+    /// <summary>
+    ///     How far an expiry which the chat server records may lie from the one which a test computes around it, which allows for a slow test host while staying far below the difference between a wait and a send-back.
+    /// </summary>
+    private static readonly TimeSpan ExpiryMargin = MatchLockService.ReturnResendInterval;
 
     [Test]
     public async Task Logging_In_While_Locked_Sends_The_Player_Back_To_Their_Match()
@@ -406,7 +406,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
     [Test]
     [Arguments(SlotTimeRemaining)]
-    [Arguments(ConnectedSlotTimeRemaining)]
+    [Arguments(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining)]
     public async Task A_Player_Still_In_The_Match_Is_Told_Why_Once_Per_Notice_Repeat_Interval(uint slotTimeRemaining)
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
@@ -604,7 +604,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     public async Task Logging_In_While_Connected_Elsewhere_Tells_The_Player_To_Close_The_Other_Game_And_Sends_Nothing_Back()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
@@ -632,7 +632,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     public async Task A_Player_Waiting_For_The_Other_Machine_Is_Sent_Back_As_Soon_As_The_Slot_Is_Free()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
@@ -678,7 +678,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         await LogInAndReadSendBack(stream);
 
         // The Game Client's Own Connection To The Locked Match Server Reads As Connected While It Loads
-        gameSocket.SlotTimeRemaining = ConnectedSlotTimeRemaining;
+        gameSocket.SlotTimeRemaining = FakeMatchServerGameSocket.ConnectedSlotTimeRemaining;
 
         (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2);
 
@@ -698,7 +698,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     public async Task Repeated_Attempts_While_Connected_Elsewhere_Message_Once()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
@@ -728,7 +728,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     public async Task A_Wait_For_The_Other_Machine_Lasts_The_Connected_Elsewhere_Wait_And_A_Send_Back_The_Return_Window()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
@@ -757,9 +757,9 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         using (Assert.Multiple())
         {
             await Assert.That(refused).IsTrue();
-            await Assert.That(waitExpires).IsEqualTo(waitStarted + MatchLockService.ConnectedElsewhereWait).Within(TimeSpan.FromSeconds(5));
+            await Assert.That(waitExpires).IsEqualTo(waitStarted + MatchLockService.ConnectedElsewhereWait).Within(ExpiryMargin);
             await Assert.That(connect?.RandomInteger).IsNotEqualTo(-1);
-            await Assert.That(returnExpires).IsEqualTo(sentBack + MatchLockService.ReturnWindow).Within(TimeSpan.FromSeconds(1));
+            await Assert.That(returnExpires).IsEqualTo(sentBack + MatchLockService.ReturnWindow).Within(ExpiryMargin);
         }
     }
 
@@ -767,7 +767,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     public async Task A_Server_Lost_During_The_Wait_Lifts_The_Lock_Without_Sending_The_Player_Back()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
@@ -803,7 +803,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     public async Task Another_Account_Is_Named_The_Slot_Account_While_The_Slot_Is_Connected_Elsewhere()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 

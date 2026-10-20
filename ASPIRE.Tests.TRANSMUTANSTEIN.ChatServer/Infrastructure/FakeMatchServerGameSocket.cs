@@ -6,6 +6,12 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 /// </summary>
 internal sealed class FakeMatchServerGameSocket : IAsyncDisposable
 {
+    /// <summary>
+    ///     A reply for a slot which is still connected to the match, as the match server gives while the slot account plays on from another machine.
+    ///     It lies midway between <see cref="MatchLockService.ConnectedSlotThreshold"/> and the largest possible reply, so that it reads as connected wherever the threshold lies.
+    /// </summary>
+    public const uint ConnectedSlotTimeRemaining = MatchLockService.ConnectedSlotThreshold + (uint.MaxValue - MatchLockService.ConnectedSlotThreshold) / 2;
+
     private const int QueryOffset = 40;
 
     private readonly UdpClient Socket;

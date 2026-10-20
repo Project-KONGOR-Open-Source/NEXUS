@@ -872,6 +872,39 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    public async Task After_A_Lift_A_New_Login_Then_Joining_Another_Game_Still_Removes_The_Player()
+    {
+        await InitialiseIn("Development");
+
+        (string originalSession, int originalServerID) = await RegisterMatchServer(1);
+        (string otherSession, _) = await RegisterMatchServer(2);
+
+        string firstCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string originalGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(originalSession, firstCookie)))["game_cookie"];
+
+        MatchLock matchLock = await LockAccount(NonHostAccountName, originalServerID);
+
+        await Assert.That(await webApplicationFactory.Services.GetRequiredService<IDatabase>().RemoveMatchLock(matchLock.UserID, matchLock.MatchID)).IsTrue();
+
+        // The Player Logs In Again, On The Same Machine Or Another, Which Retires The Login With Which They Joined The Original Match
+        string secondCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string otherGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(otherSession, secondCookie)))["game_cookie"];
+
+        (_, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(originalSession, accountID));
+
+        // The New Login Changes Nothing About Leaving: The Original Match Server Is Answered The New Game Cookie, Which Differs From The One Its Player Holds, So It Removes The Player From The Match They Left
+        using (Assert.Multiple())
+        {
+            await Assert.That(otherGameCookie).IsNotEqualTo(originalGameCookie);
+            await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(otherGameCookie);
+        }
+    }
+
+    [Test]
     public async Task Account_IDs_To_Cookie_After_A_Login_Elsewhere_Still_Answers_The_Session_Cookie_Of_The_Client_On_The_Match_Server()
     {
         await InitialiseIn("Development");

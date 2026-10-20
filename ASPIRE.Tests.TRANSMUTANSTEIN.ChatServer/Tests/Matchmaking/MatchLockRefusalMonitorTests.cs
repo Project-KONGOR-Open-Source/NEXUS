@@ -12,11 +12,6 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
     private const uint SlotTimeRemaining = 120000;
 
     /// <summary>
-    ///     The reply for a slot which is still connected to the match, as the match server gives while the slot account plays on from another machine, which is the largest possible time less the game time so far.
-    /// </summary>
-    private const uint ConnectedSlotTimeRemaining = uint.MaxValue - 60_000u;
-
-    /// <summary>
     ///     The name of an account of the locked user other than the one which is refused, which holds the user's slot in the locked match.
     /// </summary>
     private const string SlotAccountName = "TEST:SlotAccount";
@@ -102,7 +97,7 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
     public async Task A_Published_Refusal_While_Connected_Elsewhere_Tells_The_Player_To_Close_The_Other_Game()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 

@@ -169,7 +169,7 @@ public sealed class MatchLockVerificationTests(ServiceContainerContext container
     public async Task Verifying_A_Connected_Slot_Keeps_The_Lock()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(uint.MaxValue - 60_000u);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
 
         (int userID, int accountID, string accountName) = await SeedPlayer(host);
 

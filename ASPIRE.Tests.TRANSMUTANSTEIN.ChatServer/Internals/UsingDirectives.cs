@@ -45,6 +45,7 @@ global using System.Net.Sockets;
 global using System.Runtime.CompilerServices;
 
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
+global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 global using TRANSMUTANSTEIN.ChatServer.Configuration;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
