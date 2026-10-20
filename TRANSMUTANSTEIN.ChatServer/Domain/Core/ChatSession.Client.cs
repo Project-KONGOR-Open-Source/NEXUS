@@ -318,7 +318,7 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
         ChatBuffer connect = new ();
 
         connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT);
-        connect.WriteInt8((byte) arrangedMatchType);       // The Arranged Match Type (0 = None, 1 = Ranked, 2 = Tournament)
+        connect.WriteInt8((byte) arrangedMatchType);       // The Arranged Match Type, As A "MatchType" Value, Which Mirrors The Game Client's "EArrangedMatchType"
         connect.WriteInt32(matchID);                       // The Match Server's Match ID
         connect.WriteString(serverAddress);                // The Match Server's IP Address
         connect.WriteInt16(unchecked((short) serverPort)); // The Match Server's Port, Which The Game Client Reads As Unsigned, So A Port Above The Signed Range Is Reinterpreted Rather Than Rejected
