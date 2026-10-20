@@ -156,6 +156,103 @@ public sealed class LoginSessionTests(KONGORIntegrationWebApplicationFactory web
         }
     }
 
+    [Test]
+    [NotInParallel(DistributedCacheExtensions.AccountLogoutChannel)]
+    public async Task A_Logout_Publishes_The_Account_Name_With_Its_Session_Cookie()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account account, string password) = await srpAuthenticationService.CreateAccountWithSRPCredentials("logout.publish@kongor.com", "LogoutPublish", "SecurePassword123!");
+
+        SRPAuthenticationData login = await srpAuthenticationService.PerformFullAuthentication(account, password);
+
+        string cookie = login.Cookie ?? throw new InvalidOperationException("Session Cookie Is NULL");
+
+        ChannelMessageQueue logouts = await webApplicationFactory.Services.GetRequiredService<IConnectionMultiplexer>().GetSubscriber().SubscribeAsync(RedisChannel.Literal(DistributedCacheExtensions.AccountLogoutChannel));
+
+        try
+        {
+            using HttpClient httpClient = webApplicationFactory.CreateClient();
+
+            HttpResponseMessage response = await httpClient.PostAsync("client_requester.php?f=logout", new FormUrlEncodedContent(new Dictionary<string, string> { { "cookie", cookie } }));
+
+            AccountLogout? logout = await ReadLogout(logouts, TimeSpan.FromSeconds(5));
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+                await Assert.That(logout?.AccountName).IsEqualTo(account.Name);
+                await Assert.That(logout?.SessionCookie).IsEqualTo(cookie);
+                await Assert.That(await DistributedCache.GetAccountNameForSessionCookie(cookie)).IsNull();
+                await Assert.That(await DistributedCache.GetLatestSessionCookie(account.ID)).IsNull();
+            }
+        }
+
+        finally
+        {
+            await logouts.UnsubscribeAsync();
+        }
+    }
+
+    [Test]
+    [NotInParallel(DistributedCacheExtensions.AccountLogoutChannel)]
+    public async Task A_Logout_With_A_Retired_Session_Cookie_Publishes_Nothing_And_Ends_No_Session()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account account, string password) = await srpAuthenticationService.CreateAccountWithSRPCredentials("logout.retired@kongor.com", "LogoutRetired", "SecurePassword123!");
+
+        SRPAuthenticationData firstLogin = await srpAuthenticationService.PerformFullAuthentication(account, password);
+        SRPAuthenticationData secondLogin = await srpAuthenticationService.PerformFullAuthentication(account, password);
+
+        string firstCookie = firstLogin.Cookie ?? throw new InvalidOperationException("First Session Cookie Is NULL");
+        string secondCookie = secondLogin.Cookie ?? throw new InvalidOperationException("Second Session Cookie Is NULL");
+
+        ChannelMessageQueue logouts = await webApplicationFactory.Services.GetRequiredService<IConnectionMultiplexer>().GetSubscriber().SubscribeAsync(RedisChannel.Literal(DistributedCacheExtensions.AccountLogoutChannel));
+
+        try
+        {
+            using HttpClient httpClient = webApplicationFactory.CreateClient();
+
+            HttpResponseMessage response = await httpClient.PostAsync("client_requester.php?f=logout", new FormUrlEncodedContent(new Dictionary<string, string> { { "cookie", firstCookie } }));
+
+            AccountLogout? logout = await ReadLogout(logouts, TimeSpan.FromSeconds(2));
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+                await Assert.That(logout).IsNull();
+                await Assert.That(await DistributedCache.GetAccountNameForSessionCookie(secondCookie)).IsEqualTo(account.Name);
+                await Assert.That(await DistributedCache.GetLatestSessionCookie(account.ID)).IsEqualTo(secondCookie);
+            }
+        }
+
+        finally
+        {
+            await logouts.UnsubscribeAsync();
+        }
+    }
+
+    /// <summary>
+    ///     Reads the next logout which is published within the timeout, or returns <see langword="null"/> when none is.
+    /// </summary>
+    private static async Task<AccountLogout?> ReadLogout(ChannelMessageQueue logouts, TimeSpan timeout)
+    {
+        using CancellationTokenSource cancellation = new (timeout);
+
+        try
+        {
+            ChannelMessage message = await logouts.ReadAsync(cancellation.Token);
+
+            return JsonSerializer.Deserialize<AccountLogout>(message.Message.ToString());
+        }
+
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     ///     Draws an account ID at random, which needs no account in the database, because a login's supersession only reads and writes the distributed cache.
     /// </summary>

@@ -38,6 +38,14 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN";
             string cookie = string.IsNullOrEmpty(Request.Form["cookie"].ToString()) ? "EMPTY" : Request.Form["cookie"].ToString();
 
+            // A Logout Of A Session Which Ended Already, Such As By A Newer Login Of The Account On Another Machine, Is Expected And Is Not Evidence Of Abuse
+            if (function is "logout")
+            {
+                Logger.LogInformation(@"IP Address ""{IPAddress}"" Has Logged Out Of A Session Which Has Already Ended With Cookie ""{Cookie}""", remoteIPAddress, cookie);
+
+                return Unauthorized($@"Unrecognised Cookie ""{Request.Form["cookie"]}""");
+            }
+
             // The Forged Cookie Is Logged In Full On Purpose, Because An Invalid Cookie Is Not A Secret And Is Evidence Of Abuse
             Logger.LogWarning(@"IP Address ""{IPAddress}"" Has Made A Client Request With Forged Cookie ""{Cookie}""" + Environment.NewLine + @"Request Context: {RequestContext}",
                 remoteIPAddress, cookie, SerialiseRequestContext());

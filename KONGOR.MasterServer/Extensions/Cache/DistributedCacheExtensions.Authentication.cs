@@ -137,8 +137,8 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Publishes an account logout notification on <see cref="AccountLogoutChannel"/>.
-    ///     The payload is the canonical account name as stored against the session cookie.
+    ///     The payload is the logout serialised as JSON, which names the session cookie so that the chat server ends only the session which used it.
     /// </summary>
-    public static async Task PublishAccountLogout(this IDatabase distributedCacheStore, string accountName)
-        => await distributedCacheStore.Multiplexer.GetSubscriber().PublishAsync(RedisChannel.Literal(AccountLogoutChannel), accountName);
+    public static async Task PublishAccountLogout(this IDatabase distributedCacheStore, AccountLogout logout)
+        => await distributedCacheStore.Multiplexer.GetSubscriber().PublishAsync(RedisChannel.Literal(AccountLogoutChannel), JsonSerializer.Serialize(logout));
 }

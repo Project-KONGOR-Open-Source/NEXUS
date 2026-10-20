@@ -3,7 +3,7 @@ namespace KONGOR.MasterServer.Extensions.Cache;
 public static partial class DistributedCacheExtensions
 {
     /// <summary>
-    ///     Constructs the key of the session cookie of an account's newest login, which the next login of the account's user retires.
+    ///     Constructs the key of the session cookie of an account's newest login, which the next login of the account retires, and for an account of a regular user the next login of any of the user's accounts retires as well.
     /// </summary>
     internal static string ConstructAccountLatestSessionCookieKey(int accountID) => $@"ACCOUNT-LATEST-SESSION-COOKIE:[""{accountID}""]";
 
@@ -22,6 +22,23 @@ public static partial class DistributedCacheExtensions
         RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructAccountLatestSessionCookieKey(accountID));
 
         return cachedValue.IsNullOrEmpty ? null : cachedValue.ToString();
+    }
+
+    /// <summary>
+    ///     Deletes the latest-login record of an account when it points at the session cookie, and leaves it alone when it points at another, so that a logout of a retired login never clears the record of a newer one.
+    ///     Clearing it keeps every latest-login record pointing at a live session cookie, so that a later login never counts a dead one as retired.
+    /// </summary>
+    public static async Task RemoveLatestSessionCookie(this IDatabase distributedCacheStore, int accountID, string cookie)
+    {
+        RedisKey key = ConstructAccountLatestSessionCookieKey(accountID);
+
+        ITransaction transaction = distributedCacheStore.CreateTransaction();
+
+        transaction.AddCondition(Condition.StringEqual(key, cookie));
+
+        _ = transaction.KeyDeleteAsync(key);
+
+        await transaction.ExecuteAsync();
     }
 
     /// <summary>
