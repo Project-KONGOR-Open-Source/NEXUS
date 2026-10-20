@@ -47,4 +47,25 @@ internal static class StatisticsSubmissionTestsHelper
         // The Model Binder Requires The Player Statistics, Which An Empty Field Satisfies With An Empty Dictionary
         ["player_stats"]                    = string.Empty
     };
+
+    /// <summary>
+    ///     Builds the smallest "resubmit_stats" form which the master server accepts, for a match without player statistics, as resubmitted for the match server by its host account with the given password.
+    /// </summary>
+    public static Dictionary<string, string> BuildResubmission(string hostAccountName, string hostPassword, int serverID, int matchID)
+    {
+        Dictionary<string, string> resubmission = BuildSubmission(string.Empty, serverID, matchID);
+
+        // A Resubmission Is Authenticated By The Host Account Rather Than By A Match Server Session
+        resubmission.Remove("session");
+
+        resubmission["f"] = "resubmit_stats";
+
+        // The Host Account Name Ends With The Colon Which Separates It From The Match Server Instance
+        resubmission["login"] = $"{hostAccountName}:";
+        resubmission["pass"] = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(hostPassword))).ToLower();
+        resubmission["resubmission_key"] = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(matchID + StatisticsRequesterController.MatchStatsSubmissionSalt))).ToLower();
+        resubmission["server_id"] = $"{serverID}";
+
+        return resubmission;
+    }
 }
