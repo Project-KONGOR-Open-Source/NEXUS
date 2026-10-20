@@ -125,6 +125,7 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
     /// <summary>
     ///     Records this session's session cookie as the one which the client holds on the match server, so that the match server's duplicate session check is answered with it, and never kicks the client as a duplicate login.
     ///     The records which the match server's client connections left for the session's own account and for every other account of the same user are each refreshed independently, and every failure is logged rather than thrown, so that it never stops the other refreshes or disturbs joining the match.
+    ///     Every refresh which changes a record is logged, naming the account whose record changed, the match server, and this session's account, but never the session cookie, which authenticates its account.
     /// </summary>
     private async Task RefreshMatchServerSessionCookie(IDatabase distributedCacheStore, MatchServer server)
     {
@@ -151,7 +152,12 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
         {
             try
             {
-                await distributedCacheStore.RefreshClientSessionCookie(accountID, server.ID, Metadata.SessionCookie);
+                // Only A Change Is Logged, Because Every Chat Connection Of A Client In Its Match Reports Joining That Match Server Again, While Only A New Login Changes The Record
+                if (await distributedCacheStore.RefreshClientSessionCookie(accountID, server.ID, Metadata.SessionCookie))
+                {
+                    Log.Information(@"Refreshed The Session Cookie Which The Client Of Account ID ""{RefreshedAccountID}"" Holds On Match Server ID ""{MatchServerID}"" To That Of Account ""{AccountName}""",
+                        accountID, server.ID, Account.Name);
+                }
             }
 
             catch (Exception exception)

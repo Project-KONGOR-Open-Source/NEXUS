@@ -1047,6 +1047,32 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    public async Task Refreshing_With_The_Session_Cookie_Already_Recorded_Reports_No_Refresh()
+    {
+        await InitialiseIn("Development");
+
+        (string session, int serverID) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        // The Client Reports Joining The Match Server Which Served It With The Same Login, As Every Chat Connection During The Match Does, Which Changes Nothing And So Is Not Logged As A Refresh
+        bool refreshed = await webApplicationFactory.Services.GetRequiredService<IDatabase>().RefreshClientSessionCookie(accountID, serverID, cookie);
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(refreshed).IsFalse();
+            await Assert.That((string) sessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+            await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(gameCookie);
+        }
+    }
+
+    [Test]
     public async Task Account_IDs_To_Cookie_Ignores_Account_IDs_In_The_Query_String()
     {
         await InitialiseIn("Development");

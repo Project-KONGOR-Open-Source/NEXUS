@@ -136,8 +136,8 @@ public static partial class DistributedCacheExtensions
     /// <summary>
     ///     Records the session cookie as the one which the client on the match server holds for the account, because a client which logs in again during its match pushes its new session cookie to its match server ("CHostClient::UpdateCookie").
     ///     Only a stored game cookie which was issued for that match server is changed, and only its session cookie, so that a refresh never creates a record, never changes a game cookie, and never extends its expiry.
-    ///     Returns <see langword="true"/> when the account's stored game cookie is for that match server, which then carries the session cookie, unless a client connection changed the record first, and that newer record is kept.
-    ///     Returns <see langword="false"/>, changing nothing, otherwise.
+    ///     Returns <see langword="true"/> when it changed the record, which then carries the session cookie, so that the caller can log the refresh.
+    ///     Returns <see langword="false"/>, changing nothing, when the account's stored game cookie is not for that match server, when the record already carries the session cookie, or when a client connection changed the record first, and that newer record is kept.
     /// </summary>
     public static async Task<bool> RefreshClientSessionCookie(this IDatabase distributedCacheStore, int accountID, int serverID, string sessionCookie)
     {
@@ -151,7 +151,7 @@ public static partial class DistributedCacheExtensions
             return false;
 
         if (string.Equals(storedGameCookie.SessionCookie, sessionCookie, StringComparison.Ordinal))
-            return true;
+            return false;
 
         GameCookie refreshedGameCookie = new () { Cookie = storedGameCookie.Cookie, ServerID = storedGameCookie.ServerID, SessionCookie = sessionCookie };
 
@@ -162,9 +162,7 @@ public static partial class DistributedCacheExtensions
 
         _ = transaction.StringSetAsync(key, JsonSerializer.Serialize(refreshedGameCookie), Expiration.KeepTtl);
 
-        await transaction.ExecuteAsync();
-
-        return true;
+        return await transaction.ExecuteAsync();
     }
 
     /// <summary>
