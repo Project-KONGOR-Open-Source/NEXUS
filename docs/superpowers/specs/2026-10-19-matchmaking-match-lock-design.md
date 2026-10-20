@@ -20,8 +20,8 @@ Players should be on their best behaviour in matchmade matches, knowing that wal
    A match server lets back in only the exact account that holds the slot. If the person is logged in on one of their other accounts, nothing can send that account back. Every attempt to play is refused instead, with a message naming the account that holds their match. Logging in on that account sends them back.
 3. **No other games while locked.** Every one of the attempts above is refused, with a short message saying why, and no new game of any kind starts.
 4. **Never sent somewhere dead.** A player is only ever sent back to a match server that is alive, to a match that is still in progress, and to a slot they can still reclaim. If any of those fails, the lock lifts at once instead.
-5. **Back in from any machine.** Reconnecting works from a different PC or installation, because NEXUS already knows who the player is.
-6. **Duplicate sessions handled properly.** The match server's periodic account check (`aids2cookie`) finally works as the engine expects. A connection whose account has logged in elsewhere, or has joined another game, is removed by the match server, without ever disturbing a player reconnecting to their own match.
+5. **Back in from any machine.** Reconnecting works from a different PC or installation, because NEXUS already knows who the player is. While another machine is still connected to the match on the same account, the player is told to close the game there, and is sent back as soon as it has left.
+6. **Duplicate sessions handled properly.** The match server's periodic account check (`aids2cookie`) finally works as the engine expects. A connection whose account has joined another game is removed by the match server, without ever disturbing a player reconnecting to their own match. A login elsewhere never removes a connection: each user has one login at a time, and the newest retires the others (see "Single Login Per User").
 
 ## Non-Goals
 
@@ -42,6 +42,7 @@ These would make the feature a failure even if it technically worked:
 - **Pulling a player back immediately after they leave,** rather than on their next attempt to play.
 - **Letting the guard terminate a locked player's match for them.** While a lock holds, a rage-quitter who tries another game must be sent back, not removed from their first match: removal would make the leave official instead of preventing it.
 - **Keeping a player who has moved on in their old match.** Once a lock has lifted, for any reason, a player who joins another game has left, and their old match server must remove them promptly. A removed player's team shares their gold and can use or sell their items, so keeping them in the match only hurts that team.
+- **Making the match server kick a player for logging in elsewhere.** Every kick counts toward the engine's kick ban, which refuses every reconnect until the match ends, so it would lock the player out of the very match the lock sends them back to (see "Single Login Per User").
 
 ## Constraints
 
@@ -64,6 +65,7 @@ These would make the feature a failure even if it technically worked:
 7. **Crashed servers:** a player is never sent to a server that may have crashed.
 8. **Another machine:** reconnecting must work from another machine. Identity is the account, not the installation.
 9. **AFK abuse:** left to player reports for now, with ideas kept as follow-ups.
+10. **Concurrent logins:** one login per user, and never a kick for a login elsewhere (see "Single Login Per User (Amendment, 2026-10-20)").
 
 ## The Design
 
@@ -79,7 +81,7 @@ These would make the feature a failure even if it technically worked:
   - The roster must be captured at announce. Today the roster lives in live groups, and a player who drops from chat vanishes from it: `TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs` removes them from their group (`MatchmakingGroup.cs`).
   - Spectators and mentors never get a lock.
 - **Which matches lock:** decide this from NEXUS's own queue type (`QueueType`: Caldavar, MidWars, and RiftWars lock; co-op does not), not from the arranged-type numbers sent to the client. Those are easy to misread: Caldavar goes out as `AM_MATCHMAKING_CAMPAIGN`, and co-op as `AM_MATCHMAKING_BOTMATCH`.
-- **Why per user:** the lock is keyed by the user, so every account the person owns sees it. `ClientHandshake` already ends a user's other sub-account chat sessions (`TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ClientHandshake.cs`), so only one account is ever active at a time.
+- **Why per user:** the lock is keyed by the user, so every account the person owns sees it. `ClientHandshake` already ends a user's other sub-account chat sessions (`TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ClientHandshake.cs`), and a login retires the logins of the user's other accounts (see "Single Login Per User"), so only one account is ever active at a time.
 
 ### When the lock ends
 
@@ -102,8 +104,9 @@ A trigger first re-checks the lock, as follows:
    - **The source:** the engine's own reconnect query, the same one the game client uses (`NETCMD_RECONNECT_INFO_REQUEST` over UDP; HON `source/K2.Engine/c_hostserver.cpp` around 1196–1222, and `source/HON.MatchServer/c_gameserver.cpp`, `GetReconnectInfo`, around 19244–19302). The match server answers with the time left in the player's slot.
    - **Its 0 has many meanings:** the player was terminated, the game is over, the match ID is wrong, the server is still waiting for players, the account is not on the server, or the phase is numbered at or above `GAME_PHASE_ENDED`. That last case includes the pick phases listed after it, such as blind ban, hero lock, and lock pick.
    - **So read it with the match's phase.** A 0 lifts a lock only when it can only mean that the player was removed or the match is over. A lock must never lift during a pick phase.
+   - **Its largest values mean connected.** A player still connected to the match, from any machine, has no termination time (`INVALID_TIME`), so the reply is near the top of its range, while a disconnected player's reply is at most their remaining disconnect allowance. A connected slot cannot be reclaimed until that connection leaves (see "Single Login Per User").
 
-If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897).
+If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897). While the slot is still connected from another machine, the message tells the player to close the game there instead, and `AUTO_MATCH_CONNECT` follows only once the slot is free.
 
 The client ignores `AUTO_MATCH_CONNECT` while it counts as connected to a server, and it counts connecting and authenticating as connected (`CHost::IsConnected`). So a send-back must reach the client only once it is not on, or joining, any server.
 
@@ -138,7 +141,7 @@ A match server that is still registered, but whose chat connection has dropped w
 - **The switch:** the engine's `svr_ignoreConnectionIDForReconnect` matches on the account alone. It is an ordinary runtime setting; retail turned it on only for Chinese builds.
 - **How it is switched on:** the chat server already sends remote commands when a match server connects (`TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ServerHandshake.cs`, using the helpers in `Domain/Core/ChatSession.MatchServer.cs`), and the engine executes them (HON `source/K2.Engine/c_serverchatconnection.cpp`, `HandleRemoteCommand`). So NEXUS sets this switch on every match server at that handshake.
 - **The caveat:** the engine accepts a remote command only with its current session cookie, so it must be sent at handshake time. A later session renewal does not unset it.
-- **Why it is safe:** NEXUS has already verified the player's identity through `c_conn` before they reach the slot.
+- **Why it is safe:** NEXUS has already verified the player's identity through `c_conn` before they reach the slot, and since a login retires the user's earlier logins, only the newest login passes `c_conn`.
 
 ### The duplicate-session guard
 
@@ -148,13 +151,77 @@ A match server that is still registered, but whose chat connection has dropped w
 - **Why it never worked:** today NEXUS reads the IDs from the query string, while the engine posts them in the body as `aids[]`. And `c_conn` hands everyone the same fixed `game_cookie`.
   - Fixing `c_conn` alone changes nothing, because the lists stay empty.
   - Fixing `aids2cookie` alone is worse than a kick. The game-cookie check runs first, so every non-spectator would be removed from their match.
-- **There is no "current" login cookie today.** NEXUS keeps every login cookie valid for its full lifetime, and a new login does not retire the old one; only logout does. `aids2cookie` currently returns whichever cookie it happens to read last.
+- **There was no "current" login cookie.** NEXUS kept every login cookie valid for its full lifetime, and a new login did not retire the old one; only logout did. A login now retires the user's earlier logins (see "Single Login Per User").
 - **This design fixes both together:**
   - **`c_conn`** issues a real game cookie per account and match, and stores it in the lock's record or beside it. Reconnecting to the same match returns the same game cookie, so a reconnect never trips the guard.
-  - **NEXUS records each account's latest login cookie** at every login, so there is a current one. Without it, the guard could kick the new machine instead of the old one.
-  - **`aids2cookie`** reads `aids[]` from the body. It answers only for accounts that connected to the asking server, which also closes the remaining gap where any registered server could ask about any account. It returns their latest login cookie and their game cookie.
+  - **`c_conn` also records the login cookie that the served client posted,** beside the game cookie. A chat session of the same user that reports joining that match server with a newer login cookie refreshes it, which follows a client that logs in again in place and pushes its new cookie to the match server. So the match server is only ever answered with the login cookie that its own client holds.
+  - **`aids2cookie`** reads `aids[]` from the body. It answers only for accounts that connected to the asking server, which also closes the remaining gap where any registered server could ask about any account. It returns the login cookie recorded for each client and its game cookie.
   - **With the lock refusing other games,** a mismatched game cookie arises only from a genuine second connection, never from a rage-quit attempt.
-- **A login elsewhere:** logging in on a second machine records a new latest login cookie, so the match server removes the first machine's connection as a duplicate login. That is a kick, not a termination. The login trigger then sends the second machine back into the match.
+- **A login elsewhere:** logging in on a second machine retires the first machine's login, but not its connection to the match, which the match server still checks against the first machine's own login cookie, so it plays on undisturbed. The login trigger tells the second machine to close the game on the first, and sends it back as soon as the first has left the match. NEXUS never makes the match server kick anyone for a login elsewhere (see "Single Login Per User").
+
+## Single Login Per User (Amendment, 2026-10-20)
+
+The owner settled what NEXUS does when one account, or one user, is live on two machines, on the evidence in `.superpowers/research/2026-10-20-concurrent-account-sessions.md`, which carries the file and line references. This section takes precedence over the earlier text, which has been edited to agree with it.
+
+### Why
+
+- **The two-strike lockout.** As first built, `aids2cookie` answered each account's latest login cookie, so a login elsewhere made the match server kick the first machine's connection as a duplicate login (HON `source/HON.MatchServer/c_gameserver.cpp`, `CGameServer::GetAccountAuth`). Every kick counts toward `svr_kickBanCount` (HON `source/K2.Engine/c_hostserver.cpp`, `KickClient`), whose default the second such kick already reaches, and from then on every reconnect is refused until the match ends.
+  - Two switches between machines, or two quick logins after crashes while the dead connection still lingers, would lock a player out of the very match the lock sends them back to.
+  - A kick while an arranged match still waits for its players aborts that match for everyone.
+- **The logout chain.** A logout ended the chat session of the whole account, found by name, and nothing retired an earlier login. The first machine logs out when its chat is rejected and when it is kicked, and its still valid cookie then logged the second machine out as well, so a login elsewhere could log both machines out.
+- **The retail precedent.** Retail's API kept one login cookie per account, which each login overwrote, so the earlier cookie stopped working at once, and each login also logged out the user's other sub-accounts (`clearOtherCookies`). KONGOR superseded logins the same way. Neither ever refused a second login. Retail answered `aids2cookie` with the latest cookie and so kicked too, but it never supported reconnecting from another machine, which NEXUS now does.
+
+### The Owner's Decisions
+
+1. **One login per account, and NEXUS never kicks for a login elsewhere** (the research's option E1).
+   - A new login retires the previous login.
+   - A logout ends only its own session.
+   - `aids2cookie` answers, for each account, the login cookie of the client actually on that match server, and keeps answering the game cookie exactly as before. So NEXUS never causes a duplicate-login kick or a kick strike, while a player who leaves for another game is still removed, through the game cookie.
+   - The send-back is aware of the slot. While the slot query says that the account is still connected to the match from another machine, the new machine is told to close the game on the other one, and is sent back the moment the slot frees.
+2. **A new login ends the sessions of all of the user's accounts,** not only that account's, as retail did. Guest and staff accounts are the exception, as they already are at the chat handshake: each group shares one user, so their login retires only the same account's earlier login.
+3. **It is built on `matchmaking-match-lock`,** before the live check with real game clients.
+
+### The Design
+
+- **Supersession at login.**
+  - Each login retires, in one atomic step, the account's previous login cookie, which the account's latest-login record points at, and the login cookies of the user's other accounts. Two logins of one user at the same moment leave exactly one live login.
+  - A retired cookie stops resolving everywhere, because the client requester, `c_conn`, and the chat handshake all read the same cache record. At `c_conn`, a retired cookie gets the same ordinary refusal as any unknown cookie, never "Invalid cookie.", so the match server does not blacklist it.
+  - A login is never refused because of another live session, so a player can always log in again, after a crash included.
+- **A logout ends only its own session.** The logout notification carries the session cookie with the account name, and the chat server ends a chat session only when its session cookie matches. A logout with a retired cookie publishes nothing.
+- **The duplicate-session check answers each client's own login cookie.**
+  - `c_conn` records the login cookie that each served client posted, beside the game cookie and with the same expiry.
+  - A chat session of the same user that reports joining that match server with a different login cookie refreshes it. The engine pushes the new cookie of a client which logs in again in place to its match server (`NETCMD_CLIENT_COOKIE`), and the client reports the game it is in on every chat connection, so NEXUS follows it.
+  - The game cookie is unchanged, so a player who joins another game is still removed.
+- **The send-back waits for the other machine.**
+  - The slot query tells "still connected" apart from "disconnected with time remaining" (see "Sending a player back").
+  - While the slot account is connected from another machine, the player is told to close the game there, no `AUTO_MATCH_CONNECT` is sent, and the slot is checked again at every reminder. The moment it turns disconnected, the player is sent back.
+  - A player is told why once per attempt, never again while waiting.
+  - The wait is bounded, by a constant in `MatchLockService`, so that nobody is pulled into the match long after being told; the player's next attempt to play waits again.
+- **The old machine is told why.** Before the chat server rejects the old machine's chat session, it sends a notice that the account has logged in elsewhere, so the player does not read only the client's account-sharing text, which talks about sharing linked sub-accounts and contacting support. The client handles the frames in order, and shows the notice in the same chat panes as that text.
+
+### What It Costs
+
+- The second machine cannot take over while the first is still in the match. The first must be closed, crash, or lose its connection (the engine drops it after its connected timeout, without a strike), or be voted out by its team. A first machine left running where the player cannot reach it holds the slot, because the engine only flags an idle player as AFK, which lets the team vote to kick them, and never removes them by itself.
+- A machine whose login was retired plays on, but if it drops, it cannot reconnect without logging in again, which retires the other machine's login in turn. Retail behaved the same.
+- NEXUS's `aids2cookie` answer differs from retail's, as NEXUS already differs by switching on account-based reconnect.
+
+### What Changes In The Earlier Text
+
+- Goals 5 and 6, and the Anti-Goals: a login elsewhere never removes a connection, and the new machine waits for the old one to leave.
+- "The Owner's Decisions": a tenth decision points here.
+- "Why per user": a login also retires the user's other logins.
+- "Sending a player back": the reconnect query's largest values mean connected, and a connected slot holds the player back with a different message.
+- "Reconnecting from another machine": only the newest login passes `c_conn`.
+- "The duplicate-session guard": `aids2cookie` answers the login cookie recorded for each client rather than the account's latest one, and a login elsewhere no longer kicks.
+
+### Proposed For Phase 2 (Engine)
+
+- Let the newest authenticated connection of an account replace the older one without a strike, which is the engine's own stated intent, defeated by an early return in `CHostServer::AddClient`.
+- At minimum, stop duplicate-session kicks counting toward `svr_kickBanCount`.
+- Make `Kick` and `Ban` safe for remote use: no fall-back to client number 0 for a name that does not resolve, and a command keyed by account ID.
+- Give "logged in elsewhere" its own chat reject text.
+
+Either of the first two would let NEXUS supersede game connections as well.
 
 ## Facts For The Builder
 
