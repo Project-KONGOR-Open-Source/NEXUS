@@ -274,6 +274,215 @@ public sealed partial class HostingAuthenticationTests
         }
     }
 
+    [Test]
+    public async Task Reconnecting_To_The_Same_Match_Server_Returns_The_Same_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string firstGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+        string secondGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(secondGameCookie).IsEqualTo(firstGameCookie);
+            await Assert.That(await distributedCache.GetGameCookie(await GetAccountID(NonHostAccountName))).IsEqualTo(firstGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Reconnecting_After_The_Match_Server_Renews_Its_Session_Returns_The_Same_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string expiredSession, int serverID) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string firstGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(expiredSession, cookie)))["game_cookie"];
+
+        // The Match Server Renews Its Session While Its Match Is In Progress
+        (string renewedSession, int renewedServerID) = await RegisterMatchServer(1);
+
+        string secondGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(renewedSession, cookie)))["game_cookie"];
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(renewedSession).IsNotEqualTo(expiredSession);
+            await Assert.That(renewedServerID).IsEqualTo(serverID);
+            await Assert.That(secondGameCookie).IsEqualTo(firstGameCookie);
+            await Assert.That(await distributedCache.GetGameCookie(await GetAccountID(NonHostAccountName))).IsEqualTo(firstGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Reconnecting_With_An_Unrecognised_Session_Returns_The_Current_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string firstGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        // The Match Server May Be The One Whose Session The Master Server Has Lost
+        string secondGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(Guid.CreateVersion7().ToString(), cookie)))["game_cookie"];
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(secondGameCookie).IsEqualTo(firstGameCookie);
+            await Assert.That(await distributedCache.GetGameCookie(await GetAccountID(NonHostAccountName))).IsEqualTo(firstGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Connecting_To_Another_Match_Server_Returns_A_New_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string firstSession, _) = await RegisterMatchServer(1);
+        (string secondSession, _) = await RegisterMatchServer(2);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string firstGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(firstSession, cookie)))["game_cookie"];
+        string secondGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(secondSession, cookie)))["game_cookie"];
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(secondGameCookie).IsNotEqualTo(firstGameCookie);
+            await Assert.That(await distributedCache.GetGameCookie(await GetAccountID(NonHostAccountName))).IsEqualTo(secondGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Different_Accounts_Receive_Different_Game_Cookies()
+    {
+        await InitialiseIn("Development");
+
+        await CreateSubAccount(NonHostAccountName, NonHostSubAccountName);
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string mainAccountCookie = await CreateClientSessionCookie(NonHostAccountName);
+        string subAccountCookie = await CreateClientSessionCookie(NonHostSubAccountName);
+
+        string mainAccountGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, mainAccountCookie)))["game_cookie"];
+        string subAccountGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, subAccountCookie)))["game_cookie"];
+
+        await Assert.That(subAccountGameCookie).IsNotEqualTo(mainAccountGameCookie);
+    }
+
+    [Test]
+    [NotInParallel(DistributedCacheExtensions.MatchLockRefusalChannel)]
+    public async Task A_Refused_Client_Connection_Leaves_The_Game_Cookie_Unchanged()
+    {
+        await InitialiseIn("Development");
+
+        (string lockedSession, int lockedServerID) = await RegisterMatchServer(1);
+        (string otherSession, int otherServerID) = await RegisterMatchServer(2);
+
+        await LockAccount(NonHostAccountName, lockedServerID);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string lockedGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, cookie)))["game_cookie"];
+
+        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        // An Attempt To Join Another Game While Locked Never Replaces The Game Cookie, So That The Locked Match Server Never Removes The Player From Their Match
+        using (Assert.Multiple())
+        {
+            await Assert.That(await distributedCache.GetGameCookie(accountID)).IsEqualTo(lockedGameCookie);
+            await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(otherServerID)).DoesNotContain(accountID);
+            await Assert.That((string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, cookie)))["game_cookie"]).IsEqualTo(lockedGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Connecting_Elsewhere_After_The_Lock_Lifts_Returns_A_New_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string lockedSession, int lockedServerID) = await RegisterMatchServer(1);
+        (string otherSession, _) = await RegisterMatchServer(2);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string lockedGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, cookie)))["game_cookie"];
+
+        MatchLock matchLock = await LockAccount(NonHostAccountName, lockedServerID);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        // Every Lift Removes The Lock, Whatever Lifts It
+        await Assert.That(await distributedCache.RemoveMatchLock(matchLock.UserID, matchLock.MatchID)).IsTrue();
+
+        string otherGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(otherSession, cookie)))["game_cookie"];
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(otherGameCookie).IsNotEqualTo(lockedGameCookie);
+            await Assert.That(await distributedCache.GetGameCookie(await GetAccountID(NonHostAccountName))).IsEqualTo(otherGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task A_Served_Client_Connection_Records_The_Account_On_The_Match_Server()
+    {
+        await InitialiseIn("Development");
+
+        (string session, int serverID) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(session, cookie), NonHostAccountName);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(serverID)).Contains(await GetAccountID(NonHostAccountName));
+    }
+
+    [Test]
+    public async Task Client_Connection_Replaces_A_Game_Cookie_Which_Cannot_Be_Read()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        // The Stored Game Cookie No Longer Deserialises, As It Would After A Change To The Shape Of The Game Cookie
+        await distributedCache.StringSetAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID), "NOT-A-GAME-COOKIE", DistributedCacheExtensions.SessionCookieLifetime);
+
+        HttpResponseMessage response = await ConnectClient(session, cookie);
+
+        await AssertClientConnectionReturnsTheAccount(response, NonHostAccountName);
+
+        // The Reconnecting Client Carries The Replacement, So That It Still Agrees With The Stored Game Cookie
+        await Assert.That(await distributedCache.GetGameCookie(accountID)).IsEqualTo((string) (await DeserialisePHPResponse(response))["game_cookie"]);
+    }
+
     /// <summary>
     ///     Registers the dedicated host's match server manager and its match server with the given instance, and returns the match server's session cookie and server ID.
     ///     Registering the same instance again renews its session and keeps its server ID, as a match server does when it authenticates again.

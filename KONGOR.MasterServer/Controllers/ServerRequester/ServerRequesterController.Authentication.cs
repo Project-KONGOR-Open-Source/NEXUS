@@ -388,7 +388,10 @@ public partial class ServerRequesterController
         AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
 
         response.Add("infos", new List<DataPoint> { DataPoint.FromAccount(account, aggregates, statisticsByType) });
-        response.Add("game_cookie", "00005072-6f6a-6563-7420-4b4f4e474f52"); // TODO: Generate And Store This Cookie Per Match (Must Exist, But The Value Doesn't Really Matter)
+
+        // The Game Cookie Is Only Issued Once The Client Connection Is Served, So That A Refused Attempt To Join Another Game Never Replaces The Game Cookie Of The Locked Match
+        response.Add("game_cookie", await DistributedCache.IssueGameCookie(account.ID, askingServer?.ID));
+
         response.Add("my_upgrades", account.User.OwnedStoreItems);
         response.Add("selected_upgrades", account.SelectedStoreItems);
 

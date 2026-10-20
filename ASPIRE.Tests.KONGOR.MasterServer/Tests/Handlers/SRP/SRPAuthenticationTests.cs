@@ -336,6 +336,27 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     }
 
     [Test]
+    public async Task Each_Login_Records_The_Latest_Session_Cookie_Of_The_Account()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account account, string password) = await srpAuthenticationService.CreateAccountWithSRPCredentials("latest.cookie@kongor.com", "LatestCookie", "SecurePassword123!");
+
+        SRPAuthenticationData firstResult = await srpAuthenticationService.PerformFullAuthentication(account, password);
+        SRPAuthenticationData secondResult = await srpAuthenticationService.PerformFullAuthentication(account, password);
+
+        string? latestSessionCookie = await webApplicationFactory.Services.GetRequiredService<IDatabase>().GetLatestSessionCookie(account.ID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(firstResult.Success).IsTrue();
+            await Assert.That(secondResult.Success).IsTrue();
+            await Assert.That(latestSessionCookie).IsEqualTo(secondResult.Cookie);
+            await Assert.That(latestSessionCookie).IsNotEqualTo(firstResult.Cookie);
+        }
+    }
+
+    [Test]
     [Arguments("casepass@kongor.com", "CasePass", "SecurePassword123!")]
     public async Task Authenticate_With_SRP_With_Different_Password_Case_Returns_Authentication_Failure(string emailAddress, string accountName, string password)
     {
