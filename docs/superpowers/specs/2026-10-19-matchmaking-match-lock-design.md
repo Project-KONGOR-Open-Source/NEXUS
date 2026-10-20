@@ -204,6 +204,7 @@ The owner settled what NEXUS does when one account, or one user, is live on two 
 - The second machine cannot take over while the first is still in the match. The first must be closed, crash, or lose its connection (the engine drops it after its connected timeout, without a strike), or be voted out by its team. A first machine left running where the player cannot reach it holds the slot, because the engine only flags an idle player as AFK, which lets the team vote to kick them, and never removes them by itself.
 - A machine whose login was retired plays on, but if it drops, it cannot reconnect without logging in again, which retires the other machine's login in turn. Retail behaved the same.
 - NEXUS's `aids2cookie` answer differs from retail's, as NEXUS already differs by switching on account-based reconnect.
+- An in-place re-login leaves a short window. The client pushes its new login cookie to its match server on its next frame (HON `source/K2.Engine/c_hostclient.cpp`, `CHostClient::UpdateCookie`), while NEXUS follows only once the client's chat connection is accepted again and reports joining that match server (`source/K2.Engine/c_chatmanager.cpp`, `CChatManager::HandleAuthAccepted`). A duplicate-session check inside that window can still kick the connection, so "never" here means that NEXUS never answers a login cookie other than the one it knows the client holds.
 
 ### What Changes In The Earlier Text
 

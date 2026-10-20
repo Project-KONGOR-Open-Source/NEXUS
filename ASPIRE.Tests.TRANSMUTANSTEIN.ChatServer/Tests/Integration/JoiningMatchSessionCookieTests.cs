@@ -2,8 +2,8 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 
 /// <summary>
 ///     Tests that a client which reports joining a match server refreshes the session cookie which the master server answers to that match server's duplicate session check, because a client which logs in again during its match pushes its new session cookie to the match server.
-///     Only a record which the match server's client connection left is refreshed, which may be that of another account of the same user, though never for a guest or staff account, and its game cookie is never changed.
-///     Every test removes the match servers which it seeds, because every chat server host shares the unprefixed distributed cache, while the game cookies which it seeds name match servers which no other test seeds, so that they bind no later test.
+///     Only the records which the match server's client connections left are refreshed, for the session's own account and for every other account of the same user, though never for another account of a guest or staff account, and their game cookies are never changed.
+///     Every test removes the match servers and the game cookies which it seeds, because every chat server host shares the unprefixed distributed cache while each host's database restarts its identifiers, so a game cookie left behind would be read as that of a later test's account.
 /// </summary>
 [NotInParallel(nameof(ChatServerHost))]
 public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext containerContext)
@@ -54,6 +54,7 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
+            await RemoveGameCookies(distributedCache, accountID);
             await distributedCache.RemoveMatchServerByID(serverID);
         }
     }
@@ -98,6 +99,7 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
+            await RemoveGameCookies(distributedCache, accountID);
             await distributedCache.RemoveMatchServerByID(serverID);
             await distributedCache.RemoveMatchServerByID(otherServerID);
         }
@@ -134,18 +136,66 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
             GameCookie? mainAccountRecord = await distributedCache.GetStoredGameCookie(mainAccountID);
             GameCookie? subAccountRecord = await distributedCache.GetStoredGameCookie(subAccountID);
 
-            // The Main Account Keeps Its Own Game Cookie, And The Account Which The Match Server Never Served Is Given No Record For It
+            // The Main Account Keeps Its Own Game Cookie, And The Account Which The Match Server Never Served Is Given No Record
             using (Assert.Multiple())
             {
                 await Assert.That(refreshed).IsTrue();
                 await Assert.That(mainAccountRecord?.Cookie).IsEqualTo(gameCookie);
                 await Assert.That(mainAccountRecord?.ServerID).IsEqualTo(serverID);
-                await Assert.That(subAccountRecord?.ServerID).IsNotEqualTo(serverID);
+                await Assert.That(subAccountRecord).IsNull();
             }
         }
 
         finally
         {
+            await RemoveGameCookies(distributedCache, mainAccountID, subAccountID);
+            await distributedCache.RemoveMatchServerByID(serverID);
+        }
+    }
+
+    [Test]
+    public async Task A_Stale_Record_Of_The_Session_Account_Does_Not_Stop_The_Account_In_The_Match_Being_Refreshed()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        IDatabase distributedCache = host.Services.GetRequiredService<IDatabase>();
+
+        (_, int sessionAccountID, string sessionAccountName, string sessionAccountCookie) = await ChatTestData.SeedPlayer(host);
+
+        (int matchAccountID, _) = await ChatTestData.SeedSubAccount(host.Services, sessionAccountID);
+
+        (int serverID, string serverAddress) = await SeedMatchServer(host);
+
+        try
+        {
+            // The Session's Account Played An Earlier Match On The Same Match Server, Where Another Account Of The Same User Now Plays The Match In Progress
+            await distributedCache.IssueGameCookie(sessionAccountID, serverID, Guid.CreateVersion7().ToString());
+
+            string gameCookie = await distributedCache.IssueGameCookie(matchAccountID, serverID, Guid.CreateVersion7().ToString());
+
+            // The Client In The Match Logged In Again In Place With The Session's Account
+            using TcpClient client = await host.ConnectAndAuthenticateClientAsync(sessionAccountID, sessionAccountName, sessionAccountCookie, RemoteIP);
+
+            ClientChatSession session = Context.ClientChatSessions[sessionAccountName];
+
+            await ChatTestProtocol.WriteFrame(client.GetStream(), ChatTestProtocol.BuildJoiningGame(serverAddress));
+
+            // The Session Names The Match Server Only Once It Has Tried To Refresh The Recorded Session Cookies
+            bool joined = await ChatTestProtocol.WaitUntil(() => session.Metadata.MatchServerConnectedTo?.ID == serverID, JoinTimeout);
+
+            GameCookie? matchAccountRecord = await distributedCache.GetStoredGameCookie(matchAccountID);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(joined).IsTrue();
+                await Assert.That(matchAccountRecord?.SessionCookie).IsEqualTo(sessionAccountCookie);
+                await Assert.That(matchAccountRecord?.Cookie).IsEqualTo(gameCookie);
+            }
+        }
+
+        finally
+        {
+            await RemoveGameCookies(distributedCache, sessionAccountID, matchAccountID);
             await distributedCache.RemoveMatchServerByID(serverID);
         }
     }
@@ -197,6 +247,7 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
+            await RemoveGameCookies(distributedCache, mainAccountID, subAccountID);
             await distributedCache.RemoveMatchServerByID(serverID);
         }
     }
@@ -216,5 +267,20 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
         await ChatTestData.SeedMatchServer(host.Services, serverID, hostAccountID, hostAccountName, Guid.CreateVersion7().ToString(), serverPort, ServerIPAddress);
 
         return (serverID, $"{ServerIPAddress}:{serverPort}");
+    }
+
+    /// <summary>
+    ///     Deletes the game cookies of the given accounts, and verifies through the master server's own reader that none is left.
+    ///     The master server keeps the construction of the key internal to itself, so the key is built here, and the verification makes a change to it fail every test rather than leave game cookies behind unnoticed.
+    /// </summary>
+    private static async Task RemoveGameCookies(IDatabase distributedCache, params int[] accountIDs)
+    {
+        foreach (int accountID in accountIDs)
+        {
+            await distributedCache.KeyDeleteAsync($@"ACCOUNT-GAME-COOKIE:[""{accountID}""]");
+
+            if (await distributedCache.GetStoredGameCookie(accountID) is not null)
+                throw new InvalidOperationException($@"The Game Cookie Of Account ID ""{accountID}"" Is Still Stored After Its Removal, So The Key Under Which It Is Stored Has Changed");
+        }
     }
 }

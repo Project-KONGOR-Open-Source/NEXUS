@@ -714,6 +714,39 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    public async Task Account_IDs_To_Cookie_Omits_A_Game_Cookie_Record_Without_A_Session_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string session, int serverID) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        // The Record Is Valid JSON In The Shape Which The Game Cookie Had Before It Carried A Session Cookie, As A Record Stored Before An Upgrade Would Be
+        await distributedCache.StringSetAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID), JsonSerializer.Serialize(new { Cookie = gameCookie, ServerID = serverID }), DistributedCacheExtensions.SessionCookieLifetime);
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        HttpResponseMessage reconnect = await ConnectClient(session, cookie);
+
+        await AssertClientConnectionReturnsTheAccount(reconnect, NonHostAccountName);
+
+        // The Match Server Leaves Alone An Account Which Is Not Listed, And The Reconnecting Client Carries The Game Cookie Which Replaces The Old Record
+        using (Assert.Multiple())
+        {
+            await Assert.That(sessionCookies.Count).IsEqualTo(0);
+            await Assert.That(gameCookies.Count).IsEqualTo(0);
+            await Assert.That(await distributedCache.GetGameCookie(accountID)).IsEqualTo((string) (await DeserialisePHPResponse(reconnect))["game_cookie"]);
+        }
+    }
+
+    [Test]
     public async Task Account_IDs_To_Cookie_After_A_Reconnect_Returns_The_Cookies_The_Reconnect_Used()
     {
         await InitialiseIn("Development");
