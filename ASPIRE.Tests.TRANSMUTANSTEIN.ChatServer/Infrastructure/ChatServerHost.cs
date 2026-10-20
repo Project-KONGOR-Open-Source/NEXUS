@@ -28,13 +28,25 @@ internal sealed class ChatServerHost : IAsyncDisposable
     /// </summary>
     public int MatchServerManagerPort { get; }
 
-    private ChatServerHost(WebApplication application, Uri httpBaseAddress, int clientPort, int matchServerPort, int matchServerManagerPort)
+    /// <summary>
+    ///     The connection string of the host's database, which another host in the same test can share.
+    /// </summary>
+    public string DatabaseConnectionString { get; }
+
+    /// <summary>
+    ///     The connection string of the distributed cache, which the host reads without a key prefix.
+    /// </summary>
+    public string DistributedCacheConnectionString { get; }
+
+    private ChatServerHost(WebApplication application, Uri httpBaseAddress, int clientPort, int matchServerPort, int matchServerManagerPort, string databaseConnectionString, string distributedCacheConnectionString)
     {
         Application = application;
         HTTPBaseAddress = httpBaseAddress;
         ClientPort = clientPort;
         MatchServerPort = matchServerPort;
         MatchServerManagerPort = matchServerManagerPort;
+        DatabaseConnectionString = databaseConnectionString;
+        DistributedCacheConnectionString = distributedCacheConnectionString;
     }
 
     public static async Task<ChatServerHost> StartAsync(ServiceContainerContext containerContext)
@@ -78,7 +90,7 @@ internal sealed class ChatServerHost : IAsyncDisposable
 
         await application.StartAsync();
 
-        return new ChatServerHost(application, new Uri($"http://127.0.0.1:{httpPort}"), clientPort, matchServerPort, matchServerManagerPort);
+        return new ChatServerHost(application, new Uri($"http://127.0.0.1:{httpPort}"), clientPort, matchServerPort, matchServerManagerPort, databaseConnectionString, cacheConnectionString);
     }
 
     public HttpClient CreateHTTPClient() => new () { BaseAddress = HTTPBaseAddress };

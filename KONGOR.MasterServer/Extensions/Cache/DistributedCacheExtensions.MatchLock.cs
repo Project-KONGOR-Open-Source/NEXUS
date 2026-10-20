@@ -141,4 +141,17 @@ public static partial class DistributedCacheExtensions
 
         return removed;
     }
+
+    /// <summary>
+    ///     The distributed cache pub/sub channel on which match lock refusals are published by the master server and consumed by the chat server.
+    ///     Used to send a player back to their locked match, or to lift their lock when they can no longer return to it, whenever a match server other than the locked one asks to authenticate their client.
+    /// </summary>
+    public const string MatchLockRefusalChannel = "MATCH-LOCK-REFUSAL";
+
+    /// <summary>
+    ///     Publishes a match lock refusal on <see cref="MatchLockRefusalChannel"/>.
+    ///     The payload is the refusal serialised as JSON.
+    /// </summary>
+    public static async Task PublishMatchLockRefusal(this IDatabase distributedCacheStore, MatchLockRefusal refusal)
+        => await distributedCacheStore.Multiplexer.GetSubscriber().PublishAsync(RedisChannel.Literal(MatchLockRefusalChannel), JsonSerializer.Serialize(refusal));
 }

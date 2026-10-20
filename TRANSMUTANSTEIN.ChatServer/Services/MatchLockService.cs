@@ -240,6 +240,25 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
+    ///     Acts on the master server's refusal of a locked user's client connection on a match server other than the locked one, which sends no chat message of its own.
+    ///     The refused account is enforced through its chat session when it has one, and otherwise the user's lock is verified anyway, so that a player who was removed from the match while their chat is down is no longer locked when the match server asks again.
+    /// </summary>
+    public async Task HandleRefusal(MatchLockRefusal refusal)
+    {
+        if (Context.ClientChatSessions.TryGetValue(refusal.AccountName, out ClientChatSession? session))
+        {
+            await Enforce(session);
+
+            return;
+        }
+
+        MatchLock? matchLock = await distributedCacheStore.GetMatchLock(refusal.UserID);
+
+        if (matchLock is not null)
+            await Verify(matchLock);
+    }
+
+    /// <summary>
     ///     Ends the pending return when the game client reports joining the locked match server, which it reports only once it is loading there, so that its connection was accepted.
     ///     Joining any other match server leaves the return and its reminders in place.
     /// </summary>

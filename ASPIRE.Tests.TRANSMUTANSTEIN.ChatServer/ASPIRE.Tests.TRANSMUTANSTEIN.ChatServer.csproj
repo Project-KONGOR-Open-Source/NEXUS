@@ -13,8 +13,14 @@
 
     <ItemGroup>
         <ProjectReference Include="../ASPIRE.Tests/ASPIRE.Tests.csproj" />
+        <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
         <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
         <ProjectReference Include="../TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- INFO: The Chat Server Host Reads Its Settings From This Project's Output Directory, Where The Master Server's Settings, Which Its Direct Project Reference Also Copies, Would Replace The Chat Server's Whenever They Are Newer; Copying The Chat Server's Settings As This Project's Own Gives Them Precedence Over Those Of Every Referenced Project -->
+        <None Include="../TRANSMUTANSTEIN.ChatServer/appsettings*.json" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
 </Project>

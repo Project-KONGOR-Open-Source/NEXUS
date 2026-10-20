@@ -283,7 +283,7 @@ public partial class ServerRequesterController
 
     private async Task<IActionResult> HandleConnectClient()
     {
-        // The Session Is Deliberately Not Checked Against The Registered Match Servers, So That A Player Reconnecting To A Match In Progress Is Still Authenticated After The Master Server Has Lost The Match Server's Session
+        // A Session Which Is Not A Registered Match Server's, Including A Copy-On-Write Master's, Is Still Served, So That A Player Reconnecting To A Match In Progress Is Still Authenticated After The Master Server Has Lost The Match Server's Session
         string? session = Request.Form["session"];
 
         if (session is null)
@@ -327,6 +327,47 @@ public partial class ServerRequesterController
             Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{SessionCookie}""", accountNameForSessionCookie, cookie);
 
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
+        }
+
+        MatchServer? askingServer = await DistributedCache.GetMatchServerBySessionCookie(session);
+
+        // Only A Registered Match Server Can Be Told Apart From The Locked One, So A Locked Player Is Refused Only On Another Registered Match Server, And Is Always Served On The Locked Match Server Or On Any Match Server Whose Session Is Not Registered
+        // Guest And Staff Accounts Are Never Locked, Because Every Account Of Each Type Shares One User
+        if (askingServer is not null && account.Type is not (AccountType.Guest or AccountType.Staff))
+        {
+            MatchLock? matchLock = await DistributedCache.GetMatchLock(account.User.ID);
+
+            if (matchLock is not null && matchLock.ServerID != askingServer.ID)
+            {
+                // A Match Lock Must Never Outlive Its Match Server, So A Lock On A Match Server Which Is No Longer Registered Is Lifted, And The Client Is Served
+                if (await DistributedCache.GetMatchServerByID(matchLock.ServerID) is null)
+                {
+                    if (await DistributedCache.RemoveMatchLock(matchLock.UserID, matchLock.MatchID))
+                    {
+                        Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
+                            matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+                    }
+                }
+
+                else
+                {
+                    try
+                    {
+                        await DistributedCache.PublishMatchLockRefusal(new MatchLockRefusal { UserID = account.User.ID, AccountName = account.Name });
+                    }
+
+                    catch (Exception exception)
+                    {
+                        // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because The Match Server Asks Again After A Refusal And Every Refusal Is Published Anew
+                        Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}""", account.Name, askingServer.ID);
+                    }
+
+                    Logger.LogInformation(@"Refused The Client Connection Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
+                        account.Name, askingServer.ID, matchLock.MatchID, matchLock.ServerID);
+
+                    return Conflict($@"Account ""{account.Name}"" Is Locked To Match ID ""{matchLock.MatchID}"" On Another Match Server");
+                }
+            }
         }
 
         Dictionary<string, object> response = new ()

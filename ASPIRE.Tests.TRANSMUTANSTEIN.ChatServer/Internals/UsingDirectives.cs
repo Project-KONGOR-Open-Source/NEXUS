@@ -8,6 +8,7 @@ global using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Utilities.Matchmaking;
 
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.SRP;
+global using KONGOR.MasterServer.Internals;
 global using KONGOR.MasterServer.Models.ServerManagement;
 
 global using MERRICK.DatabaseContext.Constants;

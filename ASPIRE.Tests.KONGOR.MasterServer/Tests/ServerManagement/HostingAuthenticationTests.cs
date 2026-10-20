@@ -6,8 +6,10 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.ServerManagement;
 ///     Also tests how the match server's "new_session" endpoint treats the server instance of the login, including the copy-on-write master (HON's "cowmaster") which Linux match server managers fork their match servers from, and which authenticates with an empty server instance.
 ///     The copy-on-write master is a non-joinable match server: it is registered apart from the match servers, whether or not its manager is registered, its heartbeat is accepted, and it outlives the removal of its manager.
 ///     Also tests how the match server endpoints answer a session which is not registered: with the "auth_failure" reply, which makes the match server authenticate again, where acting upon it is safe, with a plain rejection where acting upon it would crash the match server, and as usual where a player reconnecting to a match in progress depends on the reply.
+///     Also tests how the client connection request treats a player locked to a match in progress: another registered match server is refused, and the refusal is published, while the locked match server, an unrecognised session, and a copy-on-write master are always served, so that reconnecting to the match never breaks.
+///     The tests which cause or observe a refusal run apart from each other, because the refusal channel is shared by every test's master server, unlike the keys of the distributed cache.
 /// </summary>
-public sealed class HostingAuthenticationTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
+public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
 {
     private const string DedicatedHostAccountName = "DEDICATED-HOST";
 
