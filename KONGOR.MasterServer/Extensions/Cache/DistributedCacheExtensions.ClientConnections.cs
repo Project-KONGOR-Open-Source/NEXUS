@@ -106,21 +106,18 @@ public static partial class DistributedCacheExtensions
         => DeserialiseGameCookie(await distributedCacheStore.StringGetAsync(ConstructAccountGameCookieKey(accountID)))?.Cookie;
 
     /// <summary>
-    ///     Retrieves the IDs of the accounts whose client connections the match server has served.
+    ///     Retrieves which of the given accounts the match server has served, in the order in which they are given.
+    ///     Only the given accounts are checked, in one request, so that the cost does not grow with every account which the match server has ever served.
     /// </summary>
-    public static async Task<HashSet<int>> GetAccountsConnectedToMatchServer(this IDatabase distributedCacheStore, int serverID)
+    public static async Task<List<int>> GetAccountsConnectedToMatchServer(this IDatabase distributedCacheStore, int serverID, IReadOnlyList<int> accountIDs)
     {
-        RedisValue[] members = await distributedCacheStore.SetMembersAsync(ConstructMatchServerAccountsKey(serverID));
+        // The Distributed Cache Rejects A Membership Check Of No Members
+        if (accountIDs.Count is 0)
+            return [];
 
-        HashSet<int> accountIDs = [];
+        bool[] connected = await distributedCacheStore.SetContainsAsync(ConstructMatchServerAccountsKey(serverID), [.. accountIDs.Select(accountID => (RedisValue) accountID)]);
 
-        foreach (RedisValue member in members)
-        {
-            if (int.TryParse(member.ToString(), out int accountID))
-                accountIDs.Add(accountID);
-        }
-
-        return accountIDs;
+        return [.. accountIDs.Where((accountID, index) => connected[index])];
     }
 
     /// <summary>

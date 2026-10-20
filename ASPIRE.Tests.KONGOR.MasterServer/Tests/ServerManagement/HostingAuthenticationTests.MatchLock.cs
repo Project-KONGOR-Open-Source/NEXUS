@@ -368,7 +368,7 @@ public sealed partial class HostingAuthenticationTests
         // The Master Server Cannot Tell Which Match Server Asks With An Unrecognised Session, So The Game Cookie Which It Issues Belongs To No Match Server
         GameCookie? unrecognisedSessionRecord = JsonSerializer.Deserialize<GameCookie>((await distributedCache.StringGetAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID))).ToString());
 
-        HashSet<int> accountsBeforeRegisteredConnection = await distributedCache.GetAccountsConnectedToMatchServer(serverID);
+        List<int> accountsBeforeRegisteredConnection = await distributedCache.GetAccountsConnectedToMatchServer(serverID, [accountID]);
 
         string registeredServerGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
 
@@ -379,7 +379,7 @@ public sealed partial class HostingAuthenticationTests
             await Assert.That(accountsBeforeRegisteredConnection).DoesNotContain(accountID);
             await Assert.That(registeredServerGameCookie).IsNotEqualTo(unrecognisedSessionGameCookie);
             await Assert.That(await distributedCache.GetGameCookie(accountID)).IsEqualTo(registeredServerGameCookie);
-            await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(serverID)).Contains(accountID);
+            await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(serverID, [accountID])).Contains(accountID);
         }
     }
 
@@ -448,7 +448,7 @@ public sealed partial class HostingAuthenticationTests
         using (Assert.Multiple())
         {
             await Assert.That(await distributedCache.GetGameCookie(accountID)).IsEqualTo(lockedGameCookie);
-            await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(otherServerID)).DoesNotContain(accountID);
+            await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(otherServerID, [accountID])).DoesNotContain(accountID);
             await Assert.That((string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, cookie)))["game_cookie"]).IsEqualTo(lockedGameCookie);
         }
     }
@@ -494,7 +494,9 @@ public sealed partial class HostingAuthenticationTests
 
         IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
 
-        await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(serverID)).Contains(await GetAccountID(NonHostAccountName));
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(serverID, [accountID])).Contains(accountID);
     }
 
     [Test]

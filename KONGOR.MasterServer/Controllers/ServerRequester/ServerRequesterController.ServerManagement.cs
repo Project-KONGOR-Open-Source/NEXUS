@@ -22,15 +22,14 @@ public partial class ServerRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
 
-        // Only The Accounts Which The Asking Match Server Has Served Are Answered, So That No Match Server Can Read The Session Cookies Of Accounts Which Never Connected To It
-        HashSet<int> servedAccountIDs = await DistributedCache.GetAccountsConnectedToMatchServer(matchServer.ID);
-
         // A Value Which Is Not An Account ID Is Skipped Rather Than Failing The Whole Check, And An Account Asked About More Than Once Is Answered Once
-        IEnumerable<int> accountIDs = Request.Form["aids[]"]
+        List<int> requestedAccountIDs = [.. Request.Form["aids[]"]
             .Select(accountIDValue => int.TryParse(accountIDValue, NumberStyles.None, CultureInfo.InvariantCulture, out int accountID) ? accountID : 0)
             .Where(accountID => accountID > 0)
-            .Distinct()
-            .Where(servedAccountIDs.Contains);
+            .Distinct()];
+
+        // Only The Accounts Which The Asking Match Server Has Served Are Answered, So That No Match Server Can Read The Session Cookies Of Accounts Which Never Connected To It
+        List<int> accountIDs = await DistributedCache.GetAccountsConnectedToMatchServer(matchServer.ID, requestedAccountIDs);
 
         Dictionary<string, object> response = [];
 
