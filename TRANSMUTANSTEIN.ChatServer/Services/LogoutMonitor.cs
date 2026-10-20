@@ -55,6 +55,14 @@ public class LogoutMonitor(IConnectionMultiplexer distributedCacheProvider, ILog
             return;
         }
 
+        // The "required" Modifier Does Not Reject An Explicit Null, Which Would Make The Session Lookup Throw Outside The Guarded Deserialisation
+        if (logout.AccountName is null || logout.SessionCookie is null)
+        {
+            logger.LogWarning(@"Received Malformed Payload ""{Payload}"" On Account Logout Event Channel ""{Channel}""", channelMessage.Message.ToString(), DistributedCacheExtensions.AccountLogoutChannel);
+
+            return;
+        }
+
         string accountName = logout.AccountName;
 
         if (Context.ClientChatSessions.TryGetValue(accountName, out ClientChatSession? session) is false)

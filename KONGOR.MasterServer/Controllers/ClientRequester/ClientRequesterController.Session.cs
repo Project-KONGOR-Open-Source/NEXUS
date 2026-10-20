@@ -16,15 +16,24 @@ public partial class ClientRequesterController
         {
             await DistributedCache.RemoveAccountNameForSessionCookie(cookie);
 
-            int? accountID = await MerrickContext.Accounts.Where(account => account.Name.Equals(accountName)).Select(account => (int?) account.ID).SingleOrDefaultAsync();
-
-            if (accountID is not null)
-                await DistributedCache.RemoveLatestSessionCookie(accountID.Value, cookie);
-
             // Notify The Chat Server To Force-Terminate The Chat Session Which Used This Session Cookie
             // The Client Normally Closes Its Own Chat Socket On Logout, But This Guards Against Cases Where That Does Not Happen Cleanly
             // The Cookie Is Published Because A Newer Login Of The Same Account Has A Chat Session Which The Logout Of An Older Machine Must Not End
             await DistributedCache.PublishAccountLogout(new AccountLogout { AccountName = accountName, SessionCookie = cookie });
+
+            // Clearing The Latest-Login Record Is Last And Best-Effort, Because A Database Outage Must Never Stop The Chat Session From Ending, And A Stale Record Is Tolerated By The Next Login's Supersession
+            try
+            {
+                int? accountID = await MerrickContext.Accounts.Where(account => account.Name.Equals(accountName)).Select(account => (int?) account.ID).SingleOrDefaultAsync();
+
+                if (accountID is not null)
+                    await DistributedCache.RemoveLatestSessionCookie(accountID.Value, cookie);
+            }
+
+            catch (Exception exception)
+            {
+                Logger.LogWarning(exception, @"Unable To Clear The Latest Session Cookie Of Account ""{AccountName}"" On Logout", accountName);
+            }
 
             Logger.LogInformation(@"Account ""{AccountName}"" Has Logged Out", accountName);
         }

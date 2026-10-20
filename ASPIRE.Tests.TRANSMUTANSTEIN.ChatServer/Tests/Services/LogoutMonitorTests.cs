@@ -73,6 +73,9 @@ public sealed class LogoutMonitorTests(ServiceContainerContext containerContext)
         // A Plain Account Name Is What Older Master Servers Published, And It Is Not An Account Logout
         await host.Services.GetRequiredService<IConnectionMultiplexer>().GetSubscriber().PublishAsync(RedisChannel.Literal(DistributedCacheExtensions.AccountLogoutChannel), accountName);
 
+        // An Explicit Null Passes The "required" Modifier, So The Monitor Must Reject It Itself
+        await host.Services.GetRequiredService<IConnectionMultiplexer>().GetSubscriber().PublishAsync(RedisChannel.Literal(DistributedCacheExtensions.AccountLogoutChannel), @"{""AccountName"":null,""SessionCookie"":null}");
+
         await host.Services.GetRequiredService<IDatabase>().PublishAccountLogout(new AccountLogout { AccountName = accountName, SessionCookie = cookie });
 
         bool closed = await ChatTestProtocol.WaitForClose(client.GetStream(), CloseTimeout);
