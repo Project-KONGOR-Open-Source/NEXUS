@@ -852,6 +852,59 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     }
 
     [Test]
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task A_Return_Which_Runs_Out_Tells_The_Player_Only_When_It_Was_Still_Waiting(bool slotConnected)
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(slotConnected ? FakeMatchServerGameSocket.ConnectedSlotTimeRemaining : SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        if (slotConnected)
+        {
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+
+            (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.ConnectedElsewhereMessage);
+        }
+
+        else
+        {
+            await LogInAndReadSendBack(stream);
+        }
+
+        MatchLockReturn? pendingReturn = session.PendingMatchLockReturn;
+
+        // The Return Runs Out Before The Reminder Loop Next Verifies The Lock, As A Wait Does Once The Other Machine Has Held The Slot For The Whole Connected Elsewhere Wait
+        if (pendingReturn is not null)
+            pendingReturn.Expires = DateTimeOffset.UtcNow;
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, ReminderTimeout);
+
+        // A Wait Has Sent Nobody Anywhere, So The Player Is Told That It Ran Out, While A Send-Back Ends Without A Notice, Because The Player Has Already Been Told Why And Sent Back
+        List<string> expectedNoticeMessages = slotConnected ? [MatchLockService.ConnectedElsewhereWaitExpiredMessage] : [];
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(pendingReturn).IsNotNull();
+            await Assert.That(noticeMessages).IsEquivalentTo(expectedNoticeMessages);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+            await Assert.That(session.PendingMatchLockReturn).IsNull();
+            await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
+        }
+    }
+
+    [Test]
     public async Task Another_Account_Is_Named_The_Slot_Account_While_The_Slot_Is_Connected_Elsewhere()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

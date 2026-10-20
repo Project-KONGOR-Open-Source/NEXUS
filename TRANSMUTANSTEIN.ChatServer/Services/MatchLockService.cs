@@ -28,6 +28,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal const string ConnectedElsewhereMessage = "Your account is still connected to your match from a game which is running or has just closed. Close it if it is still open, and you will be sent back to the match as soon as it has left.";
 
     /// <summary>
+    ///     The notice to the account which holds the slot in the locked match when its wait for the slot's other connection to leave runs out, after which it is no longer sent back until it next tries to play.
+    /// </summary>
+    internal const string ConnectedElsewhereWaitExpiredMessage = "Your other game has not left the match yet. Try again once it has closed, and you will be sent back.";
+
+    /// <summary>
     ///     The reply to the reconnect query above which the slot is still connected to the match.
     ///     The match server answers the time left before the slot is terminated, which is the largest possible time less the game time while the slot is connected, and only the remaining disconnect allowance once it has disconnected, so the middle of the range tells the two apart.
     /// </summary>
@@ -67,7 +72,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal static readonly TimeSpan ReturnWindow = TimeSpan.FromMilliseconds(MatchServerChatSession.AuthenticationRequestTotalTimeoutMilliseconds) + EngineClientConnectionTimeout + ReturnResendInterval;
 
     /// <summary>
-    ///     How long a player whose slot account is still connected to the locked match from another machine waits for that connection to leave, after which the return ends quietly, and the player's next attempt starts afresh.
+    ///     How long a player whose slot account is still connected to the locked match from another machine waits for that connection to leave, after which the return ends with <see cref="ConnectedElsewhereWaitExpiredMessage"/>, and the player's next attempt starts afresh.
     /// </summary>
     internal static readonly TimeSpan ConnectedElsewhereWait = TimeSpan.FromMinutes(5);
 
@@ -574,7 +579,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     ///     While the account is still connected from another machine, the slot is verified again at every interval and nothing is sent, and the account is sent back as soon as the slot is no longer connected.
     ///     An unanswered verification never ends that wait, because nobody has been sent anywhere yet, and the wait carries on until the match server answers again, the match server is gone or has ended the match, or the wait expires.
     ///     No chat message reaches the chat server when the match server refuses the connection, and the game client ignores a reminder while it is still connecting, so the reminders carry on until the game client reports joining the locked match server, the lock no longer holds, the session ends, or the return expires.
-    ///     It never sends a notice, because the game client's own connection to the locked match server reads as connected while it loads.
+    ///     Once it has sent the account back, it never sends a notice, because the game client's own connection to the locked match server reads as connected while it loads; a wait which runs out before then ends with one short notice, because nobody was sent anywhere.
     ///     It runs without being awaited, so it handles its own exceptions.
     /// </summary>
     private async Task RemindToReturn(ClientChatSession session, MatchLock matchLock, MatchLockReturn matchLockReturn)
@@ -605,7 +610,10 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
                     else
                     {
-                        logger.LogInformation(@"Ending The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because Its Slot On Match Server ID ""{MatchServerID}"" Stayed Connected From Another Machine",
+                        // A Wait Which Has Not Sent The Player Back Cannot Be Waiting On The Player's Own Loading Connection, So The Notice Can Never Reach A Player Who Is Returning
+                        session.SendNotice(MessageSenderName, ConnectedElsewhereWaitExpiredMessage);
+
+                        logger.LogInformation(@"Ending The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because Its Slot On Match Server ID ""{MatchServerID}"" Stayed Connected From Another Game",
                             session.Account.Name, matchLock.MatchID, matchLock.ServerID);
                     }
 
