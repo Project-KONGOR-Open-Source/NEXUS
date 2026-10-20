@@ -169,6 +169,24 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    public async Task Client_Connection_Is_Served_When_The_Match_Lock_Cannot_Be_Read()
+    {
+        await InitialiseIn("Development");
+
+        (_, int lockedServerID) = await RegisterMatchServer(1);
+        (string otherSession, _) = await RegisterMatchServer(2);
+
+        MatchLock matchLock = await LockAccount(NonHostAccountName, lockedServerID);
+
+        // The Stored Lock No Longer Deserialises, As It Would After A Change To The Shape Of The Lock
+        await webApplicationFactory.Services.GetRequiredService<IDatabase>().StringSetAsync(DistributedCacheExtensions.ConstructMatchLockKey(matchLock.UserID), "NOT-A-MATCH-LOCK", MatchLock.Lifetime);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(otherSession, cookie), NonHostAccountName);
+    }
+
+    [Test]
     [Arguments(AccountType.Guest)]
     [Arguments(AccountType.Staff)]
     public async Task Client_Connection_Is_Never_Refused_For_Guest_And_Staff_Accounts(AccountType accountType)

@@ -37,10 +37,10 @@ public class MatchLockRefusalMonitor(IConnectionMultiplexer distributedCacheProv
 
         try
         {
-            refusal = channelMessage.Message.IsNullOrEmpty ? null : System.Text.Json.JsonSerializer.Deserialize<MatchLockRefusal>(channelMessage.Message.ToString());
+            refusal = channelMessage.Message.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MatchLockRefusal>(channelMessage.Message.ToString());
         }
 
-        catch (System.Text.Json.JsonException exception)
+        catch (JsonException exception)
         {
             logger.LogWarning(exception, @"Received Malformed Payload ""{Payload}"" On Match Lock Refusal Event Channel ""{Channel}""", channelMessage.Message.ToString(), DistributedCacheExtensions.MatchLockRefusalChannel);
 

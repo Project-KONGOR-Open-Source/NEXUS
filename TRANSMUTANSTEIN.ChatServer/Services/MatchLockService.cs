@@ -434,10 +434,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
-    ///     Decides whether an account is exempt from the match lock, so that it is never locked and never sent back.
-    ///     Every guest account shares one user, as does every staff account, so locking one of them would lock all of them at once.
+    ///     Decides whether an account is exempt from the match lock, by the rule which <see cref="MatchLock.IsExempt"/> defines for the master server and the chat server alike.
     /// </summary>
-    private static bool IsExempt(Account account) => account.Type is AccountType.Guest or AccountType.Staff;
+    private static bool IsExempt(Account account) => MatchLock.IsExempt(account.Type);
 
     /// <summary>
     ///     Decides whether a pending return can be continued for the lock, which is the case while it is unexpired and for the lock's match.

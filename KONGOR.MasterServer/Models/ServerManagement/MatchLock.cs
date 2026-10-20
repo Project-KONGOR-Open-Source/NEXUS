@@ -10,6 +10,12 @@ public class MatchLock
     /// </summary>
     public static readonly TimeSpan Lifetime = TimeSpan.FromHours(1);
 
+    /// <summary>
+    ///     Decides whether accounts of a type are exempt from the match lock, so that they are never locked, never refused, and never sent back.
+    ///     Every guest account shares one user, as does every staff account, so locking one of them would lock all of them at once.
+    /// </summary>
+    public static bool IsExempt(AccountType accountType) => accountType is AccountType.Guest or AccountType.Staff;
+
     public required int UserID { get; init; }
 
     public required int AccountID { get; init; }

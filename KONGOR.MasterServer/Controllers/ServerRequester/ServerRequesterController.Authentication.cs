@@ -329,45 +329,41 @@ public partial class ServerRequesterController
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
 
-        MatchServer? askingServer = await DistributedCache.GetMatchServerBySessionCookie(session);
+        MatchServer? askingServer = null;
 
-        // Only A Registered Match Server Can Be Told Apart From The Locked One, So A Locked Player Is Refused Only On Another Registered Match Server, And Is Always Served On The Locked Match Server Or On Any Match Server Whose Session Is Not Registered
-        // Guest And Staff Accounts Are Never Locked, Because Every Account Of Each Type Shares One User
-        if (askingServer is not null && account.Type is not (AccountType.Guest or AccountType.Staff))
+        MatchLock? refusingLock = null;
+
+        // Reconnecting To A Match In Progress Must Never Break, So A Client Whose Match Lock Cannot Be Evaluated Is Served As If There Were No Lock, And A Failed Session Look-Up Leaves No Asking Match Server
+        try
         {
-            MatchLock? matchLock = await DistributedCache.GetMatchLock(account.User.ID);
+            askingServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 
-            if (matchLock is not null && matchLock.ServerID != askingServer.ID)
+            if (askingServer is not null)
+                refusingLock = await FindRefusingMatchLock(account, askingServer);
+        }
+
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, @"Serving The Client Connection Of Account ""{AccountName}"" As If It Had No Match Lock, Because Its Match Lock Could Not Be Evaluated", account.Name);
+        }
+
+        if (askingServer is not null && refusingLock is not null)
+        {
+            try
             {
-                // A Match Lock Must Never Outlive Its Match Server, So A Lock On A Match Server Which Is No Longer Registered Is Lifted, And The Client Is Served
-                if (await DistributedCache.GetMatchServerByID(matchLock.ServerID) is null)
-                {
-                    if (await DistributedCache.RemoveMatchLock(matchLock.UserID, matchLock.MatchID))
-                    {
-                        Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
-                            matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
-                    }
-                }
-
-                else
-                {
-                    try
-                    {
-                        await DistributedCache.PublishMatchLockRefusal(new MatchLockRefusal { UserID = account.User.ID, AccountName = account.Name });
-                    }
-
-                    catch (Exception exception)
-                    {
-                        // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because The Match Server Asks Again After A Refusal And Every Refusal Is Published Anew
-                        Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}""", account.Name, askingServer.ID);
-                    }
-
-                    Logger.LogInformation(@"Refused The Client Connection Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
-                        account.Name, askingServer.ID, matchLock.MatchID, matchLock.ServerID);
-
-                    return Conflict($@"Account ""{account.Name}"" Is Locked To Match ID ""{matchLock.MatchID}"" On Another Match Server");
-                }
+                await DistributedCache.PublishMatchLockRefusal(new MatchLockRefusal { UserID = account.User.ID, AccountName = account.Name });
             }
+
+            catch (Exception exception)
+            {
+                // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because The Match Server Asks Again After A Refusal And Every Refusal Is Published Anew
+                Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}""", account.Name, askingServer.ID);
+            }
+
+            Logger.LogInformation(@"Refused The Client Connection Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
+                account.Name, askingServer.ID, refusingLock.MatchID, refusingLock.ServerID);
+
+            return Conflict($@"Account ""{account.Name}"" Is Locked To Match ID ""{refusingLock.MatchID}"" On Another Match Server");
         }
 
         Dictionary<string, object> response = new ()
@@ -397,6 +393,34 @@ public partial class ServerRequesterController
         response.Add("selected_upgrades", account.SelectedStoreItems);
 
         return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Finds the match lock which refuses an account's client connection on a registered match server, which is the lock of the account's user when it names another match server that is still registered.
+    ///     Only a registered match server can be told apart from the locked one, so a locked player is always served on the locked match server, or on any match server whose session is not registered.
+    ///     A lock on a match server which is no longer registered is lifted instead, because a match lock must never outlive its match server.
+    ///     Returns <see langword="null"/> when the client connection is to be served.
+    /// </summary>
+    private async Task<MatchLock?> FindRefusingMatchLock(Account account, MatchServer askingServer)
+    {
+        if (MatchLock.IsExempt(account.Type))
+            return null;
+
+        MatchLock? matchLock = await DistributedCache.GetMatchLock(account.User.ID);
+
+        if (matchLock is null || matchLock.ServerID == askingServer.ID)
+            return null;
+
+        if (await DistributedCache.GetMatchServerByID(matchLock.ServerID) is not null)
+            return matchLock;
+
+        if (await DistributedCache.RemoveMatchLock(matchLock.UserID, matchLock.MatchID))
+        {
+            Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
+                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+        }
+
+        return null;
     }
 
     private async Task<IActionResult> HandleAcceptKey()

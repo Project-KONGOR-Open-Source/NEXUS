@@ -62,6 +62,33 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
     }
 
     [Test]
+    public async Task A_Malformed_Refusal_Does_Not_Stop_The_Monitor()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await host.Services.GetRequiredService<IConnectionMultiplexer>().GetSubscriber().PublishAsync(RedisChannel.Literal(DistributedCacheExtensions.MatchLockRefusalChannel), "NOT-A-REFUSAL");
+
+        await PublishRefusal(host, userID, accountName);
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.SlotAccountMessage);
+        }
+    }
+
+    [Test]
     public async Task A_Published_Refusal_For_Another_Account_Names_The_Slot_Account()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
