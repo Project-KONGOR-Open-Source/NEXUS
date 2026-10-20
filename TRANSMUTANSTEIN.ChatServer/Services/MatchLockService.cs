@@ -620,11 +620,8 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                 {
                     sentBack = true;
 
-                    // The Return Window Covers The Match Server's And The Game Client's Retries From The Moment The Player Is Sent Back
-                    DateTimeOffset returnWindowEnd = DateTimeOffset.UtcNow + ReturnWindow;
-
-                    if (matchLockReturn.Expires < returnWindowEnd)
-                        matchLockReturn.Expires = returnWindowEnd;
+                    // A Send-Back After A Wait Lasts Exactly As Long As One Which Was Sent At Once, So That The Return Window Covers The Match Server's And The Game Client's Retries From This Moment
+                    matchLockReturn.Expires = DateTimeOffset.UtcNow + ReturnWindow;
 
                     session.SendAutoMatchConnect(currentLock.ArrangedMatchType, currentLock.MatchID, currentLock.ServerAddress, currentLock.ServerPort, reminder: false);
 

@@ -12,7 +12,7 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
     private const uint SlotTimeRemaining = 120000;
 
     /// <summary>
-    ///     The reply for a slot which is still connected to the match, a minute into its game time, as the match server gives while the slot account plays on from another machine.
+    ///     The reply for a slot which is still connected to the match, as the match server gives while the slot account plays on from another machine, which is the largest possible time less the game time so far.
     /// </summary>
     private const uint ConnectedSlotTimeRemaining = uint.MaxValue - 60_000u;
 

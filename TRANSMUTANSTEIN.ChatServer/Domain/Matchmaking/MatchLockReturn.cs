@@ -13,7 +13,7 @@ public sealed class MatchLockReturn(int matchID, DateTimeOffset expires)
 
     /// <summary>
     ///     The moment after which the player is no longer reminded to return.
-    ///     It is extended when a player who waited for another machine to leave the match is sent back, so that the whole return window follows the moment at which they are sent.
+    ///     It is reset when a player who waited for another machine to leave the match is sent back, so that the return window follows the moment at which they are sent, exactly as it does for a player who is sent back at once.
     /// </summary>
     public DateTimeOffset Expires { get; set; } = expires;
 
