@@ -346,6 +346,39 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    public async Task Connecting_With_An_Unrecognised_Session_First_Then_To_A_Registered_Server_Returns_A_New_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string session, int serverID) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        string unrecognisedSessionGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(Guid.CreateVersion7().ToString(), cookie)))["game_cookie"];
+
+        // The Master Server Cannot Tell Which Match Server Asks With An Unrecognised Session, So The Game Cookie Which It Issues Belongs To No Match Server
+        GameCookie? unrecognisedSessionRecord = JsonSerializer.Deserialize<GameCookie>((await distributedCache.StringGetAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID))).ToString());
+
+        HashSet<int> accountsBeforeRegisteredConnection = await distributedCache.GetAccountsConnectedToMatchServer(serverID);
+
+        string registeredServerGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(unrecognisedSessionRecord?.Cookie).IsEqualTo(unrecognisedSessionGameCookie);
+            await Assert.That(unrecognisedSessionRecord?.ServerID).IsNull();
+            await Assert.That(accountsBeforeRegisteredConnection).DoesNotContain(accountID);
+            await Assert.That(registeredServerGameCookie).IsNotEqualTo(unrecognisedSessionGameCookie);
+            await Assert.That(await distributedCache.GetGameCookie(accountID)).IsEqualTo(registeredServerGameCookie);
+            await Assert.That(await distributedCache.GetAccountsConnectedToMatchServer(serverID)).Contains(accountID);
+        }
+    }
+
+    [Test]
     public async Task Connecting_To_Another_Match_Server_Returns_A_New_Game_Cookie()
     {
         await InitialiseIn("Development");

@@ -246,6 +246,7 @@ public partial class ClientRequesterController
         await MerrickContext.SaveChangesAsync();
 
         await DistributedCache.SetAccountNameForSessionCookie(cookie, account.Name);
+
         await DistributedCache.SetLatestSessionCookie(account.ID, cookie);
 
         return Ok(PhpSerialization.Serialize(response));
