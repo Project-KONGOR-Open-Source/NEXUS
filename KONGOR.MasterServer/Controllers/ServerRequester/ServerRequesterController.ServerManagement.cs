@@ -3,8 +3,10 @@ namespace KONGOR.MasterServer.Controllers.ServerRequester;
 public partial class ServerRequesterController
 {
     /// <summary>
-    ///     Resolves account IDs to their corresponding session cookies.
-    ///     Called by the match server to map a list of account IDs to their active session cookies.
+    ///     Answers the match server's periodic duplicate session check ("CGameServer::GetAccountAuth"), which posts the account IDs of its players as "aids[]" in the request body.
+    ///     For each account which the asking match server has served, the reply holds the session cookie of the account's latest login in "aids2cookie", and the account's game cookie in "aids2gcookie".
+    ///     The match server terminates a player whose game cookie differs as a duplicate connection, and kicks a connection whose session cookie differs as a duplicate login, so that a player who has joined another game, or logged in elsewhere, is removed.
+    ///     Reconnecting to a match in progress keeps the game cookie, so that a reconnecting player is never removed.
     /// </summary>
     private async Task<IActionResult> HandleAccountIDsToCookie()
     {
@@ -20,53 +22,33 @@ public partial class ServerRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
 
+        // Only The Accounts Which The Asking Match Server Has Served Are Answered, So That No Match Server Can Read The Session Cookies Of Accounts Which Never Connected To It
+        HashSet<int> servedAccountIDs = await DistributedCache.GetAccountsConnectedToMatchServer(matchServer.ID);
+
+        // A Value Which Is Not An Account ID Is Skipped Rather Than Failing The Whole Check, And An Account Asked About More Than Once Is Answered Once
+        IEnumerable<int> accountIDs = Request.Form["aids[]"]
+            .Select(accountIDValue => int.TryParse(accountIDValue, NumberStyles.None, CultureInfo.InvariantCulture, out int accountID) ? accountID : 0)
+            .Where(accountID => accountID > 0)
+            .Distinct()
+            .Where(servedAccountIDs.Contains);
+
         Dictionary<string, object> response = [];
 
         Dictionary<string, string> clientCookies = [];
         Dictionary<string, string> gameCookies = [];
 
-        EndPoint endPoint = DistributedCache.Multiplexer.GetEndPoints().Single();
-        IServer distributedCacheServer = DistributedCache.Multiplexer.GetServer(endPoint);
-
-        Dictionary<string, string> accountNameToCookie = [];
-
-        // Build A Reverse Map Of Account Name → Session Cookie By Scanning All Active Session Cookies
-        foreach (RedisKey key in distributedCacheServer.Keys(pattern: "ACCOUNT-SESSION-COOKIE:*"))
+        foreach (int accountID in accountIDs)
         {
-            RedisValue cachedValue = await DistributedCache.StringGetAsync(key);
+            string? clientCookie = await DistributedCache.GetLatestSessionCookie(accountID);
+            string? gameCookie = await DistributedCache.GetGameCookie(accountID);
 
-            if (cachedValue.IsNullOrEmpty is false)
-            {
-                Match match = AccountSessionCookieKeyPattern().Match(key.ToString());
-
-                if (match.Success)
-                    accountNameToCookie[cachedValue.ToString()] = match.Groups[1].Value;
-            }
-        }
-
-        // The Match Server ("CGameServer::GetAccountAuth") Posts The Account IDs As "aids[]" In The Request Body, While This Reads "aids[N]" From The Query String, So Real Match Servers Always Receive Empty Lists
-        // Fixing This Parsing Alone Would Make The Match Server Kick Or Terminate Every Player, Because The "game_cookie" Which "c_conn" Returns Differs From The Cookie Returned In "aids2gcookie", So Both Must Change Together, And Only Deliberately
-        foreach (string key in Request.Query.Keys.Where(key => AccountIDsQueryParameterPattern().IsMatch(key)))
-        {
-            string? accountIDValue = Request.Query[key];
-
-            if (string.IsNullOrWhiteSpace(accountIDValue))
+            // The Match Server Removes A Listed Player Whose Cookie Is Empty, While It Leaves Alone An Account Which Is Not Listed, So An Account Lacking Either Cookie Is Left Out Of Both Lists
+            if (clientCookie is null || gameCookie is null)
                 continue;
 
-            if (int.TryParse(accountIDValue, out int accountID) is false || accountID is 0)
-                continue;
-
-            Account? account = await MerrickContext.Accounts
-                .SingleOrDefaultAsync(account => account.ID == accountID);
-
-            if (account is null)
-                continue;
-
-            if (accountNameToCookie.TryGetValue(account.Name, out string? cookie) is false)
-                continue;
-
-            clientCookies[accountID.ToString()] = cookie;
-            gameCookies[accountID.ToString()] = cookie;
+            // The Match Server Pairs Both Lists By Position Rather Than By Account ID, So Both Hold The Same Accounts In The Same Order
+            clientCookies.Add(accountID.ToString(), clientCookie);
+            gameCookies.Add(accountID.ToString(), gameCookie);
         }
 
         response["aids2cookie"] = clientCookies;
@@ -139,12 +121,4 @@ public partial class ServerRequesterController
 
         return Ok(PhpSerialization.Serialize(response));
     }
-
-    // Matches The Key Format: ACCOUNT-SESSION-COOKIE:["{cookie}"]
-    [GeneratedRegex(@"^ACCOUNT-SESSION-COOKIE:\[""(.+)""\]$")]
-    private static partial Regex AccountSessionCookieKeyPattern();
-
-    // Matches The Query Parameter Format: aids[{index}]
-    [GeneratedRegex(@"^aids\[\d+\]$")]
-    private static partial Regex AccountIDsQueryParameterPattern();
 }

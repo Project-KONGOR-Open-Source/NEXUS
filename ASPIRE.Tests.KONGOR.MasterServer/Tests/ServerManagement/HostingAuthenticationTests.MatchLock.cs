@@ -516,6 +516,330 @@ public sealed partial class HostingAuthenticationTests
         await Assert.That(await distributedCache.GetGameCookie(accountID)).IsEqualTo((string) (await DeserialisePHPResponse(response))["game_cookie"]);
     }
 
+    [Test]
+    public async Task Account_IDs_To_Cookie_Answers_With_The_Latest_Session_Cookie_And_The_Game_Cookie_Of_Each_Served_Account()
+    {
+        await InitialiseIn("Development");
+
+        (string session, int _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        IDictionary<object, object> body = await DeserialisePHPResponse(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        await Assert.That((string) ((IDictionary<object, object>) body["aids2cookie"])[accountID.ToString()]).IsEqualTo(cookie);
+        await Assert.That((string) ((IDictionary<object, object>) body["aids2gcookie"])[accountID.ToString()]).IsEqualTo(gameCookie);
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_Lists_Both_Cookies_In_The_Same_Account_Order()
+    {
+        await InitialiseIn("Development");
+
+        await CreateSubAccount(NonHostAccountName, NonHostSubAccountName);
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(session, await CreateClientSessionCookie(NonHostAccountName)), NonHostAccountName);
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(session, await CreateClientSessionCookie(NonHostSubAccountName)), NonHostSubAccountName);
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, await GetAccountID(NonHostSubAccountName), await GetAccountID(NonHostAccountName)));
+
+        // The Match Server Pairs Each Session Cookie With The Game Cookie At The Same Position, Rather Than With The Game Cookie Of The Same Account
+        using (Assert.Multiple())
+        {
+            await Assert.That(sessionCookies.Count).IsEqualTo(2);
+            await Assert.That(gameCookies.Keys).IsEquivalentTo(sessionCookies.Keys, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_Omits_Accounts_The_Asking_Server_Never_Served()
+    {
+        await InitialiseIn("Development");
+
+        (string askingSession, _) = await RegisterMatchServer(1);
+        (string servingSession, _) = await RegisterMatchServer(2);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(servingSession, cookie), NonHostAccountName);
+
+        (IDictionary<object, object> askingSessionCookies, IDictionary<object, object> askingGameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(askingSession, accountID));
+
+        (IDictionary<object, object> servingSessionCookies, _) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(servingSession, accountID));
+
+        // The Match Server Which Served The Account Is Answered, So That The Other Is Answered Nothing Only Because It Never Served The Account
+        using (Assert.Multiple())
+        {
+            await Assert.That(askingSessionCookies.Count).IsEqualTo(0);
+            await Assert.That(askingGameCookies.Count).IsEqualTo(0);
+            await Assert.That((string) servingSessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_Omits_Accounts_Without_A_Latest_Session_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(session, cookie), NonHostAccountName);
+
+        // The Latest Session Cookie Has Expired, Or Was Never Recorded, As For A Login From Before It Was Recorded
+        await webApplicationFactory.Services.GetRequiredService<IDatabase>().KeyDeleteAsync(DistributedCacheExtensions.ConstructAccountLatestSessionCookieKey(accountID));
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        // The Match Server Removes A Listed Player Whose Cookie Is Empty, While It Leaves Alone An Account Which Is Not Listed
+        using (Assert.Multiple())
+        {
+            await Assert.That(sessionCookies.Count).IsEqualTo(0);
+            await Assert.That(gameCookies.Count).IsEqualTo(0);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_Omits_Accounts_Without_A_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(session, cookie), NonHostAccountName);
+
+        // The Game Cookie Has Expired During A Long Match Without A Reconnect
+        await webApplicationFactory.Services.GetRequiredService<IDatabase>().KeyDeleteAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID));
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        // The Match Server Removes A Listed Player Whose Cookie Is Empty, While It Leaves Alone An Account Which Is Not Listed
+        using (Assert.Multiple())
+        {
+            await Assert.That(sessionCookies.Count).IsEqualTo(0);
+            await Assert.That(gameCookies.Count).IsEqualTo(0);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_After_A_Reconnect_Returns_The_Cookies_The_Reconnect_Used()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(session, cookie), NonHostAccountName);
+
+        // The Match Server Holds The Cookies Of Each Player's Latest Client Connection, So Answering With Those Never Removes A Reconnecting Player
+        string ownServerReconnectGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        (IDictionary<object, object> ownServerReconnectSessionCookies, IDictionary<object, object> ownServerReconnectGameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        // The Match Server May Be The One Whose Session The Master Server Has Lost
+        string unrecognisedSessionReconnectGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(Guid.CreateVersion7().ToString(), cookie)))["game_cookie"];
+
+        (IDictionary<object, object> unrecognisedSessionReconnectSessionCookies, IDictionary<object, object> unrecognisedSessionReconnectGameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That((string) ownServerReconnectSessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+            await Assert.That((string) ownServerReconnectGameCookies[accountID.ToString()]).IsEqualTo(ownServerReconnectGameCookie);
+            await Assert.That((string) unrecognisedSessionReconnectSessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+            await Assert.That((string) unrecognisedSessionReconnectGameCookies[accountID.ToString()]).IsEqualTo(unrecognisedSessionReconnectGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_With_A_Renewed_Session_Still_Answers()
+    {
+        await InitialiseIn("Development");
+
+        (string expiredSession, int serverID) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(expiredSession, cookie)))["game_cookie"];
+
+        // The Match Server Renews Its Session While Its Match Is In Progress
+        (string renewedSession, int renewedServerID) = await RegisterMatchServer(1);
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(renewedSession, accountID));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(renewedSession).IsNotEqualTo(expiredSession);
+            await Assert.That(renewedServerID).IsEqualTo(serverID);
+            await Assert.That((string) sessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+            await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(gameCookie);
+        }
+    }
+
+    [Test]
+    [NotInParallel(DistributedCacheExtensions.MatchLockRefusalChannel)]
+    public async Task Account_IDs_To_Cookie_After_A_Refused_Connection_Elsewhere_Returns_The_Original_Game_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string lockedSession, int lockedServerID) = await RegisterMatchServer(1);
+        (string otherSession, _) = await RegisterMatchServer(2);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string lockedGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, cookie)))["game_cookie"];
+
+        await LockAccount(NonHostAccountName, lockedServerID);
+
+        // The Player Leaves Their Match In Progress And Tries To Join Another Game
+        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+
+        (IDictionary<object, object> lockedSessionCookies, IDictionary<object, object> lockedGameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(lockedSession, accountID));
+
+        (IDictionary<object, object> otherSessionCookies, IDictionary<object, object> otherGameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(otherSession, accountID));
+
+        // A Refused Attempt Never Makes The Locked Match Server Remove The Player, So That They Can Still Reconnect To Their Match
+        using (Assert.Multiple())
+        {
+            await Assert.That((string) lockedSessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+            await Assert.That((string) lockedGameCookies[accountID.ToString()]).IsEqualTo(lockedGameCookie);
+            await Assert.That(otherSessionCookies.Count).IsEqualTo(0);
+            await Assert.That(otherGameCookies.Count).IsEqualTo(0);
+        }
+    }
+
+    [Test]
+    public async Task After_A_Lift_Joining_Another_Game_Reports_The_New_Game_Cookie_To_The_Original_Server()
+    {
+        await InitialiseIn("Development");
+
+        (string originalSession, int originalServerID) = await RegisterMatchServer(1);
+        (string otherSession, _) = await RegisterMatchServer(2);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string originalGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(originalSession, cookie)))["game_cookie"];
+
+        MatchLock matchLock = await LockAccount(NonHostAccountName, originalServerID);
+
+        // Every Lift Removes The Lock, Whatever Lifts It
+        await Assert.That(await webApplicationFactory.Services.GetRequiredService<IDatabase>().RemoveMatchLock(matchLock.UserID, matchLock.MatchID)).IsTrue();
+
+        string otherGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(otherSession, cookie)))["game_cookie"];
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(originalSession, accountID));
+
+        // The Original Match Server Holds The Original Game Cookie, So It Removes The Player From The Match They Left, Which Lets Their Team Share Their Gold And Use Or Sell Their Items
+        using (Assert.Multiple())
+        {
+            await Assert.That(otherGameCookie).IsNotEqualTo(originalGameCookie);
+            await Assert.That((string) sessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+            await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(otherGameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_After_A_Login_Elsewhere_Returns_The_New_Session_Cookie()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string firstCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, firstCookie)))["game_cookie"];
+
+        // The Player Logs In On Another Machine
+        string secondCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(session, accountID));
+
+        // The Match Server Holds The First Session Cookie, So It Kicks The First Machine's Connection As A Duplicate Login, While The Unchanged Game Cookie Keeps The Player In Their Match
+        using (Assert.Multiple())
+        {
+            await Assert.That(secondCookie).IsNotEqualTo(firstCookie);
+            await Assert.That((string) sessionCookies[accountID.ToString()]).IsEqualTo(secondCookie);
+            await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(gameCookie);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_Ignores_Account_IDs_In_The_Query_String()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        await AssertClientConnectionReturnsTheAccount(await ConnectClient(session, cookie), NonHostAccountName);
+
+        HttpResponseMessage response = await RequestAccountCookies(session, await GetAccountID(NonHostAccountName));
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(response);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(sessionCookies.Count).IsEqualTo(0);
+            await Assert.That(gameCookies.Count).IsEqualTo(0);
+        }
+    }
+
+    [Test]
+    public async Task Account_IDs_To_Cookie_Ignores_Duplicate_Non_Positive_And_Non_Integer_Account_IDs()
+    {
+        await InitialiseIn("Development");
+
+        (string session, _) = await RegisterMatchServer(1);
+
+        string cookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, cookie)))["game_cookie"];
+
+        HttpResponseMessage response = await RequestAccountCookiesInTheRequestBody(session, "ACCOUNT", "1.5", string.Empty, "0", "-1", "12345678901", accountID.ToString(), accountID.ToString());
+
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        (IDictionary<object, object> sessionCookies, IDictionary<object, object> gameCookies) = await ReadAccountCookies(response);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(sessionCookies.Count).IsEqualTo(1);
+            await Assert.That(gameCookies.Count).IsEqualTo(1);
+            await Assert.That((string) sessionCookies[accountID.ToString()]).IsEqualTo(cookie);
+            await Assert.That((string) gameCookies[accountID.ToString()]).IsEqualTo(gameCookie);
+        }
+    }
+
     /// <summary>
     ///     Registers the dedicated host's match server manager and its match server with the given instance, and returns the match server's session cookie and server ID.
     ///     Registering the same instance again renews its session and keeps its server ID, as a match server does when it authenticates again.
@@ -599,6 +923,20 @@ public sealed partial class HostingAuthenticationTests
             await Assert.That(body).DoesNotContain("auth_failure");
             await Assert.That(body).DoesNotContain("Invalid cookie.");
         }
+    }
+
+    /// <summary>
+    ///     Reads the session cookies ("aids2cookie") and the game cookies ("aids2gcookie") of a reply to the duplicate session check, each keyed by account ID, in the order of the reply.
+    ///     An empty list is deserialised as an empty sequential array rather than as a dictionary, so it is read as an empty dictionary.
+    /// </summary>
+    private static async Task<(IDictionary<object, object> SessionCookies, IDictionary<object, object> GameCookies)> ReadAccountCookies(HttpResponseMessage response)
+    {
+        IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+        return (ReadAccountCookieList(body["aids2cookie"]), ReadAccountCookieList(body["aids2gcookie"]));
+
+        static IDictionary<object, object> ReadAccountCookieList(object list)
+            => list is ICollection { Count: 0 } ? new Dictionary<object, object>() : (IDictionary<object, object>) list;
     }
 
     /// <summary>
