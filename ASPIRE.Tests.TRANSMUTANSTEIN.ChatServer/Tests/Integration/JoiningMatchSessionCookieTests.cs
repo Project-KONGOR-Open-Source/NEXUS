@@ -270,17 +270,11 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
     }
 
     /// <summary>
-    ///     Deletes the game cookies of the given accounts, and verifies through the master server's own reader that none is left.
-    ///     The master server keeps the construction of the key internal to itself, so the key is built here, and the verification makes a change to it fail every test rather than leave game cookies behind unnoticed.
+    ///     Deletes the game cookies of the given accounts.
     /// </summary>
     private static async Task RemoveGameCookies(IDatabase distributedCache, params int[] accountIDs)
     {
         foreach (int accountID in accountIDs)
-        {
-            await distributedCache.KeyDeleteAsync($@"ACCOUNT-GAME-COOKIE:[""{accountID}""]");
-
-            if (await distributedCache.GetStoredGameCookie(accountID) is not null)
-                throw new InvalidOperationException($@"The Game Cookie Of Account ID ""{accountID}"" Is Still Stored After Its Removal, So The Key Under Which It Is Stored Has Changed");
-        }
+            await distributedCache.KeyDeleteAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID));
     }
 }
