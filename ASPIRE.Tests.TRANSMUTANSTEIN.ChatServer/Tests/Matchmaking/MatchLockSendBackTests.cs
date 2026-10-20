@@ -357,9 +357,42 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     }
 
     [Test]
+    public async Task A_Match_Server_Retry_Of_A_Refused_Attempt_Does_Not_Repeat_The_Notice()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        MatchLockService matchLockService = host.Services.GetRequiredService<MatchLockService>();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        bool firstRefused = await matchLockService.Enforce(session);
+
+        // The Match Server Asks Again About A Refused Client Connection At Its Authentication Request Interval, Which Belongs To The Same Attempt To Join Another Game
+        await Task.Delay(TimeSpan.FromMilliseconds(MatchServerChatSession.AuthenticationRequestIntervalMilliseconds));
+
+        bool retryRefused = await matchLockService.Enforce(session);
+
+        (List<string> noticeMessages, _) = await ChatTestProtocol.ReadSendBackFrames(client.GetStream(), QuietPeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(firstRefused).IsTrue();
+            await Assert.That(retryRefused).IsTrue();
+            await Assert.That(noticeMessages.Count).IsEqualTo(1);
+        }
+    }
+
+    [Test]
     [Arguments(true)]
     [Arguments(false)]
-    public async Task An_Attempt_After_The_Resend_Interval_Gets_The_Notice_Again(bool slotAccount)
+    public async Task An_Attempt_After_The_Notice_Repeat_Interval_Gets_The_Notice_Again(bool slotAccount)
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
@@ -379,7 +412,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         bool firstRefused = await matchLockService.Enforce(session);
 
-        await Task.Delay(MatchLockService.ReturnResendInterval + TimeSpan.FromSeconds(1));
+        await Task.Delay(MatchLockService.NoticeRepeatInterval + TimeSpan.FromSeconds(1));
 
         bool secondRefused = await matchLockService.Enforce(session);
 
@@ -394,9 +427,9 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
             await Assert.That(noticeMessages.Count).IsEqualTo(2);
             await Assert.That(noticeMessages.All(message => message == expectedMessage)).IsTrue();
 
-            // The One Reminder Loop Sends Its Initial "AUTO_MATCH_CONNECT" And Then One Reminder In This Time, While A Second Loop Would Begin With Another Initial One
+            // The One Reminder Loop Sends Its Initial "AUTO_MATCH_CONNECT" And Then Its Reminders In This Time, While A Second Loop Would Begin With Another Initial One
             await Assert.That(connectRandomIntegers.Count(randomInteger => randomInteger is not -1)).IsEqualTo(slotAccount ? 1 : 0);
-            await Assert.That(connectRandomIntegers.Count(randomInteger => randomInteger is -1)).IsEqualTo(slotAccount ? 1 : 0);
+            await Assert.That(connectRandomIntegers.Any(randomInteger => randomInteger is -1)).IsEqualTo(slotAccount);
         }
     }
 

@@ -29,9 +29,15 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         => $@"""{lockedMemberName}"" is in a match which is still in progress, so your group cannot search for a match until it ends.";
 
     /// <summary>
-    ///     How often a player whose return is pending is reminded to return, which is also how long a verification of the lock is trusted, and how long a refused attempt waits before the player is told why again.
+    ///     How often a player whose return is pending is reminded to return, which is also how long a verification of the lock is trusted.
     /// </summary>
     internal static readonly TimeSpan ReturnResendInterval = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    ///     How long a player whose return is pending waits after a notice before a refused attempt tells them why again, which is as long as the match server keeps retrying the authentication of a refused connection.
+    ///     The match server asks about a refused connection again with every retry, so that one attempt to join another game would otherwise be explained several times.
+    /// </summary>
+    internal static readonly TimeSpan NoticeRepeatInterval = TimeSpan.FromMilliseconds(MatchServerChatSession.AuthenticationRequestTotalTimeoutMilliseconds);
 
     /// <summary>
     ///     The match server's default "svr_AccountAuthInterval", which is how often it checks that the accounts of its players have not logged in elsewhere, and which the chat server does not change.
@@ -120,7 +126,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
     ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed.
-    ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once that interval has passed since the last notice.
+    ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
     public async Task<bool> Enforce(ClientChatSession session)
     {
@@ -454,7 +460,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         => pendingReturn is not null && pendingReturn.MatchID == matchLock.MatchID && pendingReturn.Expires > DateTimeOffset.UtcNow;
 
     /// <summary>
-    ///     Continues a pending return for a further refused attempt, recording the verification when the attempt verified the lock, and telling the player why again only once <see cref="ReturnResendInterval"/> has passed since the last notice.
+    ///     Continues a pending return for a further refused attempt, recording the verification when the attempt verified the lock, and telling the player why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
     private void ContinueReturn(ClientChatSession session, MatchLock matchLock, bool isSlotAccount, MatchLockReturn pendingReturn, bool verified)
     {
@@ -463,7 +469,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (verified)
             pendingReturn.LastVerified = now;
 
-        if (now - pendingReturn.LastNotified < ReturnResendInterval)
+        if (now - pendingReturn.LastNotified < NoticeRepeatInterval)
             return;
 
         pendingReturn.LastNotified = now;
