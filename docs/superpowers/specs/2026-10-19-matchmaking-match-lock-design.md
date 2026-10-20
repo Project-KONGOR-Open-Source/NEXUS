@@ -106,13 +106,13 @@ A trigger first re-checks the lock, as follows:
    - **So read it with the match's phase.** A 0 lifts a lock only when it can only mean that the player was removed or the match is over. A lock must never lift during a pick phase.
    - **Its largest values mean connected.** A player still connected to the match, from any machine, has no termination time (`INVALID_TIME`), so the reply is near the top of its range, while a disconnected player's reply is at most their remaining disconnect allowance. A connected slot cannot be reclaimed until that connection leaves (see "Single Login Per User").
 
-If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897). While the slot is still connected from another machine, the message tells the player to close the game there instead, and `AUTO_MATCH_CONNECT` follows only once the slot is free.
+If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897). While the slot is still connected from another game, the message says so and asks the player to close that game if it is still open, and `AUTO_MATCH_CONNECT` follows only once the slot is free. That other game is most often one that has just crashed or closed on the same machine, which the match server has yet to drop, rather than one still running on another machine.
 
 The client ignores `AUTO_MATCH_CONNECT` while it counts as connected to a server, and it counts connecting and authenticating as connected (`CHost::IsConnected`). So a send-back must reach the client only once it is not on, or joining, any server.
 
 If any check fails, the lock lifts and the attempt proceeds normally.
 
-**When NEXUS cannot confirm,** because the match server does not answer the slot query, the lock lifts so that nobody is sent somewhere that may be dead.
+**When NEXUS cannot confirm,** because the match server does not answer the slot query, the lock lifts so that nobody is sent somewhere that may be dead. The one exception is a player who is waiting for the slot's other connection to leave: nobody has been sent anywhere, so the wait carries on (see "Single Login Per User").
 - **The player who simply waits, or goes back,** is untouched, and can still reconnect to their match.
 - **The player who joins another game has left.** That game gives them a new game cookie, and the old match server's guard removes them at its next account check (the owner's decision), so their team gets the leaver benefits straight away.
 - **It is logged as an error,** once per server, naming the address NEXUS tried. If NEXUS could not reach match servers at all, the feature would otherwise quietly enforce nothing.
@@ -194,9 +194,10 @@ The owner settled what NEXUS does when one account, or one user, is live on two 
   - The game cookie is unchanged, so a player who joins another game is still removed.
 - **The send-back waits for the other machine.**
   - The slot query tells "still connected" apart from "disconnected with time remaining" (see "Sending a player back").
-  - While the slot account is connected from another machine, the player is told to close the game there, no `AUTO_MATCH_CONNECT` is sent, and the slot is checked again at every reminder. The moment it turns disconnected, the player is sent back.
-  - A player is told why once per attempt, never again while waiting.
-  - The wait is bounded, by a constant in `MatchLockService`, so that nobody is pulled into the match long after being told; the player's next attempt to play waits again.
+  - While the slot account is connected from another game, the player is told so, and asked to close that game if it is still open. No `AUTO_MATCH_CONNECT` is sent, and the slot is checked again at every reminder. The moment it turns disconnected, the player is sent back.
+  - A player is told why once per attempt, and is told again while waiting only if the wait runs out.
+  - An unanswered slot query never ends a wait, because nobody has been sent anywhere yet. A match server that is gone, or that no longer hosts the match, still lifts the lock.
+  - The wait is bounded, by a constant in `MatchLockService`, so that nobody is pulled into the match long after being told. When it runs out, the player gets a short notice, and the player's next attempt to play waits again, or sends them back if the slot is free by then.
 - **The old machine is told why.** Before the chat server rejects the old machine's chat session, it sends a notice that the account has logged in elsewhere, so the player does not read only the client's account-sharing text, which talks about sharing linked sub-accounts and contacting support. The client handles the frames in order, and shows the notice in the same chat panes as that text.
 
 ### What It Costs
@@ -205,13 +206,17 @@ The owner settled what NEXUS does when one account, or one user, is live on two 
 - A machine whose login was retired plays on, but if it drops, it cannot reconnect without logging in again, which retires the other machine's login in turn. Retail behaved the same.
 - NEXUS's `aids2cookie` answer differs from retail's, as NEXUS already differs by switching on account-based reconnect.
 - An in-place re-login leaves a short window. The client pushes its new login cookie to its match server on its next frame (HON `source/K2.Engine/c_hostclient.cpp`, `CHostClient::UpdateCookie`), while NEXUS follows only once the client's chat connection is accepted again and reports joining that match server (`source/K2.Engine/c_chatmanager.cpp`, `CChatManager::HandleAuthAccepted`). A duplicate-session check inside that window can still kick the connection, so "never" here means that NEXUS never answers a login cookie other than the one it knows the client holds.
+- A chat session that is accepted while its client is only connecting to the locked match server reports joining it, because `CChatManager::HandleAuthAccepted` reports the game whenever `Host.IsConnected()` holds, which includes connecting (HON `source/K2.Engine/c_chatmanager.cpp`). Its refresh then records that client's login cookie, so at the match server's next account check the machine that actually holds the slot is kicked as a duplicate login: one strike. The likeliest trigger is clicking the old machine's reconnect prompt, right after logging in on it, during a second switch while the other machine still holds the slot.
+- A `c_conn` through a match server session that NEXUS does not recognise is taken for a reconnect to the stored match server, so it re-records the login cookie it posted for that server (see "The duplicate-session guard"). If the user's other machine is in fact still on the stored match server, that server's next account check kicks it: one strike.
+- Multi-boxing costs strikes. A refresh covers every account of the user whose record is for the joined match server, so two of the user's accounts in one match, or a sub-account spectating its main account's match, make each refresh a strike for the other account, whose client is then answered a login cookie that it does not hold. A second strike in that match bans that account from it until the match ends. One login per user exists to stop multi-boxing, so this is accepted.
+- An unanswered slot query no longer ends a wait for the other game to leave. So a match server that dies without a word but stays registered holds a waiting player until it is found stale, or until the wait runs out. A wait still ends after `ConnectedElsewhereWait` in `MatchLockService`, with a short notice, and the player's next attempt starts afresh.
 
 ### What Changes In The Earlier Text
 
 - Goals 5 and 6, and the Anti-Goals: a login elsewhere never removes a connection, and the new machine waits for the old one to leave.
 - "The Owner's Decisions": a tenth decision points here.
 - "Why per user": a login also retires the user's other logins.
-- "Sending a player back": the reconnect query's largest values mean connected, and a connected slot holds the player back with a different message.
+- "Sending a player back": the reconnect query's largest values mean connected, a connected slot holds the player back with a different message, and an unanswered query does not end that wait.
 - "Reconnecting from another machine": only the newest login passes `c_conn`.
 - "The duplicate-session guard": `aids2cookie` answers the login cookie recorded for each client rather than the account's latest one, and a login elsewhere no longer kicks.
 
