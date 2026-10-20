@@ -245,10 +245,10 @@ public partial class ClientRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        // Each Group Of Guest Or Staff Accounts Shares One User, So Their Logins Retire Only The Earlier Login Of The Same Account, While Any Other Login Also Retires The Logins Of The User's Other Accounts
-        List<int> otherAccountIDs = account.Type is AccountType.Guest or AccountType.Staff
-            ? []
-            : [.. account.User.Accounts.Where(userAccount => userAccount.ID != account.ID).Select(userAccount => userAccount.ID)];
+        // A Login Retires The Earlier Login Of The Same Account, And Also Those Of The User's Other Accounts Unless The Account Stands Alone
+        List<int> otherAccountIDs = SRPAuthenticationHandlers.LoginAffectsOtherAccounts(account.Type)
+            ? [.. account.User.Accounts.Where(userAccount => userAccount.ID != account.ID).Select(userAccount => userAccount.ID)]
+            : [];
 
         List<string> retiredCookies = await DistributedCache.SupersedeSessionCookies(account.ID, account.Name, cookie, otherAccountIDs);
 

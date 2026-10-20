@@ -83,8 +83,8 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         // The Game Client's Text For The Account Sharing Reject Talks About Sharing Linked Sub-Accounts, So A Plain Notice Precedes It
         // The Client Handles Frames In Order And Shows The Notice In The Same Chat Panes, So It Reads Before The Reject
         // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
-        // Ignore Staff And Guest Accounts For Concurrent Connection Checks
-        if (account.Type is not AccountType.Staff and not AccountType.Guest)
+        // An Account Which Stands Alone, As A Guest Or Staff Account Does, Only Disconnects Its Own Existing Session, Below
+        if (SRPAuthenticationHandlers.LoginAffectsOtherAccounts(account.Type))
         {
             List<int> subAccountIDs = [.. account.User.Accounts.Select(subAccount => subAccount.ID)];
 

@@ -134,11 +134,10 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
         try
         {
             // A Client Which Logs In Again During Its Match Pushes The Session Cookie Of Whichever Account It Logged In With To Its Match Server ("CHostClient::UpdateCookie"), So The Match Server May Hold It For Another Account Of The Same User
-            // Every Guest Account Shares One User, As Does Every Staff Account, So Their Other Accounts Belong To Other Players
             // Every Other Account Is Refreshed, Rather Than Only The First Which Was Served, Because A Record Which An Earlier Match On The Same Match Server Left Cannot Be Told Apart From The Record Of The Account In The Match
-            accountIDs = Account.Type is AccountType.Guest or AccountType.Staff
-                ? [Account.ID]
-                : [Account.ID, .. Account.User.Accounts.Select(account => account.ID).Where(accountID => accountID != Account.ID)];
+            accountIDs = SRPAuthenticationHandlers.LoginAffectsOtherAccounts(Account.Type)
+                ? [Account.ID, .. Account.User.Accounts.Select(account => account.ID).Where(accountID => accountID != Account.ID)]
+                : [Account.ID];
         }
 
         catch (Exception exception)
