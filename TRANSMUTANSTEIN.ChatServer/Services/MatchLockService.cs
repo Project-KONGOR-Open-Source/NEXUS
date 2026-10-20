@@ -22,9 +22,10 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal const string InMatchMessage = "You are in a match which is still in progress, so you cannot start another game until it ends.";
 
     /// <summary>
-    ///     The notice to the account which holds the slot in the locked match while it is still connected to the match from another machine, which is sent back only once that connection has left.
+    ///     The notice to the account which holds the slot in the locked match while its slot is still connected to the match, which is sent back only once that connection has left.
+    ///     The connection is most often that of a game which has just crashed or closed on the same machine, and which the match server has yet to drop, rather than a game still running on another machine, so the notice covers both.
     /// </summary>
-    internal const string ConnectedElsewhereMessage = "You are still connected to your match from another computer. Close the game there, and you will be sent back to the match as soon as it has left.";
+    internal const string ConnectedElsewhereMessage = "Your account is still connected to your match from a game which is running or has just closed. Close it if it is still open, and you will be sent back to the match as soon as it has left.";
 
     /// <summary>
     ///     The reply to the reconnect query above which the slot is still connected to the match.
@@ -539,7 +540,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
-    ///     Tells a refused player why, naming the account which holds the slot when it is another account of the same user, and telling the slot account to close the game on another machine while that machine is still connected to the match.
+    ///     Tells a refused player why, naming the account which holds the slot when it is another account of the same user, and telling the slot account to close its other game while that game is still connected to the match.
     /// </summary>
     private void Notify(ClientChatSession session, MatchLock matchLock, bool isSlotAccount, MatchLockVerdict verdict)
     {
@@ -547,7 +548,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         {
             session.SendNotice(MessageSenderName, ConnectedElsewhereMessage);
 
-            logger.LogInformation(@"Telling Account ""{AccountName}"" To Close The Game On Another Machine, Which Is Still Connected To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"", Before It Is Sent Back",
+            logger.LogInformation(@"Telling Account ""{AccountName}"" To Close Its Other Game, Which Is Still Connected To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"", Before It Is Sent Back",
                 session.Account.Name, matchLock.MatchID, matchLock.ServerID);
         }
 
