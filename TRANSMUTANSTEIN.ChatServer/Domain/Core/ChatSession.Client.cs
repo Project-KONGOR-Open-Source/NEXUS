@@ -124,26 +124,40 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
 
     /// <summary>
     ///     Records this session's session cookie as the one which the client holds on the match server, so that the match server's duplicate session check is answered with it, and never kicks the client as a duplicate login.
-    ///     The records which the match server's client connections left for the session's own account and for every other account of the same user are all refreshed, and a failure is logged rather than thrown, so that it never disturbs joining the match.
+    ///     The records which the match server's client connections left for the session's own account and for every other account of the same user are each refreshed independently, and every failure is logged rather than thrown, so that it never stops the other refreshes or disturbs joining the match.
     /// </summary>
     private async Task RefreshMatchServerSessionCookie(IDatabase distributedCacheStore, MatchServer server)
     {
-        // A Client Which Logs In Again During Its Match Pushes The Session Cookie Of Whichever Account It Logged In With To Its Match Server ("CHostClient::UpdateCookie"), So The Match Server May Hold It For Another Account Of The Same User
-        // Every Guest Account Shares One User, As Does Every Staff Account, So Their Other Accounts Belong To Other Players
-        // Every Other Account Is Refreshed, Rather Than Only The First Which Was Served, Because A Record Which An Earlier Match On The Same Match Server Left Cannot Be Told Apart From The Record Of The Account In The Match
-        List<int> accountIDs = Account.Type is AccountType.Guest or AccountType.Staff
-            ? [Account.ID]
-            : [Account.ID, .. Account.User.Accounts.Select(account => account.ID).Where(accountID => accountID != Account.ID)];
+        List<int> accountIDs;
 
         try
         {
-            foreach (int accountID in accountIDs)
-                await distributedCacheStore.RefreshClientSessionCookie(accountID, server.ID, Metadata.SessionCookie);
+            // A Client Which Logs In Again During Its Match Pushes The Session Cookie Of Whichever Account It Logged In With To Its Match Server ("CHostClient::UpdateCookie"), So The Match Server May Hold It For Another Account Of The Same User
+            // Every Guest Account Shares One User, As Does Every Staff Account, So Their Other Accounts Belong To Other Players
+            // Every Other Account Is Refreshed, Rather Than Only The First Which Was Served, Because A Record Which An Earlier Match On The Same Match Server Left Cannot Be Told Apart From The Record Of The Account In The Match
+            accountIDs = Account.Type is AccountType.Guest or AccountType.Staff
+                ? [Account.ID]
+                : [Account.ID, .. Account.User.Accounts.Select(account => account.ID).Where(accountID => accountID != Account.ID)];
         }
 
         catch (Exception exception)
         {
-            Log.Error(exception, @"Failed To Refresh The Session Cookie Of Account ""{AccountName}"" On Match Server ID ""{MatchServerID}""", Account.Name, server.ID);
+            Log.Error(exception, @"Failed To List The Accounts Whose Session Cookies Account ""{AccountName}"" Refreshes On Match Server ID ""{MatchServerID}""", Account.Name, server.ID);
+
+            return;
+        }
+
+        foreach (int accountID in accountIDs)
+        {
+            try
+            {
+                await distributedCacheStore.RefreshClientSessionCookie(accountID, server.ID, Metadata.SessionCookie);
+            }
+
+            catch (Exception exception)
+            {
+                Log.Error(exception, @"Failed To Refresh The Session Cookie Of Account ID ""{RefreshedAccountID}"" For Account ""{AccountName}"" On Match Server ID ""{MatchServerID}""", accountID, Account.Name, server.ID);
+            }
         }
     }
 

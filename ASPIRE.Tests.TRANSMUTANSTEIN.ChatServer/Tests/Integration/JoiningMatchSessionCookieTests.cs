@@ -54,8 +54,7 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
-            await RemoveGameCookies(distributedCache, accountID);
-            await distributedCache.RemoveMatchServerByID(serverID);
+            await RemoveSeededRecords(distributedCache, [serverID], [accountID]);
         }
     }
 
@@ -99,9 +98,7 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
-            await RemoveGameCookies(distributedCache, accountID);
-            await distributedCache.RemoveMatchServerByID(serverID);
-            await distributedCache.RemoveMatchServerByID(otherServerID);
+            await RemoveSeededRecords(distributedCache, [serverID, otherServerID], [accountID]);
         }
     }
 
@@ -148,8 +145,7 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
-            await RemoveGameCookies(distributedCache, mainAccountID, subAccountID);
-            await distributedCache.RemoveMatchServerByID(serverID);
+            await RemoveSeededRecords(distributedCache, [serverID], [mainAccountID, subAccountID]);
         }
     }
 
@@ -195,8 +191,52 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
-            await RemoveGameCookies(distributedCache, sessionAccountID, matchAccountID);
-            await distributedCache.RemoveMatchServerByID(serverID);
+            await RemoveSeededRecords(distributedCache, [serverID], [sessionAccountID, matchAccountID]);
+        }
+    }
+
+    [Test]
+    public async Task A_Failed_Refresh_Of_One_Account_Does_Not_Stop_The_Other_Accounts_Being_Refreshed()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        IDatabase distributedCache = host.Services.GetRequiredService<IDatabase>();
+
+        (_, int sessionAccountID, string sessionAccountName, string sessionAccountCookie) = await ChatTestData.SeedPlayer(host);
+
+        (int matchAccountID, _) = await ChatTestData.SeedSubAccount(host.Services, sessionAccountID);
+
+        (int serverID, string serverAddress) = await SeedMatchServer(host);
+
+        try
+        {
+            // The Session's Own Account, Which Is Refreshed First, Has A Value Of Another Type Under Its Key, So That Reading It Fails With A Distributed Cache Error
+            await distributedCache.SetAddAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(sessionAccountID), "NOT-A-GAME-COOKIE");
+
+            string gameCookie = await distributedCache.IssueGameCookie(matchAccountID, serverID, Guid.CreateVersion7().ToString());
+
+            using TcpClient client = await host.ConnectAndAuthenticateClientAsync(sessionAccountID, sessionAccountName, sessionAccountCookie, RemoteIP);
+
+            ClientChatSession session = Context.ClientChatSessions[sessionAccountName];
+
+            await ChatTestProtocol.WriteFrame(client.GetStream(), ChatTestProtocol.BuildJoiningGame(serverAddress));
+
+            // The Session Names The Match Server Only Once It Has Tried To Refresh The Recorded Session Cookies, So A Failed Refresh Never Stops The Join
+            bool joined = await ChatTestProtocol.WaitUntil(() => session.Metadata.MatchServerConnectedTo?.ID == serverID, JoinTimeout);
+
+            GameCookie? matchAccountRecord = await distributedCache.GetStoredGameCookie(matchAccountID);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(joined).IsTrue();
+                await Assert.That(matchAccountRecord?.SessionCookie).IsEqualTo(sessionAccountCookie);
+                await Assert.That(matchAccountRecord?.Cookie).IsEqualTo(gameCookie);
+            }
+        }
+
+        finally
+        {
+            await RemoveSeededRecords(distributedCache, [serverID], [sessionAccountID, matchAccountID]);
         }
     }
 
@@ -247,8 +287,7 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
 
         finally
         {
-            await RemoveGameCookies(distributedCache, mainAccountID, subAccountID);
-            await distributedCache.RemoveMatchServerByID(serverID);
+            await RemoveSeededRecords(distributedCache, [serverID], [mainAccountID, subAccountID]);
         }
     }
 
@@ -270,11 +309,20 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
     }
 
     /// <summary>
-    ///     Deletes the game cookies of the given accounts.
+    ///     Removes the game cookies of the given accounts and the given match servers, which are removed even when removing a game cookie fails, so that no match server outlives its test.
     /// </summary>
-    private static async Task RemoveGameCookies(IDatabase distributedCache, params int[] accountIDs)
+    private static async Task RemoveSeededRecords(IDatabase distributedCache, IReadOnlyList<int> serverIDs, IReadOnlyList<int> accountIDs)
     {
-        foreach (int accountID in accountIDs)
-            await distributedCache.KeyDeleteAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID));
+        try
+        {
+            foreach (int accountID in accountIDs)
+                await distributedCache.KeyDeleteAsync(DistributedCacheExtensions.ConstructAccountGameCookieKey(accountID));
+        }
+
+        finally
+        {
+            foreach (int serverID in serverIDs)
+                await distributedCache.RemoveMatchServerByID(serverID);
+        }
     }
 }
