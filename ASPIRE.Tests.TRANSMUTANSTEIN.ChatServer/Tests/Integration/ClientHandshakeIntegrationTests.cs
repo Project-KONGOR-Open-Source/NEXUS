@@ -1,3 +1,5 @@
+using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
+
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 
 /// <summary>
@@ -124,6 +126,82 @@ public sealed class ClientHandshakeIntegrationTests(ServiceContainerContext cont
         bool firstWasDisconnected = await ChatTestProtocol.WaitForClose(firstStream, TimeSpan.FromSeconds(10));
 
         await Assert.That(firstWasDisconnected).IsTrue();
+    }
+
+    [Test]
+    public async Task Second_Login_Tells_The_First_Session_Why_Just_Before_Rejecting_It()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        (int accountID, string accountName) = await ChatTestData.SeedAccount(host.Services, AccountType.Normal);
+
+        string cookie = Guid.CreateVersion7().ToString();
+
+        await ChatTestData.SeedClientSessionCookie(host.Services, cookie, accountName);
+
+        string authenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountID, RemoteIP, cookie);
+
+        using TcpClient first = await host.ConnectClientAsync();
+
+        NetworkStream firstStream = first.GetStream();
+
+        await ChatTestProtocol.WriteFrame(firstStream, ChatTestProtocol.BuildClientHandshake(accountID, cookie, RemoteIP, authenticationHash));
+
+        using (CancellationTokenSource firstTimeout = new (TimeSpan.FromSeconds(10)))
+            await Assert.That(await ChatTestProtocol.ReadCommand(firstStream, firstTimeout.Token)).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+
+        using TcpClient second = await host.ConnectClientAsync();
+
+        await ChatTestProtocol.WriteFrame(second.GetStream(), ChatTestProtocol.BuildClientHandshake(accountID, cookie, RemoteIP, authenticationHash));
+
+        List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(firstStream, (ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT, TimeSpan.FromSeconds(10));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(frames.Count).IsGreaterThanOrEqualTo(2);
+            await Assert.That(frames[^1].Command).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+            await Assert.That(frames[^2].Command).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
+            await Assert.That(ChatTestProtocol.ParseNotice(frames[^2].Frame)).IsEqualTo((ClientHandshake.LoggedInElsewhereSenderName, ClientHandshake.LoggedInElsewhereMessage(accountName)));
+        }
+    }
+
+    [Test]
+    public async Task A_Login_On_Another_Account_Of_The_User_Names_That_Account_To_The_First_Session()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        (int mainAccountID, string mainAccountName) = await ChatTestData.SeedAccount(host.Services, AccountType.Normal);
+
+        (int subAccountID, string subAccountName) = await ChatTestData.SeedSubAccount(host.Services, mainAccountID);
+
+        string mainCookie = Guid.CreateVersion7().ToString();
+        string subCookie = Guid.CreateVersion7().ToString();
+
+        await ChatTestData.SeedClientSessionCookie(host.Services, mainCookie, mainAccountName);
+        await ChatTestData.SeedClientSessionCookie(host.Services, subCookie, subAccountName);
+
+        using TcpClient first = await host.ConnectClientAsync();
+
+        NetworkStream firstStream = first.GetStream();
+
+        await ChatTestProtocol.WriteFrame(firstStream, ChatTestProtocol.BuildClientHandshake(mainAccountID, mainCookie, RemoteIP, SRPAuthenticationHandlers.ComputeChatServerCookieHash(mainAccountID, RemoteIP, mainCookie)));
+
+        using (CancellationTokenSource firstTimeout = new (TimeSpan.FromSeconds(10)))
+            await Assert.That(await ChatTestProtocol.ReadCommand(firstStream, firstTimeout.Token)).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+
+        using TcpClient second = await host.ConnectClientAsync();
+
+        await ChatTestProtocol.WriteFrame(second.GetStream(), ChatTestProtocol.BuildClientHandshake(subAccountID, subCookie, RemoteIP, SRPAuthenticationHandlers.ComputeChatServerCookieHash(subAccountID, RemoteIP, subCookie)));
+
+        List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(firstStream, (ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT, TimeSpan.FromSeconds(10));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(frames.Count).IsGreaterThanOrEqualTo(2);
+            await Assert.That(frames[^1].Command).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+            await Assert.That(frames[^2].Command).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
+            await Assert.That(ChatTestProtocol.ParseNotice(frames[^2].Frame)).IsEqualTo((ClientHandshake.LoggedInElsewhereSenderName, ClientHandshake.LoggedInElsewhereMessage(subAccountName)));
+        }
     }
 
     [Test]

@@ -3,6 +3,16 @@
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
 public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ClientChatSession>
 {
+    /// <summary>
+    ///     The sender name which the notice to a session that has just been logged out elsewhere carries.
+    /// </summary>
+    internal const string LoggedInElsewhereSenderName = "Login";
+
+    /// <summary>
+    ///     The notice text for a session that has been logged out because the user logged in elsewhere, naming the account which has just logged in.
+    /// </summary>
+    internal static string LoggedInElsewhereMessage(string accountName) => $@"You have logged in as ""{accountName}"" elsewhere, so you have been logged out here. Any game in progress here carries on.";
+
     public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         ClientHandshakeRequestData requestData = new (buffer);
@@ -70,6 +80,8 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
+        // The Game Client's Text For The Account Sharing Reject Talks About Sharing Linked Sub-Accounts, So A Plain Notice Precedes It
+        // The Client Handles Frames In Order And Shows The Notice In The Same Chat Panes, So It Reads Before The Reject
         // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
         // Ignore Staff And Guest Accounts For Concurrent Connection Checks
         if (account.Type is not AccountType.Staff and not AccountType.Guest)
@@ -87,6 +99,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                         subAccountID, existingSessionMatch.Account.Name);
 
                     await existingSessionMatch
+                        .SendNotice(LoggedInElsewhereSenderName, LoggedInElsewhereMessage(account.Name))
                         .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
                         .Terminate();
                 }
@@ -98,6 +111,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             Log.Information(@"Disconnecting Existing Session For Account ""{AccountName}"" Due To Concurrent Connection Attempt", account.Name);
 
             await existingSession
+                .SendNotice(LoggedInElsewhereSenderName, LoggedInElsewhereMessage(account.Name))
                 .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
                 .Terminate();
         }

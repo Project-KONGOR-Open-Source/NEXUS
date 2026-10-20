@@ -136,6 +136,35 @@ internal static class ChatTestProtocol
     }
 
     /// <summary>
+    ///     Reads every frame in order, up to and including the first one carrying the final command, and returns the command and the frame positioned immediately after the command bytes for each, or those read before the connection closed or the timeout elapsed.
+    /// </summary>
+    public static async Task<List<(ushort Command, ChatBuffer Frame)>> ReadCommandsUntil(NetworkStream stream, ushort finalCommand, TimeSpan timeout)
+    {
+        List<(ushort Command, ChatBuffer Frame)> frames = [];
+
+        using CancellationTokenSource cancellation = new (timeout);
+
+        try
+        {
+            while (true)
+            {
+                ChatBuffer frame = new (await ReadFramePayload(stream, cancellation.Token));
+
+                ushort command = BitConverter.ToUInt16(frame.ReadCommandBytes(), 0);
+
+                frames.Add((command, frame));
+
+                if (command == finalCommand)
+                    return frames;
+            }
+        }
+
+        catch (OperationCanceledException) { return frames; }
+
+        catch (Exception exception) when (exception is IOException or SocketException or InvalidOperationException) { return frames; }
+    }
+
+    /// <summary>
     ///     Reads frames until a notice arrives, returning its sender name and message, or <see langword="null"/> if the connection closed or the timeout elapsed first.
     /// </summary>
     public static async Task<(string SenderName, string Message)?> ReadNotice(NetworkStream stream, TimeSpan timeout)
