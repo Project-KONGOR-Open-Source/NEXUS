@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 
 /// <summary>
-///     Tests for sending a locked player back to their match in progress: the notice which explains why another game is refused, the "AUTO_MATCH_CONNECT" which is sent at once, and the reminders which repeat it until the player reaches the locked match server, the lock lifts, the session ends, or the return window expires.
+///     Tests for sending a locked player back to their match in progress: the notice which explains why another game is refused, the "AUTO_MATCH_CONNECT" which is sent at once, or as soon as another machine which is still connected to the match has left it, and the reminders which repeat it until the player reaches the locked match server, the lock lifts, the session ends, or the return window expires.
 ///     Every test logs in with a fresh session cookie and disposes its locked match, because every chat server host shares the unprefixed distributed cache while each host's database restarts its identifiers, so a lock or a login marker left behind would bind a later test.
 /// </summary>
 [NotInParallel(nameof(ChatServerHost))]
@@ -10,6 +10,11 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     private const string RemoteIP = "127.0.0.1";
 
     private const uint SlotTimeRemaining = 120000;
+
+    /// <summary>
+    ///     The reply for a slot which is still connected to the match, a minute into its game time, as the match server gives while the slot account plays on from another machine.
+    /// </summary>
+    private const uint ConnectedSlotTimeRemaining = uint.MaxValue - 60_000u;
 
     /// <summary>
     ///     The name of an account of the locked user other than the one which logs in, which holds the user's slot in the locked match.
@@ -590,6 +595,196 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
             await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
             await Assert.That(gameSocket.Requests.Count).IsEqualTo(0);
             await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
+        }
+    }
+
+    [Test]
+    public async Task Logging_In_While_Connected_Elsewhere_Tells_The_Player_To_Close_The_Other_Game_And_Sends_Nothing_Back()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2 + QuietPeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.ConnectedElsewhereMessage]);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+            await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn?.SlotConnected).IsTrue();
+            await Assert.That(gameSocket.Requests.Count).IsGreaterThanOrEqualTo(2);
+            await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
+        }
+    }
+
+    [Test]
+    public async Task A_Player_Waiting_For_The_Other_Machine_Is_Sent_Back_As_Soon_As_The_Slot_Is_Free()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+        // The Game Is Closed On The Other Machine, Which Leaves The Slot Disconnected
+        gameSocket.SlotTimeRemaining = SlotTimeRemaining;
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, ReminderTimeout);
+        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? reminder = await ChatTestProtocol.ReadAutoMatchConnect(stream, ReminderTimeout);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.ConnectedElsewhereMessage);
+            await Assert.That(noticeMessages.Count).IsEqualTo(0);
+            await Assert.That(connectRandomIntegers.Count).IsGreaterThanOrEqualTo(1);
+            await Assert.That(connectRandomIntegers.FirstOrDefault(-1)).IsNotEqualTo(-1);
+            await Assert.That(connectRandomIntegers.Skip(1).All(randomInteger => randomInteger is -1)).IsTrue();
+            await Assert.That(reminder?.RandomInteger).IsEqualTo(-1);
+        }
+    }
+
+    [Test]
+    public async Task Sending_Back_Never_Tells_The_Player_To_Close_Another_Computer()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await LogInAndReadSendBack(stream);
+
+        // The Game Client's Own Connection To The Locked Match Server Reads As Connected While It Loads
+        gameSocket.SlotTimeRemaining = ConnectedSlotTimeRemaining;
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2);
+
+        gameSocket.SlotTimeRemaining = SlotTimeRemaining;
+
+        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? reminder = await ChatTestProtocol.ReadAutoMatchConnect(stream, ReminderTimeout);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(noticeMessages.Count).IsEqualTo(0);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+            await Assert.That(reminder?.RandomInteger).IsEqualTo(-1);
+        }
+    }
+
+    [Test]
+    public async Task Repeated_Attempts_While_Connected_Elsewhere_Message_Once()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        MatchLockService matchLockService = host.Services.GetRequiredService<MatchLockService>();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        bool firstRefused = await matchLockService.Enforce(session);
+        bool secondRefused = await matchLockService.Enforce(session);
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(client.GetStream(), MatchLockService.ReturnResendInterval);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(firstRefused).IsTrue();
+            await Assert.That(secondRefused).IsTrue();
+            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.ConnectedElsewhereMessage]);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+        }
+    }
+
+    [Test]
+    public async Task A_Wait_For_The_Other_Machine_Lasts_The_Connected_Elsewhere_Wait_And_A_Send_Back_The_Return_Window()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        DateTimeOffset waitStarted = DateTimeOffset.UtcNow;
+
+        bool refused = await host.Services.GetRequiredService<MatchLockService>().Enforce(session);
+
+        DateTimeOffset waitExpires = session.PendingMatchLockReturn?.Expires ?? DateTimeOffset.MinValue;
+
+        gameSocket.SlotTimeRemaining = SlotTimeRemaining;
+
+        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? connect = await ChatTestProtocol.ReadAutoMatchConnect(stream, ReminderTimeout);
+
+        DateTimeOffset sentBack = DateTimeOffset.UtcNow;
+
+        DateTimeOffset returnExpires = session.PendingMatchLockReturn?.Expires ?? DateTimeOffset.MinValue;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(refused).IsTrue();
+            await Assert.That(waitExpires).IsEqualTo(waitStarted + MatchLockService.ConnectedElsewhereWait).Within(TimeSpan.FromSeconds(5));
+            await Assert.That(connect?.RandomInteger).IsNotEqualTo(-1);
+            await Assert.That(returnExpires).IsGreaterThanOrEqualTo(sentBack + MatchLockService.ReturnWindow - TimeSpan.FromSeconds(1));
+        }
+    }
+
+    [Test]
+    public async Task Another_Account_Is_Named_The_Slot_Account_While_The_Slot_Is_Connected_Elsewhere()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName)]);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
         }
     }
 

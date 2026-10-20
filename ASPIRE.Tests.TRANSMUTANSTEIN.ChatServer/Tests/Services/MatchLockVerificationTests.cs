@@ -11,9 +11,17 @@ public sealed class MatchLockVerificationTests(ServiceContainerContext container
     [Test]
     [Arguments(GamePhase.GAME_PHASE_HERO_SELECT, 1u)]
     [Arguments(GamePhase.GAME_PHASE_ACTIVE, 240000u)]
-    [Arguments(GamePhase.GAME_PHASE_ACTIVE, uint.MaxValue - 1u)]
+    [Arguments(GamePhase.GAME_PHASE_ACTIVE, 14_400_000u)]
+    [Arguments(GamePhase.GAME_PHASE_ACTIVE, MatchLockService.ConnectedSlotThreshold)]
     public async Task A_Slot_With_Time_Remaining_Is_Reclaimable(GamePhase gamePhase, uint slotTimeRemaining)
         => await Assert.That(MatchLockService.EvaluateSlot(gamePhase, slotTimeRemaining)).IsEqualTo(MatchLockVerdict.SendBack);
+
+    [Test]
+    [Arguments(GamePhase.GAME_PHASE_HERO_SELECT, uint.MaxValue)]
+    [Arguments(GamePhase.GAME_PHASE_ACTIVE, uint.MaxValue - 7_200_000u)]
+    [Arguments(GamePhase.GAME_PHASE_ACTIVE, MatchLockService.ConnectedSlotThreshold + 1u)]
+    public async Task A_Connected_Slot_Waits_For_Its_Connection_To_Leave(GamePhase gamePhase, uint slotTimeRemaining)
+        => await Assert.That(MatchLockService.EvaluateSlot(gamePhase, slotTimeRemaining)).IsEqualTo(MatchLockVerdict.WaitForSlot);
 
     [Test]
     [Arguments(GamePhase.GAME_PHASE_HERO_LOADING)]
@@ -153,6 +161,26 @@ public sealed class MatchLockVerificationTests(ServiceContainerContext container
         {
             await Assert.That(verdict).IsEqualTo(MatchLockVerdict.LiftSlotGone);
             await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNull();
+        }
+    }
+
+    [Test]
+    [NotInParallel(nameof(ChatServerHost))]
+    public async Task Verifying_A_Connected_Slot_Keeps_The_Lock()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(uint.MaxValue - 60_000u);
+
+        (int userID, int accountID, string accountName) = await SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket, GamePhase.GAME_PHASE_ACTIVE);
+
+        MatchLockVerdict verdict = await host.Services.GetRequiredService<MatchLockService>().Verify(lockedMatch.Lock);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(verdict).IsEqualTo(MatchLockVerdict.WaitForSlot);
+            await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
         }
     }
 

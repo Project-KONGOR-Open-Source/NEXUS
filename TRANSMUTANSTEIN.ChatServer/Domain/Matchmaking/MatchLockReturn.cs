@@ -1,7 +1,7 @@
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 /// <summary>
-///     A locked player's return to their match in progress, which a chat session holds from the moment the player is sent back until the player reaches the locked match server, the lock lifts, the session ends, or the return expires.
+///     A locked player's return to their match in progress, which a chat session holds from the moment the player is sent back, or told to wait for another machine to leave the match, until the player reaches the locked match server, the lock lifts, the session ends, or the return expires.
 ///     While it is pending, further attempts to play another game are refused without starting another return.
 /// </summary>
 public sealed class MatchLockReturn(int matchID, DateTimeOffset expires)
@@ -13,8 +13,14 @@ public sealed class MatchLockReturn(int matchID, DateTimeOffset expires)
 
     /// <summary>
     ///     The moment after which the player is no longer reminded to return.
+    ///     It is extended when a player who waited for another machine to leave the match is sent back, so that the whole return window follows the moment at which they are sent.
     /// </summary>
-    public DateTimeOffset Expires { get; } = expires;
+    public DateTimeOffset Expires { get; set; } = expires;
+
+    /// <summary>
+    ///     Whether the last verification found the slot account still connected to the match, so that the player waits for that connection to leave rather than being sent back.
+    /// </summary>
+    public bool SlotConnected { get; set; }
 
     /// <summary>
     ///     The moment at which the match server last confirmed that the player can still return.

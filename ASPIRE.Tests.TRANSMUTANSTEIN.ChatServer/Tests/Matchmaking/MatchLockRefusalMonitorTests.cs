@@ -12,6 +12,11 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
     private const uint SlotTimeRemaining = 120000;
 
     /// <summary>
+    ///     The reply for a slot which is still connected to the match, a minute into its game time, as the match server gives while the slot account plays on from another machine.
+    /// </summary>
+    private const uint ConnectedSlotTimeRemaining = uint.MaxValue - 60_000u;
+
+    /// <summary>
     ///     The name of an account of the locked user other than the one which is refused, which holds the user's slot in the locked match.
     /// </summary>
     private const string SlotAccountName = "TEST:SlotAccount";
@@ -90,6 +95,33 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
             await Assert.That(reportedJoiningGame).IsTrue();
             await Assert.That(notice?.Message).IsEqualTo(MatchLockService.SlotAccountMessage);
             await Assert.That(connect?.MatchID).IsEqualTo(lockedMatch.Lock.MatchID);
+        }
+    }
+
+    [Test]
+    public async Task A_Published_Refusal_While_Connected_Elsewhere_Tells_The_Player_To_Close_The_Other_Game()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await PublishRefusal(host, userID, accountName);
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? connect = await ChatTestProtocol.ReadAutoMatchConnect(stream, QuietPeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.ConnectedElsewhereMessage);
+            await Assert.That(connect).IsNull();
         }
     }
 
