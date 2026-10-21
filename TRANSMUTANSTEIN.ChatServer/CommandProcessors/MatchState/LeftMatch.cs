@@ -7,7 +7,7 @@ public class LeftMatch : ISynchronousCommandProcessor<ClientChatSession>
     {
         LeftMatchRequestData requestData = new (buffer);
 
-        session.ReportedJoiningGame = false;
+        session.ReportedGameServerAddress = null;
 
         session.LeaveMatch();
     }

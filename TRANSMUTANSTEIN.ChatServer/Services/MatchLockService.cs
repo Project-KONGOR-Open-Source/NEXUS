@@ -152,15 +152,15 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
     ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed, apart from a short notice which is sent at most once per <see cref="NoticeRepeatInterval"/>.
-    ///     A refused connection proves that the game client is connecting elsewhere, so it is always sent back, whatever the game client reports.
+    ///     A relayed refusal proves that the game client is connecting elsewhere, so it is always sent back, whatever the game client reports.
     ///     While the slot account is still connected to the match from another machine, it is told to close the game there instead, and is sent back only once that connection has left.
     ///     A group member whose group is enforced because another member acted is never given the notice, because the attempt is not its own.
     ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
     /// <param name="session">The chat session of the player whose attempt to play another game is decided.</param>
-    /// <param name="refusedConnection">Whether the attempt is a client connection which the master server refused on another match server, which proves that the game client is connecting elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
+    /// <param name="relayedRefusal">Whether the attempt is a refusal of a client connection on another match server which was relayed to the chat server, which proves that the game client is connecting elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
     /// <param name="groupMember">Whether the player is enforced only because its group is, as when another member asked to queue or the group's loading started the queue, so that a player who is still in its match is not told why an attempt which is not its own was refused.</param>
-    public async Task<bool> Enforce(ClientChatSession session, bool refusedConnection = false, bool groupMember = false)
+    public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool groupMember = false)
     {
         if (IsExempt(session.Account))
             return false;
@@ -191,8 +191,8 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         }
 
         // A Game Client Which Reports Being In A Game Is On A Match Server, Where It Cannot Be Sent Back, And Is Usually A Player Still In The Locked Match, Who Must Not Be Told That They Left It
-        // A Refused Connection Is Never Such A Player, Because A Chat Reconnect Reports Joining A Game While The Client Is Still Connecting
-        if (session.ReportedJoiningGame && refusedConnection is false)
+        // A Relayed Refusal Is Never Such A Player, Because A Chat Reconnect Reports Joining A Game While The Client Is Still Connecting
+        if (session.ReportedJoiningGame && relayedRefusal is false)
         {
             if (groupMember is false && session.TryClaimInMatchNotice(NoticeRepeatInterval))
                 session.SendNotice(MessageSenderName, InMatchMessage);
@@ -307,7 +307,18 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     {
         if (Context.ClientChatSessions.TryGetValue(refusal.AccountName, out ClientChatSession? session))
         {
-            await Enforce(session, refusedConnection: true);
+            // A Client Which Reports Being In Its Own Match Cannot Be Connecting Elsewhere, So The Refusal Is The Late Answer To An Attempt Which It Has Abandoned, Whereas A Client Which Reports Another Match Server May Be In A Chat Reconnect During A Refused Join
+            MatchLock? lockedMatch = await distributedCacheStore.GetMatchLock(refusal.UserID);
+
+            if (lockedMatch is not null && session.ReportedGameServerAddress is { } reportedAddress && await NamesLockedServer(lockedMatch, reportedAddress))
+            {
+                logger.LogDebug(@"Ignoring A Stale Refusal Of Account ""{AccountName}"", Because It Reports Being In Match ID ""{MatchID}""",
+                    refusal.AccountName, lockedMatch.MatchID);
+
+                return;
+            }
+
+            await Enforce(session, relayedRefusal: true);
 
             return;
         }

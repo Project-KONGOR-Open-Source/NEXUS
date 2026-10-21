@@ -39,10 +39,15 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
     public MatchLockReturn? PendingMatchLockReturn => Volatile.Read(ref PendingReturn);
 
     /// <summary>
-    ///     Whether the client has reported joining a game on this chat connection, and has not reported leaving it since.
+    ///     The address of the match server in the latest game which the client reported joining on this chat connection, or <see langword="null"/> before any and after it reported leaving.
     ///     A game client which is already connected to a match server reports joining it as soon as its chat connection is accepted, before it reports logging in.
     /// </summary>
-    public bool ReportedJoiningGame { get; set; }
+    public string? ReportedGameServerAddress { get; set; }
+
+    /// <summary>
+    ///     Whether the client has reported joining a game on this chat connection, and has not reported leaving it since.
+    /// </summary>
+    public bool ReportedJoiningGame => ReportedGameServerAddress is not null;
 
     /// <summary>
     ///     Surfaces the authenticated account's identifier to the base session, so that it can be pushed into the ambient log context while commands are processed.

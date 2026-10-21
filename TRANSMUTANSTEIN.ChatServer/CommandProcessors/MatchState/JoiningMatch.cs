@@ -7,7 +7,7 @@ public class JoiningMatch(IDatabase distributedCacheStore, MatchLockService matc
     {
         JoiningMatchRequestData requestData = new (buffer);
 
-        session.ReportedJoiningGame = true;
+        session.ReportedGameServerAddress = requestData.ServerAddress;
 
         await matchLockService.EndReturnOnJoiningGame(session, requestData.ServerAddress);
 
