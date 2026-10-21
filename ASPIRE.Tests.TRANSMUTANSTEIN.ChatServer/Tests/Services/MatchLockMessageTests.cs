@@ -16,7 +16,8 @@ public sealed class MatchLockMessageTests
             MatchLockService.SlotAccountLoginMessage,
             MatchLockService.OtherAccountMessage("[TAG]Slot"),
             MatchLockService.RefusalLiftedMessage,
-            MatchLockService.GroupMemberLockedMessage("[TAG]Member")
+            MatchLockService.GroupMemberLockedMessage("[TAG]Member"),
+            MatchLockService.InviteeLockedMessage("[TAG]Invitee")
         ];
 
         using (Assert.Multiple())

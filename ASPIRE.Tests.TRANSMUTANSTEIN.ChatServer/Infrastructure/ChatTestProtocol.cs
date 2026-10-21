@@ -479,6 +479,16 @@ internal static class ChatTestProtocol
         return buffer;
     }
 
+    public static ChatBuffer BuildGroupInvite(string inviteReceiverName)
+    {
+        ChatBuffer buffer = new ();
+
+        buffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
+        buffer.WriteString(inviteReceiverName); // Invite Receiver Name
+
+        return buffer;
+    }
+
     public static ChatBuffer BuildGroupJoinQueue()
     {
         ChatBuffer buffer = new ();

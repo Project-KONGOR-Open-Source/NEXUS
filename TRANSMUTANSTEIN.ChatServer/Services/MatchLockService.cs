@@ -56,6 +56,12 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         => $@"""{lockedMemberNameWithClanTag}"" has a match lock, because their match is still in progress, so your group cannot search for a match until it ends.";
 
     /// <summary>
+    ///     The notice to the inviter of a player who cannot join a group, because the player holds a match lock.
+    /// </summary>
+    internal static string InviteeLockedMessage(string inviteeNameWithClanTag)
+        => $@"""{inviteeNameWithClanTag}"" is under a match lock until their match in progress ends, so they cannot join your group.";
+
+    /// <summary>
     ///     How often a player whose return is pending is reminded to return, which is also how long a verification of the lock is trusted.
     /// </summary>
     internal static readonly TimeSpan ReturnResendInterval = TimeSpan.FromSeconds(5);
@@ -266,6 +272,21 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             _ = RemindToReturn(session, matchLock, matchLockReturn);
 
         return true;
+    }
+
+    /// <summary>
+    ///     Decides whether the session's user holds a match lock which still holds, without telling the player anything or sending the player anywhere.
+    ///     A lock which no longer holds is lifted, as at any check.
+    /// </summary>
+    /// <param name="session">The chat session of the player whose lock is read.</param>
+    public async Task<bool> HoldsLock(ClientChatSession session)
+    {
+        if (IsExempt(session.Account))
+            return false;
+
+        MatchLock? matchLock = await distributedCacheStore.GetMatchLock(session.Account.User.ID);
+
+        return matchLock is not null && KeepsLock(await Verify(matchLock));
     }
 
     /// <summary>

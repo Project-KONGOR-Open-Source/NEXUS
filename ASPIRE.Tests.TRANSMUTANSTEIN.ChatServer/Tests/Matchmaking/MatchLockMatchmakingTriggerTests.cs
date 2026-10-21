@@ -154,6 +154,173 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Inviting_A_Locked_Player_Is_Not_Delivered_And_Tells_The_Inviter(bool inviteeStillInTheMatch)
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(inviteeStillInTheMatch ? FakeMatchServerGameSocket.ConnectedSlotTimeRemaining : SlotTimeRemaining);
+
+        (_, int inviterAccountID, string inviterAccountName, string inviterCookie) = await ChatTestData.SeedPlayer(host);
+        (int inviteeUserID, int inviteeAccountID, string inviteeAccountName, string inviteeCookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, inviteeUserID, inviteeAccountID, inviteeAccountName, gameSocket);
+
+        using TcpClient inviterClient = await host.ConnectAndAuthenticateClientAsync(inviterAccountID, inviterAccountName, inviterCookie, RemoteIP);
+        using TcpClient inviteeClient = await host.ConnectAndAuthenticateClientAsync(inviteeAccountID, inviteeAccountName, inviteeCookie, RemoteIP);
+
+        NetworkStream inviterStream = inviterClient.GetStream();
+        NetworkStream inviteeStream = inviteeClient.GetStream();
+
+        ClientChatSession inviteeSession = Context.ClientChatSessions[inviteeAccountName];
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(inviterStream, inviterAccountID);
+
+            // A Player Still In Their Match Reports Joining Its Match Server, And Is Locked All The Same
+            if (inviteeStillInTheMatch)
+            {
+                await ChatTestProtocol.WriteFrame(inviteeStream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
+
+                await ChatTestProtocol.WaitUntil(() => inviteeSession.ReportedJoiningGame, FrameTimeout);
+            }
+
+            await ChatTestProtocol.WriteFrame(inviterStream, ChatTestProtocol.BuildGroupInvite(inviteeAccountName));
+
+            (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(inviterStream, FrameTimeout);
+
+            ChatBuffer? broadcast = await ChatTestProtocol.ReadUntilCommand(inviterStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST, QuietPeriod);
+            ChatBuffer? invite = await ChatTestProtocol.ReadUntilCommand(inviteeStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE, QuietPeriod);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+                await Assert.That(notice?.Message).IsEqualTo(MatchLockService.InviteeLockedMessage(inviteeAccountName));
+                await Assert.That(broadcast).IsNull();
+                await Assert.That(invite).IsNull();
+                await Assert.That(group.Members.Count).IsEqualTo(1);
+                await Assert.That(inviteeSession.PendingMatchLockReturn).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(inviterAccountID);
+        }
+    }
+
+    [Test]
+    public async Task A_Locked_Player_Inviting_Someone_Is_Sent_Back_And_The_Invite_Is_Not_Delivered()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int inviterUserID, int inviterAccountID, string inviterAccountName, string inviterCookie) = await ChatTestData.SeedPlayer(host);
+        (_, int receiverAccountID, string receiverAccountName, string receiverCookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, inviterUserID, inviterAccountID, inviterAccountName, gameSocket);
+
+        using TcpClient inviterClient = await host.ConnectAndAuthenticateClientAsync(inviterAccountID, inviterAccountName, inviterCookie, RemoteIP);
+        using TcpClient receiverClient = await host.ConnectAndAuthenticateClientAsync(receiverAccountID, receiverAccountName, receiverCookie, RemoteIP);
+
+        NetworkStream inviterStream = inviterClient.GetStream();
+
+        try
+        {
+            await CreateGroup(inviterStream, inviterAccountID);
+
+            await ChatTestProtocol.WriteFrame(inviterStream, ChatTestProtocol.BuildGroupInvite(receiverAccountName));
+
+            await AssertSentBack(inviterStream, lockedMatch);
+
+            await Assert.That(await ChatTestProtocol.ReadUntilCommand(receiverClient.GetStream(), ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE, QuietPeriod)).IsNull();
+        }
+
+        finally
+        {
+            DisbandGroups(inviterAccountID, receiverAccountID);
+        }
+    }
+
+    [Test]
+    public async Task Another_Account_Of_A_Locked_User_Inviting_Someone_Is_Told_Why()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int inviterUserID, int inviterAccountID, string inviterAccountName, string inviterCookie) = await ChatTestData.SeedPlayer(host);
+        (_, int receiverAccountID, string receiverAccountName, string receiverCookie) = await ChatTestData.SeedPlayer(host);
+
+        // Another Account Of The Same User Holds The Slot, So This Account Has No Match To Return To
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, inviterUserID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, gameSocket);
+
+        using TcpClient inviterClient = await host.ConnectAndAuthenticateClientAsync(inviterAccountID, inviterAccountName, inviterCookie, RemoteIP);
+        using TcpClient receiverClient = await host.ConnectAndAuthenticateClientAsync(receiverAccountID, receiverAccountName, receiverCookie, RemoteIP);
+
+        NetworkStream inviterStream = inviterClient.GetStream();
+
+        try
+        {
+            await CreateGroup(inviterStream, inviterAccountID);
+
+            await ChatTestProtocol.WriteFrame(inviterStream, ChatTestProtocol.BuildGroupInvite(receiverAccountName));
+
+            List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(inviterStream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
+
+            ChatBuffer? invite = await ChatTestProtocol.ReadUntilCommand(receiverClient.GetStream(), ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE, QuietPeriod);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(MatchLockNotices(frames)).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName)]);
+                await Assert.That(frames.Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN)).IsFalse();
+                await Assert.That(invite).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(inviterAccountID, receiverAccountID);
+        }
+    }
+
+    [Test]
+    public async Task Inviting_A_Player_Who_Is_Not_Locked_Still_Delivers_The_Invite()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        (_, int inviterAccountID, string inviterAccountName, string inviterCookie) = await ChatTestData.SeedPlayer(host);
+        (_, int receiverAccountID, string receiverAccountName, string receiverCookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient inviterClient = await host.ConnectAndAuthenticateClientAsync(inviterAccountID, inviterAccountName, inviterCookie, RemoteIP);
+        using TcpClient receiverClient = await host.ConnectAndAuthenticateClientAsync(receiverAccountID, receiverAccountName, receiverCookie, RemoteIP);
+
+        NetworkStream inviterStream = inviterClient.GetStream();
+
+        try
+        {
+            await CreateGroup(inviterStream, inviterAccountID);
+
+            await ChatTestProtocol.WriteFrame(inviterStream, ChatTestProtocol.BuildGroupInvite(receiverAccountName));
+
+            ChatBuffer? invite = await ChatTestProtocol.ReadUntilCommand(receiverClient.GetStream(), ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE, FrameTimeout);
+
+            (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(inviterStream, QuietPeriod);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(invite).IsNotNull();
+                await Assert.That(notice).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(inviterAccountID, receiverAccountID);
+        }
+    }
+
+    [Test]
     public async Task Queueing_While_Locked_Is_Refused_And_Sends_The_Player_Back()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
