@@ -12,12 +12,13 @@ Players should be on their best behaviour in matchmade matches, knowing that wal
    - **What it blocks:** every match type while it lasts, co-op games against bots included, even though a co-op game creates no lock of its own.
    - **Who is exempt:** guest and staff accounts are never locked.
 2. **Sent back on the next attempt to play.** While locked, each of these sends the player straight back into their match, automatically and without a prompt:
+   - joining another player's matchmaking group, or inviting someone into theirs;
    - searching for a match (joining the queue);
    - asking for the list of public games, or of the match servers on which to create a game;
    - joining any other game: public, custom, or spectating.
 
-   Logging in only tells the player that their match is still in progress, and creating or joining a matchmaking group is never refused (see "Live Test Amendment (2026-10-21)"). A match server lets back in only the exact account that holds the slot. If the person is logged in on one of their other accounts, nothing can send that account back. Every attempt to play is refused instead, with a message naming the account that holds their match. Logging in on that account lets them return.
-3. **No other games while locked.** Every one of the attempts above is refused, with a short message saying why, and no new game of any kind starts.
+   Logging in only tells the player that their match is still in progress, and the solo group which the game client creates by itself is never refused (see "Live Test Amendment (2026-10-21)"). A match server lets back in only the exact account that holds the slot. If the person is logged in on one of their other accounts, nothing can send that account back. Every attempt to play is refused instead, with a message naming the account that holds their match. Logging in on that account lets them return.
+3. **No other games while locked.** Every one of the attempts above is refused, with a short message saying why, and no new game of any kind starts. Nobody can invite a locked player into a group either: the invite is not delivered, and the inviter is told why.
 4. **Never sent somewhere dead.** A player is only ever sent back to a match server that is alive, to a match that is still in progress, and to a slot they can still reclaim. If any of those fails, the lock lifts at once instead.
 5. **Back in from any machine.** Reconnecting works from a different PC or installation, because NEXUS already knows who the player is. While another machine is still connected to the match on the same account, a player who tries to play is told to close the game there, and is sent back as soon as it has left.
 6. **Duplicate sessions handled properly.** The match server's periodic account check (`aids2cookie`) finally works as the engine expects. A connection whose account has joined another game is removed by the match server, without ever disturbing a player reconnecting to their own match. A login elsewhere never removes a connection: each user has one login at a time, and the newest retires the others (see "Single Login Per User").
@@ -57,7 +58,7 @@ These would make the feature a failure even if it technically worked:
 
 1. **What creates a lock:** competitive matchmade matches only (Caldavar, MidWars, and RiftWars). Co-op games against bots create none.
 2. **What a lock does:** a locked player is sent back automatically, and is blocked from every other game until the match ends. That covers every match type (co-op included), public games, custom games, and spectating.
-3. **The trigger:** an attempt to play again, meaning a queue, the server list, or a game join. A login only tells the player, and group create and join are never refused (see "Live Test Amendment (2026-10-21)"). Leaving alone triggers nothing.
+3. **The trigger:** an attempt to play again, meaning joining another group, inviting someone, a queue, the server list, or a game join. A login only tells the player, and the client's own solo group is never refused (see "Live Test Amendment (2026-10-21)"). Leaving alone triggers nothing.
 4. **Whom it covers:** every account the person owns. Guest and staff accounts are exempt.
 5. **Another account:** a locked person on an account other than the one holding the slot is refused, with a message naming that account, because only that account can be sent back.
 6. **Players already removed:** a player whom the match server has already removed is not locked; the leaver percentage applies.
@@ -75,7 +76,7 @@ These would make the feature a failure even if it technically worked:
   - the match ID;
   - the arranged match type (Caldavar or MidWars), as the protocol encodes it;
   - the match server's identity (ID, address, and port);
-  - which of the person's accounts holds the slot, by ID and by name, and that name with its clan tag for the notices which name it (see "Live Test Amendment (2026-10-21)");
+  - which of the person's accounts holds the slot, by ID and by name, and that name with its clan tag for the notices and log lines which name it (see "Live Test Amendment (2026-10-21)");
   - when the lock began, and when it expires at the latest.
 - **When it begins:** when matchmaking announces the match to the player's group (the same moment NEXUS sends the group to the server). By then matchmaking has committed the player.
   - The roster must be captured at announce. Today the roster lives in live groups, and a player who drops from chat vanishes from it: `TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs` removes them from their group (`MatchmakingGroup.cs`).
@@ -106,7 +107,7 @@ A trigger first re-checks the lock, as follows:
    - **So read it with the match's phase.** A 0 lifts a lock only when it can only mean that the player was removed or the match is over. A lock must never lift during a pick phase.
    - **Its largest values mean connected.** A player still connected to the match, from any machine, has no termination time (`INVALID_TIME`), so the reply is near the top of its range, while a disconnected player's reply is at most their remaining disconnect allowance. A connected slot cannot be reclaimed until that connection leaves (see "Single Login Per User").
 
-If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897). While the slot is still connected from another game, the message says so and asks the player to close that game if it is still open, and `AUTO_MATCH_CONNECT` follows only once the slot is free. That other game is most often one that has just crashed or closed on the same machine, which the match server has yet to drop, rather than one still running on another machine. A refused queue is answered first with the client's own matchmaking failure reply, and a refused join with a final `c_conn` reply (see "The triggers").
+If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897). While the slot is still connected from another game, the message says so and asks the player to close that game if it is still open, and `AUTO_MATCH_CONNECT` follows only once the slot is free. That other game is most often one that has just crashed or closed on the same machine, which the match server has yet to drop, rather than one still running on another machine. A refused queue or group join which does not pull the player back at once is answered first with the client's own matchmaking failure reply, and a refused join of a game gets a final `c_conn` reply (see "The triggers").
 
 The client ignores `AUTO_MATCH_CONNECT` while it counts as connected to a server, and it counts connecting and authenticating as connected (`CHost::IsConnected`). So a send-back must reach the client only once it is not on, or joining, any server.
 
@@ -121,14 +122,17 @@ A match server that is still registered, but whose chat connection has dropped w
 
 ### The triggers
 
-A trigger is an attempt to play; a login only tells the player (see "Live Test Amendment (2026-10-21)").
+A trigger is an attempt to play; a login only tells the player. A locked player is only ever alone in a matchmaking group, apart from a premade party which outlives the match it played together (see "Live Test Amendment (2026-10-21)").
 - **Login.** At the login report which follows the chat handshake, once per login cookie, and never while the session reports being in a game, NEXUS verifies the lock and, while it holds, only tells the player: the slot account that it is in a match which is still in progress and that trying to play sends it back, and another account which account holds the match. Nobody is pulled back and no wait starts at login; the client's own reconnect prompt is the way back then, on the machine which played the match.
-- **Group create and group join** are never refused. The client creates a group by itself shortly after login and whenever it returns to the menu, so refusing them pulled players back without any attempt to play.
-- **Queue** (the leader's queue request, and the queue which full loading starts). The queue is refused, and the group never reaches the queue.
-  - Each refused member that is not in a game first gets the client's own matchmaking failure reply (`NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, with the seconds left until the lock's safety limit), then the pull, or, on another account, the notice. Its client leaves the group on that reply, so NEXUS removes it from the group as well.
-  - The rest of the group is unreadied, and sent a group update, which unlocks its members' matchmaking screens, and a leader which was not refused itself is told which member keeps the group from searching.
+- **Group create** is never refused. The client creates a solo group by itself shortly after login and whenever it returns to the menu, so refusing it pulled players back without any attempt to play.
+- **Group join**, including accepting an invite, is refused: the slot account is pulled back, and another account gets the matchmaking failure reply described under "Queue", then the notice.
+- **Invites.** A locked player's invite is refused in the same way, and is not delivered. An invite to a locked player is not delivered either: the inviter is told why, the inviter's group is unchanged, and the invited player is not disturbed.
+- **Queue** (the leader's queue request, and the queue which full loading starts). The queue is refused, and every member of the group is enforced, because a premade party outlives the match it played together.
+  - A slot account which is pulled back at once gets the notice and the pull, and nothing else: the client leaves a solo group by itself when the pull arrives, which unlocks its screen.
+  - Another account, and a slot account which waits for its other connection, first get the client's own matchmaking failure reply (`NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, with the seconds left until the lock's safety limit), which shows the client's "Temporary Ban" popup and unlocks the screen, then the notice. The client leaves its group on that reply, so NEXUS removes the member from its group as well.
+  - A party which outlives its match is unreadied, with a group update, which unlocks its remaining members' screens.
   - A member that is in a game is refused without a word.
-- **The server list** (`client_requester.php?f=server_list`), which the client asks for, with its login cookie, before it lists public games and before it picks a match server to create a public or custom game on. A locked player gets an empty list, and the master server relays the refusal to the chat server, as for `c_conn`.
+- **The server list** (`client_requester.php?f=server_list`), which the client asks for, with its login cookie, before it lists public games, and before it creates a public or custom game, on a match server which the player picks or on one which the client picks by itself. A locked player gets an empty list, and the master server relays the refusal to the chat server, as for `c_conn`.
 - **Joining any other game** (public, custom, or spectating).
   - **Why `c_conn`:** the client connects straight to the game's server, and every match server authenticates each joining player with the master server through `c_conn` (HON `source/K2.Engine/c_clientconnection.cpp`). That is the one place where all game types meet.
   - **The rule:** `c_conn` refuses a locked player when the asking server is registered and is not the locked match's server.
@@ -259,68 +263,75 @@ The feature was played with real game clients on 2026-10-21: match servers start
 5. **A refused group create or queue locks the client's matchmaking screen** until the client's own timeout, over the chat pane which holds the notice.
 6. **The client's reconnect prompt shows a still-connected slot as a countdown of millions of seconds,** because a connected slot's reply is the largest time less the game time. It appears after a crash and relaunch while the dead connection lingers, and on one PC whenever both windows share the reconnect file.
 
-Also: a log line printed a retired session cookie, and the chat server logged the match server's expected authentication error after every lock refusal at error level. Practice games which could not open their port were a same-PC clash with a match server instance's ports, not the lock.
+Also: a log line printed a retired session cookie, which the owner has since ruled acceptable, and the chat server logged the match server's expected authentication error after every lock refusal at error level. Practice games which could not open their port were a same-PC clash with a match server instance's ports, not the lock.
 
 ### The Owner's Redesign
 
-NEXUS pulls a locked player back only when the player really tries to play. A login and the client's own group handling are not attempts to play: the client creates a group by itself shortly after login and whenever it returns to the menu, which is what pulled players back with no attempt of their own, and what locked the matchmaking screen.
+NEXUS pulls a locked player back only when the player really tries to play. A login and the client's own solo group are not attempts to play: the client creates a group by itself shortly after login and whenever it returns to the menu, which is what pulled players back with no attempt of their own, and what locked the matchmaking screen.
+
+A locked player is only ever alone in a matchmaking group: they cannot join another group, they cannot invite anyone into theirs, and nobody can invite them. The one exception is a premade party which outlives the match it played together (see "Rulings").
 
 | Event | Behaviour |
 |---|---|
-| Login | A chat notice, with no pull: the slot account is told that its match is still in progress and that trying to play sends it back, and another account is told which account holds the match. Once per login, and never while the session reports being in a game. The client's own reconnect prompt handles a return at login. |
-| Group create, group join | Never refused. |
-| Queue (the leader's request, and the queue which full loading starts) | Refused with the client's own matchmaking failure reply, then the pull for the slot account, or the notice for another account. |
-| A queue refused because of another member | The locked member as above; the leader, when it is not refused itself, is told which member keeps the group from searching. |
+| Login | A chat notice, with no pull: the slot account is told that a match lock holds it until its match ends and that trying to play sends it back, and another account is told which account holds the match. Once per login, and never while the session reports being in a game. The client's own reconnect prompt handles a return at login. |
+| Leaving the match | Nothing. |
+| Group create (the client's own solo group) | Allowed, silently. |
+| Group join, including accepting an invite | Refused: the pull for the slot account, or, for another account, the client's "Temporary Ban" popup and the notice. |
+| A locked player's invite | Refused in the same way, and not delivered. |
+| An invite to a locked player | Not delivered: the inviter is told why, and the inviter's group is unchanged. |
+| Queue (the leader's request, and the queue which full loading starts) | Refused: the pull for the slot account, or, for another account, the client's "Temporary Ban" popup and the notice. |
 | The server list | An empty list, with the refusal relayed to the chat server, which pulls the slot account or tells another account. |
 | A refused `c_conn` | A final reply, with the refusal relayed as before. |
 
-Leaving alone still triggers nothing.
+For the slot account, every trigger gives the pull (`AUTO_MATCH_CONNECT`) and the chat notice, with no failure reply and no popup. Another account has no match to return to, and its matchmaking screen covers the chat, so a refused queue or group join shows it the client's "Temporary Ban" popup, which also unlocks the screen, and the chat notice says why (owner).
 
 ### Rulings
 
-The controller made these on the owner's redesign, and those marked "planner" were made while planning; where the engine or the client decides, the ruling names the evidence.
-- **The queue's failure reply.** A refused queue is answered with `NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, and the seconds left until the lock's safety limit, in the layout which `CChatManager::HandleTMMJoinFailed` reads (HON `source/K2.Engine/c_chatmanager.cpp`): a byte for the reason, then, for this reason only, a 32-bit number of seconds.
-  - The client leaves its group at once, locally and without telling the chat server (`LeaveTMMGroup`, local only), shows its "Temporary Ban" popup with the countdown (HON-Assets `ui/fe2/newui/main_dialogs_v2.package`, `mm_popup_banned`), and resets its matchmaking interface, which unlocks the screen.
+The owner made the rulings marked "owner", the controller made the others on the owner's redesign, and those marked "planner" were made while planning; where the engine or the client decides, the ruling names the evidence.
+- **The pull resets the slot account's own screen.** On `AUTO_MATCH_CONNECT`, a client which is not on a server connects through `CChatManager::MatchmakingConnect` (HON `source/K2.Engine/c_chatmanager.cpp`), which leaves a solo group locally with the reason "foundmatch", as the live test showed. Its interface hides the server-found popup and resets matchmaking (`TMMReset`, HON-Assets `ui/scripts/newui/main_dialogs_v2.lua`), and leaving the group recomputes the ready status (`CChatManager::UpdateReadyStatus`), which hides the full-screen queue loading panel (`Loading_V2:UpdateQueueLoadingPanel`, HON-Assets `ui/scripts/newui/loading_v2.lua`).
+- **The "Temporary Ban" popup for everyone else** (owner). A refused queue or group join which does not pull its player back at once (another account, or a slot account which waits for its other connection) is answered first with `NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, and the seconds left until the lock's safety limit, because the matchmaking screen covers the chat and a notice alone would go unseen.
+  - The layout is the one which `CChatManager::HandleTMMJoinFailed` reads: a byte for the reason, then, for this reason only, a 32-bit number of seconds. The client leaves its group at once, locally and without telling the chat server (`LeaveTMMGroup`, local only), shows its "Temporary Ban" popup with the countdown (HON-Assets `ui/fe2/newui/main_dialogs_v2.package`, `mm_popup_banned`), and resets its matchmaking interface, which unlocks the screen.
   - The countdown is display only. The ban time is read by nothing but the per-frame display, and the next group update clears it (`CChatManager::HandleTMMPlayerUpdates`), so it can never hold a player back after the lock lifts.
-  - The reply goes first, before the notice and the pull, and on every refused queue, because it is the queue's own answer rather than a notice.
-- **A refused member leaves its group in NEXUS too** (planner). Its client has already left the group on the reply, so NEXUS removes the member without sending it a group update: an update naming it as leaving, or naming its group as disbanded, would make the client leave a second time, with another popup (`HandleTMMPlayerUpdates`).
-- **The leader gets no failure reply** (planner).
-  - Its screen is locked by the full-screen queue loading panel, which the client shows while every member is ready and the group is not queued (HON-Assets `ui/scripts/newui/loading_v2.lua`, `UpdateQueueLoadingPanel`), and which follows every group update (`CChatManager::UpdateReadyStatus`).
-  - So NEXUS unreadies the rest of the group and sends it a group update, as the retail chat server did whenever a group left the queue, which unlocks every remaining member's screen, and the leader is told in chat which member keeps the group from searching.
-  - The failure reply would instead split the leader's client from its own group, and its popup would tell a player who is not locked that they are banned.
-- **A player in a game is refused without a word** (planner), which removes the in-match notice of the earlier rulings. Group create and join are no longer refused, and the client queues only from its menu: its Start button readies the group, and full loading queues it, while no client interface sends the leader's queue request, which only a console command reaches. So a player still in their match makes no refused attempt of their own. What remains is a teammate enforced because another member queued, who by ruling sees nothing, and a console command.
+  - NEXUS removes the member from its group without sending it a group update (planner), because an update naming it as leaving, or naming its group as disbanded, would make the client leave a second time, with another popup.
+  - No other popup fits a match lock better. Every other failure reason shows a text about something else (matchmaking disabled or busy, an option, the version, a full or queued group, statistics, a trial account, an ineligible invitee, or an unknown disconnection), "isleaver" shows only a real leaver's block, the server-not-idle popup asks the player to queue again, and the leave strike warning threatens a punishment. A reset without a popup exists, the group update which answers a cancelled queue, but it would leave the reason unseen.
+  - A party which outlives its match (see below) is unreadied, with a full group update, because a pulled member's client keeps a party on the pull and an in-game member gets no frame, so nothing else would unlock the remaining members' screens.
+- **Premade parties outlive their match** (planner). The matchmaking service keeps a group of more than one member through its match, and the client keeps it too, so a locked player can still sit in a party with the teammates of the locked match. Every member of a queueing group is therefore still enforced. The leader's message naming a locked member is gone (owner).
+- **Invites** (owner). An invite to a locked player is not delivered, the inviter is told why from the match lock, and the inviter's group is unchanged; the invited player is not disturbed. The "not eligible" failure reply cannot be used, because `CChatManager::HandleTMMJoinFailed` always makes the inviter's client leave its own group. Inviting does not lock the inviter's screen, which only marks the player as invited (HON-Assets `ui/scripts/newui/teammaking_v2.lua`), so the chat notice is all the inviter needs. A player still in their match is locked, so the same rule covers them; the client refuses to join a group while it is in a game anyway (`CChatManager::JoinTMMGroup`), so such an invite could never be accepted. An invite to a player in a game which locks nobody is delivered, as retail did.
+- **A player in a game is refused without a word** (planner), which removes the in-match notice of the earlier rulings. The client never joins a group while in a game, and it queues only from its menu: its Start button readies the group, and full loading queues it, while no client interface sends the leader's queue request, which only a console command reaches. What remains is a party teammate who is still in the match, and a console command.
 - **Stale refusals.** A relayed refusal is ignored, with no notice and no return, while the player's chat session last reported joining the locked match server: the client cannot be connecting elsewhere while it reports being in its own match, so the refusal can only be the late answer to an attempt which it has abandoned. A session which last reported another match server, or none, keeps the full send-back, because a chat reconnect during a refused join reports the server which the client is still connecting to. Nothing else can start a return or a wait for a player in their own match: a login starts none, and a queue from a session in a game is refused without one.
 - **The server list.**
   - For a locked account which is not exempt, the master server answers the server list with an empty list, in the shape of the requested list and with a success status, and relays the refusal as `c_conn` does.
-  - The client asks for it, with its login cookie, before it lists public games and before it picks a match server to create a public or custom game on (`CServerList::RequestMasterServerList`, HON `source/K2.Engine/c_hostclient.cpp`).
+  - The client asks for it, with its login cookie, before it lists public games, and before it creates a public or custom game, whether on a match server which the player picks or on one which the client picks by itself (owner, confirmed: "remote_automatic" in `CHost` calls `CHostClient::StartAutoRemoteGame`, which asks for the list of match servers for the region; `CServerList::RequestMasterServerList`, HON `source/K2.Engine/c_hostclient.cpp`).
   - An empty list is safe. The client clears its list, reads the empty `server_list`, and redraws the list (`CServerList::ProcessServerList`), and a game creation then finds no match server and cancels itself (`CHostClient::CheckAutoStartGame`), so no match server is taken into use.
   - The rule which decides whether a lock refuses `c_conn` decides here too, including lifting a lock whose match server is no longer registered, and a lock which cannot be read is served as if there were none.
-- **Spectating does not go through the server list.** The client spectates a player through the chat server's spectate request, then connects straight to that player's match server (`CChatManager::SpectatePlayer` and `CChatManager::JoinGame`), as it does to join a friend's game, and the list of ongoing games exists only behind a console command. Spectating and joining a friend's game are refused at `c_conn`.
+- **Spectating keeps no earlier refusal** (owner). The client spectates a player through the chat server's spectate request, then connects straight to that player's match server (`CChatManager::SpectatePlayer` and `CChatManager::JoinGame`), as it does to join a friend's game, and the list of ongoing games exists only behind a console command. The final `c_conn` rejection refuses both at once.
 - **A final `c_conn` rejection.**
   - The engine retries any reply which it cannot read, and blacklists the login cookie on "Invalid cookie." (`CClientConnection::CheckAuthResult`, HON `source/K2.Engine/c_clientconnection.cpp`).
   - A reply which names the account (`account_id`) but carries no `game_cookie` is final: the engine disconnects the client at once with `DISCONNECT_UNIQUE_LOGIN_FAILED`, which the client shows as a failure to authorise its account. There is no retry, no blacklisting, and no `auth_failure`, so the match server's session is untouched, and the engine ignores the HTTP status of the reply.
   - The engine reports that reply to its manager and to the chat server as a successful authentication before it disconnects, so the chat server no longer logs an error after a lock refusal, and its error level stays for real authentication failures.
 - **A refusal which finds the lock lifted tells the player to try again** (planner). Neither the server list nor the final rejection is retried by the client or the engine, so a player whose lock lifts while their refusal is relayed would otherwise see an empty list, or a failed join, with nothing to explain it.
-- **Clan tags.** Player-facing notices name accounts with their clan tags: the other-account notice, the group member notice, and the logged-in-elsewhere notice. The lock records the slot account's name with its clan tag at announce, and a lock written without it names the bare account. The other-account notice still tells the player to log in with the bare name, which is what the login form takes (planner). Log lines keep bare account names, which are what operators search for.
-- **No log line prints a session cookie.**
+- **Clan tags everywhere** (owner). Notices and log lines name accounts with their clan tags (`Account.NameWithClanTag`), because some names only make sense with their tag. The lock records the slot account's name with its clan tag at announce, and a lock written without it names the bare account. Login takes the bare name only, so the other-account notice tells the player to log in on that account, without asking them to type a name. The refusal relayed by the master server keeps the bare name, which is what finds the chat session.
+- **"Match lock" in player-facing text** (owner). Notices call the restriction a match lock, never a ban, and come from the sender "Match Lock". Each text is defined once.
+- **Cookies may be logged** (owner): only administrators read the logs, and a cookie is sometimes the only identifier there is.
 
 ### What It Costs
 
 - On a machine without the client's reconnect file, nothing returns a player at login: they are told, and are pulled back at their first attempt to play.
-- The "Temporary Ban" popup speaks of a matchmaking ban for leaving a match before it started or failing to connect to one, and its countdown runs to the lock's safety limit, an upper bound, while the chat notice says why.
-- A locked player's Start loads the map before the queue is refused, because group create is no longer refused.
+- The "Temporary Ban" popup speaks of a matchmaking ban for leaving a match before it started or failing to connect to one, and its countdown runs to the lock's safety limit, an upper bound, while the chat notice from the match lock says why.
+- A locked player's Start loads the map before the queue is refused, because the client's own group is not refused.
 - A refused join shows the client's generic failure to authorise its account, and the match server's manager and chat server see that authentication as a success followed by a disconnect.
 - The first pull after a refused join can reach the client before the other match server's disconnect does, which the client ignores, so the player returns up to one reminder interval later.
 - A player whose lock has gone stale is refused once more, and is told to try again.
 - Spectating and joining a friend's game are refused only once the client has connected to that match server.
+- In a premade party which played the locked match together, a member whose own lock has lifted, and a leader whose teammate is still in the match, are refused with only the unreadying, without being told why.
 - A player in a game who sends a queue request from the console is refused without being told why.
 
 ### What Changes In The Earlier Text
 
-- Goals 2 and 5: the attempts which pull a player back, and when a waiting machine is pulled.
+- Goals 2, 3, and 5: the attempts which pull a player back, invites, and when a waiting machine is pulled.
 - "The Owner's Decisions": the third decision, and an eleventh which points here.
-- "The lock": it records the slot account's name with its clan tag.
-- "Sending a player back": the queue's failure reply and the final `c_conn` reply.
+- "The lock": it records the slot account's name with its clan tag, for notices and log lines.
+- "Sending a player back": the failure reply to a refused queue or group join, and the final `c_conn` reply.
 - "The triggers": rewritten.
 - "The duplicate-session guard": a login elsewhere only tells the second machine.
 - "Single Login Per User": the new machine waits for the old one only once it tries to play.
