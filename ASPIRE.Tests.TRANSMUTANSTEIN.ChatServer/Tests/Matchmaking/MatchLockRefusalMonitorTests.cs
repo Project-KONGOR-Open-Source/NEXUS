@@ -1,7 +1,9 @@
+using PhpSerializerNET;
+
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 
 /// <summary>
-///     Tests for relaying the master server's refusals of a locked player's connections to other match servers: the chat server sends the player back through their chat session when they have one, and otherwise verifies their lock anyway, so that a player who was removed from their match while their chat is down is served on their next attempt.
+///     Tests for relaying the master server's refusals of a locked player's server list, and of its connections to other match servers: the chat server sends the player back through their chat session when they have one, and otherwise verifies their lock anyway, so that a player who was removed from their match while their chat is down is served on their next attempt.
 ///     Every test logs in with a fresh session cookie and disposes its locked match, because every chat server host shares the unprefixed distributed cache while each host's database restarts its identifiers, so a lock left behind would bind a later test.
 /// </summary>
 [NotInParallel(nameof(ChatServerHost))]
@@ -54,6 +56,7 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
         {
             await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
             await Assert.That(notice?.Message).IsEqualTo(MatchLockService.SlotAccountMessage);
+            await Assert.That(connect?.ArrangedMatchType).IsEqualTo((byte) lockedMatch.Lock.ArrangedMatchType);
             await Assert.That(connect?.MatchID).IsEqualTo(lockedMatch.Lock.MatchID);
             await Assert.That(connect?.Address).IsEqualTo(lockedMatch.Lock.ServerAddress);
             await Assert.That((ushort?) connect?.Port).IsEqualTo(lockedMatch.Lock.ServerPort);
@@ -363,8 +366,8 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
             bool lifted = await ChatTestData.WaitUntilLockIsGone(host, userID, LockLiftTimeout);
             HttpResponseMessage retried = await masterServer.ConnectClient(otherServerSession, cookie);
 
-            IDictionary<object, object> refusedFields = PhpSerializerNET.PhpSerialization.Deserialize(await refused.Content.ReadAsStringAsync()) as IDictionary<object, object> ?? throw new InvalidOperationException("The Refused Reply Was Not A PHP Array");
-            IDictionary<object, object> retriedFields = PhpSerializerNET.PhpSerialization.Deserialize(await retried.Content.ReadAsStringAsync()) as IDictionary<object, object> ?? throw new InvalidOperationException("The Retried Reply Was Not A PHP Array");
+            IDictionary<object, object> refusedFields = PhpSerialization.Deserialize(await refused.Content.ReadAsStringAsync()) as IDictionary<object, object> ?? throw new InvalidOperationException("The Refused Reply Was Not A PHP Array");
+            IDictionary<object, object> retriedFields = PhpSerialization.Deserialize(await retried.Content.ReadAsStringAsync()) as IDictionary<object, object> ?? throw new InvalidOperationException("The Retried Reply Was Not A PHP Array");
 
             using (Assert.Multiple())
             {

@@ -164,6 +164,9 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
         (_, int inviterAccountID, string inviterAccountName, string inviterCookie) = await ChatTestData.SeedPlayer(host);
         (int inviteeUserID, int inviteeAccountID, string inviteeAccountName, string inviteeCookie) = await ChatTestData.SeedPlayer(host);
 
+        // The Notice Names The Invitee With Its Clan Tag, Which The Chat Session Loads At The Handshake, While The Invite Names The Invitee Without It
+        string inviteeAccountNameWithClanTag = await ChatTestData.SeedClanMember(host.Services, inviteeAccountID);
+
         await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, inviteeUserID, inviteeAccountID, inviteeAccountName, gameSocket);
 
         using TcpClient inviterClient = await host.ConnectAndAuthenticateClientAsync(inviterAccountID, inviterAccountName, inviterCookie, RemoteIP);
@@ -196,7 +199,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             using (Assert.Multiple())
             {
                 await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
-                await Assert.That(notice?.Message).IsEqualTo(MatchLockService.InviteeLockedMessage(inviteeAccountName));
+                await Assert.That(notice?.Message).IsEqualTo(MatchLockService.InviteeLockedMessage(inviteeAccountNameWithClanTag));
                 await Assert.That(broadcast).IsNull();
                 await Assert.That(invite).IsNull();
                 await Assert.That(group.Members.Count).IsEqualTo(1);
@@ -492,6 +495,51 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(secondGroup.QueueStartTime).IsNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(accountID);
+        }
+    }
+
+    [Test]
+    public async Task Queueing_Again_While_The_Return_Continues_Shows_The_Temporary_Ban_And_Leaves_The_Group()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(stream, accountID);
+
+            await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+            MakeReadyToQueue(group);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            await AssertSentBack(stream, lockedMatch);
+
+            // The Player Queues Again Before Reporting Joining The Locked Match Server, So The Return Continues Without Pulling The Player Back At Once, And Only The Failure Reply Releases The Matchmaking Screen
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(failure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
+                await Assert.That(earlier.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(group.QueueStartTime).IsNull();
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
+                await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn?.MatchID).IsEqualTo(lockedMatch.Lock.MatchID);
             }
         }
 
@@ -809,7 +857,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     [Test]
-    public async Task Queueing_A_Party_With_Two_Members_Connected_Elsewhere_Removes_Both_Without_Telling_Them()
+    public async Task Queueing_A_Party_With_Two_Members_Connected_Elsewhere_Removes_Both_And_Sends_Neither_A_Group_Update_About_Its_Own_Removal()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket firstGameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
