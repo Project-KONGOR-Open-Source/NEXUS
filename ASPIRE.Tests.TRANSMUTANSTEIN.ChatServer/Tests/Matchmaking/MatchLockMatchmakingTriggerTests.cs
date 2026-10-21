@@ -384,6 +384,9 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
         (_, int leaderAccountID, string leaderAccountName, string leaderCookie) = await ChatTestData.SeedPlayer(host);
         (int memberUserID, int memberAccountID, string memberAccountName, string memberCookie) = await ChatTestData.SeedPlayer(host);
 
+        // The Notice Names The Locked Member With Its Clan Tag, Which The Chat Session Loads At The Handshake
+        string memberAccountNameWithClanTag = await ChatTestData.SeedClanMember(host.Services, memberAccountID);
+
         using TcpClient leaderClient = await host.ConnectAndAuthenticateClientAsync(leaderAccountID, leaderAccountName, leaderCookie, RemoteIP);
         using TcpClient memberClient = await host.ConnectAndAuthenticateClientAsync(memberAccountID, memberAccountName, memberCookie, RemoteIP);
 
@@ -406,7 +409,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             List<(ushort Command, ChatBuffer Frame)> memberFrames = await ReadThroughSendBack(memberStream);
             List<(ushort Command, ChatBuffer Frame)> leaderFrames = await ChatTestProtocol.ReadCommandsUntil(leaderStream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
 
-            string groupMemberLockedMessage = MatchLockService.GroupMemberLockedMessage(memberAccountName);
+            string groupMemberLockedMessage = MatchLockService.GroupMemberLockedMessage(memberAccountNameWithClanTag);
 
             using (Assert.Multiple())
             {

@@ -76,6 +76,65 @@ public sealed class MatchLockCreationTests(ServiceContainerContext containerCont
 
     [Test]
     [NotInParallel(nameof(ChatServerHost))]
+    public async Task Locking_A_Competitive_Match_Records_The_Clan_Tagged_Name_Of_Each_Player()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        IDatabase distributedCacheStore = host.Services.GetRequiredService<IDatabase>();
+
+        MatchmakingMatch match = BuildCompetitiveMatch(ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL);
+
+        // The First Player Is A Real Account Which Is In A Clan, And The Second Has No Clan
+        (int clanMemberAccountID, _) = await ChatTestData.SeedAccount(host.Services, AccountType.Normal);
+
+        string clanMemberNameWithClanTag = await ChatTestData.SeedClanMember(host.Services, clanMemberAccountID);
+
+        await using (AsyncServiceScope scope = host.Services.CreateAsyncScope())
+        {
+            MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+            match.GetAllPlayers().First().Account = await databaseContext.Accounts
+                .Include(account => account.User)
+                .Include(account => account.Clan)
+                .SingleAsync(account => account.ID == clanMemberAccountID);
+        }
+
+        match.CommitRoster();
+
+        int clanMemberUserID = match.CommittedRoster.First().Account.User.ID;
+
+        int matchID = Random.Shared.Next(1_000_000, int.MaxValue);
+
+        try
+        {
+            await host.Services.GetRequiredService<MatchLockService>().LockMatchRoster(match, matchID, Random.Shared.Next(1_000_000, int.MaxValue), ServerAddress, ServerPort);
+
+            foreach (MatchmakingGroupMember member in match.CommittedRoster)
+            {
+                MatchLock? matchLock = await distributedCacheStore.GetMatchLock(member.Account.User.ID);
+
+                await Assert.That(matchLock).IsNotNull();
+
+                using (Assert.Multiple())
+                {
+                    await Assert.That(matchLock!.AccountName).IsEqualTo(member.Account.Name);
+                    await Assert.That(matchLock.AccountNameWithClanTag).IsEqualTo(member.Account.NameWithClanTag);
+                }
+            }
+
+            MatchLock clanMemberLock = (await distributedCacheStore.GetMatchLock(clanMemberUserID))!;
+
+            await Assert.That(clanMemberLock.AccountNameWithClanTag).IsEqualTo(clanMemberNameWithClanTag);
+        }
+
+        finally
+        {
+            await RemoveLocks(distributedCacheStore, match.CommittedRoster.Select(member => member.Account.User.ID), matchID);
+        }
+    }
+
+    [Test]
+    [NotInParallel(nameof(ChatServerHost))]
     public async Task Locking_A_Co_Op_Match_Locks_Nobody()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

@@ -86,6 +86,26 @@ public sealed class MatchLockStoreTests(KONGORIntegrationWebApplicationFactory w
     }
 
     [Test]
+    public async Task A_Lock_Stored_Without_A_Clan_Tagged_Name_Names_The_Bare_Account()
+    {
+        // A Lock Written Before The Clan-Tagged Name Was Recorded Has No Such Property, And Reconnecting To The Match Depends On It Still Reading
+        JsonObject storedLock = JsonSerializer.SerializeToNode(BuildLock(userID: 7, matchID: 100, serverID: 1, timestampStarted: DateTimeOffset.UtcNow))!.AsObject();
+
+        storedLock.Remove(nameof(MatchLock.AccountNameWithClanTag));
+
+        await DistributedCache.StringSetAsync(DistributedCacheExtensions.ConstructMatchLockKey(7), storedLock.ToJsonString(), MatchLock.Lifetime);
+
+        MatchLock? stored = await DistributedCache.GetMatchLock(7);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(stored).IsNotNull();
+            await Assert.That(stored!.AccountNameWithClanTag).IsNull();
+            await Assert.That(stored.TaggedAccountName).IsEqualTo(stored.AccountName);
+        }
+    }
+
+    [Test]
     public async Task A_Match_Lock_Lifts_At_The_Safety_Limit()
     {
         await DistributedCache.SetMatchLock(BuildLock(userID: 7, matchID: 100, serverID: 1, timestampStarted: DateTimeOffset.UtcNow - MatchLock.Lifetime + TimeSpan.FromSeconds(2)));

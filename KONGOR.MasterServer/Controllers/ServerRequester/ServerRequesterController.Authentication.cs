@@ -345,14 +345,14 @@ public partial class ServerRequesterController
                 if (liftedLock is not null)
                 {
                     Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
-                        liftedLock.AccountName, liftedLock.MatchID, liftedLock.ServerID);
+                        liftedLock.TaggedAccountName, liftedLock.MatchID, liftedLock.ServerID);
                 }
             }
         }
 
         catch (Exception exception)
         {
-            Logger.LogError(exception, @"Serving The Client Connection Of Account ""{AccountName}"" As If It Had No Match Lock, Because Its Match Lock Could Not Be Evaluated", account.Name);
+            Logger.LogError(exception, @"Serving The Client Connection Of Account ""{AccountName}"" As If It Had No Match Lock, Because Its Match Lock Could Not Be Evaluated", account.NameWithClanTag);
         }
 
         if (askingServer is not null && refusingLock is not null)
@@ -365,11 +365,11 @@ public partial class ServerRequesterController
             catch (Exception exception)
             {
                 // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because Serving The Client Would Break The Lock, And The Player's Next Attempt Publishes Its Refusal Anew
-                Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}""", account.Name, askingServer.ID);
+                Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}""", account.NameWithClanTag, askingServer.ID);
             }
 
             Logger.LogInformation(@"Refused The Client Connection Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
-                account.Name, askingServer.ID, refusingLock.MatchID, refusingLock.ServerID);
+                account.NameWithClanTag, askingServer.ID, refusingLock.MatchID, refusingLock.ServerID);
 
             // The Match Server Retries Any Reply Which It Cannot Read While The Client Waits, And Blacklists The Login Cookie On "Invalid cookie.", Whereas A Reply Which Names The Account But Carries No Game Cookie Disconnects The Client At Once ("DISCONNECT_UNIQUE_LOGIN_FAILED"), With No Retry, No Blacklisting, And No Harm To The Match Server's Session ("CClientConnection::CheckAuthResult")
             return Conflict(PhpSerialization.Serialize(new Dictionary<string, object> { { "account_id", account.ID } }));

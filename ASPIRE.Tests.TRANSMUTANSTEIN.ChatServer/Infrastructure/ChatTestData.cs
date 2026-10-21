@@ -84,6 +84,31 @@ internal static class ChatTestData
     }
 
     /// <summary>
+    ///     Puts the account in a new clan with a unique tag of four capital letters, and returns the account's name with that tag, as "Account.NameWithClanTag" writes it.
+    /// </summary>
+    public static async Task<string> SeedClanMember(IServiceProvider services, int accountID)
+    {
+        await using AsyncServiceScope scope = services.CreateAsyncScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        string tag;
+
+        do
+            tag = string.Concat(Enumerable.Range(0, 4).Select(_ => (char) Random.Shared.Next('A', 'Z' + 1)));
+
+        while (await databaseContext.Clans.AnyAsync(candidate => candidate.Tag == tag));
+
+        Account account = await databaseContext.Accounts.SingleAsync(candidate => candidate.ID == accountID);
+
+        account.Clan = new Clan { Name = $"Clan {tag}", Tag = tag };
+
+        await databaseContext.SaveChangesAsync();
+
+        return account.NameWithClanTag;
+    }
+
+    /// <summary>
     ///     Seeds an account of the given type, with a fresh session cookie for its login, and returns the identifier of its user with the account's identifier, name, and session cookie.
     /// </summary>
     public static async Task<(int UserID, int AccountID, string AccountName, string Cookie)> SeedPlayer(ChatServerHost host, AccountType accountType = AccountType.Normal)
@@ -172,9 +197,10 @@ internal static class ChatTestData
     ///     Locks a user to a match in progress on a seeded match server, whose game socket is the given fake and whose registered address is the given one.
     ///     With a chat session, the match server completes its handshake and reports the locked match in the given game phase, as a live match server does.
     ///     Without one, the match server stays registered with no chat session, as it is while the stale host reaper waits out its grace period.
+    ///     The lock records the given clan-tagged name of the account, if any, which a lock stored before clan tags were recorded lacks.
     /// </summary>
     public static async Task<LockedMatch> SeedLockedMatch(ChatServerHost host, int userID, int accountID, string accountName, FakeMatchServerGameSocket gameSocket,
-        GamePhase gamePhase = GamePhase.GAME_PHASE_ACTIVE, string registeredAddress = "127.0.0.1", bool withChatSession = true)
+        GamePhase gamePhase = GamePhase.GAME_PHASE_ACTIVE, string registeredAddress = "127.0.0.1", bool withChatSession = true, string? accountNameWithClanTag = null)
     {
         (int hostAccountID, string hostAccountName) = await SeedAccount(host.Services, AccountType.ServerHost);
 
@@ -202,6 +228,7 @@ internal static class ChatTestData
             UserID = userID,
             AccountID = accountID,
             AccountName = accountName,
+            AccountNameWithClanTag = accountNameWithClanTag,
             MatchID = matchID,
             CorrelationID = Random.Shared.Next(),
             ArrangedMatchType = MatchType.AM_MATCHMAKING,

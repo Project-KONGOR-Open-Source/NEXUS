@@ -9,12 +9,12 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     The sender of the notices which tell a locked player why another game is refused.
     /// </summary>
-    internal const string MessageSenderName = "Matchmaking";
+    internal const string MessageSenderName = "Match Lock";
 
     /// <summary>
     ///     The notice to the account which holds the slot in the locked match, which is sent back to the match.
     /// </summary>
-    internal const string SlotAccountMessage = "You left a match which is still in progress, so you cannot play another game until it ends. Sending you back to it.";
+    internal const string SlotAccountMessage = "You left a match which is still in progress, and a match lock keeps you from playing another game until it ends. Sending you back to it.";
 
     /// <summary>
     ///     The notice to the account which holds the slot in the locked match when it logs in, which is not sent back, because the game client's own reconnect prompt offers the return at login.
@@ -46,8 +46,8 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     The notice to another account of the locked user, which is not sent back, because only the account which holds the slot can return to the match.
     /// </summary>
-    internal static string OtherAccountMessage(string slotAccountName)
-        => $@"Your account ""{slotAccountName}"" is in a match which is still in progress, so you cannot play another game until it ends. Log in as ""{slotAccountName}"" to return to it.";
+    internal static string OtherAccountMessage(string slotAccountNameWithClanTag)
+        => $@"Your account ""{slotAccountNameWithClanTag}"" is in a match which is still in progress, and a match lock keeps you from playing another game until it ends. Log in on that account to return to it.";
 
     /// <summary>
     ///     The notice to every member of a party which cannot search for a match, once for each of its members which holds a match lock.
@@ -110,6 +110,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                 UserID = member.Account.User.ID,
                 AccountID = member.Account.ID,
                 AccountName = member.Account.Name,
+                AccountNameWithClanTag = member.Account.NameWithClanTag,
                 MatchID = matchID,
                 CorrelationID = match.CorrelationID,
                 ArrangedMatchType = match.ArrangedMatchType,
@@ -157,13 +158,13 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
     ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed.
-    ///     A relayed refusal proves that the game client is connecting elsewhere, so it is always sent back, whatever the game client reports.
+    ///     A relayed refusal, of the server list or of a client connection on another match server, proves that the game client is trying to play elsewhere, so it is always sent back, whatever the game client reports.
     ///     While the slot account is still connected to the match from another machine, it is told to close the game there instead, and is sent back only once that connection has left.
     ///     A refused queue or group join which does not send the player back at once is answered with the game client's "Temporary Ban" popup before the notice, and the player leaves its group, because the game client's matchmaking screen covers the chat in which the notice appears.
     ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
     /// <param name="session">The chat session of the player whose attempt to play another game is decided.</param>
-    /// <param name="relayedRefusal">Whether the attempt is a refusal of a client connection on another match server which was relayed to the chat server, which proves that the game client is connecting elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
+    /// <param name="relayedRefusal">Whether the attempt is a refusal of the server list, or of a client connection on another match server, which was relayed to the chat server, which proves that the game client is trying to play elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
     /// <param name="matchmaking">Whether the attempt is a queue or a group join, whose refusal must also release the game client's matchmaking screen.</param>
     public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false)
     {
@@ -200,7 +201,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (session.ReportedJoiningGame && relayedRefusal is false)
         {
             logger.LogDebug(@"Refusing Account ""{AccountName}"" Without Sending It Back To Match ID ""{MatchID}"", Because It Reports Being In A Game",
-                session.Account.Name, matchLock.MatchID);
+                session.Account.NameWithClanTag, matchLock.MatchID);
 
             return true;
         }
@@ -244,7 +245,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             if (session.TryReplacePendingMatchLockReturn(concurrentReturn, matchLockReturn) is false)
             {
                 logger.LogWarning(@"Could Not Start The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because Its Pending Return Kept Changing",
-                    session.Account.Name, matchLock.MatchID);
+                    session.Account.NameWithClanTag, matchLock.MatchID);
 
                 if (matchmaking)
                     RefuseMatchmaking(session, matchLock);
@@ -340,20 +341,20 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             session.SendNotice(MessageSenderName, SlotAccountLoginMessage);
 
             logger.LogInformation(@"Telling Account ""{AccountName}"" At Login That It Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
-                session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+                session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID);
         }
 
         else
         {
-            session.SendNotice(MessageSenderName, OtherAccountMessage(matchLock.AccountName));
+            session.SendNotice(MessageSenderName, OtherAccountMessage(matchLock.TaggedAccountName));
 
             logger.LogInformation(@"Telling Account ""{AccountName}"" At Login That Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"" As Account ""{SlotAccountName}""",
-                session.Account.Name, matchLock.MatchID, matchLock.ServerID, matchLock.AccountName);
+                session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID, matchLock.TaggedAccountName);
         }
     }
 
     /// <summary>
-    ///     Acts on the master server's refusal of a locked user's client connection on a match server other than the locked one, which sends no chat message of its own.
+    ///     Acts on the master server's refusal of a locked user's server list, or of its client connection on a match server other than the locked one, which sends no chat message of its own.
     ///     The refused account is enforced through its chat session when it has one, and otherwise the user's lock is verified anyway, so that a player who was removed from the match while their chat is down is no longer locked when they next try to play.
     /// </summary>
     public async Task HandleRefusal(MatchLockRefusal refusal)
@@ -366,7 +367,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             if (lockedMatch is not null && session.ReportedGameServerAddress is { } reportedAddress && await NamesLockedServer(lockedMatch, reportedAddress))
             {
                 logger.LogDebug(@"Ignoring A Stale Refusal Of Account ""{AccountName}"", Because It Reports Being In Match ID ""{MatchID}""",
-                    refusal.AccountName, lockedMatch.MatchID);
+                    session.Account.NameWithClanTag, lockedMatch.MatchID);
 
                 return;
             }
@@ -376,7 +377,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             {
                 session.SendNotice(MessageSenderName, RefusalLiftedMessage);
 
-                logger.LogInformation(@"Telling Account ""{AccountName}"" To Try Again, Because Its Refused Attempt Found Its Match Lock Lifted", refusal.AccountName);
+                logger.LogInformation(@"Telling Account ""{AccountName}"" To Try Again, Because Its Refused Attempt Found Its Match Lock Lifted", session.Account.NameWithClanTag);
             }
 
             return;
@@ -405,7 +406,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (session.TryReplacePendingMatchLockReturn(pendingReturn, null))
         {
             logger.LogInformation(@"Ending The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because It Is Joining Match Server ID ""{MatchServerID}""",
-                session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+                session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID);
         }
     }
 
@@ -418,7 +419,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (session.PendingMatchLockReturn is { } pendingReturn)
         {
             logger.LogDebug(@"Account ""{AccountName}"" Acknowledged Its Return To Match ID ""{MatchID}"" With Action ""{Action}""",
-                session.Account.Name, pendingReturn.MatchID, action);
+                session.Account.NameWithClanTag, pendingReturn.MatchID, action);
         }
     }
 
@@ -526,13 +527,13 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             if (unconfirmedSlotLifts)
             {
                 logger.LogWarning(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"" Without Confirmation, Because Match Server ID ""{MatchServerID}"" Did Not Answer The Reconnect Query",
-                    matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+                    matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID);
             }
 
             else
             {
                 logger.LogDebug(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"" While Its Return Waits, Although Match Server ID ""{MatchServerID}"" Did Not Answer The Reconnect Query, Because Nobody Has Been Sent There Yet",
-                    matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+                    matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID);
             }
 
             return verdict;
@@ -544,19 +545,19 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (verdict is MatchLockVerdict.WaitForSlot)
         {
             logger.LogDebug(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Reports That The Slot Is Still Connected In Game Phase ""{GamePhase}""",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID, gamePhaseName);
+                matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID, gamePhaseName);
         }
 
         else if (verdict is MatchLockVerdict.SendBack)
         {
             logger.LogDebug(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Reports {SlotTimeRemaining} Milliseconds Remaining On The Slot In Game Phase ""{GamePhase}""",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID, slotTimeRemaining, gamePhaseName);
+                matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID, slotTimeRemaining, gamePhaseName);
         }
 
         else
         {
             logger.LogInformation(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Reports No Time Remaining On The Slot In Game Phase ""{GamePhase}""",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID, gamePhaseName);
+                matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID, gamePhaseName);
         }
 
         return verdict;
@@ -583,19 +584,19 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (registeredServer is null)
         {
             logger.LogInformation(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
+                matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID);
         }
 
         else if (verdict is MatchLockVerdict.LiftServerGone)
         {
             logger.LogInformation(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Has Not Reported Its Status Since ""{LastStatusUpdate}""",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID, serverSessionMetadata?.LastStatusUpdate);
+                matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID, serverSessionMetadata?.LastStatusUpdate);
         }
 
         else
         {
             logger.LogInformation(@"Lifting The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Reports Status ""{Status}"" With Match ID ""{ReportedMatchID}""",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID, serverSessionMetadata?.Status, serverSessionMetadata?.MatchID);
+                matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID, serverSessionMetadata?.Status, serverSessionMetadata?.MatchID);
         }
     }
 
@@ -655,7 +656,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             session.SendNotice(MessageSenderName, ConnectedElsewhereMessage);
 
             logger.LogInformation(@"Telling Account ""{AccountName}"" To Close Its Other Game, Which Is Still Connected To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"", Before It Is Sent Back",
-                session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+                session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID);
         }
 
         else if (isSlotAccount)
@@ -663,15 +664,15 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             session.SendNotice(MessageSenderName, SlotAccountMessage);
 
             logger.LogInformation(@"Sending Account ""{AccountName}"" Back To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"", Which Is Still In Progress",
-                session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+                session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID);
         }
 
         else
         {
-            session.SendNotice(MessageSenderName, OtherAccountMessage(matchLock.AccountName));
+            session.SendNotice(MessageSenderName, OtherAccountMessage(matchLock.TaggedAccountName));
 
             logger.LogInformation(@"Telling Account ""{AccountName}"" That Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"" As Account ""{SlotAccountName}""",
-                session.Account.Name, matchLock.MatchID, matchLock.ServerID, matchLock.AccountName);
+                session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID, matchLock.TaggedAccountName);
         }
     }
 
@@ -706,7 +707,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                     if (sentBack)
                     {
                         logger.LogInformation(@"Ending The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because It Did Not Join Match Server ID ""{MatchServerID}"" Within The Return Window",
-                            session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+                            session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID);
                     }
 
                     else
@@ -715,7 +716,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                         session.SendNotice(MessageSenderName, ConnectedElsewhereWaitExpiredMessage);
 
                         logger.LogInformation(@"Ending The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because Its Slot On Match Server ID ""{MatchServerID}"" Stayed Connected From Another Game",
-                            session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+                            session.Account.NameWithClanTag, matchLock.MatchID, matchLock.ServerID);
                     }
 
                     return;
@@ -755,7 +756,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                     session.SendAutoMatchConnect(currentLock.ArrangedMatchType, currentLock.MatchID, currentLock.ServerAddress, currentLock.ServerPort, reminder: false);
 
                     logger.LogInformation(@"Sending Account ""{AccountName}"" Back To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"", Because Its Slot Is No Longer Connected From Another Machine",
-                        session.Account.Name, currentLock.MatchID, currentLock.ServerID);
+                        session.Account.NameWithClanTag, currentLock.MatchID, currentLock.ServerID);
 
                     continue;
                 }
@@ -763,7 +764,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                 session.SendAutoMatchConnect(currentLock.ArrangedMatchType, currentLock.MatchID, currentLock.ServerAddress, currentLock.ServerPort, reminder: true);
 
                 logger.LogDebug(@"Reminded Account ""{AccountName}"" To Return To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
-                    session.Account.Name, currentLock.MatchID, currentLock.ServerID);
+                    session.Account.NameWithClanTag, currentLock.MatchID, currentLock.ServerID);
             }
         }
 
@@ -771,7 +772,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
         catch (Exception exception)
         {
-            logger.LogError(exception, @"The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"" Failed", session.Account.Name, matchLock.MatchID);
+            logger.LogError(exception, @"The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"" Failed", session.Account.NameWithClanTag, matchLock.MatchID);
         }
 
         finally

@@ -99,7 +99,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                         subAccountID, existingSessionMatch.Account.Name);
 
                     await existingSessionMatch
-                        .SendNotice(LoggedInElsewhereSenderName, LoggedInElsewhereMessage(account.Name))
+                        .SendNotice(LoggedInElsewhereSenderName, LoggedInElsewhereMessage(account.NameWithClanTag))
                         .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
                         .Terminate();
                 }
@@ -111,7 +111,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             Log.Information(@"Disconnecting Existing Session For Account ""{AccountName}"" Due To Concurrent Connection Attempt", account.Name);
 
             await existingSession
-                .SendNotice(LoggedInElsewhereSenderName, LoggedInElsewhereMessage(account.Name))
+                .SendNotice(LoggedInElsewhereSenderName, LoggedInElsewhereMessage(account.NameWithClanTag))
                 .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
                 .Terminate();
         }

@@ -177,6 +177,44 @@ public sealed class ClientHandshakeIntegrationTests(ServiceContainerContext cont
     }
 
     [Test]
+    public async Task A_Login_Elsewhere_Names_The_Account_With_Its_Clan_Tag()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        (int accountID, string accountName) = await ChatTestData.SeedAccount(host.Services, AccountType.Normal);
+
+        string accountNameWithClanTag = await ChatTestData.SeedClanMember(host.Services, accountID);
+
+        string cookie = Guid.CreateVersion7().ToString();
+
+        await ChatTestData.SeedClientSessionCookie(host.Services, cookie, accountName);
+
+        string authenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountID, RemoteIP, cookie);
+
+        using TcpClient first = await host.ConnectClientAsync();
+
+        NetworkStream firstStream = first.GetStream();
+
+        await ChatTestProtocol.WriteFrame(firstStream, ChatTestProtocol.BuildClientHandshake(accountID, cookie, RemoteIP, authenticationHash));
+
+        using (CancellationTokenSource firstTimeout = new (TimeSpan.FromSeconds(10)))
+            await Assert.That(await ChatTestProtocol.ReadCommand(firstStream, firstTimeout.Token)).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+
+        using TcpClient second = await host.ConnectClientAsync();
+
+        await ChatTestProtocol.WriteFrame(second.GetStream(), ChatTestProtocol.BuildClientHandshake(accountID, cookie, RemoteIP, authenticationHash));
+
+        List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(firstStream, (ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT, TimeSpan.FromSeconds(10));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(frames.Count).IsGreaterThanOrEqualTo(2);
+            await Assert.That(frames[^1].Command).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+            await Assert.That(ChatTestProtocol.ParseNotice(frames[^2].Frame)).IsEqualTo((ClientHandshake.LoggedInElsewhereSenderName, ClientHandshake.LoggedInElsewhereMessage(accountNameWithClanTag)));
+        }
+    }
+
+    [Test]
     public async Task A_Login_On_Another_Account_Of_The_User_Names_That_Account_To_The_First_Session()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

@@ -8,5 +8,6 @@ public class MatchLockRefusal
 {
     public required int UserID { get; set; }
 
+    // The Bare Name Finds The Chat Session, Which Is Registered Under It, So It Carries No Clan Tag
     public required string AccountName { get; set; }
 }

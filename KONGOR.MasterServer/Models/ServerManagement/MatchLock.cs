@@ -22,6 +22,12 @@ public class MatchLock
 
     public required string AccountName { get; init; }
 
+    /// <summary>
+    ///     The name of the account with its clan tag, as it was when the match was announced, which is what notices and logs name the account by.
+    ///     It is optional, so that a lock stored without it still reads.
+    /// </summary>
+    public string? AccountNameWithClanTag { get; init; }
+
     public required int MatchID { get; init; }
 
     public required int CorrelationID { get; init; }
@@ -35,6 +41,12 @@ public class MatchLock
     public required ushort ServerPort { get; init; }
 
     public required DateTimeOffset TimestampStarted { get; init; }
+
+    /// <summary>
+    ///     The name which notices and logs call the account by, which is its bare name for a lock stored without a clan-tagged name.
+    /// </summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string TaggedAccountName => AccountNameWithClanTag ?? AccountName;
 
     /// <summary>
     ///     Computed from the start of the match, so that it is never stored.

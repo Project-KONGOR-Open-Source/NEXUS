@@ -47,7 +47,7 @@ public partial class ClientRequesterController
                 if (liftedLock is not null)
                 {
                     Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
-                        liftedLock.AccountName, liftedLock.MatchID, liftedLock.ServerID);
+                        liftedLock.TaggedAccountName, liftedLock.MatchID, liftedLock.ServerID);
                 }
             }
         }
@@ -55,7 +55,7 @@ public partial class ClientRequesterController
         catch (Exception exception)
         {
             Logger.LogError(exception, @"Serving The Server List Of Account ""{AccountName}"" With Session Cookie ""{SessionCookie}"" As If It Had No Match Lock, Because Its Match Lock Could Not Be Evaluated",
-                account?.Name ?? "UNKNOWN", cookie);
+                account?.NameWithClanTag ?? "UNKNOWN", cookie);
         }
 
         if (account is not null && refusingLock is not null)
@@ -68,11 +68,11 @@ public partial class ClientRequesterController
             catch (Exception exception)
             {
                 // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because Serving The Server List Would Let The Player Join Or Create Another Game, And The Player's Next Attempt Publishes Its Refusal Anew
-                Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" For The Server List", account.Name);
+                Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" For The Server List", account.NameWithClanTag);
             }
 
             Logger.LogInformation(@"Refused The Server List Of Account ""{AccountName}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
-                account.Name, refusingLock.MatchID, refusingLock.ServerID);
+                account.NameWithClanTag, refusingLock.MatchID, refusingLock.ServerID);
         }
 
         // A Refused Server List Is A Successful, Empty List, Because The Client Clears, Reads, And Redraws Its List From Every Successful Reply ("CServerList::ProcessServerList"), Which Leaves A Locked Player Nothing To Join, And A Game Creation No Match Server To Take, Including The One Which The Client Picks By Itself For A New Game ("CHostClient::StartAutoRemoteGame" Asks For The List Of Game Type "90")

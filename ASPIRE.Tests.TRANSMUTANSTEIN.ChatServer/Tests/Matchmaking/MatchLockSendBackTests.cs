@@ -42,6 +42,44 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     private static readonly TimeSpan ExpiryMargin = MatchLockService.ReturnResendInterval;
 
     [Test]
+    [Arguments(true)]
+    [Arguments(false)]
+    public async Task Another_Account_Is_Named_With_The_Slot_Account_Clan_Tag(bool atLogin)
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        // The Slot Is Held By Another Account Of The Same User, Which Was In A Clan When The Match Was Announced
+        string slotAccountNameWithClanTag = $"[SLOT]{SlotAccountName}";
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, gameSocket, accountNameWithClanTag: slotAccountNameWithClanTag);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        if (atLogin)
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+
+        else
+            await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(slotAccountNameWithClanTag));
+            await Assert.That(noticeMessages.Count).IsEqualTo(0);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+        }
+    }
+
+    [Test]
     [Arguments(SlotTimeRemaining)]
     [Arguments(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining)]
     public async Task Logging_In_While_Locked_Tells_The_Player_Without_Sending_Them_Back(uint slotTimeRemaining)
