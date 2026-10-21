@@ -133,7 +133,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
 
-            // The Notice Follows The Failure Reply, Because Reading Up To The Failure Reply Would Have Skipped A Notice Which Came First
+            // The Frames On Both Sides Of The Failure Reply Are Read, Because The Notice Must Come After The Reply, While A Group Update About The Player's Removal Would Come Before It
             // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Removal Would Make It Leave Again
             List<(ushort Command, ChatBuffer Frame)> later = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
 
@@ -212,7 +212,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
 
-            // The Notice Follows The Failure Reply, Because Reading Up To The Failure Reply Would Have Skipped A Notice Which Came First
+            // The Frames On Both Sides Of The Failure Reply Are Read, Because The Notice Must Come After The Reply, While A Group Update About The Player's Removal Would Come Before It
             // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Removal Would Make It Leave Again
             List<(ushort Command, ChatBuffer Frame)> later = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
 
@@ -314,7 +314,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
 
-            // The Notice Follows The Failure Reply, Because Reading Up To The Failure Reply Would Have Skipped A Notice Which Came First
+            // The Frames On Both Sides Of The Failure Reply Are Read, Because The Notice Must Come After The Reply, While A Group Update About The Player's Removal Would Come Before It
             // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Removal Would Make It Leave Again
             List<(ushort Command, ChatBuffer Frame)> later = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
 
