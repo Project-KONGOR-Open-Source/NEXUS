@@ -339,7 +339,15 @@ public partial class ServerRequesterController
             askingServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 
             if (askingServer is not null)
-                refusingLock = await FindRefusingMatchLock(account, askingServer);
+            {
+                (refusingLock, MatchLock? liftedLock) = await DistributedCache.FindRefusingMatchLock(account, askingServer.ID);
+
+                if (liftedLock is not null)
+                {
+                    Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
+                        liftedLock.AccountName, liftedLock.MatchID, liftedLock.ServerID);
+                }
+            }
         }
 
         catch (Exception exception)
@@ -397,34 +405,6 @@ public partial class ServerRequesterController
         response.Add("selected_upgrades", account.SelectedStoreItems);
 
         return Ok(PhpSerialization.Serialize(response));
-    }
-
-    /// <summary>
-    ///     Finds the match lock which refuses an account's client connection on a registered match server, which is the lock of the account's user when it names another match server that is still registered.
-    ///     Only a registered match server can be told apart from the locked one, so a locked player is always served on the locked match server, or on any match server whose session is not registered.
-    ///     A lock on a match server which is no longer registered is lifted instead, because a match lock must never outlive its match server.
-    ///     Returns <see langword="null"/> when the client connection is to be served.
-    /// </summary>
-    private async Task<MatchLock?> FindRefusingMatchLock(Account account, MatchServer askingServer)
-    {
-        if (MatchLock.IsExempt(account.Type))
-            return null;
-
-        MatchLock? matchLock = await DistributedCache.GetMatchLock(account.User.ID);
-
-        if (matchLock is null || matchLock.ServerID == askingServer.ID)
-            return null;
-
-        if (await DistributedCache.GetMatchServerByID(matchLock.ServerID) is not null)
-            return matchLock;
-
-        if (await DistributedCache.RemoveMatchLock(matchLock.UserID, matchLock.MatchID))
-        {
-            Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
-                matchLock.AccountName, matchLock.MatchID, matchLock.ServerID);
-        }
-
-        return null;
     }
 
     private async Task<IActionResult> HandleAcceptKey()

@@ -2,7 +2,7 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 
 /// <summary>
 ///     Subscribes to <see cref="DistributedCacheExtensions.MatchLockRefusalChannel"/> on the distributed cache and relays every refusal which the master server publishes to <see cref="MatchLockService.HandleRefusal"/>.
-///     A match server which is refused a locked player's connection sends no chat message about it, so this relay is what sends the player back to the locked match, or frees them when they can no longer return to it.
+///     Neither a locked player's refused server list nor a match server which is refused a locked player's connection sends a chat message about it, so this relay is what sends the player back to the locked match, or frees them when they can no longer return to it.
 /// </summary>
 public class MatchLockRefusalMonitor(IConnectionMultiplexer distributedCacheProvider, MatchLockService matchLockService, ILogger<MatchLockRefusalMonitor> logger) : IHostedService
 {
