@@ -12,7 +12,7 @@
 
 **Amendment (2026-10-20):** The owner settled one login per user, and never a kick for a login elsewhere, in the spec's "Single Login Per User (Amendment, 2026-10-20)", on the evidence in `.superpowers/research/2026-10-20-concurrent-account-sessions.md`. Tasks 13 to 18 build it. They run after Task 11 and before Task 12, which stays the last task and the last in this file. They supersede Task 11's answer for a login elsewhere, Task 10's `SetLatestSessionCookie`, and Task 6's return window, and Task 16 carries two controller rulings from the fix wave's re-review.
 
-**Amendment (2026-10-21):** The first live test with real game clients found six problems, and the owner redesigned the triggers: NEXUS pulls a locked player back only when the player really tries to play. The spec's "Live Test Amendment (2026-10-21)" records the findings, the redesign, and the rulings. Tasks 19 to 24 build it. They run after Task 18 and before Task 12, which stays the last task and the last in this file, and becomes the re-test of what they change. They supersede Task 6's send-back at login, Task 7's refusal of group create and join, Task 8's plain-text `c_conn` refusal, and Task 16's in-match notice with its `groupMember` and `leaderActed` flags, and they narrow Task 16's first ruling, that a refused `c_conn` always gets the full send-back, to sessions which do not report the locked match server. No change affects the arguments or workarounds of the launchers.
+**Amendment (2026-10-21):** The first live test with real game clients found six problems, and the owner redesigned the triggers: NEXUS pulls a locked player back only when the player really tries to play. The spec's "Live Test Amendment (2026-10-21)" records the findings, the redesign, and the rulings, including the owner's later rulings on the group model and the wording, which make a locked player's group a solo one. Tasks 19 to 25 build it. They run after Task 18 and before Task 12, which stays the last task and the last in this file, and becomes the re-test of what they change. They supersede Task 6's send-back at login, Task 7's refusal of group create and the leader's group message, Task 8's plain-text `c_conn` refusal, and Task 16's in-match notice with its `groupMember` and `leaderActed` flags, and they narrow Task 16's first ruling, that a refused `c_conn` always gets the full send-back, to sessions which do not report the locked match server. No change affects the arguments or workarounds of the launchers.
 
 ## Global Constraints
 
@@ -23,7 +23,8 @@
 - Players already removed from their match are free.
 - Never send a player to a dead server, a finished match, or an unreclaimable slot.
 - Never lift a lock during a pick phase.
-- The triggers which pull a locked player back are a queue, the server list, and any game join (`c_conn`); a login only tells the player, once per login cookie, and never pulls or starts a wait; group create and join are never refused; and leaving alone triggers nothing (Tasks 20 to 23).
+- The triggers which pull a locked player back are joining another group, inviting someone, a queue, the server list, and any game join (`c_conn`); a login only tells the player, once per login cookie, and never pulls or starts a wait; the client's own solo group (group create) is never refused; and leaving alone triggers nothing (Tasks 20 to 23 and 25).
+- A locked player is only ever alone in a group, apart from a premade party which outlives its match: an invite to a locked player is not delivered, the inviter is told why, and the inviter's group is unchanged (Task 25).
 - Account-based reconnect is set by a remote command at server handshake, always.
 - NEXUS conventions (`claude.md` and `agents.md` on `next`); commits in imperative Start Case, with no body and no attribution to non-humans.
 - The match lock is the default behaviour, with no configuration at all: the safety limit is the constant `MatchLock.Lifetime`, one hour from when the lock begins, never renewed, and tests reference it, never a copied value.
@@ -36,13 +37,13 @@
 - NEXUS never causes a duplicate-login kick: `aids2cookie` answers each served account with the login cookie which its own client on the asking match server holds, and the game cookie exactly as before, so a player who joins another game is still removed (Task 15).
 - A logout ends only its own session: the logout notification carries its session cookie, the chat server ends only the session which used it, and a logout with a retired cookie publishes nothing (Task 14).
 - While the slot account is still connected to the match, from another machine, nobody is sent `AUTO_MATCH_CONNECT`: the player is told to close the game there, once per attempt, and is sent back as soon as the slot is free (Task 17).
-- Every refused attempt from the menu is told why. A session which reports being in a game is refused without a word, because its client never queues from a game, and a teammate enforced because another member queued is not the one acting (Task 21).
+- Every refused attempt of a locked player at the menu is told why. A session which reports being in a game is refused without a word, because its client never joins or queues from a game, and a party teammate enforced because another member queued is not the one acting (Task 21).
 - A refusal relayed by the master server (`c_conn` or the server list) is ignored while the chat session last reported joining the locked match server, and otherwise always gets the full send-back, whatever else the session reported (Task 19).
-- A refused queue is answered first with the client's own `NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, with the seconds left until `MatchLock.TimestampExpires`, then with the pull or the notice; the refused member leaves its group in NEXUS too, and the rest of the group is unreadied (Task 21).
+- The slot account is never sent a matchmaking failure reply: a trigger gives it the notice and the pull, and the client leaves its solo group by itself on the pull. A refused queue or group join which does not pull its player back at once (another account, or a slot account which waits for its other connection) is answered first with `NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, with the seconds left until `MatchLock.TimestampExpires`, because the matchmaking screen covers the chat; the session then leaves its group in NEXUS without a group update. A refused party's remaining members are unreadied (Task 21).
 - A refused `c_conn` is answered with an array holding only the account's `account_id`, which the engine treats as final; never `game_cookie`, never `auth_failure`, and never `cookie` set to `Invalid cookie.` (Task 22).
 - A locked account's server list is a successful, empty list in the requested shape (Task 23).
-- Player-facing notices name accounts with their clan tags, and log lines use the bare account names (Task 24).
-- No log line prints a session cookie (Tasks 22 and 23).
+- Notices and log lines name accounts with their clan tags (`Account.NameWithClanTag`, or the lock's `TaggedAccountName`); only the refusal relayed by the master server keeps the bare name, which finds the chat session, and no notice asks a player to type a tagged name (Task 24).
+- Player-facing text calls the restriction a match lock, never a ban, and notices come from the sender "Match Lock"; each text is defined once, in `MatchLockService` (Task 24).
 - Work on branch `matchmaking-match-lock`; never push.
 
 ## Review Focus
@@ -57,10 +58,11 @@
 8. A client which logs in again in place during its match pushes its new cookie to the match server, and must not be kicked for it (Task 15, `Joining_A_Match_Server_With_A_New_Session_Cookie_Refreshes_The_Recorded_Session_Cookie`).
 9. A chat reconnect while a refused join is still connecting reports `JOINING_GAME` for the other match server, and must not silence the send-back, while a refusal which arrives after the player is back in their own match must be ignored (Task 16, `A_Published_Refusal_Sends_The_Player_Back_Even_After_The_Client_Reported_Joining_A_Game`; Task 19, `A_Refusal_While_The_Player_Reports_The_Locked_Server_Is_Ignored`).
 10. The new machine's own connection reads as connected while it loads into the match, and must never earn it the notice that its slot is still connected from another game (`ConnectedElsewhereMessage`; Task 17's test `Sending_Back_Never_Tells_The_Player_To_Close_Another_Computer`).
-11. No trigger may start a return or a wait for a player who is in their own match, so that leaving it afterwards still triggers nothing (Task 19, `Leaving_The_Match_After_An_Ignored_Refusal_Triggers_Nothing`; Task 20, `Logging_In_While_Locked_Tells_The_Player_Without_Sending_Them_Back`; Task 21, `Queueing_While_Still_In_The_Match_Is_Refused_Without_A_Frame`).
-12. A refused queue must unlock every client's matchmaking screen: the refused member's through the failure reply, and the rest of the group's through a group update which unreadies it (Task 21, `Queueing_A_Group_With_A_Locked_Member_Tells_The_Leader_And_Sends_The_Member_Back`).
+11. No trigger may start a return or a wait for a player who is in their own match, so that leaving it afterwards still triggers nothing (Task 19, `Leaving_The_Match_After_An_Ignored_Refusal_Triggers_Nothing`; Task 20, `Logging_In_While_Locked_Tells_The_Player_Without_Sending_Them_Back`; Task 21, `Queueing_While_Still_In_The_Match_Gives_No_Notice_And_No_Return`).
+12. A refused queue must unlock the client's matchmaking screen: a slot account's alone in its group through the pull with no popup, another account's through the "Temporary Ban" popup, and a party's through a group update which unreadies it (Task 21, `Queueing_While_Locked_Is_Refused_And_Sends_The_Player_Back`, `Queueing_On_Another_Account_Shows_The_Temporary_Ban_Before_The_Notice`, and `Queueing_A_Party_With_A_Locked_Member_Unreadies_It_And_Sends_The_Member_Back`).
 13. A refusal which no client or engine retries must never leave a player whose lock has just lifted without an explanation (Task 22, `A_Refusal_Which_Finds_The_Lock_Lifted_Tells_The_Player_To_Try_Again`).
 14. The empty server list must be a successful, well-formed list of the requested kind, so that the client clears and redraws its list, and a game creation finds no match server (Task 23, `The_Server_List_Of_A_Locked_Account_Is_Empty_And_Relays_A_Refusal`).
+15. An invite must never reach a locked player, nor change the inviter's group (Task 25, `Inviting_A_Locked_Player_Is_Not_Delivered_And_Tells_The_Inviter`).
 
 ## Decisions Left To The Builder
 
@@ -125,7 +127,7 @@ Retail NAEU builds define `K2_NAEU` (`HON.Shell/k2_settings.h`), which defaults 
 - the slot account: `You left a match which is still in progress, so you cannot play another game until it ends. Sending you back to it.`
 - another account: `Your account "{slot account}" is in a match which is still in progress, so you cannot play another game until it ends. Log in as "{slot account}" to return to it.`
 - a group leader whose member is locked: `"{member}" is in a match which is still in progress, so your group cannot search for a match until it ends.`
-- Task 24 names the slot account and the member with their clan tags, and gives the other account's message the bare name for the login instruction.
+- Task 24 names the slot account with its clan tag, rewords the other account's message, and calls the restriction a match lock; Task 21 removes the group leader's message.
 
 **One login per user (Tasks 13 to 18).**
 - **The supersession (Task 13).** The latest-login record (`ACCOUNT-LATEST-SESSION-COOKIE`) is the pointer to each account's live login cookie.
@@ -162,25 +164,28 @@ Retail NAEU builds define `K2_NAEU` (`HON.Shell/k2_settings.h`), which defaults 
   - the slot account whose wait has run out (`MatchLockService.ConnectedElsewhereWaitExpiredMessage`, final review): `Your other game has not left the match yet. Try again once it has closed, and you will be sent back.`
   - the old machine (`ClientHandshake.LoggedInElsewhereMessage`, from the sender `Login`): `You have logged in as "{account}" elsewhere, so you have been logged out here. Any game in progress here carries on.`
 
-**The live test amendment (Tasks 19 to 24).** The spec's "Live Test Amendment (2026-10-21)" carries the evidence from the engine and the client; these are the decisions which it leaves to the plan.
+**The live test amendment (Tasks 19 to 25).** The spec's "Live Test Amendment (2026-10-21)" carries the evidence from the engine and the client; these are the decisions which it leaves to the plan.
 - **What a session last reported (Task 19).** `ClientChatSession.ReportedGameServerAddress` holds the address of the latest `CHAT_CMD_JOINING_GAME` on the chat connection, `CHAT_CMD_LEFT_GAME` clears it, and `ReportedJoiningGame` is derived from it. A relayed refusal is stale when that address names the lock's match server by the rule which `EndReturnOnJoiningGame` already uses (`NamesLockedServer`: exactly as the player was sent there, or as the match server is registered).
 - **The login notice (Task 20).** `NotifyAtLogin` replaces `EnforceAtLogin`, with the same guards (exempt accounts, sessions which report a game, and the once-per-login-cookie marker). It verifies the lock as before, so an unanswered query still lifts it at login, and it sends one notice while `KeepsLock` accepts the verdict. It never touches the pending return.
-- **The failure reply (Task 21).** `Enforce(…, queueing: true)` sends it, so that it reaches the client before the notice and the first `AUTO_MATCH_CONNECT`. It goes on every refused queue, never throttled like the notice, and never to a session which reports a game. The seconds round up, so that a lock with a fraction of a second left still shows one.
-- **Leaving the group (Task 21).** `EnforceForGroup` removes each refused member which does not report a game with `RemoveMember(…, notifyRemovedMember: false)`. While members remain, it then calls `UnloadAndUnreadyMembers` and sends one `TMM_PARTIAL_GROUP_UPDATE` from the leader, and sends `GroupMemberMessage` to a leader which was not refused. Removing the only member disbands its group, as `RemoveMember` already does, so `SendLoadingStatusUpdate` multicasts only while its reporting member is still in the group.
-- **What Task 21 removes, and why.** `InMatchMessage`, `TryClaimInMatchNotice` with its ticks field, `Enforce`'s `groupMember`, and the `leaderActed` parameters of `EnforceForGroup` and `JoinQueue` existed only for the in-match notice, which nothing reaches any more. Group create and join no longer enforce (Task 20), and no client interface sends `NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE`: the client's Start button readies the group, full loading queues it, and `JoinTMMQueue` is reachable only from the console (HON `K2.Engine/cmd_chatmanager.cpp`, and no caller in HON-Assets `ui`). So a session which reports a game reaches `Enforce` only as a teammate of a queueing leader, who sees nothing by ruling, or through the console.
+- **The group model (Tasks 20, 21, and 25).** Group create stands, silently; group join, a queue, and a locked player's invite go through `Enforce`, as any attempt to play; and an invite to a locked player is not delivered. The client cannot join a group while it is in a game (`CChatManager::JoinTMMGroup`), and inviting changes nothing on the inviter's screen, which only marks the player as invited, so an invite gets a chat notice and nothing more.
+- **What the client sees on a refused queue or group join (Task 21).** `Enforce(…, matchmaking: true)` gives a slot account which it pulls back at once the notice and the pull, and nothing else: the client leaves a solo group by itself on the pull (`CChatManager::MatchmakingConnect`, "foundmatch"), which unlocks its screen. Any other refused queue or group join of a session at the menu gets the `TMMFTJR_BANNED` failure reply first, because the matchmaking screen covers the chat (owner); the client then leaves its group without telling the chat server, so NEXUS removes the session from its group with `RemoveMember(…, notifyRemovedMember: false)`, since a group update naming it as leaving, or its group as disbanded, would make the client leave again with another popup. The client has no popup which fits a match lock better: every other failure reason shows a text about something else, "isleaver" shows only a real leaver's block, the server-not-idle popup asks the player to queue again, and the leave strike warning threatens a punishment. The failure reply is not held back by `NoticeRepeatInterval`, and its seconds round up, so that a lock with a fraction of a second left still shows one.
+- **What is left of `EnforceForGroup` (Task 21).** It still enforces every member, because a premade party outlives the match it played together (`MatchmakingService` keeps groups of more than one member through their match, and the client keeps them too), so a locked player can still queue with the teammates of the locked match. Beyond that, it only unreadies a refused party's remaining members and sends them one full group update, because a pulled member's client keeps a party on the pull and an in-game member gets no frame, so nothing else would unlock the remaining members' screens; a solo group gets nothing more, so that no group update follows a pull. The leader's `GroupMemberMessage` is gone (owner).
+- **What Task 21 removes, and why.** `InMatchMessage`, `TryClaimInMatchNotice` with its ticks field, `Enforce`'s `groupMember`, and the `leaderActed` parameters of `EnforceForGroup` and `JoinQueue` existed only for the in-match notice, which nothing reaches any more: the client never joins a group from a game, group create no longer enforces (Task 20), and no client interface sends `NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE` (the client's Start button readies the group, full loading queues it, and `JoinTMMQueue` is reachable only from the console: HON `K2.Engine/cmd_chatmanager.cpp`, and no caller in HON-Assets `ui`). `GroupMemberMessage` goes by the owner's group model.
 - **The final reply (Task 22).** `HandleConnectClient` refuses with `Conflict(PhpSerialization.Serialize(new Dictionary<string, object> { { "account_id", account.ID } }))`.
   - The status stays 409. The engine's HTTP manager completes any transfer which cURL finishes, whatever its status (`CHTTPManager`, HON `K2.Engine/c_httpmanager.cpp`), and 409 keeps the refusal visible in the master server's own records.
   - The `account_id` is that of the posted cookie's account, so it never conflicts with the connection's own account ID, which is still unset at the first `c_conn` (`CClientConnection`).
   - The chat server's authentication error log stays as it is: the final reply makes the engine report a success before it disconnects, so the expected error after a lock refusal disappears, while a real failure is still logged at error level.
 - **A relayed refusal which finds no lock (Task 22).** `HandleRefusal` tells the session `RefusalLiftedMessage` when `Enforce` lets the attempt through, because the master server refused an attempt which nothing retries.
 - **The shared refusal rule (Task 23).** `FindRefusingMatchLock` moves from `ServerRequesterController` into `DistributedCacheExtensions.MatchLock.cs`, with an asking server ID which is NULL for the server list. It also returns the lock which it lifted because its match server is gone, so that each caller logs the lift as `c_conn` did, since the cache extensions do not log.
-- **The server list's account (Task 23).** The client requester's common check has already validated the cookie, so `GetServerList` resolves the account from it, with its user, as `c_conn` does. An unknown game type keeps its 422, before any lock is read.
-- **Clan tags (Task 24).** `MatchLock.AccountNameWithClanTag` is optional and nullable, so that a lock stored before it deserialises with NULL, and `MatchLock.PlayerFacingAccountName` falls back to `AccountName`. The accounts of chat sessions already load their clans at the handshake.
-- **Cookies in logs (Tasks 22 and 23).** `HandleConnectClient`'s missing-account line, which prints a live cookie, and the client requester's ended-session logout line stop printing cookies. The forged-cookie warnings, which print unrecognised cookies on purpose as evidence of abuse, stay (see Follow-Ups).
-- **The messages (Tasks 20, 22, and 24).** Defined beside the others in `MatchLockService`, and compared by tests through those members:
-  - the slot account at login (`SlotAccountLoginMessage`): `You are in a match which is still in progress, so you cannot play another game until it ends. Trying to play another game sends you back to it.`
-  - a relayed refusal which finds the lock lifted (`RefusalLiftedMessage`): `You can no longer return to your last match, so you are free to play another game. Please try again.`
-  - another account (`OtherAccountMessage(string slotAccountNameWithClanTag, string slotAccountName)`, Task 24): `Your account "{slot account with clan tag}" is in a match which is still in progress, so you cannot play another game until it ends. Log in as "{slot account}" to return to it.`
+- **The server list's account (Task 23).** The client requester's common check has already validated the cookie, so `GetServerList` resolves the account from it, with its user and its clan, as `c_conn` does. An unknown game type keeps its 422, before any lock is read. The game type "90" covers the match server which the client picks by itself for a new game (`CHostClient::StartAutoRemoteGame`), as well as one which the player picks.
+- **Clan tags (Task 24).** `MatchLock.AccountNameWithClanTag` is optional and nullable, so that a lock stored before it deserialises with NULL, and `MatchLock.TaggedAccountName` falls back to `AccountName`. Every log line and notice of the match lock which names an account uses `Account.NameWithClanTag`, or `TaggedAccountName` for the slot account. `MatchLockRefusal.AccountName` stays bare, because it finds the chat session by name. The accounts of chat sessions already load their clans at the handshake, and `c_conn` already loads the account's clan.
+- **The messages (Tasks 20, 22, 24, and 25).** Defined once, in `MatchLockService`, from `MessageSenderName = "Match Lock"` (Task 24), and compared by tests through those members; each says "match lock" where it names the restriction, and never "ban":
+  - the slot account sent back (`SlotAccountMessage`, reworded by Task 24): `You left a match which is still in progress, and a match lock keeps you from playing another game until it ends. Sending you back to it.`
+  - the slot account at login (`SlotAccountLoginMessage`, Task 20): `You are in a match which is still in progress, and a match lock keeps you from playing another game until it ends. Trying to play another game sends you back to it.`
+  - another account (`OtherAccountMessage(string slotAccountNameWithClanTag)`, reworded by Task 24): `Your account "{slot account with clan tag}" is in a match which is still in progress, and a match lock keeps you from playing another game until it ends. Log in on that account to return to it.`
+  - a relayed refusal which finds the lock lifted (`RefusalLiftedMessage`, Task 22): `Your match lock has lifted, because you can no longer return to your last match. Please try again.`
+  - the inviter of a locked player (`InviteeLockedMessage(string inviteeNameWithClanTag)`, Task 25): `"{invitee with clan tag}" is under a match lock until their match in progress ends, so they cannot join your group.`
+  - `ConnectedElsewhereMessage` and `ConnectedElsewhereWaitExpiredMessage` keep their wording, which does not name the restriction.
 
 ---
 
@@ -1690,12 +1695,12 @@ git commit -m "Ignore A Refusal Which Arrives After The Player Is Back In Their 
 
 ---
 
-### Task 20: Tell A Locked Player At Login And Let Groups Form
+### Task 20: Tell A Locked Player At Login And Let The Client's Own Group Form
 
 **Files:**
 - Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs:9-51,287-300` (`SlotAccountLoginMessage`, and `NotifyAtLogin` in place of `EnforceAtLogin`)
 - Modify: `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Actions/TrackPlayerAction.cs:12-17`
-- Modify: `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupCreate.cs` and `GroupJoin.cs` (no `MatchLockService`, and no `Enforce`)
+- Modify: `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupCreate.cs` (no `MatchLockService`, and no `Enforce`)
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs`
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs`
 
@@ -1705,7 +1710,7 @@ git commit -m "Ignore A Refusal Which Arrives After The Player Is Back In Their 
   - `internal const string SlotAccountLoginMessage` on `MatchLockService`, worded as in Decisions.
   - `public async Task NotifyAtLogin(ClientChatSession session)`: nothing for an exempt account, for a session which reports a game, or when `MarkMatchLockLoginChecked(session.Metadata.SessionCookie)` is FALSE; otherwise it verifies the user's lock and, while `KeepsLock` accepts the verdict, sends the slot account `SlotAccountLoginMessage` and another account `OtherAccountMessage(lock.AccountName)`, from `MessageSenderName`. It never sends `AUTO_MATCH_CONNECT`, never starts a return or a wait, and never touches the pending return.
   - `EnforceAtLogin` is removed.
-  - `public class GroupCreate(MerrickContext merrick)` and `public class GroupJoin(MerrickContext merrick)`.
+  - `public class GroupCreate(MerrickContext merrick)`. `GroupJoin` keeps its enforcement, because joining another player's group is an attempt to play.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1745,10 +1750,7 @@ public async Task Logging_In_While_Locked_Tells_The_Player_Without_Sending_Them_
 // MatchLockMatchmakingTriggerTests; replaces Creating_A_Group_While_Locked_Is_Refused_And_Sends_The_Player_Back
 [Test] [Arguments(ChatProtocol.TMMType.TMM_TYPE_PVP)] [Arguments(ChatProtocol.TMMType.TMM_TYPE_COOP)]
 public async Task Creating_A_Group_While_Locked_Creates_It_And_Sends_Nothing(ChatProtocol.TMMType groupType)
-    // GROUP_CREATE of that type: a TMM_GROUP_UPDATE arrives, and the account leads its group; no notice and no AUTO_MATCH_CONNECT over twice ReturnResendInterval; no pending return; the lock remains
-// replaces Joining_A_Group_While_Locked_Is_Refused_And_Sends_The_Player_Back
-[Test] public async Task Joining_A_Group_While_Locked_Joins_It_And_Sends_Nothing()
-    // the group has two members; no notice and no AUTO_MATCH_CONNECT reach the locked player over twice ReturnResendInterval
+    // GROUP_CREATE of that type: a TMM_GROUP_UPDATE arrives, and the account leads its group alone; no notice and no AUTO_MATCH_CONNECT over twice ReturnResendInterval; no pending return; the lock remains
 ```
 
 The other tests change as follows:
@@ -1756,6 +1758,7 @@ The other tests change as follows:
 - `Logging_In_Again_With_The_Same_Session_Cookie_Sends_Nothing` reads the first login's notice through a helper `LogInAndReadNotice(NetworkStream stream)`, which asserts `SlotAccountLoginMessage`.
 - Every other test which started its return or its wait with `AC_DAILY_LOGINS` starts it with a direct `Enforce` on the session instead, keeping its assertions; `LogInAndReadSendBack` becomes `RefuseAndReadSendBack(ChatServerHost host, string accountName, NetworkStream stream)`, which calls `Enforce` and reads the slot notice and the first `AUTO_MATCH_CONNECT`.
 - `Logging_In_While_Reporting_A_Game_Sends_Nothing`, `A_Lock_Whose_Slot_Is_Gone_Lifts_At_Login_And_Sends_Nothing`, `Another_Account_Is_Named_The_Slot_Account_While_The_Slot_Is_Connected_Elsewhere`, and `Guest_And_Staff_Accounts_Are_Never_Sent_Back` stay as they are.
+- `Joining_A_Group_While_Locked_Is_Refused_And_Sends_The_Player_Back` stays as it is, because joining another player's group is still a trigger.
 - `Creating_A_Group_While_Still_In_The_Match_Gives_Only_The_In_Match_Notice` is removed: group create no longer enforces, so a player in their match creates a group like anyone else, which `Creating_A_Group_While_Locked_Creates_It_And_Sends_Nothing` covers.
 
 - [ ] **Step 2: Run the tests to verify they fail**
@@ -1763,9 +1766,9 @@ The other tests change as follows:
 Run: `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer --treenode-filter "/*/*/MatchLockSendBackTests/*"`
 Expected: FAIL to compile, because `SlotAccountLoginMessage` does not exist.
 
-- [ ] **Step 3: Implement the login notice and free the groups**
+- [ ] **Step 3: Implement the login notice and free the client's own group**
 
-`TrackPlayerAction` routes `AC_DAILY_LOGINS` to `NotifyAtLogin`, and its comment says that the action tells a locked player at login. `NotifyAtLogin` logs each notice at information level, naming the account, the match, and the match server. `GroupCreate` and `GroupJoin` act at once; `GroupCreate` loses the comment about refusing groups of any type and gains one saying why groups stand: the game client creates a group by itself shortly after login and whenever it returns to the menu, and the lock refuses the queue instead.
+`TrackPlayerAction` routes `AC_DAILY_LOGINS` to `NotifyAtLogin`, and its comment says that the action tells a locked player at login. `NotifyAtLogin` logs each notice at information level, naming the account, the match, and the match server. `GroupCreate` acts at once; it loses the comment about refusing groups of any type and gains one saying why the group stands: the game client creates a solo group by itself shortly after login and whenever it returns to the menu, and the lock refuses the queue instead.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
@@ -1775,42 +1778,42 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Actions/TrackPlayerAction.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupCreate.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoin.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs
-git commit -m "Tell A Locked Player At Login And Let Groups Form"
+git add TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Actions/TrackPlayerAction.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupCreate.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs
+git commit -m "Tell A Locked Player At Login And Let The Client's Own Group Form"
 ```
 
 ---
 
-### Task 21: Refuse A Locked Player's Queue With The Client's Own Failure Reply
+### Task 21: Refuse A Locked Player's Queue And Group Join Without Locking Their Screen
 
 **Files:**
-- Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs:9-51,152-285` (`Enforce`'s `queueing`, `BanSecondsRemaining`, and `EnforceForGroup`; remove `InMatchMessage` and `groupMember`)
+- Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs:9-51,152-285` (`Enforce`'s `matchmaking`, `BanSecondsRemaining`, and `EnforceForGroup`; remove `InMatchMessage`, `GroupMemberMessage`, and `groupMember`)
 - Modify: `TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs:381-416` (add `SendMatchmakingBan`; remove `TryClaimInMatchNotice` and `LastInMatchNoticeTicks`)
 - Modify: `TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingGroup.cs:305-322,487-506,691-779` (`SendLoadingStatusUpdate`, `JoinQueue`, and `RemoveMember`)
-- Modify: `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoinQueue.cs:32-33`
+- Modify: `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoin.cs:10` and `GroupJoinQueue.cs:32-33`
 - Modify: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestProtocol.cs` (add `ParseMatchmakingFailure` and `ReadMatchmakingFailure`)
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs`
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs`
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockVerificationTests.cs`
 
 **Interfaces:**
-- Consumes: Task 19's `Enforce(session, relayedRefusal, groupMember)`; Task 7's `EnforceForGroup` and `GroupMemberMessage`; `MatchmakingGroup.UnloadAndUnreadyMembers` and `MulticastUpdate`; Task 18's `ReadCommandsUntil`.
+- Consumes: Task 19's `Enforce(session, relayedRefusal, groupMember)`; Task 7's `EnforceForGroup`; `MatchmakingGroup.UnloadAndUnreadyMembers` and `MulticastUpdate`; Task 18's `ReadCommandsUntil`.
 - Produces:
-  - `public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool queueing = false)`: for `queueing`, a refused session which does not report a game is sent `SendMatchmakingBan(BanSecondsRemaining(matchLock, now))` first, before any notice or `AUTO_MATCH_CONNECT`, on every refused queue; a session which reports a game is refused with no frame at all, and without a return.
+  - `public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false)`: for a refused queue or group join (`matchmaking`) of a session which does not report a game, and which this attempt does not pull back at once, it first sends `SendMatchmakingBan(BanSecondsRemaining(matchLock, now))`, then removes the session from its current group with `RemoveMember(…, notifyRemovedMember: false)`, because its client has left that group, and only then sends the notice. That covers another account, and a slot account which waits for its other connection; a slot account pulled back at once gets the notice and the pull alone. A session which reports a game gets no frame and no return.
   - `internal static uint BanSecondsRemaining(MatchLock matchLock, DateTimeOffset now)`: the whole seconds left until `matchLock.TimestampExpires`, rounded up, and 0 once it has passed.
-  - `public async Task<bool> EnforceForGroup(MatchmakingGroup group)`.
+  - `public async Task<bool> EnforceForGroup(MatchmakingGroup group)`: enforces every member concurrently with `matchmaking: true`; when the queue is refused and the group had more than one member, it unreadies the members which remain (`UnloadAndUnreadyMembers`) and sends them one `TMM_FULL_GROUP_UPDATE`, which unlocks a party's screens; TRUE when any member is refused.
   - `public ClientChatSession SendMatchmakingBan(uint secondsRemaining)` on `ClientChatSession`: `NET_CHAT_CL_TMM_FAILED_TO_JOIN`, the byte `TMMFTJR_BANNED`, then the seconds as a 32-bit integer, the layout which `CChatManager::HandleTMMJoinFailed` reads.
-  - `public async Task JoinQueue(MerrickContext merrick, MatchLockService matchLockService)`.
   - `public void RemoveMember(int accountID, bool kick = false, bool notifyRemovedMember = true)`: FALSE sends the removed member no group update, because its client has already left the group, while the remaining members are updated as before.
+  - `public async Task JoinQueue(MerrickContext merrick, MatchLockService matchLockService)`.
   - On `ChatTestProtocol`: `public static (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds) ParseMatchmakingFailure(ChatBuffer frame)` (the seconds are read only for `TMMFTJR_BANNED`, as the client reads them, and are 0 otherwise) and `public static async Task<(ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)?> ReadMatchmakingFailure(NetworkStream stream, TimeSpan timeout)`.
-  - Removed, for the reasons in Decisions: `MatchLockService.InMatchMessage`, `ClientChatSession.TryClaimInMatchNotice` and `LastInMatchNoticeTicks`, `Enforce`'s `groupMember`, and the `leaderActed` parameters of `EnforceForGroup` and `JoinQueue`.
+  - Removed, for the reasons in Decisions: `MatchLockService.InMatchMessage` and `GroupMemberMessage`, `ClientChatSession.TryClaimInMatchNotice` and `LastInMatchNoticeTicks`, `Enforce`'s `groupMember`, and the `leaderActed` parameters of `EnforceForGroup` and `JoinQueue`.
 
 - [ ] **Step 1: Write the failing tests**
 
 ```csharp
-// MatchLockMatchmakingTriggerTests; replaces Queueing_While_Locked_Is_Refused_And_Sends_The_Player_Back
+// MatchLockMatchmakingTriggerTests
 [Test]
-public async Task Queueing_While_Locked_Answers_The_Failure_Reply_Before_Sending_The_Player_Back()
+public async Task Queueing_On_Another_Account_Shows_The_Temporary_Ban_Before_The_Notice()
 {
     await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
     await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
@@ -1825,29 +1828,28 @@ public async Task Queueing_While_Locked_Answers_The_Failure_Reply_Before_Sending
     {
         MatchmakingGroup group = await CreateGroup(stream, accountID);
 
-        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+        // Another Account Of The Same User Holds The Slot, So This Account Has No Match To Return To, And Its Matchmaking Screen Covers The Chat
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, Random.Shared.Next(1_000_000, int.MaxValue), "TEST:SlotAccount", gameSocket);
 
         MakeReadyToQueue(group);
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
 
-        List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, FrameTimeout);
+        (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure = await ChatTestProtocol.ReadMatchmakingFailure(stream, FrameTimeout);
 
-        List<ushort> lockCommands = [.. frames.Select(frame => frame.Command)
-            .Where(command => command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN or ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL or ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT)];
+        // The Notice Follows The Failure Reply, Because Reading Up To The Failure Reply Would Have Skipped A Notice Which Came First
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
 
-        (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds) failure = ChatTestProtocol.ParseMatchmakingFailure(frames.Single(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN).Frame);
-
-        // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Own Removal Would Make It Leave Again
-        ChatBuffer? laterGroupUpdate = await ChatTestProtocol.ReadUntilCommand(stream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE, QuietPeriod);
+        // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Removal Would Make It Leave Again
+        List<(ushort Command, ChatBuffer Frame)> later = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
 
         using (Assert.Multiple())
         {
-            await Assert.That(lockCommands).IsEquivalentTo([ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN, ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT], TUnit.Assertions.Enums.CollectionOrdering.Matching);
-            await Assert.That(failure.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
-            await Assert.That(failure.Seconds).IsLessThanOrEqualTo((uint) MatchLock.Lifetime.TotalSeconds);
-            await Assert.That(failure.Seconds).IsGreaterThan((uint) (MatchLock.Lifetime - TimeSpan.FromMinutes(1)).TotalSeconds);
-            await Assert.That(laterGroupUpdate).IsNull();
+            await Assert.That(failure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
+            await Assert.That(failure?.Seconds).IsLessThanOrEqualTo((uint) MatchLock.Lifetime.TotalSeconds);
+            await Assert.That(failure?.Seconds).IsGreaterThan((uint) (MatchLock.Lifetime - TimeSpan.FromMinutes(1)).TotalSeconds);
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName));
+            await Assert.That(later.Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
             await Assert.That(group.QueueStartTime).IsNull();
             await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
         }
@@ -1859,21 +1861,30 @@ public async Task Queueing_While_Locked_Answers_The_Failure_Reply_Before_Sending
     }
 }
 
-// replaces Reaching_Full_Loading_While_Locked_Does_Not_Queue
-[Test] public async Task Reaching_Full_Loading_While_Locked_Answers_The_Failure_Reply_And_Does_Not_Queue()
-    // GROUP_PLAYER_LOADING_STATUS 100 on a solo group: the same frames in the same order; no later TMM_GROUP_UPDATE; QueueStartTime is NULL; the group is gone
-[Test] public async Task Queueing_A_Group_With_A_Locked_Member_Tells_The_Leader_And_Sends_The_Member_Back()
-    // keeps its name; the member reads the failure reply before its notice and AUTO_MATCH_CONNECT, is no longer in group.Members, and reads no later TMM_GROUP_UPDATE;
-    // the leader reads GroupMemberMessage and a TMM_GROUP_UPDATE, reads no failure reply within QuietPeriod, and stays the leader;
-    // group.Leader.IsReady is FALSE and every member's LoadingPercent is 0, which unlocks the leader's queue loading panel; QueueStartTime is NULL
-[Test] public async Task Queueing_A_Group_With_A_Member_Still_In_The_Match_Does_Not_Message_The_Member()
-    // keeps its name and expectations, and adds: the member reads no failure reply, and stays in group.Members; the group is unreadied as above
-[Test] public async Task Queueing_As_A_Locked_Leader_Sends_The_Leader_Back_Without_A_Group_Message()
-    // keeps its name and expectations, and adds: the leader reads the failure reply before its notice and leaves the group, whose remaining member now leads it; the member reads no failure reply
+[Test] public async Task Queueing_While_Connected_Elsewhere_Shows_The_Temporary_Ban_Before_The_Notice()
+    // the slot account, with a connected slot: the TMMFTJR_BANNED failure reply, then ConnectedElsewhereMessage; no AUTO_MATCH_CONNECT and no TMM_GROUP_UPDATE within QuietPeriod; the group is gone
+[Test] public async Task Joining_A_Group_On_Another_Account_Shows_The_Temporary_Ban_Before_The_Notice()
+    // another account of a locked user sends GROUP_JOIN naming an unlocked leader: the failure reply, then OtherAccountMessage; the leader's group keeps one member; the account's own group is gone
+[Test] public async Task Queueing_While_Locked_Is_Refused_And_Sends_The_Player_Back()
+    // keeps its name and expectations, and adds: the frames up to the first AUTO_MATCH_CONNECT hold no NET_CHAT_CL_TMM_FAILED_TO_JOIN and no TMM_GROUP_UPDATE,
+    // and no TMM_GROUP_UPDATE follows within QuietPeriod, because the client leaves its solo group by itself on the pull
+[Test] public async Task Reaching_Full_Loading_While_Locked_Does_Not_Queue()
+    // keeps its name and expectations, and adds the same, which pins that the loading update no longer follows the pull
+// Joining_A_Group_While_Locked_Is_Refused_And_Sends_The_Player_Back keeps its name and expectations, and adds that no failure reply arrives
+// replaces Queueing_A_Group_With_A_Locked_Member_Tells_The_Leader_And_Sends_The_Member_Back
+[Test] public async Task Queueing_A_Party_With_A_Locked_Member_Unreadies_It_And_Sends_The_Member_Back()
+    // the party is formed before the lock, as a premade party outlives its match; the leader queues: the member reads its slot notice and AUTO_MATCH_CONNECT, no failure reply, and stays in the party;
+    // the leader reads a TMM_GROUP_UPDATE, no notice, and no failure reply within QuietPeriod; the leader is not ready, every LoadingPercent is 0, and QueueStartTime is NULL
+// replaces Queueing_A_Group_With_A_Member_Still_In_The_Match_Does_Not_Message_The_Member
+[Test] public async Task Queueing_A_Party_With_A_Member_Still_In_The_Match_Unreadies_It_Without_Messaging_The_Member()
+    // the member reports joining the lock's server: the member reads no notice, no failure reply, and no AUTO_MATCH_CONNECT, and has no pending return; the leader reads a TMM_GROUP_UPDATE and no notice; the party is unreadied
+// replaces Queueing_As_A_Locked_Leader_Sends_The_Leader_Back_Without_A_Group_Message
+[Test] public async Task Queueing_A_Party_As_Its_Locked_Leader_Unreadies_It_And_Sends_The_Leader_Back()
+    // the leader reads its slot notice and AUTO_MATCH_CONNECT and no failure reply; the member reads a TMM_GROUP_UPDATE and no notice
 // replaces Queueing_While_Still_In_The_Match_Gives_The_Leader_Only_The_In_Match_Notice
-[Test] public async Task Queueing_While_Still_In_The_Match_Is_Refused_Without_A_Frame()
-    // JOINING_GAME naming the lock's server; GROUP_JOIN_QUEUE: no notice, no failure reply, and no AUTO_MATCH_CONNECT over twice ReturnResendInterval; QueueStartTime is NULL; no pending return; the leader stays in its group
-// Reaching_Full_Loading_While_Still_In_The_Match_Gives_No_Notice keeps its name and expectations, and adds that no failure reply arrives
+[Test] public async Task Queueing_While_Still_In_The_Match_Gives_No_Notice_And_No_Return()
+    // JOINING_GAME naming the lock's server; GROUP_JOIN_QUEUE: no notice, no failure reply, and no AUTO_MATCH_CONNECT over twice ReturnResendInterval; QueueStartTime is NULL; no pending return
+// Reaching_Full_Loading_While_Still_In_The_Match_Gives_No_Notice and Reaching_Full_Loading_Without_A_Lock_Still_Queues stay as they are
 
 // MatchLockSendBackTests; replaces A_Player_Still_In_The_Match_Is_Told_Why_Once_Per_Notice_Repeat_Interval
 [Test] [Arguments(SlotTimeRemaining)] [Arguments(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining)]
@@ -1888,15 +1899,16 @@ public async Task A_Player_Still_In_The_Match_Is_Refused_Without_A_Notice_Or_A_R
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer --treenode-filter "/*/*/MatchLockMatchmakingTriggerTests/*"`
-Expected: FAIL to compile, because `ParseMatchmakingFailure` and `BanSecondsRemaining` do not exist.
+Expected: FAIL to compile, because `ReadMatchmakingFailure` and `BanSecondsRemaining` do not exist.
 
-- [ ] **Step 3: Implement the failure reply**
+- [ ] **Step 3: Implement the refusals which the client can see**
 
-- `Enforce`'s in-game shortcut refuses with no frame and logs at debug level, as before but without the notice. After it, `queueing` sends the failure reply before anything else, including when only a notice follows (another account, or a lost race to install the return), and whatever `NoticeRepeatInterval` holds back.
-- `EnforceForGroup` enforces every member concurrently with `queueing: true`, then works in the order which Decisions gives: it removes each refused member which does not report a game with `RemoveMember(…, notifyRemovedMember: false)`; while members remain, it unreadies them (`UnloadAndUnreadyMembers`) and sends one `TMM_PARTIAL_GROUP_UPDATE` from the leader; and it sends `GroupMemberMessage` to a leader which was not refused. Comments say why: the client leaves its group on the failure reply without telling the chat server, and the remaining members' clients show a full-screen queue loading panel while every member is ready and the group is not queued.
+- `Enforce`'s in-game shortcut refuses with no frame and logs at debug level, as before but without the notice. After it, a refused `matchmaking` attempt which does not pull the slot account back at once gets the failure reply and leaves its group in NEXUS, in the order which the Interfaces give, including when only a notice follows: another account, a wait for the slot, a continued return, or a lost race to install the return. The failure reply is not held back by `NoticeRepeatInterval`. A comment says why: the matchmaking screen covers the chat, the "Temporary Ban" popup is the client's only refusal whose text fits a match lock, and the client leaves its group on that reply without telling the chat server; a slot account pulled back at once needs none of it, because the client leaves a solo group by itself on the pull (`CChatManager::MatchmakingConnect`, "foundmatch").
+- `GroupJoin` calls `Enforce(session, matchmaking: true)`.
+- `EnforceForGroup` enforces every member with `matchmaking: true`, with a comment saying why it still does: a premade party outlives the match it played together, so a locked player can queue with its teammates. It unreadies a refused party's remaining members as the Interfaces give, and no longer sends the leader any message.
+- `SendLoadingStatusUpdate` sends its partial update before it starts the queue, so that no group update follows a pull, and none goes to a group which the queue's refusal has emptied.
 - `JoinQueue` passes the group alone to `EnforceForGroup`, and `GroupJoinQueue` calls `JoinQueue(merrick, matchLockService)`.
-- `SendLoadingStatusUpdate` sends its partial update only while the reporting member is still in the group.
-- The summaries of `Enforce`, `EnforceForGroup`, and `JoinQueue` lose every mention of the in-match notice and of the leader's own request.
+- The summaries of `Enforce`, `EnforceForGroup`, and `JoinQueue` lose every mention of the in-match notice, of the leader's own request, and of the leader's message.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
@@ -1906,8 +1918,8 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingGroup.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoinQueue.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestProtocol.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockVerificationTests.cs
-git commit -m "Refuse A Locked Player's Queue With The Client's Own Failure Reply"
+git add TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingGroup.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoin.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoinQueue.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestProtocol.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockVerificationTests.cs
+git commit -m "Refuse A Locked Player's Queue And Group Join Without Locking Their Screen"
 ```
 
 ---
@@ -1915,7 +1927,7 @@ git commit -m "Refuse A Locked Player's Queue With The Client's Own Failure Repl
 ### Task 22: Reject A Locked Player's Direct Join At Once
 
 **Files:**
-- Modify: `KONGOR.MasterServer/Controllers/ServerRequester/ServerRequesterController.Authentication.cs:325-367` (the final reply, and the missing-account line without the cookie)
+- Modify: `KONGOR.MasterServer/Controllers/ServerRequester/ServerRequesterController.Authentication.cs:350-367` (the final reply)
 - Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs` (`RefusalLiftedMessage`, sent by `HandleRefusal`)
 - Test: `ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/HostingAuthenticationTests.MatchLock.cs`
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockRefusalMonitorTests.cs`
@@ -1978,7 +1990,6 @@ Expected: FAIL; the master server's refusals carry no `account_id`, and the chat
 - [ ] **Step 3: Implement the final reply**
 
 - `HandleConnectClient` refuses with the final reply. A comment says why: the engine retries any reply which it cannot read while the client waits, and blacklists the login cookie on "Invalid cookie.", while a reply which names the account but carries no game cookie disconnects the client at once (`DISCONNECT_UNIQUE_LOGIN_FAILED`), with no retry, no blacklisting, and no harm to the match server's session (`CClientConnection::CheckAuthResult`).
-- Its missing-account line names the account but no longer prints the session cookie.
 - `HandleRefusal` sends `RefusalLiftedMessage` from `MessageSenderName`, and logs it at information level, when `Enforce` lets the attempt through, with a comment saying why: nothing repeats a refused server list or a finally rejected join.
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -2001,7 +2012,6 @@ git commit -m "Reject A Locked Player's Direct Join At Once"
 - Modify: `KONGOR.MasterServer/Extensions/Cache/DistributedCacheExtensions.MatchLock.cs` (add `FindRefusingMatchLock`)
 - Modify: `KONGOR.MasterServer/Controllers/ServerRequester/ServerRequesterController.Authentication.cs:401-427` (call the shared rule; the private method goes)
 - Modify: `KONGOR.MasterServer/Controllers/ClientRequester/ClientRequesterController.ServerList.cs`
-- Modify: `KONGOR.MasterServer/Controllers/ClientRequester/ClientRequesterController.cs:39-45` (the ended-session logout line without the cookie)
 - Modify: `KONGOR.MasterServer/Models/ServerManagement/MatchLockRefusal.cs` and `TRANSMUTANSTEIN.ChatServer/Services/MatchLockRefusalMonitor.cs` (their summaries cover the server list)
 - Create: `ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/HostingAuthenticationTests.ServerList.cs`
 
@@ -2087,45 +2097,44 @@ Expected: FAIL, because a locked account's server list still lists the match ser
 
 - [ ] **Step 3: Implement the refusal of the server list**
 
-- `GetServerList` keeps rejecting an unknown game type first. It then resolves the account from the cookie, with its user, and calls `FindRefusingMatchLock(account, askingServerID: null)` in a `try` which logs an error and serves the full list on any exception, as `c_conn` does.
-- It logs a lifted lock at information level, as `c_conn` did. For a refusing lock, it publishes the `MatchLockRefusal` (best effort, a failure logged at error level), logs the refusal at information level, naming the account, the match, and the match server, and builds the requested response from an empty list of match servers. A comment says why: the client clears, reads, and redraws its list from any reply (`CServerList::ProcessServerList`), so a successful, empty list leaves it nothing to join and a game creation no match server to take.
+- `GetServerList` keeps rejecting an unknown game type first. It then resolves the account from the cookie, with its user and its clan, and calls `FindRefusingMatchLock(account, askingServerID: null)` in a `try` which logs an error and serves the full list on any exception, as `c_conn` does.
+- It logs a lifted lock at information level, as `c_conn` did. For a refusing lock, it publishes the `MatchLockRefusal` (best effort, a failure logged at error level), logs the refusal at information level, naming the account, the match, and the match server, and builds the requested response from an empty list of match servers. A comment says why: the client clears, reads, and redraws its list from any reply (`CServerList::ProcessServerList`), so a successful, empty list leaves it nothing to join and a game creation no match server to take, including the one which the client picks by itself for a new game (`CHostClient::StartAutoRemoteGame` asks for the list of game type "90").
 - `HandleConnectClient` calls the shared rule with the asking server's ID, and logs its `LiftedLock` with the line which the private method logged.
-- The ended-session logout line keeps the IP address but no longer prints the cookie.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: the command from Step 2, then `dotnet test --project ASPIRE.Tests.KONGOR.MasterServer --treenode-filter "/*/*/ServerListRegionFilteringTests/*"` and `dotnet test --project ASPIRE.Tests.KONGOR.MasterServer --treenode-filter "/*/*/LoginSessionTests/*"`, and `git grep -n "Already Ended With Cookie" -- KONGOR.MasterServer`
-Expected: PASS, and no output from `git grep`.
+Run: the command from Step 2, then `dotnet test --project ASPIRE.Tests.KONGOR.MasterServer --treenode-filter "/*/*/ServerListRegionFilteringTests/*"`
+Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add KONGOR.MasterServer/Extensions/Cache/DistributedCacheExtensions.MatchLock.cs KONGOR.MasterServer/Controllers/ServerRequester/ServerRequesterController.Authentication.cs KONGOR.MasterServer/Controllers/ClientRequester/ClientRequesterController.ServerList.cs KONGOR.MasterServer/Controllers/ClientRequester/ClientRequesterController.cs KONGOR.MasterServer/Models/ServerManagement/MatchLockRefusal.cs TRANSMUTANSTEIN.ChatServer/Services/MatchLockRefusalMonitor.cs ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/HostingAuthenticationTests.ServerList.cs
+git add KONGOR.MasterServer/Extensions/Cache/DistributedCacheExtensions.MatchLock.cs KONGOR.MasterServer/Controllers/ServerRequester/ServerRequesterController.Authentication.cs KONGOR.MasterServer/Controllers/ClientRequester/ClientRequesterController.ServerList.cs KONGOR.MasterServer/Models/ServerManagement/MatchLockRefusal.cs TRANSMUTANSTEIN.ChatServer/Services/MatchLockRefusalMonitor.cs ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/HostingAuthenticationTests.ServerList.cs
 git commit -m "Refuse The Server List While Locked"
 ```
 
 ---
 
-### Task 24: Name Accounts With Their Clan Tags In Notices
+### Task 24: Use Clan Tags And Match Lock Wording In Notices And Logs
 
 **Files:**
-- Modify: `KONGOR.MasterServer/Models/ServerManagement/MatchLock.cs` (`AccountNameWithClanTag` and `PlayerFacingAccountName`)
-- Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs` (`OtherAccountMessage`, `LockMatchRoster`, `NotifyAtLogin`, `Notify`, and `EnforceForGroup`)
+- Modify: `KONGOR.MasterServer/Models/ServerManagement/MatchLock.cs` (`AccountNameWithClanTag` and `TaggedAccountName`)
+- Modify: `KONGOR.MasterServer/Controllers/ServerRequester/ServerRequesterController.Authentication.cs` and `KONGOR.MasterServer/Controllers/ClientRequester/ClientRequesterController.ServerList.cs` (the match lock's log lines)
+- Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs` (`MessageSenderName`, `SlotAccountMessage`, `OtherAccountMessage`, `LockMatchRoster`, `NotifyAtLogin`, `Notify`, and every log line which names an account)
 - Modify: `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ClientHandshake.cs:102,114`
 - Modify: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestData.cs` (add `SeedClanMember`; `SeedLockedMatch` takes the clan-tagged name)
+- Create: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockMessageTests.cs`
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockCreationTests.cs`
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs`
-- Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockRefusalMonitorTests.cs`
-- Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs`
 - Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Integration/ClientHandshakeIntegrationTests.cs`
 - Test: `ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/MatchLockStoreTests.cs`
 
 **Interfaces:**
-- Consumes: Task 20's `NotifyAtLogin`; Task 21's `EnforceForGroup`; Task 18's `LoggedInElsewhereMessage`; `Account.NameWithClanTag`.
+- Consumes: Task 20's `NotifyAtLogin` and `SlotAccountLoginMessage`; Task 22's `RefusalLiftedMessage`; Task 23's server list log lines; Task 18's `LoggedInElsewhereMessage`; `Account.NameWithClanTag`.
 - Produces:
   - `public string? AccountNameWithClanTag { get; init; }` on `MatchLock`, optional, so that a lock stored without it reads as NULL.
-  - `[System.Text.Json.Serialization.JsonIgnore] public string PlayerFacingAccountName => AccountNameWithClanTag ?? AccountName;` on `MatchLock`.
-  - `internal static string OtherAccountMessage(string slotAccountNameWithClanTag, string slotAccountName)`, worded as in Decisions, which `Notify` and `NotifyAtLogin` call with the lock's `PlayerFacingAccountName` and `AccountName`.
+  - `[System.Text.Json.Serialization.JsonIgnore] public string TaggedAccountName => AccountNameWithClanTag ?? AccountName;` on `MatchLock`.
+  - `internal const string MessageSenderName = "Match Lock";`, and `SlotAccountMessage` and `internal static string OtherAccountMessage(string slotAccountNameWithClanTag)`, worded as in Decisions; `Notify` and `NotifyAtLogin` pass the lock's `TaggedAccountName`.
   - `public static async Task<string> SeedClanMember(IServiceProvider services, int accountID)` on `ChatTestData`: puts the account in a new clan with a unique tag of four capital letters, and returns the account's name with that tag, as `Account.NameWithClanTag` writes it.
   - `SeedLockedMatch(…, string? accountNameWithClanTag = null)`, which records it on the lock.
 
@@ -2158,57 +2167,174 @@ public async Task Another_Account_Is_Named_With_The_Slot_Account_Clan_Tag(bool a
     else
         await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
+    (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
     (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, QuietPeriod);
 
     using (Assert.Multiple())
     {
-        await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.OtherAccountMessage(slotAccountNameWithClanTag, SlotAccountName)]);
+        await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+        await Assert.That(notice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(slotAccountNameWithClanTag));
+        await Assert.That(noticeMessages.Count).IsEqualTo(0);
         await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
     }
 }
 
+// MatchLockMessageTests
+[Test] public async Task Notices_Call_The_Restriction_A_Match_Lock_And_Never_A_Ban()
+    // SlotAccountMessage, SlotAccountLoginMessage, OtherAccountMessage("[TAG]Slot"), and RefusalLiftedMessage each contain "match lock",
+    // none contains the word "ban" in any letter case, and MessageSenderName is "Match Lock"
 // MatchLockCreationTests
 [Test] public async Task Locking_A_Competitive_Match_Records_The_Clan_Tagged_Name_Of_Each_Player()
     // one roster member in a clan from SeedClanMember: its lock's AccountNameWithClanTag is that name and its AccountName the bare one; a member without a clan records its bare name in both
-// MatchLockMatchmakingTriggerTests
-[Test] public async Task Queueing_A_Group_With_A_Locked_Member_Names_The_Member_With_Their_Clan_Tag()
-    // the member joins a clan through SeedClanMember before connecting: the leader reads GroupMemberMessage(that name)
 // ClientHandshakeIntegrationTests
 [Test] public async Task A_Login_Elsewhere_Names_The_Account_With_Its_Clan_Tag()
     // the account joins a clan through SeedClanMember before either handshake: the notice before the reject is LoggedInElsewhereMessage(that name)
 // MatchLockStoreTests (KONGOR.MasterServer)
 [Test] public async Task A_Lock_Stored_Without_A_Clan_Tagged_Name_Names_The_Bare_Account()
-    // the lock's key holds JSON written without the property: GetMatchLock reads AccountNameWithClanTag as NULL, and PlayerFacingAccountName as AccountName
+    // the lock's key holds JSON written without the property: GetMatchLock reads AccountNameWithClanTag as NULL, and TaggedAccountName as AccountName
 ```
 
-Every test which builds `OtherAccountMessage` passes the lock's `PlayerFacingAccountName` and `AccountName`; with locks seeded without a clan-tagged name, its expectations are unchanged.
+Every test which builds `OtherAccountMessage` passes the lock's `TaggedAccountName`; with locks seeded without a clan-tagged name, its expectations are unchanged.
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
 Run: `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer --treenode-filter "/*/*/MatchLockSendBackTests/*"`
-Expected: FAIL to compile, because `SeedLockedMatch` takes no clan-tagged name and `OtherAccountMessage` takes one argument.
+Expected: FAIL to compile, because `SeedLockedMatch` takes no clan-tagged name.
 
-- [ ] **Step 3: Implement the clan tags**
+- [ ] **Step 3: Implement the clan tags and the wording**
 
-`LockMatchRoster` records `member.Account.NameWithClanTag` as `AccountNameWithClanTag`. `EnforceForGroup` names the first refused member with `Account.NameWithClanTag`, and both rejects in `ClientHandshake` pass `account.NameWithClanTag` to `LoggedInElsewhereMessage`. Every log line keeps the bare account name, which is what operators search for.
+- `LockMatchRoster` records `member.Account.NameWithClanTag` as `AccountNameWithClanTag`, and both rejects in `ClientHandshake` pass `account.NameWithClanTag` to `LoggedInElsewhereMessage`.
+- Every log line of the match lock which names an account, in `MatchLockService`, `HandleConnectClient`, and `GetServerList`, uses `Account.NameWithClanTag`, or the lock's `TaggedAccountName` for the slot account. `MatchLockRefusal.AccountName` stays bare, with a comment saying why: it finds the chat session, which is registered under the bare name.
+- `MessageSenderName`, `SlotAccountMessage`, and `OtherAccountMessage` take the wording of Decisions, which calls the restriction a match lock and asks no player to type a tagged name.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
-Run: the command from Step 2, then the whole chat server suite, `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer`, and the whole master server suite, `dotnet test --project ASPIRE.Tests.KONGOR.MasterServer`
+Run: the command from Step 2, then `git grep -n -E "(session|matchLock|currentLock)\.(Account\.Name|AccountName)\b" -- TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs`, the whole chat server suite, `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer`, and the whole master server suite, `dotnet test --project ASPIRE.Tests.KONGOR.MasterServer`
+Expected: PASS, and no output from `git grep`.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add KONGOR.MasterServer/Models/ServerManagement/MatchLock.cs KONGOR.MasterServer/Controllers/ServerRequester/ServerRequesterController.Authentication.cs KONGOR.MasterServer/Controllers/ClientRequester/ClientRequesterController.ServerList.cs TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ClientHandshake.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestData.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockMessageTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockCreationTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Integration/ClientHandshakeIntegrationTests.cs ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/MatchLockStoreTests.cs
+git commit -m "Use Clan Tags And Match Lock Wording In Notices And Logs"
+```
+
+---
+
+### Task 25: Refuse Invites To And From A Locked Player
+
+**Files:**
+- Modify: `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupInvite.cs` (asynchronous, with `MatchLockService`)
+- Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs` (`InviteeLockedMessage` and `HoldsLock`)
+- Modify: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestProtocol.cs` (add `BuildGroupInvite`)
+- Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs`
+- Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockMessageTests.cs`
+
+**Interfaces:**
+- Consumes: Task 21's `Enforce`; Task 24's `MessageSenderName` and wording; Task 3's `Verify`; Task 17's `KeepsLock`.
+- Produces:
+  - `public class GroupInvite(MerrickContext merrick, MatchLockService matchLockService) : IAsynchronousCommandProcessor<ClientChatSession>`.
+  - `internal static string InviteeLockedMessage(string inviteeNameWithClanTag)` on `MatchLockService`, worded as in Decisions.
+  - `public async Task<bool> HoldsLock(ClientChatSession session)` on `MatchLockService`: TRUE while the session's user, unless exempt, has a lock which `Verify` keeps, with no notice and no return; a lock which no longer holds is lifted by `Verify`, as at any check.
+  - `public static ChatBuffer BuildGroupInvite(string inviteReceiverName)` on `ChatTestProtocol`, in the layout which `GroupInvite` reads.
+
+- [ ] **Step 1: Write the failing tests**
+
+```csharp
+// MatchLockMatchmakingTriggerTests
+[Test]
+[Arguments(false)]
+[Arguments(true)]
+public async Task Inviting_A_Locked_Player_Is_Not_Delivered_And_Tells_The_Inviter(bool inviteeStillInTheMatch)
+{
+    await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+    await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(inviteeStillInTheMatch ? FakeMatchServerGameSocket.ConnectedSlotTimeRemaining : SlotTimeRemaining);
+
+    (_, int inviterAccountID, string inviterAccountName, string inviterCookie) = await ChatTestData.SeedPlayer(host);
+    (int inviteeUserID, int inviteeAccountID, string inviteeAccountName, string inviteeCookie) = await ChatTestData.SeedPlayer(host);
+
+    await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, inviteeUserID, inviteeAccountID, inviteeAccountName, gameSocket);
+
+    using TcpClient inviterClient = await host.ConnectAndAuthenticateClientAsync(inviterAccountID, inviterAccountName, inviterCookie, RemoteIP);
+    using TcpClient inviteeClient = await host.ConnectAndAuthenticateClientAsync(inviteeAccountID, inviteeAccountName, inviteeCookie, RemoteIP);
+
+    NetworkStream inviterStream = inviterClient.GetStream();
+    NetworkStream inviteeStream = inviteeClient.GetStream();
+
+    ClientChatSession inviteeSession = Context.ClientChatSessions[inviteeAccountName];
+
+    try
+    {
+        MatchmakingGroup group = await CreateGroup(inviterStream, inviterAccountID);
+
+        // A Player Still In Their Match Reports Joining Its Match Server, And Is Locked All The Same
+        if (inviteeStillInTheMatch)
+        {
+            await ChatTestProtocol.WriteFrame(inviteeStream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
+
+            await ChatTestProtocol.WaitUntil(() => inviteeSession.ReportedJoiningGame, FrameTimeout);
+        }
+
+        await ChatTestProtocol.WriteFrame(inviterStream, ChatTestProtocol.BuildGroupInvite(inviteeAccountName));
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(inviterStream, FrameTimeout);
+
+        ChatBuffer? broadcast = await ChatTestProtocol.ReadUntilCommand(inviterStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST, QuietPeriod);
+        ChatBuffer? invite = await ChatTestProtocol.ReadUntilCommand(inviteeStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE, QuietPeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.InviteeLockedMessage(inviteeAccountName));
+            await Assert.That(broadcast).IsNull();
+            await Assert.That(invite).IsNull();
+            await Assert.That(group.Members.Count).IsEqualTo(1);
+            await Assert.That(inviteeSession.PendingMatchLockReturn).IsNull();
+        }
+    }
+
+    finally
+    {
+        DisbandGroups(inviterAccountID);
+    }
+}
+
+[Test] public async Task A_Locked_Player_Inviting_Someone_Is_Sent_Back_And_The_Invite_Is_Not_Delivered()
+    // the inviter is the locked slot account: SlotAccountMessage and an AUTO_MATCH_CONNECT; the receiver reads no NET_CHAT_CL_TMM_GROUP_INVITE within QuietPeriod
+[Test] public async Task Another_Account_Of_A_Locked_User_Inviting_Someone_Is_Told_Why()
+    // OtherAccountMessage; no AUTO_MATCH_CONNECT and no failure reply; the receiver reads no invite
+[Test] public async Task Inviting_A_Player_Who_Is_Not_Locked_Still_Delivers_The_Invite()
+    // the receiver reads a NET_CHAT_CL_TMM_GROUP_INVITE, and the inviter reads no notice within QuietPeriod
+// MatchLockMessageTests: Notices_Call_The_Restriction_A_Match_Lock_And_Never_A_Ban adds InviteeLockedMessage("[TAG]Invitee") to its cases
+```
+
+- [ ] **Step 2: Run the tests to verify they fail**
+
+Run: `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer --treenode-filter "/*/*/MatchLockMatchmakingTriggerTests/*"`
+Expected: FAIL to compile, because `BuildGroupInvite` and `InviteeLockedMessage` do not exist.
+
+- [ ] **Step 3: Implement the refused invites**
+
+`GroupInvite` first calls `Enforce` on the inviter and returns when it is TRUE, because a locked player's invite is an attempt to play. When the receiver has a chat session (`Context.ClientChatSessions`, keyed by the bare name which the client sends) and `HoldsLock(receiver)` is TRUE, it sends the inviter `InviteeLockedMessage(receiver.Account.NameWithClanTag)` from `MessageSenderName`, logs the refusal at information level with both accounts' clan-tagged names, and returns, so that neither the invite nor its broadcast is sent; otherwise it invites as before. A comment says why there is no failure reply: `CChatManager::HandleTMMJoinFailed` would make the inviter's client leave its own group, and inviting leaves nothing to unlock on the inviter's screen.
+
+- [ ] **Step 4: Run the tests to verify they pass**
+
+Run: the command from Step 2, then `dotnet test --project ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer --treenode-filter "/*/*/MatchLockMessageTests/*"`
 Expected: PASS.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add KONGOR.MasterServer/Models/ServerManagement/MatchLock.cs TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ClientHandshake.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestData.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockCreationTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockSendBackTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockRefusalMonitorTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Integration/ClientHandshakeIntegrationTests.cs ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/MatchLockStoreTests.cs
-git commit -m "Name Accounts With Their Clan Tags In Notices"
+git add TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupInvite.cs TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Infrastructure/ChatTestProtocol.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Services/MatchLockMessageTests.cs
+git commit -m "Refuse Invites To And From A Locked Player"
 ```
 
 ---
 
 ### Task 12: Verify The Match Lock With Real Game Clients (Needs The Owner)
 
-**This task needs the owner, and runs last, after Tasks 19 to 24.** The controller prepares and observes; the owner plays the clients. The first live run (2026-10-21) passed most of the scenarios which it reached, and found what Tasks 19 to 24 change (the spec's "Live Test Amendment (2026-10-21)"). This run re-tests what they change, then carries on with the scenarios which the first run did not reach; the first run's passes are not repeated.
+**This task needs the owner, and runs last, after Tasks 19 to 25.** The controller prepares and observes; the owner plays the clients. The first live run (2026-10-21) passed most of the scenarios which it reached, and found what Tasks 19 to 25 change (the spec's "Live Test Amendment (2026-10-21)"). This run re-tests what they change, then carries on with the scenarios which the first run did not reach; the first run's passes are not repeated.
 
 **Files:** none changed. Outcomes are recorded in the branch's working notes.
 
@@ -2220,16 +2346,17 @@ git commit -m "Name Accounts With Their Clan Tags In Notices"
 - [ ] Start NEXUS through the Aspire AppHost in Development before COMPEL. It plays one player per team, as `TRANSMUTANSTEIN.ChatServer/appsettings.Development.json` sets, and the party scenario raises the team size there for its own run.
 - [ ] Use normal accounts only, never guest or staff accounts, which are exempt: two players, a sub-account of player A, and a third player, C, for the party, with A in a clan for the clan tag checks.
 - [ ] Watch the match server consoles for `Sending info to … - …ms` lines (one per reconnect query), `Cookie failed for` (a duplicate-login kick), `Game Cookie failed for` (a removal for joining another game), and `disconnect_unique_login_failed` (the final rejection of Task 22).
-- [ ] Watch NEXUS's logs for lock creation, verdicts, refusals of `c_conn` and of the server list, ignored stale refusals, lifts, and the queue's failure replies, and check that no line prints a session cookie.
+- [ ] Watch NEXUS's logs for lock creation, verdicts, refusals of `c_conn`, of the server list, of groups, and of invites, ignored stale refusals, lifts, and failure replies, and check that each line names accounts with their clan tags.
 
 **Re-test.** Each scenario starts from a fresh Caldavar 1v1 which reached hero selection, unless it says otherwise; the expected outcome follows the arrow.
-- [ ] **Leaving, then queueing.** A leaves the match for the menu → nothing happens: no notice, no pull, and the group which the client creates by itself stands. A clicks Play → the "Temporary Ban" popup with a countdown, an unlocked matchmaking screen, the slot notice in chat, and A is pulled back into the match. Repeat once in a pick phase.
+- [ ] **Leaving, then queueing.** A leaves the match for the menu → nothing happens: no notice, no pull, and the solo group which the client creates by itself stands. A clicks Play → no popup, the matchmaking screen resets as the client leaves its group with "foundmatch", the slot notice from "Match Lock" arrives, and A is pulled back into the match. Repeat once in a pick phase.
 - [ ] **A public game through the server list.** After leaving, A opens the public game list → an empty list, the slot notice, and the pull. After leaving again, A creates a public game → no match server leaves idle, the slot notice, and the pull. Back in the match and out of it again → nothing happens until A acts (finding 1).
 - [ ] **A custom game.** After leaving, A creates a custom game on a chosen match server → refused through the server list, as above.
 - [ ] **A direct join and spectating.** After leaving, A joins C's public game from the friend list, then, after another leave, spectates C → each time the client is disconnected at once, with its message that the game server could not authorise the account and with no retries, the slot notice arrives, and A is pulled back within one reminder interval. The other match server logs `disconnect_unique_login_failed` once, its game carries on, and NEXUS logs no client authentication error for it.
-- [ ] **The alt account.** A logs in on the sub-account → the other-account notice, naming A with its clan tag and giving the bare name to log in with, and no pull. The sub-account clicks Play → the "Temporary Ban" popup and the notice, and no pull. It opens the public game list → an empty list and the notice.
-- [ ] **The party.** With teams of two, C leads a group with A while A is locked and at the menu, and clicks Play → A gets the popup and the pull, and leaves the group; C's screen unlocks, C is told in chat that A, named with its clan tag, keeps the group from searching, and C can then queue without A. Repeat while A is still in the match → A sees nothing, and C is told, and its screen unlocks.
-- [ ] **A second machine.** While A plays on machine 1, A logs in on machine 2 → machine 1's chat ends with the logged-in-elsewhere notice naming A with its clan tag, and its game plays on; machine 2 gets the login notice, and no pull and no wait. Machine 2 clicks Play → the popup and the notice to close the other game; closing machine 1's game sends machine 2 back within one reminder interval.
+- [ ] **The alt account.** A logs in on the sub-account → the other-account notice, naming A with its clan tag and telling the player to log in on that account, and no pull. The sub-account clicks Play → the "Temporary Ban" popup with a countdown, the matchmaking screen unlocked, and the notice, and no pull. It accepts an invite → the same. It opens the public game list → an empty list and the notice.
+- [ ] **Groups and invites.** After leaving, A accepts C's invite → no popup, the slot notice, and the pull, and C's group is unchanged. After leaving again, A invites C → the slot notice and the pull, and C gets no invite. While A is locked, at the menu and again while still in the match, C invites A → A gets nothing, C is told in chat that A, named with its clan tag, is under a match lock, and C's group is unchanged.
+- [ ] **A premade party which outlives its match.** With teams of two, A and C play the match as one party; A leaves, and the party leader clicks Play → A is pulled back, the party is unreadied and its screens unlock, and nobody gets a popup. Repeat while A is still in the match → A sees nothing, and the leader's screen unlocks.
+- [ ] **A second machine.** While A plays on machine 1, A logs in on machine 2 → machine 1's chat ends with the logged-in-elsewhere notice naming A with its clan tag, and its game plays on; machine 2 gets the login notice, and no pull and no wait. Machine 2 clicks Play → the "Temporary Ban" popup and the notice to close the other game; closing machine 1's game sends machine 2 back within one reminder interval.
 - [ ] **A crash and relaunch.** Kill A's client mid-match, relaunch it, and log in → the login notice, and the client's own reconnect prompt (record its countdown: finding 6). Clicking it once the match server has dropped the dead connection returns A; clicking Play instead pulls A back as soon as the slot frees.
 - [ ] **A crashed match server.** Kill the match server process mid-match → at A's next login or attempt to play, the lock lifts, silently or with the try-again notice after a refusal; A plays normally, and is never sent to the dead server.
 - [ ] **A chat server restart.** Restart the chat server while A plays → nobody in the match gets a notice. Restart it while A is locked at the menu → A gets the login notice once the client's chat reconnects, and only once.
@@ -2241,7 +2368,7 @@ git commit -m "Name Accounts With Their Clan Tags In Notices"
 - [ ] **A chat server restart during a wait** → no automatic send-back afterwards, and machine 2's next attempt to play sends it back.
 - [ ] **A second switch in the same match,** back from machine 2 to machine 1 → machine 1 is sent back at its attempt to play, with no kick and no ban, so that two switches in one match never lock the player out.
 - [ ] **A second switch through the reconnect prompt.** While machine 2 holds the slot, log in on machine 1 and click its reconnect prompt at once → watch for a `Cookie failed for` line for machine 2 (the spec's cost of a connecting chat session's refresh).
-- [ ] **An in-place re-login.** On the machine in the match, log in again without leaving it, if the client allows it → it plays on, NEXUS logs the refresh, naming the accounts and the match server but never the cookie, and no `Cookie failed for` line follows.
+- [ ] **An in-place re-login.** On the machine in the match, log in again without leaving it, if the client allows it → it plays on, NEXUS logs the refresh, and no `Cookie failed for` line follows.
 - [ ] **A normal logout on the live machine.** With machine 1 retired and still in the match, log out on machine 2 → only machine 2's chat ends, and machine 1 plays on with no kick.
 - [ ] **A sub-account spectating the main account's match, if possible** → expect a duplicate-login kick of A (the spec's multi-boxing cost), and record whether a second one bans A from the match.
 - [ ] **Removal by a vote.** With teams of two, let A idle until the match server flags A as idle, and have A's team vote A out → A's next attempt to play lifts the lock and proceeds.
@@ -2272,5 +2399,3 @@ git commit -m "Name Accounts With Their Clan Tags In Notices"
   - It stays open and clickable after NEXUS pulls the player back, and clicking it disconnects and reconnects the player again, at the cost of disconnect allowance and a reload (finding 3). With the pull at login gone (Task 20), it no longer races NEXUS at login, but it can still outlive a later pull. Fix idea: hide `reconnect_dialog` (HON-Assets `ui/fe2/newui/main_dialogs_v2.package`) as soon as the client starts connecting or loading, as `lobby_ack_timeout_dialog` hides on `GamePhase`, and disable its button while the client is connected.
   - It shows a still-connected slot's reply, the largest time less the game time, as a countdown of millions of seconds (finding 6; `CServerList::ProcessReconnectInfoResponse`, HON `K2.Engine/c_hostclient.cpp`). Fix idea: treat a reply above half the range as a slot which is still connected from another game, and say so instead of counting down, in the dialog's `ReconnectTimer` handler or in the engine.
   - Until then, release notes can tell players to close the prompt once they are back in their match.
-- **Spectating and joining a friend's game are refused only at `c_conn`.** The chat server's spectate request (`TRANSMUTANSTEIN.ChatServer/CommandProcessors/Social/PlayerSpectate.cs`) could refuse a locked player before the client connects anywhere; the owner's call.
-- **Cookies in older log lines.** The client requester's forged-cookie warning, and the invalid-cookie warnings of several other controllers, print unrecognised cookies on purpose, as evidence of abuse, and with one login per user they now print retired cookies too, while the registration lines of match servers and their managers print those servers' session cookies. Whether "never log a session cookie" reaches them is the owner's call.
