@@ -42,10 +42,12 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     private static readonly TimeSpan ExpiryMargin = MatchLockService.ReturnResendInterval;
 
     [Test]
-    public async Task Logging_In_While_Locked_Sends_The_Player_Back_To_Their_Match()
+    [Arguments(SlotTimeRemaining)]
+    [Arguments(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining)]
+    public async Task Logging_In_While_Locked_Tells_The_Player_Without_Sending_Them_Back(uint slotTimeRemaining)
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(slotTimeRemaining);
 
         (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
 
@@ -57,18 +59,16 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
 
-        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
-        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? connect = await ChatTestProtocol.ReadAutoMatchConnect(stream, FrameTimeout);
+        // The Game Client's Own Reconnect Prompt Handles A Return At Login, So Neither A Free Nor A Still-Connected Slot Starts A Return
+        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2 + QuietPeriod);
 
         using (Assert.Multiple())
         {
-            await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
-            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.SlotAccountMessage);
-            await Assert.That(connect?.ArrangedMatchType).IsEqualTo((byte) lockedMatch.Lock.ArrangedMatchType);
-            await Assert.That(connect?.MatchID).IsEqualTo(lockedMatch.Lock.MatchID);
-            await Assert.That(connect?.Address).IsEqualTo(lockedMatch.Lock.ServerAddress);
-            await Assert.That((ushort?) connect?.Port).IsEqualTo(lockedMatch.Lock.ServerPort);
-            await Assert.That(connect?.RandomInteger).IsNotEqualTo(-1);
+            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.SlotAccountLoginMessage]);
+            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+            await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn).IsNull();
+            await Assert.That(gameSocket.Requests.Count).IsEqualTo(1);
+            await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
         }
     }
 
@@ -95,6 +95,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
             await Assert.That(noticeMessages.Count).IsEqualTo(1);
             await Assert.That(noticeMessages.SingleOrDefault()).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName));
             await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+            await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn).IsNull();
         }
     }
 
@@ -110,7 +111,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         using TcpClient firstClient = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
 
-        await LogInAndReadSendBack(firstClient.GetStream());
+        await LogInAndReadNotice(firstClient.GetStream());
 
         // The Game Client Reconnects To The Chat Server With The Session Cookie Of The Same Login, Which Replaces The First Chat Session
         using TcpClient secondClient = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
@@ -170,7 +171,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await LogInAndReadSendBack(stream);
+        await RefuseAndReadSendBack(host, accountName, stream);
 
         (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? reminder = await ChatTestProtocol.ReadAutoMatchConnect(stream, ReminderTimeout);
 
@@ -197,7 +198,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await LogInAndReadSendBack(stream);
+        await RefuseAndReadSendBack(host, accountName, stream);
 
         // The Game Client Acknowledges An "AUTO_MATCH_CONNECT" As It Acts On It, While Its Connection To The Match Server Can Still Be Refused
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY));
@@ -221,7 +222,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await LogInAndReadSendBack(stream);
+        await RefuseAndReadSendBack(host, accountName, stream);
 
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
 
@@ -253,7 +254,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
             NetworkStream stream = client.GetStream();
 
-            await LogInAndReadSendBack(stream);
+            await RefuseAndReadSendBack(host, accountName, stream);
 
             await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{OtherServerIPAddress}:{otherServerPort}"));
 
@@ -283,7 +284,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         ClientChatSession session = Context.ClientChatSessions[accountName];
 
-        await LogInAndReadSendBack(client.GetStream());
+        await RefuseAndReadSendBack(host, accountName, client.GetStream());
 
         MatchLockReturn? pendingReturn = session.PendingMatchLockReturn;
 
@@ -320,7 +321,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await LogInAndReadSendBack(stream);
+        await RefuseAndReadSendBack(host, accountName, stream);
 
         // The Player's Slot Is Gone Before The Reminder Loop Verifies The Lock Again
         gameSocket.SlotTimeRemaining = 0;
@@ -601,34 +602,6 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     }
 
     [Test]
-    public async Task Logging_In_While_Connected_Elsewhere_Tells_The_Player_To_Close_The_Other_Game_And_Sends_Nothing_Back()
-    {
-        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
-
-        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
-
-        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
-
-        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
-
-        NetworkStream stream = client.GetStream();
-
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
-
-        (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2 + QuietPeriod);
-
-        using (Assert.Multiple())
-        {
-            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.ConnectedElsewhereMessage]);
-            await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
-            await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn?.SlotConnected).IsTrue();
-            await Assert.That(gameSocket.Requests.Count).IsGreaterThanOrEqualTo(2);
-            await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
-        }
-    }
-
-    [Test]
     public async Task A_Player_Waiting_For_The_Other_Machine_Is_Sent_Back_As_Soon_As_The_Slot_Is_Free()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
@@ -642,7 +615,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+        await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
         (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
 
@@ -675,7 +648,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await LogInAndReadSendBack(stream);
+        await RefuseAndReadSendBack(host, accountName, stream);
 
         // The Game Client's Own Connection To The Locked Match Server Reads As Connected While It Loads
         gameSocket.SlotTimeRemaining = FakeMatchServerGameSocket.ConnectedSlotTimeRemaining;
@@ -777,7 +750,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+        await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
         (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
 
@@ -811,7 +784,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         NetworkStream stream = client.GetStream();
 
-        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+        await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
         (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
 
@@ -871,7 +844,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         if (slotConnected)
         {
-            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+            await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
             (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
 
@@ -880,7 +853,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         else
         {
-            await LogInAndReadSendBack(stream);
+            await RefuseAndReadSendBack(host, accountName, stream);
         }
 
         MatchLockReturn? pendingReturn = session.PendingMatchLockReturn;
@@ -930,11 +903,23 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     }
 
     /// <summary>
-    ///     Sends the login action, and reads the notice and the initial "AUTO_MATCH_CONNECT" with which it sends the slot account back to the locked match.
+    ///     Sends the login action, and reads the notice with which it tells the slot account about the locked match.
     /// </summary>
-    private static async Task LogInAndReadSendBack(NetworkStream stream)
+    private static async Task LogInAndReadNotice(NetworkStream stream)
     {
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(ChatProtocol.ActionCampaign.AC_DAILY_LOGINS));
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+        await Assert.That(notice?.Message).IsEqualTo(MatchLockService.SlotAccountLoginMessage);
+    }
+
+    /// <summary>
+    ///     Refuses an attempt to play another game, and reads the notice and the initial "AUTO_MATCH_CONNECT" with which it sends the slot account back to the locked match.
+    /// </summary>
+    private static async Task RefuseAndReadSendBack(ChatServerHost host, string accountName, NetworkStream stream)
+    {
+        await host.Services.GetRequiredService<MatchLockService>().Enforce(Context.ClientChatSessions[accountName]);
 
         (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
         (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? connect = await ChatTestProtocol.ReadAutoMatchConnect(stream, FrameTimeout);

@@ -17,6 +17,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal const string SlotAccountMessage = "You left a match which is still in progress, so you cannot play another game until it ends. Sending you back to it.";
 
     /// <summary>
+    ///     The notice to the account which holds the slot in the locked match when it logs in, which is not sent back, because the game client's own reconnect prompt offers the return at login.
+    /// </summary>
+    internal const string SlotAccountLoginMessage = "You are in a match which is still in progress, and a match lock keeps you from playing another game until it ends. Trying to play another game sends you back to it.";
+
+    /// <summary>
     ///     The notice to a player who is still in the locked match, whose own attempt to play another game is refused, and who is not sent anywhere.
     /// </summary>
     internal const string InMatchMessage = "You are in a match which is still in progress, so you cannot start another game until it ends.";
@@ -285,10 +290,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
-    ///     Enforces the match lock when a player logs in, once per login, so that the chat reconnects of the same login, which report logging in again, are left alone.
-    ///     A session which has reported joining a game, as the game client does when it is already connected to a match server, is left alone too.
+    ///     Tells a locked player about the match lock when they log in, once per login, so that the chat reconnects of the same login, which report logging in again, are left alone.
+    ///     A session which has reported a game, as the game client does when it is already connected to a match server, is left alone too.
+    ///     It never sends the player back, because the game client raises its own reconnect prompt at login, which a send-back at the same moment would leave open and clickable beneath the match.
     /// </summary>
-    public async Task EnforceAtLogin(ClientChatSession session)
+    public async Task NotifyAtLogin(ClientChatSession session)
     {
         if (IsExempt(session.Account) || session.ReportedJoiningGame)
             return;
@@ -296,7 +302,29 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (await distributedCacheStore.MarkMatchLockLoginChecked(session.Metadata.SessionCookie) is false)
             return;
 
-        await Enforce(session);
+        MatchLock? matchLock = await distributedCacheStore.GetMatchLock(session.Account.User.ID);
+
+        if (matchLock is null)
+            return;
+
+        if (KeepsLock(await Verify(matchLock)) is false)
+            return;
+
+        if (matchLock.AccountID == session.Account.ID)
+        {
+            session.SendNotice(MessageSenderName, SlotAccountLoginMessage);
+
+            logger.LogInformation(@"Telling Account ""{AccountName}"" At Login That It Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
+                session.Account.Name, matchLock.MatchID, matchLock.ServerID);
+        }
+
+        else
+        {
+            session.SendNotice(MessageSenderName, OtherAccountMessage(matchLock.AccountName));
+
+            logger.LogInformation(@"Telling Account ""{AccountName}"" At Login That Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"" As Account ""{SlotAccountName}""",
+                session.Account.Name, matchLock.MatchID, matchLock.ServerID, matchLock.AccountName);
+        }
     }
 
     /// <summary>

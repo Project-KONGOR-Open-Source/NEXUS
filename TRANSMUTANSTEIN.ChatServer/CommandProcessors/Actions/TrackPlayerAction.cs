@@ -10,10 +10,10 @@ public class TrackPlayerAction(MatchLockService matchLockService) : IAsynchronou
         switch (requestData.Action)
         {
             // Daily Login Action
-            // The Game Client Sends It Last Whenever Its Chat Connection Is Accepted, So It Triggers The Match Lock At Login
+            // The Game Client Sends It Last Whenever Its Chat Connection Is Accepted, So It Tells A Locked Player About The Match Lock At Login
             case ChatProtocol.ActionCampaign.AC_DAILY_LOGINS:
                 Log.Debug(@"Daily Login Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
-                await matchLockService.EnforceAtLogin(session);
+                await matchLockService.NotifyAtLogin(session);
                 break;
 
             // Analytics Events

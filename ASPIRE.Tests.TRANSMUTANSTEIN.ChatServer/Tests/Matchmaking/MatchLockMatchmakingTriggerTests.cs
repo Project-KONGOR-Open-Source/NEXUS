@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 
 /// <summary>
-///     Tests for refusing matchmaking to a locked player: creating a group of any type, joining a group, queueing, and reaching full loading each send the player back to their match in progress, and a group with a locked member cannot queue.
+///     Tests for refusing matchmaking to a locked player: joining a group, queueing, and reaching full loading each send the player back to their match in progress, creating a group refuses nothing, and a group with a locked member cannot queue.
 ///     Every test logs in with a fresh session cookie, and disposes its locked match and the groups which it created, because every chat server host shares the unprefixed distributed cache and the matchmaking group registry while each host's database restarts its identifiers, so a lock or a group left behind would bind a later test.
 /// </summary>
 [NotInParallel(nameof(ChatServerHost))]
@@ -24,7 +24,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     [Test]
     [Arguments(ChatProtocol.TMMType.TMM_TYPE_PVP)]
     [Arguments(ChatProtocol.TMMType.TMM_TYPE_COOP)]
-    public async Task Creating_A_Group_While_Locked_Is_Refused_And_Sends_The_Player_Back(ChatProtocol.TMMType groupType)
+    public async Task Creating_A_Group_While_Locked_Creates_It_And_Sends_Nothing(ChatProtocol.TMMType groupType)
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
@@ -39,12 +39,26 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
         try
         {
-            // A Lock Refuses A Co-Op Group Too, Because Any Group Leads To Another Game
+            // The Game Client Creates A Solo Group By Itself After Login, So Creating One Is Not An Attempt To Play
             await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupCreate(groupType));
 
-            await AssertSentBack(stream, lockedMatch);
+            bool groupUpdated = await ChatTestProtocol.ReadUntilCommand(stream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE, FrameTimeout) is not null;
 
-            await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
+            (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2);
+
+            MatchmakingGroup? group = MatchmakingService.GetMatchmakingGroup(accountID);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(groupUpdated).IsTrue();
+                await Assert.That(group).IsNotNull();
+                await Assert.That(group?.Members.Count).IsEqualTo(1);
+                await Assert.That(group?.Leader.Account.ID).IsEqualTo(accountID);
+                await Assert.That(noticeMessages.Count).IsEqualTo(0);
+                await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
+                await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn).IsNull();
+                await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNotNull();
+            }
         }
 
         finally
@@ -252,49 +266,6 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
         finally
         {
             DisbandGroups(leaderAccountID, memberAccountID);
-        }
-    }
-
-    [Test]
-    public async Task Creating_A_Group_While_Still_In_The_Match_Gives_Only_The_In_Match_Notice()
-    {
-        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
-        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
-
-        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
-
-        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
-
-        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
-
-        NetworkStream stream = client.GetStream();
-
-        ClientChatSession session = Context.ClientChatSessions[accountName];
-
-        try
-        {
-            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
-
-            bool reportedJoiningGame = await ChatTestProtocol.WaitUntil(() => session.ReportedJoiningGame, FrameTimeout);
-
-            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupCreate(ChatProtocol.TMMType.TMM_TYPE_PVP));
-            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupCreate(ChatProtocol.TMMType.TMM_TYPE_PVP));
-
-            (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(stream, MatchLockService.ReturnResendInterval * 2);
-
-            using (Assert.Multiple())
-            {
-                await Assert.That(reportedJoiningGame).IsTrue();
-                await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.InMatchMessage]);
-                await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
-                await Assert.That(session.PendingMatchLockReturn).IsNull();
-                await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
-            }
-        }
-
-        finally
-        {
-            DisbandGroups(accountID);
         }
     }
 
