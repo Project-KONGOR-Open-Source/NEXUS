@@ -390,7 +390,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         bool firstRefused = await matchLockService.Enforce(session);
 
-        // The Match Server Asks Again About A Refused Client Connection At Its Authentication Request Interval, Which Belongs To The Same Attempt To Join Another Game
+        // Another Refusal Of The Same Player Soon After Belongs To The Same Attempt To Join Another Game
         await Task.Delay(TimeSpan.FromMilliseconds(MatchServerChatSession.AuthenticationRequestIntervalMilliseconds));
 
         bool retryRefused = await matchLockService.Enforce(session);

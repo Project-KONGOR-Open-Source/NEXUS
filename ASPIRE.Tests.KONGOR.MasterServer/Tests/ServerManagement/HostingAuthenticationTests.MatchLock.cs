@@ -1192,7 +1192,7 @@ public sealed partial class HostingAuthenticationTests
     }
 
     /// <summary>
-    ///     Asserts that the client connection reply rejects the client at once, which is a reply that names the account and carries nothing else, so that the match server disconnects the client without retrying or authenticating it.
+    ///     Asserts that the client connection reply rejects the client at once, which is a reply that names the account and carries nothing else, so that the match server disconnects the client without retrying or admitting it.
     ///     The reply carries no "game_cookie", no "auth_failure", which would make the match server drop its session, or end its match if the match has not started yet, and no "cookie" set to "Invalid cookie.", after which the match server refuses the client's session cookie for as long as it runs.
     /// </summary>
     private async Task AssertClientConnectionIsRejectedAtOnce(HttpResponseMessage response, string accountName)

@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 
 /// <summary>
-///     Tests for relaying the master server's refusals of a locked player's connections to other match servers: the chat server sends the player back through their chat session when they have one, and otherwise verifies their lock anyway, so that a player who was removed from their match while their chat is down is served when the match server asks again.
+///     Tests for relaying the master server's refusals of a locked player's connections to other match servers: the chat server sends the player back through their chat session when they have one, and otherwise verifies their lock anyway, so that a player who was removed from their match while their chat is down is served on their next attempt.
 ///     Every test logs in with a fresh session cookie and disposes its locked match, because every chat server host shares the unprefixed distributed cache while each host's database restarts its identifiers, so a lock left behind would bind a later test.
 /// </summary>
 [NotInParallel(nameof(ChatServerHost))]
@@ -363,13 +363,17 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
             bool lifted = await ChatTestData.WaitUntilLockIsGone(host, userID, LockLiftTimeout);
             HttpResponseMessage retried = await masterServer.ConnectClient(otherServerSession, cookie);
 
+            IDictionary<object, object> refusedFields = PhpSerializerNET.PhpSerialization.Deserialize(await refused.Content.ReadAsStringAsync()) as IDictionary<object, object> ?? throw new InvalidOperationException("The Refused Reply Was Not A PHP Array");
+            IDictionary<object, object> retriedFields = PhpSerializerNET.PhpSerialization.Deserialize(await retried.Content.ReadAsStringAsync()) as IDictionary<object, object> ?? throw new InvalidOperationException("The Retried Reply Was Not A PHP Array");
+
             using (Assert.Multiple())
             {
                 await Assert.That(refused.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
-                await Assert.That(await refused.Content.ReadAsStringAsync()).DoesNotContain("game_cookie");
+                await Assert.That(refusedFields.Count).IsEqualTo(1);
+                await Assert.That(Convert.ToInt32(refusedFields["account_id"])).IsEqualTo(accountID);
                 await Assert.That(lifted).IsTrue();
                 await Assert.That(retried.StatusCode).IsEqualTo(HttpStatusCode.OK);
-                await Assert.That(await retried.Content.ReadAsStringAsync()).Contains("account_id");
+                await Assert.That(retriedFields).ContainsKey("game_cookie");
             }
         }
 

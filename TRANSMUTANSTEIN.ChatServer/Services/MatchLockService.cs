@@ -35,7 +35,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     The notice to a player whose refused attempt to play found that the lock has lifted, which nothing repeats, so the player has to try again.
     /// </summary>
-    internal const string RefusalLiftedMessage = "Your match has ended, so you can play another game now. Try again.";
+    internal const string RefusalLiftedMessage = "Your match lock has lifted, because you can no longer return to your last match. Please try again.";
 
     /// <summary>
     ///     The reply to the reconnect query above which the slot is still connected to the match.
@@ -354,7 +354,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Acts on the master server's refusal of a locked user's client connection on a match server other than the locked one, which sends no chat message of its own.
-    ///     The refused account is enforced through its chat session when it has one, and otherwise the user's lock is verified anyway, so that a player who was removed from the match while their chat is down is no longer locked when the match server asks again.
+    ///     The refused account is enforced through its chat session when it has one, and otherwise the user's lock is verified anyway, so that a player who was removed from the match while their chat is down is no longer locked when they next try to play.
     /// </summary>
     public async Task HandleRefusal(MatchLockRefusal refusal)
     {

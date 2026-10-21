@@ -356,14 +356,14 @@ public partial class ServerRequesterController
 
             catch (Exception exception)
             {
-                // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because The Match Server Asks Again After A Refusal And Every Refusal Is Published Anew
+                // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because Serving The Client Would Break The Lock, And The Player's Next Attempt Publishes Its Refusal Anew
                 Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}""", account.Name, askingServer.ID);
             }
 
             Logger.LogInformation(@"Refused The Client Connection Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
                 account.Name, askingServer.ID, refusingLock.MatchID, refusingLock.ServerID);
 
-            // The Match Server Retries Any Reply Which It Cannot Read While The Client Waits, And Blacklists The Login Cookie On "Invalid Cookie.", Whereas A Reply Which Names The Account But Carries No Game Cookie Disconnects The Client At Once ("DISCONNECT_UNIQUE_LOGIN_FAILED"), With No Retry, No Blacklisting, And No Harm To The Match Server's Session ("CClientConnection::CheckAuthResult")
+            // The Match Server Retries Any Reply Which It Cannot Read While The Client Waits, And Blacklists The Login Cookie On "Invalid cookie.", Whereas A Reply Which Names The Account But Carries No Game Cookie Disconnects The Client At Once ("DISCONNECT_UNIQUE_LOGIN_FAILED"), With No Retry, No Blacklisting, And No Harm To The Match Server's Session ("CClientConnection::CheckAuthResult")
             return Conflict(PhpSerialization.Serialize(new Dictionary<string, object> { { "account_id", account.ID } }));
         }
 
