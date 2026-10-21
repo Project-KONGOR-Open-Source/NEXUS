@@ -67,8 +67,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal static readonly TimeSpan ReturnResendInterval = TimeSpan.FromSeconds(5);
 
     /// <summary>
-    ///     How long a player whose return is pending waits after a notice before a refused attempt tells them why again, which is as long as the match server keeps retrying the authentication of a refused connection.
-    ///     The match server asks about a refused connection again with every retry, so that one attempt to join another game would otherwise be explained several times.
+    ///     How long a player whose return is pending waits after a notice before a refused attempt tells them why again.
+    ///     A player often repeats an attempt within seconds, by clicking Play again, or by asking for the server list and then joining a game, so that one wish to play another game would otherwise be explained several times.
+    ///     It lasts as long as the match server retries the authentication of a refused connection, because during a staggered deployment a master server of the previous version can still answer, whose refusal the match server retries, and which relays every retry as another refused attempt.
     /// </summary>
     internal static readonly TimeSpan NoticeRepeatInterval = TimeSpan.FromMilliseconds(MatchServerChatSession.AuthenticationRequestTotalTimeoutMilliseconds);
 
@@ -78,7 +79,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal static readonly TimeSpan EngineClientConnectionTimeout = TimeSpan.FromSeconds(15);
 
     /// <summary>
-    ///     How long a player who is sent back is reminded to return: as long as the match server keeps retrying the authentication of a refused connection, plus as long as the game client keeps trying to connect, plus one resend interval, so that a reminder still follows the game client's last attempt.
+    ///     How long a player who is sent back is reminded to return: as long as the match server retries the authentication of a refused connection, plus as long as the game client keeps trying to connect, plus one resend interval, so that a reminder still follows the game client's last attempt.
+    ///     The master server's own refusal is final and never retried, but during a staggered deployment a master server of the previous version can still answer, whose refusal the match server retries while the game client keeps connecting and ignores every reminder.
+    ///     A window longer than a return needs costs nothing, because the reminders stop as soon as the game client reports joining the locked match server.
     /// </summary>
     internal static readonly TimeSpan ReturnWindow = TimeSpan.FromMilliseconds(MatchServerChatSession.AuthenticationRequestTotalTimeoutMilliseconds) + EngineClientConnectionTimeout + ReturnResendInterval;
 
