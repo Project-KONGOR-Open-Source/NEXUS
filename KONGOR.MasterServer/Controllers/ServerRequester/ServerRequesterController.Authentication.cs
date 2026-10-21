@@ -363,7 +363,8 @@ public partial class ServerRequesterController
             Logger.LogInformation(@"Refused The Client Connection Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
                 account.Name, askingServer.ID, refusingLock.MatchID, refusingLock.ServerID);
 
-            return Conflict($@"Account ""{account.Name}"" Is Locked To Match ID ""{refusingLock.MatchID}"" On Another Match Server");
+            // The Match Server Retries Any Reply Which It Cannot Read While The Client Waits, And Blacklists The Login Cookie On "Invalid Cookie.", Whereas A Reply Which Names The Account But Carries No Game Cookie Disconnects The Client At Once ("DISCONNECT_UNIQUE_LOGIN_FAILED"), With No Retry, No Blacklisting, And No Harm To The Match Server's Session ("CClientConnection::CheckAuthResult")
+            return Conflict(PhpSerialization.Serialize(new Dictionary<string, object> { { "account_id", account.ID } }));
         }
 
         Dictionary<string, object> response = new ()

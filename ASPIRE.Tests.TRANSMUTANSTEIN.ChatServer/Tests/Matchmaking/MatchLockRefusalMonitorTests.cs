@@ -306,7 +306,37 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
     }
 
     [Test]
-    public async Task A_Removed_Player_Without_Chat_Is_Served_On_The_Engine_Retry()
+    public async Task A_Refusal_Which_Finds_The_Lock_Lifted_Tells_The_Player_To_Try_Again()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        // The Player Was Removed From The Match, Which Its Match Server Answers With No Time Remaining On The Slot
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(0);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket, GamePhase.GAME_PHASE_ACTIVE);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        await PublishRefusal(host, userID, accountName);
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+        (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? connect = await ChatTestProtocol.ReadAutoMatchConnect(stream, QuietPeriod);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.RefusalLiftedMessage);
+            await Assert.That(connect).IsNull();
+            await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(userID)).IsNull();
+        }
+    }
+
+    [Test]
+    public async Task A_Removed_Player_Without_Chat_Is_Served_On_Their_Next_Attempt()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
 
@@ -336,6 +366,7 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
             using (Assert.Multiple())
             {
                 await Assert.That(refused.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
+                await Assert.That(await refused.Content.ReadAsStringAsync()).DoesNotContain("game_cookie");
                 await Assert.That(lifted).IsTrue();
                 await Assert.That(retried.StatusCode).IsEqualTo(HttpStatusCode.OK);
                 await Assert.That(await retried.Content.ReadAsStringAsync()).Contains("account_id");

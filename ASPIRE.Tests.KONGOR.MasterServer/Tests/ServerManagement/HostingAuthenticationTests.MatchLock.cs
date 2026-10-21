@@ -37,7 +37,7 @@ public sealed partial class HostingAuthenticationTests
 
         HttpResponseMessage response = await ConnectClient(otherSession, cookie);
 
-        await AssertClientConnectionIsRefused(response);
+        await AssertClientConnectionIsRejectedAtOnce(response, NonHostAccountName);
 
         IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
 
@@ -65,7 +65,7 @@ public sealed partial class HostingAuthenticationTests
         await AssertClientConnectionReturnsTheAccount(await ConnectClient(lockedSession, cookie), NonHostAccountName);
 
         // The Same Lock Refuses Another Match Server, So That The Locked Match Server Is Served Because It Is The Locked One
-        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(otherSession, cookie), NonHostAccountName);
     }
 
     [Test]
@@ -93,7 +93,7 @@ public sealed partial class HostingAuthenticationTests
         await AssertClientConnectionReturnsTheAccount(await ConnectClient(renewedSession, cookie), NonHostAccountName);
 
         // The Same Lock Refuses Another Match Server, So That The Locked Match Server Is Served Because It Is The Locked One
-        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(otherSession, cookie), NonHostAccountName);
     }
 
     [Test]
@@ -113,7 +113,7 @@ public sealed partial class HostingAuthenticationTests
         await AssertClientConnectionReturnsTheAccount(await ConnectClient(Guid.CreateVersion7().ToString(), cookie), NonHostAccountName);
 
         // The Same Lock Refuses Another Match Server, So That The Unrecognised Session Is Served Because It Is Unrecognised
-        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(otherSession, cookie), NonHostAccountName);
     }
 
     [Test]
@@ -135,7 +135,7 @@ public sealed partial class HostingAuthenticationTests
         await AssertClientConnectionReturnsTheAccount(await ConnectClient(copyOnWriteMasterSession, cookie), NonHostAccountName);
 
         // The Same Lock Refuses Another Match Server, So That The Copy-On-Write Master's Session Is Served Because The Match Server Which Asks Is Unknown
-        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(otherSession, cookie), NonHostAccountName);
     }
 
     [Test]
@@ -153,7 +153,7 @@ public sealed partial class HostingAuthenticationTests
 
         string cookie = await CreateClientSessionCookie(NonHostSubAccountName);
 
-        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(otherSession, cookie), NonHostSubAccountName);
     }
 
     [Test]
@@ -466,7 +466,7 @@ public sealed partial class HostingAuthenticationTests
 
         string lockedGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, cookie)))["game_cookie"];
 
-        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(otherSession, cookie), NonHostAccountName);
 
         IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
 
@@ -823,7 +823,7 @@ public sealed partial class HostingAuthenticationTests
         await LockAccount(NonHostAccountName, lockedServerID);
 
         // The Player Leaves Their Match In Progress And Tries To Join Another Game
-        await AssertClientConnectionIsRefused(await ConnectClient(otherSession, cookie));
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(otherSession, cookie), NonHostAccountName);
 
         (IDictionary<object, object> lockedSessionCookies, IDictionary<object, object> lockedGameCookies) = await ReadAccountCookies(await RequestAccountCookiesInTheRequestBody(lockedSession, accountID));
 
@@ -1192,20 +1192,18 @@ public sealed partial class HostingAuthenticationTests
     }
 
     /// <summary>
-    ///     Asserts that the client connection reply refuses the client, without authenticating the account, and without "auth_failure", which would make the match server drop its session, or end its match if the match has not started yet.
-    ///     The reply also never sets the "cookie" to "Invalid cookie.", after which the match server refuses the client's session cookie for as long as it runs, so that the player could not join it even once the lock lifts.
+    ///     Asserts that the client connection reply rejects the client at once, which is a reply that names the account and carries nothing else, so that the match server disconnects the client without retrying or authenticating it.
+    ///     The reply carries no "game_cookie", no "auth_failure", which would make the match server drop its session, or end its match if the match has not started yet, and no "cookie" set to "Invalid cookie.", after which the match server refuses the client's session cookie for as long as it runs.
     /// </summary>
-    private static async Task AssertClientConnectionIsRefused(HttpResponseMessage response)
+    private async Task AssertClientConnectionIsRejectedAtOnce(HttpResponseMessage response, string accountName)
     {
-        string body = await response.Content.ReadAsStringAsync();
+        IDictionary<object, object> fields = await DeserialisePHPResponse(response);
 
         using (Assert.Multiple())
         {
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Conflict);
-            await Assert.That(body).DoesNotContain("account_id");
-            await Assert.That(body).DoesNotContain("game_cookie");
-            await Assert.That(body).DoesNotContain("auth_failure");
-            await Assert.That(body).DoesNotContain("Invalid cookie.");
+            await Assert.That(fields.Count).IsEqualTo(1);
+            await Assert.That(Convert.ToInt32(fields["account_id"])).IsEqualTo(await GetAccountID(accountName));
         }
     }
 

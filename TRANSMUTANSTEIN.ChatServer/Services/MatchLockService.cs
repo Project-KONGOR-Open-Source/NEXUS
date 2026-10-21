@@ -33,6 +33,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal const string ConnectedElsewhereWaitExpiredMessage = "Your other game has not left the match yet. Try again once it has closed, and you will be sent back.";
 
     /// <summary>
+    ///     The notice to a player whose refused attempt to play found that the lock has lifted, which nothing repeats, so the player has to try again.
+    /// </summary>
+    internal const string RefusalLiftedMessage = "Your match has ended, so you can play another game now. Try again.";
+
+    /// <summary>
     ///     The reply to the reconnect query above which the slot is still connected to the match.
     ///     The match server answers the time left before the slot is terminated, which is the largest possible time less the game time while the slot is connected, and only the remaining disconnect allowance once it has disconnected, so the middle of the range tells the two apart.
     /// </summary>
@@ -366,7 +371,13 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                 return;
             }
 
-            await Enforce(session, relayedRefusal: true);
+            // Nothing Repeats A Refused Server List Or A Finally Rejected Join, So A Refusal Which Finds The Lock Lifted Tells The Player To Try Again
+            if (await Enforce(session, relayedRefusal: true) is false)
+            {
+                session.SendNotice(MessageSenderName, RefusalLiftedMessage);
+
+                logger.LogInformation(@"Telling Account ""{AccountName}"" To Try Again, Because Its Refused Attempt Found Its Match Lock Lifted", refusal.AccountName);
+            }
 
             return;
         }
