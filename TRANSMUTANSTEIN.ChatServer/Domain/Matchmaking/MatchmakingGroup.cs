@@ -23,6 +23,12 @@ public class MatchmakingGroup
     private Lock QueueStateLock { get; } = new ();
 
     /// <summary>
+    ///     Serialises the removal of members (refused members of a queue, kicks, leaves, and ended sessions), so that two removals never change the group's members at the same time.
+    ///     It is taken before <see cref="QueueStateLock"/>, which a removal reaches when it takes the group out of the queue, and never while that lock is held.
+    /// </summary>
+    private Lock MembershipLock { get; } = new ();
+
+    /// <summary>
     ///     The group chat channel for pre-match communication.
     ///     Uses RESERVED | UNJOINABLE | HIDDEN flags per original implementation.
     /// </summary>
@@ -588,8 +594,6 @@ public class MatchmakingGroup
     /// </summary>
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType, bool notifyEmitter = true)
     {
-        List<MatchmakingGroupMember> recipients = [.. Members.Where(member => notifyEmitter || member.Account.ID != emitterAccountID)];
-
         ChatBuffer update = new ();
 
         update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
@@ -671,8 +675,11 @@ public class MatchmakingGroup
         {
             long sharedBufferLength = update.Size;
 
-            foreach (MatchmakingGroupMember recipient in recipients)
+            foreach (MatchmakingGroupMember recipient in Members)
             {
+                if (notifyEmitter is false && recipient.Account.ID == emitterAccountID)
+                    continue;
+
                 update.Resize(sharedBufferLength);
 
                 foreach (MatchmakingGroupMember member in Members)
@@ -688,8 +695,13 @@ public class MatchmakingGroup
 
         else
         {
-            foreach (MatchmakingGroupMember recipient in recipients)
-                recipient.Session.Send(update);
+            foreach (MatchmakingGroupMember member in Members)
+            {
+                if (notifyEmitter is false && member.Account.ID == emitterAccountID)
+                    continue;
+
+                member.Session.Send(update);
+            }
         }
     }
 
@@ -701,87 +713,91 @@ public class MatchmakingGroup
     /// </summary>
     public void RemoveMember(int accountID, bool kick = false, bool notifyRemovedMember = true)
     {
-        MatchmakingGroupMember? memberToRemove = Members.SingleOrDefault(member => member.Account.ID == accountID);
-
-        if (memberToRemove is null)
-            return;
-
-        bool memberToRemoveIsLeader = memberToRemove.IsLeader;
-
-        // Broadcast Removal To All Members Before Removing
-        ChatProtocol.TMMUpdateType updateType = kick
-            ? ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP
-            : ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP;
-
-        // Send Partial Group Update Indicating Member Removal
-        MulticastUpdate(accountID, updateType, notifyEmitter: notifyRemovedMember);
-
-        // Remove Member From Group Chat Channel
-        if (ChatChannel is not null)
+        // Removals Are Serialised, Because The Refused Members Of A Queue Are Enforced Concurrently, So Two Of Them May Leave The Same Group At Once
+        lock (MembershipLock)
         {
-            ChatChannel.Members.TryRemove(memberToRemove.Account.Name, out _);
+            MatchmakingGroupMember? memberToRemove = Members.SingleOrDefault(member => member.Account.ID == accountID);
 
-            memberToRemove.Session.CurrentChannels.Remove(ChatChannel.ID);
-        }
+            if (memberToRemove is null)
+                return;
 
-        // Remove Member From Group
-        Members.Remove(memberToRemove);
+            bool memberToRemoveIsLeader = memberToRemove.IsLeader;
 
-        // Dispose The Group Chat Channel When The Group Drops To One Or Fewer Members
-        if (Members.Count <= 1 && ChatChannel is not null)
-        {
-            foreach (MatchmakingGroupMember remainingMember in Members)
+            // Broadcast Removal To All Members Before Removing
+            ChatProtocol.TMMUpdateType updateType = kick
+                ? ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP
+                : ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP;
+
+            // Send Partial Group Update Indicating Member Removal
+            MulticastUpdate(accountID, updateType, notifyEmitter: notifyRemovedMember);
+
+            // Remove Member From Group Chat Channel
+            if (ChatChannel is not null)
             {
-                ChatChannel.Members.TryRemove(remainingMember.Account.Name, out _);
+                ChatChannel.Members.TryRemove(memberToRemove.Account.Name, out _);
 
-                remainingMember.Session.CurrentChannels.Remove(ChatChannel.ID);
+                memberToRemove.Session.CurrentChannels.Remove(ChatChannel.ID);
             }
 
-            if (ChatChannel.Members.IsEmpty)
+            // Remove Member From Group
+            Members.Remove(memberToRemove);
+
+            // Dispose The Group Chat Channel When The Group Drops To One Or Fewer Members
+            if (Members.Count <= 1 && ChatChannel is not null)
             {
-                Context.ChatChannels.TryRemove(ChatChannel.Name, out _);
+                foreach (MatchmakingGroupMember remainingMember in Members)
+                {
+                    ChatChannel.Members.TryRemove(remainingMember.Account.Name, out _);
+
+                    remainingMember.Session.CurrentChannels.Remove(ChatChannel.ID);
+                }
+
+                if (ChatChannel.Members.IsEmpty)
+                {
+                    Context.ChatChannels.TryRemove(ChatChannel.Name, out _);
+                }
+
+                ChatChannel = null;
             }
 
-            ChatChannel = null;
-        }
+            // If Group Is Now Empty, Disband It
+            if (Members.Count is 0)
+            {
+                // Remove The Leader's Entry From The Matchmaking Service (Groups Are Keyed By Leader ID)
+                if (memberToRemoveIsLeader)
+                {
+                    MatchmakingService.Groups.TryRemove(accountID, out _);
+                }
 
-        // If Group Is Now Empty, Disband It
-        if (Members.Count is 0)
-        {
-            // Remove The Leader's Entry From The Matchmaking Service (Groups Are Keyed By Leader ID)
+                DisbandGroup();
+
+                return;
+            }
+
+            // Leave Queue If Queued (Queue Membership Changes Require Re-Queuing)
+            if (IsQueued)
+            {
+                LeaveQueue(forced: true);
+            }
+
+            // Reassign Slots And Transfer Leadership
+            ReassignSlots();
+
+            // If The Leader Left, Re-Key The Group Under The New Leader's ID
             if (memberToRemoveIsLeader)
             {
                 MatchmakingService.Groups.TryRemove(accountID, out _);
+                MatchmakingService.Groups.TryAdd(Leader.Account.ID, this);
             }
 
-            DisbandGroup();
+            // Reset All Members To Default Readiness State: Leader = Not Ready, Others = Ready
+            // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
+            foreach (MatchmakingGroupMember member in Members)
+                member.IsReady = member.IsLeader is false;
 
-            return;
+            // Send Full Group Update To Remaining Members
+            MulticastUpdate(accountID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
         }
-
-        // Leave Queue If Queued (Queue Membership Changes Require Re-Queuing)
-        if (IsQueued)
-        {
-            LeaveQueue(forced: true);
-        }
-
-        // Reassign Slots And Transfer Leadership
-        ReassignSlots();
-
-        // If The Leader Left, Re-Key The Group Under The New Leader's ID
-        if (memberToRemoveIsLeader)
-        {
-            MatchmakingService.Groups.TryRemove(accountID, out _);
-            MatchmakingService.Groups.TryAdd(Leader.Account.ID, this);
-        }
-
-        // Reset All Members To Default Readiness State: Leader = Not Ready, Others = Ready
-        // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
-        foreach (MatchmakingGroupMember member in Members)
-            member.IsReady = member.IsLeader is false;
-
-        // Send Full Group Update To Remaining Members
-        MulticastUpdate(accountID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
     }
 
     /// <summary>

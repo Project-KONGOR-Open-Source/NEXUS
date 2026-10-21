@@ -628,9 +628,10 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// </summary>
     private static void RefuseMatchmaking(ClientChatSession session, MatchLock matchLock)
     {
-        session.SendMatchmakingBan(BanSecondsRemaining(matchLock, DateTimeOffset.UtcNow));
-
+        // The Player Is Removed Before The Popup Is Sent, Because Another Refused Member's Removal Updates Every Member Still In The Group, And Such An Update After The Popup Would Put The Game Client Back Into The Group
         MatchmakingService.GetMatchmakingGroup(session.Account.ID)?.RemoveMember(session.Account.ID, notifyRemovedMember: false);
+
+        session.SendMatchmakingBan(BanSecondsRemaining(matchLock, DateTimeOffset.UtcNow));
     }
 
     /// <summary>

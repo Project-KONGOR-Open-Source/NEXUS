@@ -131,7 +131,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoin(leaderAccountName));
 
-            (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure = await ChatTestProtocol.ReadMatchmakingFailure(stream, FrameTimeout);
+            (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
 
             // The Notice Follows The Failure Reply, Because Reading Up To The Failure Reply Would Have Skipped A Notice Which Came First
             // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Removal Would Make It Leave Again
@@ -141,7 +141,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             {
                 await Assert.That(failure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
                 await Assert.That(MatchLockNotices(later)).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName)]);
-                await Assert.That(later.Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(group.Members.Count).IsEqualTo(1);
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
             }
@@ -210,7 +210,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
 
-            (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure = await ChatTestProtocol.ReadMatchmakingFailure(stream, FrameTimeout);
+            (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
 
             // The Notice Follows The Failure Reply, Because Reading Up To The Failure Reply Would Have Skipped A Notice Which Came First
             // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Removal Would Make It Leave Again
@@ -222,8 +222,63 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(failure?.Seconds ?? 0).IsLessThanOrEqualTo((uint) MatchLock.Lifetime.TotalSeconds);
                 await Assert.That(failure?.Seconds ?? 0).IsGreaterThan((uint) (MatchLock.Lifetime - TimeSpan.FromMinutes(1)).TotalSeconds);
                 await Assert.That(MatchLockNotices(later)).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName)]);
-                await Assert.That(later.Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(group.QueueStartTime).IsNull();
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(accountID);
+        }
+    }
+
+    [Test]
+    public async Task Queueing_Again_On_Another_Account_Within_The_Notice_Repeat_Interval_Still_Shows_The_Temporary_Ban()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        try
+        {
+            MatchmakingGroup firstGroup = await CreateGroup(stream, accountID);
+
+            await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, gameSocket);
+
+            MakeReadyToQueue(firstGroup);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? firstFailure = await ChatTestProtocol.ReadMatchmakingFailure(stream, FrameTimeout);
+            (string SenderName, string Message)? firstNotice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+            // The Game Client Creates A Solo Group Again Once It Has Left Its Last One, From Which Its Player Queues Again Well Within The Notice Repeat Interval
+            MatchmakingGroup secondGroup = await CreateGroup(stream, accountID);
+
+            MakeReadyToQueue(secondGroup);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? secondFailure) = await ReadThroughMatchmakingFailure(stream);
+
+            // The Notice Repeat Interval Holds Back Only The Notice, Because Without The Failure Reply The Matchmaking Screen Would Stay Locked
+            List<(ushort Command, ChatBuffer Frame)> later = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(firstFailure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
+                await Assert.That(firstNotice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName));
+                await Assert.That(secondFailure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
+                await Assert.That(MatchLockNotices(later).Count).IsEqualTo(0);
+                await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(secondGroup.QueueStartTime).IsNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
             }
         }
@@ -257,7 +312,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
 
-            (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure = await ChatTestProtocol.ReadMatchmakingFailure(stream, FrameTimeout);
+            (List<(ushort Command, ChatBuffer Frame)> earlier, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
 
             // The Notice Follows The Failure Reply, Because Reading Up To The Failure Reply Would Have Skipped A Notice Which Came First
             // The Game Client Has Left Its Group On The Failure Reply, So A Group Update About Its Removal Would Make It Leave Again
@@ -267,7 +322,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             {
                 await Assert.That(failure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
                 await Assert.That(MatchLockNotices(later)).IsEquivalentTo([MatchLockService.ConnectedElsewhereMessage]);
-                await Assert.That(later.Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(group.QueueStartTime).IsNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
             }
@@ -472,6 +527,8 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(MatchLockNotices(leaderFrames)).IsEquivalentTo([MatchLockService.SlotAccountMessage, groupMemberLockedMessage]);
                 await Assert.That(memberFrames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsTrue();
                 await Assert.That(MatchLockNotices(memberFrames)).IsEquivalentTo([groupMemberLockedMessage]);
+                await Assert.That(group.Leader.IsReady).IsFalse();
+                await Assert.That(group.Members.All(member => member.LoadingPercent is 0)).IsTrue();
                 await Assert.That(group.QueueStartTime).IsNull();
             }
         }
@@ -526,6 +583,76 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(MatchLockNotices(leaderFrames)).IsEquivalentTo(groupMemberLockedMessages);
                 await Assert.That(MatchLockNotices(firstMemberFrames)).IsEquivalentTo([MatchLockService.SlotAccountMessage, .. groupMemberLockedMessages]);
                 await Assert.That(MatchLockNotices(secondMemberFrames)).IsEquivalentTo([MatchLockService.SlotAccountMessage, .. groupMemberLockedMessages]);
+                await Assert.That(group.QueueStartTime).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(leaderAccountID, firstMemberAccountID, secondMemberAccountID);
+        }
+    }
+
+    [Test]
+    public async Task Queueing_A_Party_With_Two_Members_Connected_Elsewhere_Removes_Both_Without_Telling_Them()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket firstGameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
+        await using FakeMatchServerGameSocket secondGameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
+
+        (_, int leaderAccountID, string leaderAccountName, string leaderCookie) = await ChatTestData.SeedPlayer(host);
+        (int firstMemberUserID, int firstMemberAccountID, string firstMemberAccountName, string firstMemberCookie) = await ChatTestData.SeedPlayer(host);
+        (int secondMemberUserID, int secondMemberAccountID, string secondMemberAccountName, string secondMemberCookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient leaderClient = await host.ConnectAndAuthenticateClientAsync(leaderAccountID, leaderAccountName, leaderCookie, RemoteIP);
+        using TcpClient firstMemberClient = await host.ConnectAndAuthenticateClientAsync(firstMemberAccountID, firstMemberAccountName, firstMemberCookie, RemoteIP);
+        using TcpClient secondMemberClient = await host.ConnectAndAuthenticateClientAsync(secondMemberAccountID, secondMemberAccountName, secondMemberCookie, RemoteIP);
+
+        NetworkStream leaderStream = leaderClient.GetStream();
+        NetworkStream firstMemberStream = firstMemberClient.GetStream();
+        NetworkStream secondMemberStream = secondMemberClient.GetStream();
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(leaderStream, leaderAccountID);
+
+            await JoinGroup(firstMemberStream, leaderAccountName, leaderStream);
+            await JoinGroup(secondMemberStream, leaderAccountName, leaderStream, firstMemberStream);
+
+            // Neither Slot Can Be Reclaimed While It Is Still Connected From Another Game, So Neither Member Is Sent Back At Once, And Both Leave The Party Concurrently
+            await using LockedMatch firstLockedMatch = await ChatTestData.SeedLockedMatch(host, firstMemberUserID, firstMemberAccountID, firstMemberAccountName, firstGameSocket);
+            await using LockedMatch secondLockedMatch = await ChatTestData.SeedLockedMatch(host, secondMemberUserID, secondMemberAccountID, secondMemberAccountName, secondGameSocket);
+
+            MakeReadyToQueue(group);
+
+            await ChatTestProtocol.WriteFrame(leaderStream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            // A Member May Read The Other Member's Removal Before Its Own Failure Reply, While It Is Still In The Party, But Never Its Own Removal, And Nothing About The Party After The Reply
+            (List<(ushort Command, ChatBuffer Frame)> firstMemberEarlierFrames, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? firstFailure) = await ReadThroughMatchmakingFailure(firstMemberStream);
+            List<(ushort Command, ChatBuffer Frame)> firstMemberFrames = await ChatTestProtocol.ReadCommandsUntil(firstMemberStream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
+
+            (List<(ushort Command, ChatBuffer Frame)> secondMemberEarlierFrames, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? secondFailure) = await ReadThroughMatchmakingFailure(secondMemberStream);
+            List<(ushort Command, ChatBuffer Frame)> secondMemberFrames = await ChatTestProtocol.ReadCommandsUntil(secondMemberStream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
+
+            List<(ushort Command, ChatBuffer Frame)> leaderFrames = await ChatTestProtocol.ReadCommandsUntil(leaderStream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
+
+            List<string> groupMemberLockedMessages = [MatchLockService.GroupMemberLockedMessage(firstMemberAccountName), MatchLockService.GroupMemberLockedMessage(secondMemberAccountName)];
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(firstFailure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
+                await Assert.That(GroupUpdateAccountIDs(firstMemberEarlierFrames, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP).Contains(firstMemberAccountID)).IsFalse();
+                await Assert.That(firstMemberFrames.Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(MatchLockNotices(firstMemberFrames)).IsEquivalentTo([MatchLockService.ConnectedElsewhereMessage, .. groupMemberLockedMessages]);
+                await Assert.That(secondFailure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
+                await Assert.That(GroupUpdateAccountIDs(secondMemberEarlierFrames, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP).Contains(secondMemberAccountID)).IsFalse();
+                await Assert.That(secondMemberFrames.Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(MatchLockNotices(secondMemberFrames)).IsEquivalentTo([MatchLockService.ConnectedElsewhereMessage, .. groupMemberLockedMessages]);
+                await Assert.That(GroupUpdateAccountIDs(leaderFrames, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP)).IsEquivalentTo([firstMemberAccountID, secondMemberAccountID]);
+                await Assert.That(MatchLockNotices(leaderFrames)).IsEquivalentTo(groupMemberLockedMessages);
+                await Assert.That(group.Members.Select(member => member.Account.ID)).IsEquivalentTo([leaderAccountID]);
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(firstMemberAccountID)).IsNull();
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(secondMemberAccountID)).IsNull();
                 await Assert.That(group.QueueStartTime).IsNull();
             }
         }
@@ -716,12 +843,32 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     /// <summary>
+    ///     Reads every frame up to and including the first matchmaking failure reply, and returns them with the reply's reason and seconds, or <see langword="null"/> when no reply arrived in time.
+    ///     The frames before the reply are kept, because the player leaves its group before the reply is sent, so that a group update about its removal would arrive before the reply.
+    /// </summary>
+    private static async Task<(List<(ushort Command, ChatBuffer Frame)> Frames, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? Failure)> ReadThroughMatchmakingFailure(NetworkStream stream)
+    {
+        List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN, FrameTimeout);
+
+        return (frames, frames is [.., { Command: ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN } failure] ? ChatTestProtocol.ParseMatchmakingFailure(failure.Frame) : null);
+    }
+
+    /// <summary>
     ///     Returns the messages of the match lock's notices among the frames, in the order in which they arrived.
     ///     Reading a notice moves its frame past it, so it is called once for each list of frames.
     /// </summary>
     private static List<string> MatchLockNotices(List<(ushort Command, ChatBuffer Frame)> frames)
         => [.. frames.Where(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL).Select(frame => ChatTestProtocol.ParseNotice(frame.Frame))
             .Where(notice => notice.SenderName is MatchLockService.MessageSenderName).Select(notice => notice.Message)];
+
+    /// <summary>
+    ///     Returns the account IDs which the group updates of the given type among the frames are about, in the order in which they arrived.
+    ///     Reading a group update moves its frame past its type and account ID, so it is called once for each list of frames.
+    /// </summary>
+    private static List<int> GroupUpdateAccountIDs(List<(ushort Command, ChatBuffer Frame)> frames, ChatProtocol.TMMUpdateType updateType)
+        => [.. frames.Where(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)
+            .Select(frame => (UpdateType: (ChatProtocol.TMMUpdateType) frame.Frame.ReadInt8(), AccountID: frame.Frame.ReadInt32()))
+            .Where(update => update.UpdateType == updateType).Select(update => update.AccountID)];
 
     /// <summary>
     ///     Decides whether the frames hold an initial "AUTO_MATCH_CONNECT", rather than a reminder, which sends the player back to the locked match.
