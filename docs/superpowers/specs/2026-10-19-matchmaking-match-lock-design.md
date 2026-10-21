@@ -12,15 +12,14 @@ Players should be on their best behaviour in matchmade matches, knowing that wal
    - **What it blocks:** every match type while it lasts, co-op games against bots included, even though a co-op game creates no lock of its own.
    - **Who is exempt:** guest and staff accounts are never locked.
 2. **Sent back on the next attempt to play.** While locked, each of these sends the player straight back into their match, automatically and without a prompt:
-   - logging in;
-   - creating a matchmaking group, or joining one;
    - searching for a match (joining the queue);
+   - asking for the list of public games, or of the match servers on which to create a game;
    - joining any other game: public, custom, or spectating.
 
-   A match server lets back in only the exact account that holds the slot. If the person is logged in on one of their other accounts, nothing can send that account back. Every attempt to play is refused instead, with a message naming the account that holds their match. Logging in on that account sends them back.
+   Logging in only tells the player that their match is still in progress, and creating or joining a matchmaking group is never refused (see "Live Test Amendment (2026-10-21)"). A match server lets back in only the exact account that holds the slot. If the person is logged in on one of their other accounts, nothing can send that account back. Every attempt to play is refused instead, with a message naming the account that holds their match. Logging in on that account lets them return.
 3. **No other games while locked.** Every one of the attempts above is refused, with a short message saying why, and no new game of any kind starts.
 4. **Never sent somewhere dead.** A player is only ever sent back to a match server that is alive, to a match that is still in progress, and to a slot they can still reclaim. If any of those fails, the lock lifts at once instead.
-5. **Back in from any machine.** Reconnecting works from a different PC or installation, because NEXUS already knows who the player is. While another machine is still connected to the match on the same account, the player is told to close the game there, and is sent back as soon as it has left.
+5. **Back in from any machine.** Reconnecting works from a different PC or installation, because NEXUS already knows who the player is. While another machine is still connected to the match on the same account, a player who tries to play is told to close the game there, and is sent back as soon as it has left.
 6. **Duplicate sessions handled properly.** The match server's periodic account check (`aids2cookie`) finally works as the engine expects. A connection whose account has joined another game is removed by the match server, without ever disturbing a player reconnecting to their own match. A login elsewhere never removes a connection: each user has one login at a time, and the newest retires the others (see "Single Login Per User").
 
 ## Non-Goals
@@ -58,7 +57,7 @@ These would make the feature a failure even if it technically worked:
 
 1. **What creates a lock:** competitive matchmade matches only (Caldavar, MidWars, and RiftWars). Co-op games against bots create none.
 2. **What a lock does:** a locked player is sent back automatically, and is blocked from every other game until the match ends. That covers every match type (co-op included), public games, custom games, and spectating.
-3. **The trigger:** an attempt to play again, meaning login, group create or join, queue, or a game join. Leaving alone triggers nothing.
+3. **The trigger:** an attempt to play again, meaning a queue, the server list, or a game join. A login only tells the player, and group create and join are never refused (see "Live Test Amendment (2026-10-21)"). Leaving alone triggers nothing.
 4. **Whom it covers:** every account the person owns. Guest and staff accounts are exempt.
 5. **Another account:** a locked person on an account other than the one holding the slot is refused, with a message naming that account, because only that account can be sent back.
 6. **Players already removed:** a player whom the match server has already removed is not locked; the leaver percentage applies.
@@ -66,6 +65,7 @@ These would make the feature a failure even if it technically worked:
 8. **Another machine:** reconnecting must work from another machine. Identity is the account, not the installation.
 9. **AFK abuse:** left to player reports for now, with ideas kept as follow-ups.
 10. **Concurrent logins:** one login per user, and never a kick for a login elsewhere (see "Single Login Per User (Amendment, 2026-10-20)").
+11. **The live test redesign:** NEXUS pulls a locked player back only when they really try to play, and leaves a return at login to the game client's own reconnect prompt (see "Live Test Amendment (2026-10-21)").
 
 ## The Design
 
@@ -75,7 +75,7 @@ These would make the feature a failure even if it technically worked:
   - the match ID;
   - the arranged match type (Caldavar or MidWars), as the protocol encodes it;
   - the match server's identity (ID, address, and port);
-  - which of the person's accounts holds the slot;
+  - which of the person's accounts holds the slot, by ID and by name, and that name with its clan tag for the notices which name it (see "Live Test Amendment (2026-10-21)");
   - when the lock began, and when it expires at the latest.
 - **When it begins:** when matchmaking announces the match to the player's group (the same moment NEXUS sends the group to the server). By then matchmaking has committed the player.
   - The roster must be captured at announce. Today the roster lives in live groups, and a player who drops from chat vanishes from it: `TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs` removes them from their group (`MatchmakingGroup.cs`).
@@ -106,7 +106,7 @@ A trigger first re-checks the lock, as follows:
    - **So read it with the match's phase.** A 0 lifts a lock only when it can only mean that the player was removed or the match is over. A lock must never lift during a pick phase.
    - **Its largest values mean connected.** A player still connected to the match, from any machine, has no termination time (`INVALID_TIME`), so the reply is near the top of its range, while a disconnected player's reply is at most their remaining disconnect allowance. A connected slot cannot be reclaimed until that connection leaves (see "Single Login Per User").
 
-If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897). While the slot is still connected from another game, the message says so and asks the player to close that game if it is still open, and `AUTO_MATCH_CONNECT` follows only once the slot is free. That other game is most often one that has just crashed or closed on the same machine, which the match server has yet to drop, rather than one still running on another machine.
+If all three hold, the chat server refuses whatever the player attempted, with a short message sent to that player's session through `CHAT_CMD_MESSAGE_ALL`, which the client displays as free text. (`TMM_GENERIC_RESPONSE` cannot carry text: the client reads only a code from it.) It then sends `CHAT_CMD_AUTO_MATCH_CONNECT` (0x0062) with the real arranged type, match ID, address, and port, and the client connects at once, with no prompt (HON `source/K2.Engine/c_chatmanager.cpp` around 4820–4897). While the slot is still connected from another game, the message says so and asks the player to close that game if it is still open, and `AUTO_MATCH_CONNECT` follows only once the slot is free. That other game is most often one that has just crashed or closed on the same machine, which the match server has yet to drop, rather than one still running on another machine. A refused queue is answered first with the client's own matchmaking failure reply, and a refused join with a final `c_conn` reply (see "The triggers").
 
 The client ignores `AUTO_MATCH_CONNECT` while it counts as connected to a server, and it counts connecting and authenticating as connected (`CHost::IsConnected`). So a send-back must reach the client only once it is not on, or joining, any server.
 
@@ -121,14 +121,20 @@ A match server that is still registered, but whose chat connection has dropped w
 
 ### The triggers
 
-- **Login.** On the chat handshake, if the person is locked, send them back.
-- **Group create, group join, and queue.** These chat-server requests are refused, and the player is sent back. Today, group create and join silently drop the player from a group that is already in a match, and the queue checks only readiness, loading, and rating spread (`MatchmakingGroup.cs`).
+A trigger is an attempt to play; a login only tells the player (see "Live Test Amendment (2026-10-21)").
+- **Login.** At the login report which follows the chat handshake, once per login cookie, and never while the session reports being in a game, NEXUS verifies the lock and, while it holds, only tells the player: the slot account that it is in a match which is still in progress and that trying to play sends it back, and another account which account holds the match. Nobody is pulled back and no wait starts at login; the client's own reconnect prompt is the way back then, on the machine which played the match.
+- **Group create and group join** are never refused. The client creates a group by itself shortly after login and whenever it returns to the menu, so refusing them pulled players back without any attempt to play.
+- **Queue** (the leader's queue request, and the queue which full loading starts). The queue is refused, and the group never reaches the queue.
+  - Each refused member that is not in a game first gets the client's own matchmaking failure reply (`NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, with the seconds left until the lock's safety limit), then the pull, or, on another account, the notice. Its client leaves the group on that reply, so NEXUS removes it from the group as well.
+  - The rest of the group is unreadied, and sent a group update, which unlocks its members' matchmaking screens, and a leader which was not refused itself is told which member keeps the group from searching.
+  - A member that is in a game is refused without a word.
+- **The server list** (`client_requester.php?f=server_list`), which the client asks for, with its login cookie, before it lists public games and before it picks a match server to create a public or custom game on. A locked player gets an empty list, and the master server relays the refusal to the chat server, as for `c_conn`.
 - **Joining any other game** (public, custom, or spectating).
   - **Why `c_conn`:** the client connects straight to the game's server, and every match server authenticates each joining player with the master server through `c_conn` (HON `source/K2.Engine/c_clientconnection.cpp`). That is the one place where all game types meet.
   - **The rule:** `c_conn` refuses a locked player when the asking server is registered and is not the locked match's server.
-  - **What the engine does with the refusal:** it retries a refused `c_conn` several times before disconnecting the player with a generic authentication failure. The attempts and interval are the authentication settings NEXUS sends in `SendOptions`.
-  - **The reply to avoid:** an "Invalid cookie." reply would disconnect at once, but the engine then blacklists that login cookie on that server for the rest of the server process's life (`AddBadHash`). Use an ordinary refusal.
-  - **The notification:** the master server tells the chat server, which sends the player back once the client has left the other server (see above). A pub/sub channel already carries account logout notifications from the master server to the chat server, so there is precedent.
+  - **The reply:** an array which names the account (`account_id`) and carries no `game_cookie`. The engine treats it as final: it disconnects the client at once with `DISCONNECT_UNIQUE_LOGIN_FAILED`, with no retry and no blacklisting, and without touching its own session (`CClientConnection::CheckAuthResult`). The reply which NEXUS first used, plain text, made the engine retry `svr_authRequestAttempts` times while the client sat connecting.
+  - **The replies to avoid:** an "Invalid cookie." reply would also disconnect at once, but the engine then blacklists that login cookie on that server for the rest of the server process's life (`AddBadHash`), and `auth_failure` makes the match server drop its own session.
+  - **The notification:** the master server tells the chat server, which sends the player back once the client has left the other server (see above). A pub/sub channel already carries account logout notifications from the master server to the chat server, so there is precedent. A relayed refusal is ignored while the player's chat session last reported joining the locked match server, because it can only be the late answer to an attempt which the player has abandoned.
   - **Reconnect safety:**
     - `c_conn` from the locked match's own server is always served.
     - So is `c_conn` from a server whose session NEXUS does not know: the reconnect rule from `server-session-recovery` stays, and NEXUS cannot tell which server is asking.
@@ -157,7 +163,7 @@ A match server that is still registered, but whose chat connection has dropped w
   - **`c_conn` also records the login cookie that the served client posted,** beside the game cookie. A chat session of the same user that reports joining that match server with a newer login cookie refreshes it, which follows a client that logs in again in place and pushes its new cookie to the match server. So the match server is only ever answered with the login cookie that its own client holds.
   - **`aids2cookie`** reads `aids[]` from the body. It answers only for accounts that connected to the asking server, which also closes the remaining gap where any registered server could ask about any account. It returns the login cookie recorded for each client and its game cookie.
   - **With the lock refusing other games,** a mismatched game cookie arises only from a genuine second connection, never from a rage-quit attempt.
-- **A login elsewhere:** logging in on a second machine retires the first machine's login, but not its connection to the match, which the match server still checks against the first machine's own login cookie, so it plays on undisturbed. The login trigger tells the second machine to close the game on the first, and sends it back as soon as the first has left the match. NEXUS never makes the match server kick anyone for a login elsewhere (see "Single Login Per User").
+- **A login elsewhere:** logging in on a second machine retires the first machine's login, but not its connection to the match, which the match server still checks against the first machine's own login cookie, so it plays on undisturbed. At login the second machine is only told that its account is in a match; its first attempt to play tells it to close the game on the first, and sends it back as soon as the first has left the match. NEXUS never makes the match server kick anyone for a login elsewhere (see "Single Login Per User").
 
 ## Single Login Per User (Amendment, 2026-10-20)
 
@@ -177,7 +183,7 @@ The owner settled what NEXUS does when one account, or one user, is live on two 
    - A new login retires the previous login.
    - A logout ends only its own session.
    - `aids2cookie` answers, for each account, the login cookie of the client actually on that match server, and keeps answering the game cookie exactly as before. So NEXUS never causes a duplicate-login kick or a kick strike, while a player who leaves for another game is still removed, through the game cookie.
-   - The send-back is aware of the slot. While the slot query says that the account is still connected to the match from another machine, the new machine is told to close the game on the other one, and is sent back the moment the slot frees.
+   - The send-back is aware of the slot. While the slot query says that the account is still connected to the match from another machine, the new machine, once it tries to play, is told to close the game on the other one, and is sent back the moment the slot frees.
 2. **A new login ends the sessions of all of the user's accounts,** not only that account's, as retail did. Guest and staff accounts are the exception, as they already are at the chat handshake: each group shares one user, so their login retires only the same account's earlier login.
 3. **It is built on `matchmaking-match-lock`,** before the live check with real game clients.
 
@@ -194,6 +200,7 @@ The owner settled what NEXUS does when one account, or one user, is live on two 
   - The game cookie is unchanged, so a player who joins another game is still removed.
 - **The send-back waits for the other machine.**
   - The slot query tells "still connected" apart from "disconnected with time remaining" (see "Sending a player back").
+  - A wait starts only from an attempt to play, never at login (see "Live Test Amendment (2026-10-21)").
   - While the slot account is connected from another game, the player is told so, and asked to close that game if it is still open. No `AUTO_MATCH_CONNECT` is sent, and the slot is checked again at every reminder. The moment it turns disconnected, the player is sent back.
   - A player is told why once per attempt, and is told again while waiting only if the wait runs out.
   - An unanswered slot query at the wait's own re-checks between attempts does not end it, because nobody has been sent anywhere yet. A real attempt to play during the wait still lifts the lock on an unanswered query, which ends the wait, and a match server that is gone, or that no longer hosts the match, lifts the lock at any check.
@@ -229,6 +236,96 @@ The owner settled what NEXUS does when one account, or one user, is live on two 
 
 Either of the first two would let NEXUS supersede game connections as well.
 
+## Live Test Amendment (2026-10-21)
+
+The feature was played with real game clients on 2026-10-21: match servers started by COMPEL, two clients on one PC, normal accounts (two players and a sub-account), and NEXUS in Development. This section records what the test found, the owner's redesign of the triggers, and the rulings which complete it. It takes precedence over the earlier text, which has been edited to agree with it.
+
+### What Passed
+
+- Every player of an announced match was locked.
+- A rage-quit, in the game proper and in hero selection, then an attempt to play, sent the player back into their slot. In hero selection the slot query answered with time remaining, and the lock held.
+- A login retired the earlier login, and the old window's logout was refused harmlessly.
+- A sub-account's login retired the main account's login, and named the main account without pulling anyone.
+- A join on another match server was refused, and relayed into one send-back across the engine's retries.
+- A second machine, and a crash followed by a relaunch: once the other connection had left, the waiting return sent the new window in within seconds, and no duplicate-login kick happened.
+- A match abandoned by its server, a match which ended, and a player removed as a leaver each lifted the locks they should.
+
+### What It Found
+
+1. **A stale refusal.** The other match server's last retry of an abandoned join arrived after the reminders had brought the player back into their match. Its relay told the player that their slot was still connected from another game (their own connection), and started a wait, which pulled the player back the moment they next left the match, with no new attempt to play.
+2. **Public games are refused too late.** Creating a public game took an idle match server into use before `c_conn` refused the player, which tied that server up while the engine retried the refusal, and the client ignored every reminder until its own connection timeout. The engine's last retry produced finding 1.
+3. **The client's own reconnect prompt stays open after a pull.** At login the client raises its reconnect prompt from its local reconnect file in the same second as NEXUS's `AUTO_MATCH_CONNECT`. The pull wins, but the prompt stays on screen, and clicking it disconnects and reconnects the player again, at the cost of disconnect allowance and a reload.
+4. **Notices name accounts without their clan tags,** which players always see beside a name.
+5. **A refused group create or queue locks the client's matchmaking screen** until the client's own timeout, over the chat pane which holds the notice.
+6. **The client's reconnect prompt shows a still-connected slot as a countdown of millions of seconds,** because a connected slot's reply is the largest time less the game time. It appears after a crash and relaunch while the dead connection lingers, and on one PC whenever both windows share the reconnect file.
+
+Also: a log line printed a retired session cookie, and the chat server logged the match server's expected authentication error after every lock refusal at error level. Practice games which could not open their port were a same-PC clash with a match server instance's ports, not the lock.
+
+### The Owner's Redesign
+
+NEXUS pulls a locked player back only when the player really tries to play. A login and the client's own group handling are not attempts to play: the client creates a group by itself shortly after login and whenever it returns to the menu, which is what pulled players back with no attempt of their own, and what locked the matchmaking screen.
+
+| Event | Behaviour |
+|---|---|
+| Login | A chat notice, with no pull: the slot account is told that its match is still in progress and that trying to play sends it back, and another account is told which account holds the match. Once per login, and never while the session reports being in a game. The client's own reconnect prompt handles a return at login. |
+| Group create, group join | Never refused. |
+| Queue (the leader's request, and the queue which full loading starts) | Refused with the client's own matchmaking failure reply, then the pull for the slot account, or the notice for another account. |
+| A queue refused because of another member | The locked member as above; the leader, when it is not refused itself, is told which member keeps the group from searching. |
+| The server list | An empty list, with the refusal relayed to the chat server, which pulls the slot account or tells another account. |
+| A refused `c_conn` | A final reply, with the refusal relayed as before. |
+
+Leaving alone still triggers nothing.
+
+### Rulings
+
+The controller made these on the owner's redesign, and those marked "planner" were made while planning; where the engine or the client decides, the ruling names the evidence.
+- **The queue's failure reply.** A refused queue is answered with `NET_CHAT_CL_TMM_FAILED_TO_JOIN`, reason `TMMFTJR_BANNED`, and the seconds left until the lock's safety limit, in the layout which `CChatManager::HandleTMMJoinFailed` reads (HON `source/K2.Engine/c_chatmanager.cpp`): a byte for the reason, then, for this reason only, a 32-bit number of seconds.
+  - The client leaves its group at once, locally and without telling the chat server (`LeaveTMMGroup`, local only), shows its "Temporary Ban" popup with the countdown (HON-Assets `ui/fe2/newui/main_dialogs_v2.package`, `mm_popup_banned`), and resets its matchmaking interface, which unlocks the screen.
+  - The countdown is display only. The ban time is read by nothing but the per-frame display, and the next group update clears it (`CChatManager::HandleTMMPlayerUpdates`), so it can never hold a player back after the lock lifts.
+  - The reply goes first, before the notice and the pull, and on every refused queue, because it is the queue's own answer rather than a notice.
+- **A refused member leaves its group in NEXUS too** (planner). Its client has already left the group on the reply, so NEXUS removes the member without sending it a group update: an update naming it as leaving, or naming its group as disbanded, would make the client leave a second time, with another popup (`HandleTMMPlayerUpdates`).
+- **The leader gets no failure reply** (planner).
+  - Its screen is locked by the full-screen queue loading panel, which the client shows while every member is ready and the group is not queued (HON-Assets `ui/scripts/newui/loading_v2.lua`, `UpdateQueueLoadingPanel`), and which follows every group update (`CChatManager::UpdateReadyStatus`).
+  - So NEXUS unreadies the rest of the group and sends it a group update, as the retail chat server did whenever a group left the queue, which unlocks every remaining member's screen, and the leader is told in chat which member keeps the group from searching.
+  - The failure reply would instead split the leader's client from its own group, and its popup would tell a player who is not locked that they are banned.
+- **A player in a game is refused without a word** (planner), which removes the in-match notice of the earlier rulings. Group create and join are no longer refused, and the client queues only from its menu: its Start button readies the group, and full loading queues it, while no client interface sends the leader's queue request, which only a console command reaches. So a player still in their match makes no refused attempt of their own. What remains is a teammate enforced because another member queued, who by ruling sees nothing, and a console command.
+- **Stale refusals.** A relayed refusal is ignored, with no notice and no return, while the player's chat session last reported joining the locked match server: the client cannot be connecting elsewhere while it reports being in its own match, so the refusal can only be the late answer to an attempt which it has abandoned. A session which last reported another match server, or none, keeps the full send-back, because a chat reconnect during a refused join reports the server which the client is still connecting to. Nothing else can start a return or a wait for a player in their own match: a login starts none, and a queue from a session in a game is refused without one.
+- **The server list.**
+  - For a locked account which is not exempt, the master server answers the server list with an empty list, in the shape of the requested list and with a success status, and relays the refusal as `c_conn` does.
+  - The client asks for it, with its login cookie, before it lists public games and before it picks a match server to create a public or custom game on (`CServerList::RequestMasterServerList`, HON `source/K2.Engine/c_hostclient.cpp`).
+  - An empty list is safe. The client clears its list, reads the empty `server_list`, and redraws the list (`CServerList::ProcessServerList`), and a game creation then finds no match server and cancels itself (`CHostClient::CheckAutoStartGame`), so no match server is taken into use.
+  - The rule which decides whether a lock refuses `c_conn` decides here too, including lifting a lock whose match server is no longer registered, and a lock which cannot be read is served as if there were none.
+- **Spectating does not go through the server list.** The client spectates a player through the chat server's spectate request, then connects straight to that player's match server (`CChatManager::SpectatePlayer` and `CChatManager::JoinGame`), as it does to join a friend's game, and the list of ongoing games exists only behind a console command. Spectating and joining a friend's game are refused at `c_conn`.
+- **A final `c_conn` rejection.**
+  - The engine retries any reply which it cannot read, and blacklists the login cookie on "Invalid cookie." (`CClientConnection::CheckAuthResult`, HON `source/K2.Engine/c_clientconnection.cpp`).
+  - A reply which names the account (`account_id`) but carries no `game_cookie` is final: the engine disconnects the client at once with `DISCONNECT_UNIQUE_LOGIN_FAILED`, which the client shows as a failure to authorise its account. There is no retry, no blacklisting, and no `auth_failure`, so the match server's session is untouched, and the engine ignores the HTTP status of the reply.
+  - The engine reports that reply to its manager and to the chat server as a successful authentication before it disconnects, so the chat server no longer logs an error after a lock refusal, and its error level stays for real authentication failures.
+- **A refusal which finds the lock lifted tells the player to try again** (planner). Neither the server list nor the final rejection is retried by the client or the engine, so a player whose lock lifts while their refusal is relayed would otherwise see an empty list, or a failed join, with nothing to explain it.
+- **Clan tags.** Player-facing notices name accounts with their clan tags: the other-account notice, the group member notice, and the logged-in-elsewhere notice. The lock records the slot account's name with its clan tag at announce, and a lock written without it names the bare account. The other-account notice still tells the player to log in with the bare name, which is what the login form takes (planner). Log lines keep bare account names, which are what operators search for.
+- **No log line prints a session cookie.**
+
+### What It Costs
+
+- On a machine without the client's reconnect file, nothing returns a player at login: they are told, and are pulled back at their first attempt to play.
+- The "Temporary Ban" popup speaks of a matchmaking ban for leaving a match before it started or failing to connect to one, and its countdown runs to the lock's safety limit, an upper bound, while the chat notice says why.
+- A locked player's Start loads the map before the queue is refused, because group create is no longer refused.
+- A refused join shows the client's generic failure to authorise its account, and the match server's manager and chat server see that authentication as a success followed by a disconnect.
+- The first pull after a refused join can reach the client before the other match server's disconnect does, which the client ignores, so the player returns up to one reminder interval later.
+- A player whose lock has gone stale is refused once more, and is told to try again.
+- Spectating and joining a friend's game are refused only once the client has connected to that match server.
+- A player in a game who sends a queue request from the console is refused without being told why.
+
+### What Changes In The Earlier Text
+
+- Goals 2 and 5: the attempts which pull a player back, and when a waiting machine is pulled.
+- "The Owner's Decisions": the third decision, and an eleventh which points here.
+- "The lock": it records the slot account's name with its clan tag.
+- "Sending a player back": the queue's failure reply and the final `c_conn` reply.
+- "The triggers": rewritten.
+- "The duplicate-session guard": a login elsewhere only tells the second machine.
+- "Single Login Per User": the new machine waits for the old one only once it tries to play.
+- "Facts For The Builder" and "Follow-Ups": the client's own reconnect prompt.
+
 ## Facts For The Builder
 
 - **The `AUTO_MATCH_CONNECT` payload:** arranged type (byte), match ID, address, port, and a random integer (HON `source/K2.Shared/chatserver_protocol.h`; NEXUS `ASPIRE.Common/ChatProtocol.cs`). Today NEXUS sends it only at match announce (`TRANSMUTANSTEIN.ChatServer/CommandProcessors/MatchState/MatchAnnounce.cs`).
@@ -239,7 +336,7 @@ Either of the first two would let NEXUS supersede game connections as well.
   - its `JOINING_GAME` redirect came too late to matter.
 - **The disconnect window:** after `sv_maxDisconnectedTime`, the match server terminates a disconnected player. It reports only the first leaver of a matchmade match (`REPORT_LEAVER`, which NEXUS does not handle).
 - **Statistics:** statistics for a match whose server session NEXUS lost are recovered through the manager's resubmission, which NEXUS records (`StatisticsRequesterController.Submit.cs`, `HandleStatsResubmission`).
-- **The game client's reconnect prompt:** the client has its own local prompt, from a file written at hero selection that expires after a few hours. It is unchanged, and complements this feature on the same machine.
+- **The game client's reconnect prompt:** the client has its own local prompt, from a file written at hero selection that expires after a few hours. It is unchanged. Since a login no longer pulls anyone back, it is the way back at login on the machine which played the match, and its flaws are a HON follow-up (see "Follow-Ups").
 
 ## Left To The Builder
 
@@ -258,3 +355,4 @@ Either of the first two would let NEXUS supersede game connections as well.
   - have NEXUS flag accounts that repeatedly hover just under the AFK limit, if match statistics carry idle time.
 - **Leaver reporting:** handling `REPORT_LEAVER` and `REPORT_MISSING_PLAYERS`, if penalties are wanted later.
 - **The engine's unsafe `auth_failure` handling** on `aids2cookie` and `get_upgrades` replies (HON). NEXUS never sends it there.
+- **The game client's own reconnect prompt** (HON, client, phase 2), from findings 3 and 6 of "Live Test Amendment (2026-10-21)": it should close once the client connects to or loads a game, so that it cannot be clicked after a pull, and it should show a still-connected slot as such rather than as a countdown of millions of seconds.
