@@ -53,6 +53,17 @@ public sealed class MatchLockVerificationTests(ServiceContainerContext container
         => await Assert.That(MatchLockService.EvaluateSlot(GamePhase.GAME_PHASE_ACTIVE, null)).IsEqualTo(MatchLockVerdict.LiftSlotUnconfirmed);
 
     [Test]
+    public async Task The_Ban_Countdown_Is_The_Time_Left_Until_The_Safety_Limit()
+    {
+        using (Assert.Multiple())
+        {
+            await Assert.That(MatchLockService.BanSecondsRemaining(BuildLock(Now), Now)).IsEqualTo((uint) MatchLock.Lifetime.TotalSeconds);
+            await Assert.That(MatchLockService.BanSecondsRemaining(BuildLock(Now - (MatchLock.Lifetime - TimeSpan.FromSeconds(1.5))), Now)).IsEqualTo(2u);
+            await Assert.That(MatchLockService.BanSecondsRemaining(BuildLock(Now - (MatchLock.Lifetime + TimeSpan.FromSeconds(1))), Now)).IsEqualTo(0u);
+        }
+    }
+
+    [Test]
     public async Task A_Server_Which_Is_Not_Registered_Is_Gone()
     {
         MatchLock matchLock = BuildLock();
@@ -300,7 +311,7 @@ public sealed class MatchLockVerificationTests(ServiceContainerContext container
         return (await ChatTestData.GetUserID(host.Services, accountID), accountID, accountName);
     }
 
-    private static MatchLock BuildLock() => new ()
+    private static MatchLock BuildLock(DateTimeOffset? timestampStarted = null) => new ()
     {
         UserID = 7,
         AccountID = 17,
@@ -311,7 +322,7 @@ public sealed class MatchLockVerificationTests(ServiceContainerContext container
         ServerID = 1,
         ServerAddress = "127.0.0.1",
         ServerPort = 11235,
-        TimestampStarted = Now
+        TimestampStarted = timestampStarted ?? Now
     };
 
     private static MatchServer BuildServer(MatchLock matchLock) => new ()

@@ -29,8 +29,8 @@ public class GroupJoinQueue(MerrickContext merrick, MatchLockService matchLockSe
             return;
         }
 
-        // Call The Group's Queue Join Method Which Validates All Conditions, As The Leader's Own Attempt To Play
-        await group.JoinQueue(merrick, matchLockService, leaderActed: true);
+        // Call The Group's Queue Join Method Which Validates All Conditions
+        await group.JoinQueue(merrick, matchLockService);
     }
 }
 

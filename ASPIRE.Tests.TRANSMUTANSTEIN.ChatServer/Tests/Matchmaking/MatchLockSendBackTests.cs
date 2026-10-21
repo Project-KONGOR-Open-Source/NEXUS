@@ -408,7 +408,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
     [Test]
     [Arguments(SlotTimeRemaining)]
     [Arguments(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining)]
-    public async Task A_Player_Still_In_The_Match_Is_Told_Why_Once_Per_Notice_Repeat_Interval(uint slotTimeRemaining)
+    public async Task A_Player_Still_In_The_Match_Is_Refused_Without_A_Notice_Or_A_Return(uint slotTimeRemaining)
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
         await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(slotTimeRemaining);
@@ -439,7 +439,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
             await Assert.That(reportedJoiningGame).IsTrue();
             await Assert.That(firstRefused).IsTrue();
             await Assert.That(secondRefused).IsTrue();
-            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.InMatchMessage]);
+            await Assert.That(noticeMessages.Count).IsEqualTo(0);
             await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
             await Assert.That(session.PendingMatchLockReturn).IsNull();
         }

@@ -22,11 +22,6 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal const string SlotAccountLoginMessage = "You are in a match which is still in progress, and a match lock keeps you from playing another game until it ends. Trying to play another game sends you back to it.";
 
     /// <summary>
-    ///     The notice to a player who is still in the locked match, whose own attempt to play another game is refused, and who is not sent anywhere.
-    /// </summary>
-    internal const string InMatchMessage = "You are in a match which is still in progress, so you cannot start another game until it ends.";
-
-    /// <summary>
     ///     The notice to the account which holds the slot in the locked match while its slot is still connected to the match, which is sent back only once that connection has left.
     ///     The connection is most often that of a game which has just crashed or closed on the same machine, and which the match server has yet to drop, rather than a game still running on another machine, so the notice covers both.
     /// </summary>
@@ -50,10 +45,10 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         => $@"Your account ""{slotAccountName}"" is in a match which is still in progress, so you cannot play another game until it ends. Log in as ""{slotAccountName}"" to return to it.";
 
     /// <summary>
-    ///     The notice to the leader of a group which cannot search for a match, because one of its members is locked to a match in progress.
+    ///     The notice to every member of a party which cannot search for a match, once for each of its members which holds a match lock.
     /// </summary>
-    internal static string GroupMemberMessage(string lockedMemberName)
-        => $@"""{lockedMemberName}"" is in a match which is still in progress, so your group cannot search for a match until it ends.";
+    internal static string GroupMemberLockedMessage(string lockedMemberNameWithClanTag)
+        => $@"""{lockedMemberNameWithClanTag}"" has a match lock, because their match is still in progress, so your group cannot search for a match until it ends.";
 
     /// <summary>
     ///     How often a player whose return is pending is reminded to return, which is also how long a verification of the lock is trusted.
@@ -156,16 +151,16 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
-    ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed, apart from a short notice which is sent at most once per <see cref="NoticeRepeatInterval"/>.
+    ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed.
     ///     A relayed refusal proves that the game client is connecting elsewhere, so it is always sent back, whatever the game client reports.
     ///     While the slot account is still connected to the match from another machine, it is told to close the game there instead, and is sent back only once that connection has left.
-    ///     A group member whose group is enforced because another member acted is never given the notice, because the attempt is not its own.
+    ///     A refused queue or group join which does not send the player back at once is answered with the game client's "Temporary Ban" popup before the notice, and the player leaves its group, because the game client's matchmaking screen covers the chat in which the notice appears.
     ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
     /// <param name="session">The chat session of the player whose attempt to play another game is decided.</param>
     /// <param name="relayedRefusal">Whether the attempt is a refusal of a client connection on another match server which was relayed to the chat server, which proves that the game client is connecting elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
-    /// <param name="groupMember">Whether the player is enforced only because its group is, as when another member asked to queue or the group's loading started the queue, so that a player who is still in its match is not told why an attempt which is not its own was refused.</param>
-    public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool groupMember = false)
+    /// <param name="matchmaking">Whether the attempt is a queue or a group join, whose refusal must also release the game client's matchmaking screen.</param>
+    public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false)
     {
         if (IsExempt(session.Account))
             return false;
@@ -199,9 +194,6 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         // A Relayed Refusal Is Never Such A Player, Because A Chat Reconnect Reports Joining A Game While The Client Is Still Connecting
         if (session.ReportedJoiningGame && relayedRefusal is false)
         {
-            if (groupMember is false && session.TryClaimInMatchNotice(NoticeRepeatInterval))
-                session.SendNotice(MessageSenderName, InMatchMessage);
-
             logger.LogDebug(@"Refusing Account ""{AccountName}"" Without Sending It Back To Match ID ""{MatchID}"", Because It Reports Being In A Game",
                 session.Account.Name, matchLock.MatchID);
 
@@ -210,8 +202,12 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
         bool isSlotAccount = matchLock.AccountID == session.Account.ID;
 
+        // Only A Slot Account Which This Attempt Sends Back At Once Releases Its Matchmaking Screen By Itself, So Every Other Refused Queue Or Group Join Gets The "Temporary Ban" Popup Before Its Notice, Even When The Notice Repeat Interval Holds The Notice Back
         if (continuedReturn is not null)
         {
+            if (matchmaking)
+                RefuseMatchmaking(session, matchLock);
+
             ContinueReturn(session, matchLock, isSlotAccount, continuedReturn, verdict, verificationIsDue);
 
             return true;
@@ -231,6 +227,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
             if (IsContinuable(concurrentReturn, matchLock))
             {
+                if (matchmaking)
+                    RefuseMatchmaking(session, matchLock);
+
                 ContinueReturn(session, matchLock, isSlotAccount, concurrentReturn, verdict, verified: true);
 
                 return true;
@@ -242,11 +241,17 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                 logger.LogWarning(@"Could Not Start The Return Of Account ""{AccountName}"" To Match ID ""{MatchID}"", Because Its Pending Return Kept Changing",
                     session.Account.Name, matchLock.MatchID);
 
+                if (matchmaking)
+                    RefuseMatchmaking(session, matchLock);
+
                 Notify(session, matchLock, isSlotAccount, verdict);
 
                 return true;
             }
         }
+
+        if (matchmaking && (isSlotAccount is false || slotConnected))
+            RefuseMatchmaking(session, matchLock);
 
         Notify(session, matchLock, isSlotAccount, verdict);
 
@@ -259,20 +264,18 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Decides whether a group's attempt to search for a match must be refused, which is while <see cref="Enforce"/> refuses any of its members.
-    ///     Every member is enforced, so that every locked member who is not in a game is sent back, and a leader who is not refused is told which member keeps the group from searching.
-    ///     Only a leader who asked to queue is enforced as acting on its own, so that a leader who is still in its match is told why, while a queue which full loading started tells nobody who is still in their match.
+    ///     Every member is enforced as a matchmaking attempt, so that every locked member who is not in a game is sent back, or shown why when it cannot be sent back at once.
+    ///     A refused party's remaining members are unreadied, and every member which the party had when the queue started is told which members hold a match lock.
     /// </summary>
     /// <param name="group">The group which is about to search for a match.</param>
-    /// <param name="leaderActed">Whether the group's leader asked to queue, rather than the group's loading having started the queue by itself.</param>
-    public async Task<bool> EnforceForGroup(MatchmakingGroup group, bool leaderActed = false)
+    public async Task<bool> EnforceForGroup(MatchmakingGroup group)
     {
-        // The Members Are Read Once, Because The Group Can Change While They Are Enforced
-        MatchmakingGroupMember leader = group.Leader;
-
+        // The Members Are Read Once, Because The Group Can Change While They Are Enforced, Not Least When A Refused Member Leaves It
         List<MatchmakingGroupMember> members = [.. group.Members];
 
+        // Every Member Is Enforced, Because A Premade Party Outlives The Match It Played Together, So A Locked Player Can Still Queue With Its Teammates
         // The Members Are Enforced Concurrently, Because Each Locked Member May Wait On Its Own Match Server's Answer
-        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, groupMember: leaderActed is false || member != leader)));
+        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, matchmaking: true)));
 
         List<MatchmakingGroupMember> refusedMembers = [.. members.Where((member, index) => refusals[index])];
 
@@ -282,9 +285,26 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
             group.GUID, refusedMembers.Count);
 
-        // A Refused Leader Has Already Been Told Why, Unless It Is Still In Its Match And Did Not Ask To Queue, Which Leaves It Undisturbed
-        if (refusedMembers.Contains(leader) is false)
-            leader.Session.SendNotice(MessageSenderName, GroupMemberMessage(refusedMembers[0].Account.Name));
+        // A Solo Group Gets Nothing More, Because The Game Client Leaves It By Itself When It Is Sent Back, And A Group Update Would Put It Back
+        if (members.Count is 1)
+            return true;
+
+        // A Sent-Back Member's Game Client Keeps Its Party, And A Member In A Game Gets No Frame, So Only A Group Update Which Unreadies The Party Releases The Matchmaking Screens Of The Members Which Remain
+        if (group.Members.Count > 0)
+        {
+            group.UnloadAndUnreadyMembers();
+
+            group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+        }
+
+        // Every Member Which The Party Had When The Queue Started, The Leader And The Refused Members Included, Is Told About Each Refused Member, So That Nobody Blames The Leader For The Queue Not Starting
+        foreach (MatchmakingGroupMember refusedMember in refusedMembers)
+        {
+            string message = GroupMemberLockedMessage(refusedMember.Account.NameWithClanTag);
+
+            foreach (MatchmakingGroupMember member in members)
+                member.Session.SendNotice(MessageSenderName, message);
+        }
 
         return true;
     }
@@ -456,6 +476,17 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     internal static bool KeepsLock(MatchLockVerdict verdict) => verdict is MatchLockVerdict.SendBack or MatchLockVerdict.WaitForSlot;
 
     /// <summary>
+    ///     The whole seconds left until the match lock's safety limit, which the game client's "Temporary Ban" popup counts down, and zero once the limit has passed.
+    ///     The seconds are rounded up, so that a lock with a fraction of a second left still shows one.
+    /// </summary>
+    internal static uint BanSecondsRemaining(MatchLock matchLock, DateTimeOffset now)
+    {
+        TimeSpan timeRemaining = matchLock.TimestampExpires - now;
+
+        return timeRemaining > TimeSpan.Zero ? (uint) Math.Ceiling(timeRemaining.TotalSeconds) : 0;
+    }
+
+    /// <summary>
     ///     Queries the match server for the time remaining on the player's slot, and reads the reply with the game phase which the match server last reported.
     ///     An unanswered query is logged as lifting the lock only when <paramref name="unconfirmedSlotLifts"/> holds, because a waiting return keeps the lock through it.
     /// </summary>
@@ -587,6 +618,19 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         pendingReturn.LastNotified = now;
 
         Notify(session, matchLock, isSlotAccount, verdict);
+    }
+
+    /// <summary>
+    ///     Answers a refused queue or group join with the game client's "Temporary Ban" popup, counting down to the match lock's safety limit, and removes the player from its group, before the player is told why.
+    ///     The game client's matchmaking screen covers the chat in which the notice appears, and the "Temporary Ban" popup is the only refusal of the game client whose text fits a match lock.
+    ///     The game client leaves its group on that reply without telling the chat server, so the player is removed without a group update, which would make the game client leave its group again.
+    ///     A slot account which is sent back at once needs none of this, because the game client leaves a solo group by itself when it is sent to a match, with the reason "foundmatch" ("CChatManager::MatchmakingConnect").
+    /// </summary>
+    private static void RefuseMatchmaking(ClientChatSession session, MatchLock matchLock)
+    {
+        session.SendMatchmakingBan(BanSecondsRemaining(matchLock, DateTimeOffset.UtcNow));
+
+        MatchmakingService.GetMatchmakingGroup(session.Account.ID)?.RemoveMember(session.Account.ID, notifyRemovedMember: false);
     }
 
     /// <summary>

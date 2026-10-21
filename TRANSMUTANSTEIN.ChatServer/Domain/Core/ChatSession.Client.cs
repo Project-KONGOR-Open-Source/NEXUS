@@ -400,24 +400,20 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
     }
 
     /// <summary>
-    ///     The ticks of the last claim of the in-match notice, which is zero while none has been claimed.
+    ///     Tells the game client that it cannot join matchmaking because it is temporarily banned, which the game client shows as its "Temporary Ban" popup, counting down the given seconds.
+    ///     The game client leaves its group on this reply without telling the chat server ("CChatManager::HandleTMMJoinFailed"), and its countdown is for display only, clearing on the next group update.
     /// </summary>
-    private long LastInMatchNoticeTicks;
-
-    /// <summary>
-    ///     Claims the in-match notice, recording that it is sent now, but only when none was claimed within the repeat interval.
-    ///     Returns whether the notice was claimed, atomically, so that concurrent attempts send it once.
-    /// </summary>
-    public bool TryClaimInMatchNotice(TimeSpan repeatInterval)
+    public ClientChatSession SendMatchmakingBan(uint secondsRemaining)
     {
-        long lastTicks = Interlocked.Read(ref LastInMatchNoticeTicks);
+        ChatBuffer failure = new ();
 
-        long nowTicks = DateTime.UtcNow.Ticks;
+        failure.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+        failure.WriteInt8(Convert.ToByte(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED)); // Failure Reason
+        failure.WriteInt32(unchecked((int) secondsRemaining));                                 // Seconds Remaining, Which The Game Client Reads As Unsigned
 
-        if (lastTicks is not 0 && nowTicks - lastTicks < repeatInterval.Ticks)
-            return false;
+        Send(failure);
 
-        return Interlocked.CompareExchange(ref LastInMatchNoticeTicks, nowTicks, lastTicks) == lastTicks;
+        return this;
     }
 
     /// <summary>

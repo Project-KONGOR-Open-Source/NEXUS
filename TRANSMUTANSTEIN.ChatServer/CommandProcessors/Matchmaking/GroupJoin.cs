@@ -7,7 +7,7 @@ public class GroupJoin(MerrickContext merrick, MatchLockService matchLockService
     {
         GroupJoinRequestData requestData = new (buffer);
 
-        if (await matchLockService.Enforce(session))
+        if (await matchLockService.Enforce(session, matchmaking: true))
             return;
 
         await MatchmakingGroup

@@ -177,6 +177,12 @@ internal static class ChatTestProtocol
         => await ReadUntilCommand(stream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, timeout) is { } frame ? ParseAutoMatchConnect(frame) : null;
 
     /// <summary>
+    ///     Reads frames until a matchmaking failure reply arrives, returning its reason and seconds, or <see langword="null"/> if the connection closed or the timeout elapsed first.
+    /// </summary>
+    public static async Task<(ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)?> ReadMatchmakingFailure(NetworkStream stream, TimeSpan timeout)
+        => await ReadUntilCommand(stream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN, timeout) is { } frame ? ParseMatchmakingFailure(frame) : null;
+
+    /// <summary>
     ///     Reads the sender name and message of a notice frame which is positioned immediately after its command bytes.
     /// </summary>
     public static (string SenderName, string Message) ParseNotice(ChatBuffer frame)
@@ -188,6 +194,17 @@ internal static class ChatTestProtocol
     /// </summary>
     public static (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger) ParseAutoMatchConnect(ChatBuffer frame)
         => (frame.ReadInt8(), frame.ReadInt32(), frame.ReadString(), frame.ReadInt16(), frame.ReadInt32());
+
+    /// <summary>
+    ///     Reads the reason of a matchmaking failure reply which is positioned immediately after its command bytes, and the seconds which follow it.
+    ///     The seconds are read only for <see cref="ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED"/>, as the game client reads them, and are zero otherwise.
+    /// </summary>
+    public static (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds) ParseMatchmakingFailure(ChatBuffer frame)
+    {
+        ChatProtocol.TMMFailedToJoinReason reason = (ChatProtocol.TMMFailedToJoinReason) frame.ReadInt8();
+
+        return (reason, reason is ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED ? unchecked((uint) frame.ReadInt32()) : 0);
+    }
 
     /// <summary>
     ///     Reads every frame which arrives within the period, and returns the messages of the match lock's notices and the random integers of the "AUTO_MATCH_CONNECT" frames among them, so that frames of either kind are counted however they interleave.

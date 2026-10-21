@@ -308,6 +308,9 @@ public class MatchmakingGroup
 
         groupMember.LoadingPercent = loadingPercent;
 
+        // The Update Is Sent Before The Queue Starts, Because A Refused Queue May Send A Solo Player Back, Whose Game Client Then Leaves Its Group, Or Empty The Group, And No Group Update May Follow Either
+        MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+
         // Check If All Members Have Reached 100% Loading
         bool allMembersAreFullyLoaded = Members.All(member => member.LoadingPercent is 100);
 
@@ -315,8 +318,6 @@ public class MatchmakingGroup
         {
             await JoinQueue(merrick, matchLockService);
         }
-
-        MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
 
         return this;
     }
@@ -490,8 +491,7 @@ public class MatchmakingGroup
     /// </summary>
     /// <param name="merrick">The database context from which the members' statistics are loaded.</param>
     /// <param name="matchLockService">The service which refuses the queue while a member is locked to a match in progress.</param>
-    /// <param name="leaderActed">Whether the group's leader asked to queue, rather than the group's loading having started the queue by itself, so that a leader who is still in its match is told why its own request is refused.</param>
-    public async Task JoinQueue(MerrickContext merrick, MatchLockService matchLockService, bool leaderActed = false)
+    public async Task JoinQueue(MerrickContext merrick, MatchLockService matchLockService)
     {
         // Prevent Double-Queuing (The Explicit Queue Join And The Loading-Status Auto-Join Can Legitimately Race)
         if (QueueStartTime is not null)
@@ -502,7 +502,7 @@ public class MatchmakingGroup
         }
 
         // A Group With A Locked Member Is Refused Before Anything Else Is Validated Or Changed, So That Every Attempt To Queue Sends Its Locked Members Back, Ready Or Not
-        if (await matchLockService.EnforceForGroup(this, leaderActed))
+        if (await matchLockService.EnforceForGroup(this))
             return;
 
         // Validate That All Members Are Ready And Loaded Before Joining Queue
@@ -583,8 +583,13 @@ public class MatchmakingGroup
         }
     }
 
-    public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
+    /// <summary>
+    ///     Sends a group update about the emitting member to every member of the group, or to every member but the emitting one when <paramref name="notifyEmitter"/> is <see langword="false"/>.
+    /// </summary>
+    public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType, bool notifyEmitter = true)
     {
+        List<MatchmakingGroupMember> recipients = [.. Members.Where(member => notifyEmitter || member.Account.ID != emitterAccountID)];
+
         ChatBuffer update = new ();
 
         update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
@@ -666,7 +671,7 @@ public class MatchmakingGroup
         {
             long sharedBufferLength = update.Size;
 
-            foreach (MatchmakingGroupMember recipient in Members)
+            foreach (MatchmakingGroupMember recipient in recipients)
             {
                 update.Resize(sharedBufferLength);
 
@@ -683,8 +688,8 @@ public class MatchmakingGroup
 
         else
         {
-            foreach (MatchmakingGroupMember member in Members)
-                member.Session.Send(update);
+            foreach (MatchmakingGroupMember recipient in recipients)
+                recipient.Session.Send(update);
         }
     }
 
@@ -692,8 +697,9 @@ public class MatchmakingGroup
     ///     Removes a member from the matchmaking group.
     ///     If the leader leaves and other members remain, leadership transfers to the member with the lowest slot index.
     ///     If the leader leaves and no other members remain, or if the last member leaves, the group is disbanded.
+    ///     A member whose game client has already left the group is sent no update about its removal, which would make its game client leave the group again, while the remaining members are updated as for any other removal.
     /// </summary>
-    public void RemoveMember(int accountID, bool kick = false)
+    public void RemoveMember(int accountID, bool kick = false, bool notifyRemovedMember = true)
     {
         MatchmakingGroupMember? memberToRemove = Members.SingleOrDefault(member => member.Account.ID == accountID);
 
@@ -708,7 +714,7 @@ public class MatchmakingGroup
             : ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP;
 
         // Send Partial Group Update Indicating Member Removal
-        MulticastUpdate(accountID, updateType);
+        MulticastUpdate(accountID, updateType, notifyEmitter: notifyRemovedMember);
 
         // Remove Member From Group Chat Channel
         if (ChatChannel is not null)
