@@ -217,6 +217,45 @@ public sealed partial class HostingAuthenticationTests
         }
     }
 
+    [Test]
+    [NotInParallel(DistributedCacheExtensions.MatchLockRefusalChannel)]
+    public async Task The_Server_List_Is_Served_When_The_Account_Of_The_Session_Cookie_Cannot_Be_Found()
+    {
+        await InitialiseIn("Development");
+
+        (_, int idleServerID) = await RegisterMatchServer(1);
+
+        await SetMatchServerStatus(idleServerID, ChatProtocol.ServerStatus.SERVER_STATUS_IDLE);
+
+        string cookie = Guid.CreateVersion7().ToString();
+
+        // The Session Cookie Passes The Validation Of Every Client Request, But Names An Account Which Does Not Exist, So That No Match Lock Can Be Looked Up For It
+        await webApplicationFactory.Services.GetRequiredService<IDatabase>().SetAccountNameForSessionCookie(cookie, "MISSING-ACCOUNT");
+
+        ChannelMessageQueue refusals = await SubscribeToRefusals();
+
+        try
+        {
+            HttpResponseMessage response = await RequestServerList(cookie, "90");
+
+            IDictionary<object, object> body = await DeserialisePHPResponse(response);
+
+            MatchLockRefusal? refusal = await ReadRefusal(refusals, RefusalQuietPeriod);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+                await Assert.That(body["server_list"] is ICollection { Count: > 0 }).IsTrue();
+                await Assert.That(refusal).IsNull();
+            }
+        }
+
+        finally
+        {
+            await refusals.UnsubscribeAsync();
+        }
+    }
+
     /// <summary>
     ///     Sends the request which the game client sends, with its login cookie, for the list of match servers of a game type ("CServerList::RequestMasterServerList").
     /// </summary>

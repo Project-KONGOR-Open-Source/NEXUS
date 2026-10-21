@@ -19,43 +19,46 @@ public partial class ClientRequesterController
             return UnprocessableEntity($@"Unknown Server List Game Type ""{gameType ?? "NULL"}""");
         }
 
-        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
-
-        if (accountName is null)
-            return Unauthorized($@"Unrecognised Cookie ""{cookie}""");
-
-        Account? account = await MerrickContext.Accounts
-            .Include(account => account.User)
-            .Include(account => account.Clan)
-            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
-
-        if (account is null)
-        {
-            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{SessionCookie}""", accountName, cookie);
-
-            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
-        }
+        Account? account = null;
 
         MatchLock? refusingLock = null;
 
-        // A Server List Whose Match Lock Cannot Be Evaluated Is Served As If There Were No Lock, As A Client Connection Is
+        // Only A Match Lock May Change The Server List's Reply, And No Lock Can Be Found Without An Account, So A Session Cookie Whose Account Cannot Be Looked Up, Or Whose Match Lock Cannot Be Evaluated, Is Served The Full List, As A Client Connection Is Served
         try
         {
-            (refusingLock, MatchLock? liftedLock) = await DistributedCache.FindRefusingMatchLock(account, askingServerID: null);
+            string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
-            if (liftedLock is not null)
+            // The Session Cookie Was Validated Before This Request Was Handled, So It Is Unrecognised Here Only When It Has Ended Since, As A Logout, A Newer Login, Or Its Expiry Ends It
+            if (accountName is not null)
             {
-                Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
-                    liftedLock.AccountName, liftedLock.MatchID, liftedLock.ServerID);
+                account = await MerrickContext.Accounts
+                    .Include(account => account.User)
+                    .Include(account => account.Clan)
+                    .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+                if (account is null)
+                    Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{SessionCookie}""", accountName, cookie);
+            }
+
+            if (account is not null)
+            {
+                (refusingLock, MatchLock? liftedLock) = await DistributedCache.FindRefusingMatchLock(account, askingServerID: null);
+
+                if (liftedLock is not null)
+                {
+                    Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
+                        liftedLock.AccountName, liftedLock.MatchID, liftedLock.ServerID);
+                }
             }
         }
 
         catch (Exception exception)
         {
-            Logger.LogError(exception, @"Serving The Server List Of Account ""{AccountName}"" As If It Had No Match Lock, Because Its Match Lock Could Not Be Evaluated", account.Name);
+            Logger.LogError(exception, @"Serving The Server List Of Account ""{AccountName}"" With Session Cookie ""{SessionCookie}"" As If It Had No Match Lock, Because Its Match Lock Could Not Be Evaluated",
+                account?.Name ?? "UNKNOWN", cookie);
         }
 
-        if (refusingLock is not null)
+        if (account is not null && refusingLock is not null)
         {
             try
             {
