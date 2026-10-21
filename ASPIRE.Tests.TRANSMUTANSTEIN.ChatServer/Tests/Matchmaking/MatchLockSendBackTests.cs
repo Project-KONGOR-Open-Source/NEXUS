@@ -131,7 +131,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
         using (Assert.Multiple())
         {
             await Assert.That(noticeMessages.Count).IsEqualTo(1);
-            await Assert.That(noticeMessages.SingleOrDefault()).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName));
+            await Assert.That(noticeMessages.SingleOrDefault()).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName));
             await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
             await Assert.That(Context.ClientChatSessions[accountName].PendingMatchLockReturn).IsNull();
         }
@@ -512,7 +512,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         (List<string> noticeMessages, List<int> connectRandomIntegers) = await ChatTestProtocol.ReadSendBackFrames(client.GetStream(), QuietPeriod);
 
-        string expectedMessage = slotAccount ? MatchLockService.SlotAccountMessage : MatchLockService.OtherAccountMessage(slotAccountName);
+        string expectedMessage = slotAccount ? MatchLockService.SlotAccountMessage : MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName);
 
         using (Assert.Multiple())
         {
@@ -935,7 +935,7 @@ public sealed class MatchLockSendBackTests(ServiceContainerContext containerCont
 
         using (Assert.Multiple())
         {
-            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName)]);
+            await Assert.That(noticeMessages).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName)]);
             await Assert.That(connectRandomIntegers.Count).IsEqualTo(0);
         }
     }

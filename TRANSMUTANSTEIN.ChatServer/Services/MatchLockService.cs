@@ -197,7 +197,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         }
 
         // A Game Client Which Reports Being In A Game Is On A Match Server, Where It Cannot Be Sent Back, And Is Usually A Player Still In The Locked Match, Who Must Not Be Told That They Left It
-        // A Relayed Refusal Is Never Such A Player, Because A Chat Reconnect Reports Joining A Game While The Client Is Still Connecting
+        // A Relayed Refusal Shows That The Client Is Trying To Play Elsewhere, So It Is Not A Player In Its Locked Match, And For A Refused Client Connection A Chat Reconnect Reports Joining A Game While The Client Is Still Connecting
         if (session.ReportedJoiningGame && relayedRefusal is false)
         {
             logger.LogDebug(@"Refusing Account ""{AccountName}"" Without Sending It Back To Match ID ""{MatchID}"", Because It Reports Being In A Game",
@@ -361,7 +361,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     {
         if (Context.ClientChatSessions.TryGetValue(refusal.AccountName, out ClientChatSession? session))
         {
-            // A Client Which Reports Being In Its Own Match Cannot Be Connecting Elsewhere, So The Refusal Is The Late Answer To An Attempt Which It Has Abandoned, Whereas A Client Which Reports Another Match Server May Be In A Chat Reconnect During A Refused Join
+            // A Client Which Reports Being In Its Own Match Cannot Be Connecting Elsewhere, So The Refusal Is The Late Answer To An Attempt Which It Has Abandoned, Whereas A Client Which Reports Another Match Server May Be In A Chat Reconnect During A Refused Client Connection, And A Refused Server List Shows Only That The Client Is Trying To Play Elsewhere
             MatchLock? lockedMatch = await distributedCacheStore.GetMatchLock(refusal.UserID);
 
             if (lockedMatch is not null && session.ReportedGameServerAddress is { } reportedAddress && await NamesLockedServer(lockedMatch, reportedAddress))

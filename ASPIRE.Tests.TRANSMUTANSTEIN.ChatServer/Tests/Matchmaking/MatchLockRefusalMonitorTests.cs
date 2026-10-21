@@ -283,7 +283,7 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
         using (Assert.Multiple())
         {
             await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
-            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName));
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName));
             await Assert.That(connect).IsNull();
         }
     }

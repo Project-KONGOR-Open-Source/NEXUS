@@ -210,6 +210,7 @@ public sealed class ClientHandshakeIntegrationTests(ServiceContainerContext cont
         {
             await Assert.That(frames.Count).IsGreaterThanOrEqualTo(2);
             await Assert.That(frames[^1].Command).IsEqualTo((ushort) ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+            await Assert.That(frames[^2].Command).IsEqualTo((ushort) ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL);
             await Assert.That(ChatTestProtocol.ParseNotice(frames[^2].Frame)).IsEqualTo((ClientHandshake.LoggedInElsewhereSenderName, ClientHandshake.LoggedInElsewhereMessage(accountNameWithClanTag)));
         }
     }

@@ -140,7 +140,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             using (Assert.Multiple())
             {
                 await Assert.That(failure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
-                await Assert.That(MatchLockNotices(later)).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName)]);
+                await Assert.That(MatchLockNotices(later)).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName)]);
                 await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(group.Members.Count).IsEqualTo(1);
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
@@ -221,7 +221,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(failure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
                 await Assert.That(failure?.Seconds ?? 0).IsLessThanOrEqualTo((uint) MatchLock.Lifetime.TotalSeconds);
                 await Assert.That(failure?.Seconds ?? 0).IsGreaterThan((uint) (MatchLock.Lifetime - TimeSpan.FromMinutes(1)).TotalSeconds);
-                await Assert.That(MatchLockNotices(later)).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName)]);
+                await Assert.That(MatchLockNotices(later)).IsEquivalentTo([MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName)]);
                 await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(group.QueueStartTime).IsNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
@@ -274,7 +274,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             using (Assert.Multiple())
             {
                 await Assert.That(firstFailure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
-                await Assert.That(firstNotice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.AccountName));
+                await Assert.That(firstNotice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName));
                 await Assert.That(secondFailure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
                 await Assert.That(MatchLockNotices(later).Count).IsEqualTo(0);
                 await Assert.That(earlier.Concat(later).Any(frame => frame.Command is ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
