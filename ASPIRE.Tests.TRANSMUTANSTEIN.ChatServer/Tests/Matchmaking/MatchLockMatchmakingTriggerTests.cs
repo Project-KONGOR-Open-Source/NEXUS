@@ -211,6 +211,51 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     [Test]
+    public async Task Inviting_A_Locked_Player_Whose_Match_Server_Does_Not_Answer_Delivers_The_Invite_And_Keeps_The_Lock()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        // The Match Server's Game Socket Does Not Answer The Reconnect Query, As When A Few Datagrams Are Lost, While The Match Server Still Reports Its Status
+        gameSocket.Answers = false;
+
+        (_, int inviterAccountID, string inviterAccountName, string inviterCookie) = await ChatTestData.SeedPlayer(host);
+        (int inviteeUserID, int inviteeAccountID, string inviteeAccountName, string inviteeCookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, inviteeUserID, inviteeAccountID, inviteeAccountName, gameSocket);
+
+        using TcpClient inviterClient = await host.ConnectAndAuthenticateClientAsync(inviterAccountID, inviterAccountName, inviterCookie, RemoteIP);
+        using TcpClient inviteeClient = await host.ConnectAndAuthenticateClientAsync(inviteeAccountID, inviteeAccountName, inviteeCookie, RemoteIP);
+
+        NetworkStream inviterStream = inviterClient.GetStream();
+
+        try
+        {
+            await CreateGroup(inviterStream, inviterAccountID);
+
+            // An Invite Is Not The Invitee's Own Attempt To Play, So An Unconfirmed Slot Neither Holds The Invite Back Nor Lifts The Invitee's Lock, And The Invitee's Own Group Join Decides
+            await ChatTestProtocol.WriteFrame(inviterStream, ChatTestProtocol.BuildGroupInvite(inviteeAccountName));
+
+            ChatBuffer? invite = await ChatTestProtocol.ReadUntilCommand(inviteeClient.GetStream(), ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE, FrameTimeout);
+
+            (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(inviterStream, QuietPeriod);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(invite).IsNotNull();
+                await Assert.That(notice).IsNull();
+                await Assert.That(await host.Services.GetRequiredService<IDatabase>().GetMatchLock(inviteeUserID)).IsNotNull();
+                await Assert.That(Context.ClientChatSessions[inviteeAccountName].PendingMatchLockReturn).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(inviterAccountID, inviteeAccountID);
+        }
+    }
+
+    [Test]
     public async Task A_Locked_Player_Inviting_Someone_Is_Sent_Back_And_The_Invite_Is_Not_Delivered()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

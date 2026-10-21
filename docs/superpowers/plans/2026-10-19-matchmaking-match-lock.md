@@ -24,7 +24,7 @@
 - Never send a player to a dead server, a finished match, or an unreclaimable slot.
 - Never lift a lock during a pick phase.
 - The triggers which pull a locked player back are joining another group, inviting someone, a queue, the server list, and any game join (`c_conn`); a login only tells the player, once per login cookie, and never pulls or starts a wait; the client's own solo group (group create) is never refused; and leaving alone triggers nothing (Tasks 20 to 23 and 25).
-- A locked player is only ever alone in a group, apart from a premade party which outlives its match: an invite to a locked player is not delivered, the inviter is told why, and the inviter's group is unchanged (Task 25).
+- A locked player is only ever alone in a group, apart from a premade party which outlives its match: an invite to a locked player is not delivered, the inviter is told why, and the inviter's group is unchanged; an invite never lifts the invitee's lock on a slot which the match server does not confirm: when the match server does not answer the reconnect query, the invite is delivered, the lock is kept, and the invitee's own group join decides (Task 25).
 - Account-based reconnect is set by a remote command at server handshake, always.
 - NEXUS conventions (`claude.md` and `agents.md` on `next`); commits in imperative Start Case, with no body and no attribution to non-humans.
 - The match lock is the default behaviour, with no configuration at all: the safety limit is the constant `MatchLock.Lifetime`, one hour from when the lock begins, never renewed, and tests reference it, never a copied value.
@@ -62,7 +62,7 @@
 12. A refused queue must unlock the client's matchmaking screen: a slot account's alone in its group through the pull with no popup, another account's through the "Temporary Ban" popup, and a party's through a group update which unreadies it (Task 21, `Queueing_While_Locked_Is_Refused_And_Sends_The_Player_Back`, `Queueing_On_Another_Account_Shows_The_Temporary_Ban_Before_The_Notice`, and `Queueing_A_Party_With_A_Locked_Member_Unreadies_It_And_Sends_The_Member_Back`).
 13. A refusal which no client or engine retries must never leave a player whose lock has just lifted without an explanation (Task 22, `A_Refusal_Which_Finds_The_Lock_Lifted_Tells_The_Player_To_Try_Again`).
 14. The empty server list must be a successful, well-formed list of the requested kind, so that the client clears and redraws its list, and a game creation finds no match server (Task 23, `The_Server_List_Of_A_Locked_Account_Is_Empty_And_Relays_A_Refusal`).
-15. An invite must never reach a locked player, nor change the inviter's group (Task 25, `Inviting_A_Locked_Player_Is_Not_Delivered_And_Tells_The_Inviter`).
+15. An invite must never reach a locked player whose slot its match server confirms, nor change the inviter's group, and must never lift the invitee's lock because the match server does not answer (Task 25, `Inviting_A_Locked_Player_Is_Not_Delivered_And_Tells_The_Inviter` and `Inviting_A_Locked_Player_Whose_Match_Server_Does_Not_Answer_Delivers_The_Invite_And_Keeps_The_Lock`).
 
 ## Decisions Left To The Builder
 
@@ -107,7 +107,7 @@ Retail NAEU builds define `K2_NAEU` (`HON.Shell/k2_settings.h`), which defaults 
 
 | Reply | Last reported phase | Verdict |
 |---|---|---|
-| no reply after the retries, or only socket errors | any | lift without confirmation (`LiftSlotUnconfirmed`): the lock is removed, so nobody is trapped, and the server is logged at error level once; at the re-checks which a return makes by itself between attempts while it waits for the slot (`WaitForSlot`) and has sent nobody anywhere, the lock is kept and the wait goes on instead (final review ruling); a real attempt to play during the wait still lifts the lock, and a server which is gone or no longer hosts the match lifts it at any check |
+| no reply after the retries, or only socket errors | any | lift without confirmation (`LiftSlotUnconfirmed`): the lock is removed, so nobody is trapped, and the server is logged at error level once; at the re-checks which a return makes by itself between attempts while it waits for the slot (`WaitForSlot`) and has sent nobody anywhere, the lock is kept and the wait goes on instead (final review ruling); a real attempt to play during the wait still lifts the lock, and a server which is gone or no longer hosts the match lifts it at any check; a third party's invite to a locked player keeps the lock too, and is delivered (Task 25, the amendment's final review) |
 | nonzero, at most `ConnectedSlotThreshold` (Task 17) | any | send back |
 | above `ConnectedSlotThreshold` (Task 17) | any | wait for the slot (`WaitForSlot`), which keeps the lock: a connected player's value is near `uint.MaxValue`, because its termination time is `INVALID_TIME` |
 | `0` | `HERO_LOADING`, `PRE_MATCH`, `ACTIVE`, `POST_MATCH`, or `ENDED` | lift (`LiftSlotGone`): picking phases only ever precede `HERO_LOADING`, so from these phases a `0` can only mean removed or over |
@@ -2242,7 +2242,7 @@ git commit -m "Use Clan Tags And Match Lock Wording In Notices And Logs"
 - Produces:
   - `public class GroupInvite(MerrickContext merrick, MatchLockService matchLockService) : IAsynchronousCommandProcessor<ClientChatSession>`.
   - `internal static string InviteeLockedMessage(string inviteeNameWithClanTag)` on `MatchLockService`, worded as in Decisions.
-  - `public async Task<bool> HoldsLock(ClientChatSession session)` on `MatchLockService`: TRUE while the session's user, unless exempt, has a lock which `Verify` keeps, with no notice and no return; a lock which no longer holds is lifted by `Verify`, as at any check.
+  - `public async Task<bool> HoldsLock(ClientChatSession session)` on `MatchLockService`: TRUE while the session's user, unless exempt, has a lock which `Verify` keeps, with no notice and no return. It verifies with `unconfirmedSlotLifts: false` (the amendment's final review), because a third party's invite is not the invitee's own attempt to play: an unanswered reconnect query gives FALSE, so the invite is delivered, and keeps the lock, so that the invitee's own group join decides, while a match server which is gone, or has ended the match, and a slot which is gone, still lift it.
   - `public static ChatBuffer BuildGroupInvite(string inviteReceiverName)` on `ChatTestProtocol`, in the layout which `GroupInvite` reads.
 
 - [ ] **Step 1: Write the failing tests**

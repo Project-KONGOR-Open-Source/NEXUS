@@ -142,7 +142,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     ///     The player's slot is queried only when the match server does not rule the lock out by itself.
     /// </summary>
     /// <param name="matchLock">The match lock to verify.</param>
-    /// <param name="unconfirmedSlotLifts">Whether an unanswered reconnect query lifts the lock, which it does unless the caller is a return which waits for another machine and has sent nobody anywhere yet; a match server which is gone, or has ended the match, lifts the lock either way.</param>
+    /// <param name="unconfirmedSlotLifts">Whether an unanswered reconnect query lifts the lock, which it does unless the caller is a return which waits for another machine and has sent nobody anywhere yet, or an invite to the player from someone else, which is not the player's own attempt to play; a match server which is gone, or has ended the match, lifts the lock either way.</param>
     public async Task<MatchLockVerdict> Verify(MatchLock matchLock, bool unconfirmedSlotLifts = true)
     {
         MatchServer? registeredServer = await distributedCacheStore.GetMatchServerByID(matchLock.ServerID);
@@ -279,7 +279,8 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Decides whether the session's user holds a match lock which still holds, without telling the player anything or sending the player anywhere.
-    ///     A lock which no longer holds is lifted, as at any check.
+    ///     A lock which no longer holds is lifted, but an unanswered reconnect query gives <see langword="false"/> and keeps the lock, because the check is someone else's invite rather than the player's own attempt to play.
+    ///     So an invite never frees a player who may still be in the match, or whose slot account waits for its other machine, and the player's own group join decides instead.
     /// </summary>
     /// <param name="session">The chat session of the player whose lock is read.</param>
     public async Task<bool> HoldsLock(ClientChatSession session)
@@ -289,7 +290,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
         MatchLock? matchLock = await distributedCacheStore.GetMatchLock(session.Account.User.ID);
 
-        return matchLock is not null && KeepsLock(await Verify(matchLock));
+        return matchLock is not null && KeepsLock(await Verify(matchLock, unconfirmedSlotLifts: false));
     }
 
     /// <summary>
@@ -524,7 +525,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
     /// <summary>
     ///     Queries the match server for the time remaining on the player's slot, and reads the reply with the game phase which the match server last reported.
-    ///     An unanswered query is logged as lifting the lock only when <paramref name="unconfirmedSlotLifts"/> holds, because a waiting return keeps the lock through it.
+    ///     An unanswered query is logged as lifting the lock only when <paramref name="unconfirmedSlotLifts"/> holds, because a waiting return, and an invite to the player, keep the lock through it.
     /// </summary>
     private async Task<MatchLockVerdict> VerifySlot(MatchLock matchLock, MatchServer? registeredServer, MatchServerChatSession? serverSession, bool unconfirmedSlotLifts)
     {
@@ -556,7 +557,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
             else
             {
-                logger.LogDebug(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"" While Its Return Waits, Although Match Server ID ""{MatchServerID}"" Did Not Answer The Reconnect Query, Because Nobody Has Been Sent There Yet",
+                logger.LogDebug(@"Keeping The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Although Match Server ID ""{MatchServerID}"" Did Not Answer The Reconnect Query, Because This Check Sends Nobody There",
                     matchLock.TaggedAccountName, matchLock.MatchID, matchLock.ServerID);
             }
 
