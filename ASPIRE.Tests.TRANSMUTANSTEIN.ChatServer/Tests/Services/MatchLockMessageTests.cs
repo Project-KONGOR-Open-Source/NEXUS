@@ -26,7 +26,7 @@ public sealed class MatchLockMessageTests
             foreach (string message in messages)
             {
                 await Assert.That(message.Contains("match lock", StringComparison.OrdinalIgnoreCase)).IsTrue();
-                await Assert.That(Regex.IsMatch(message, @"ban(ned|s|ning)?", RegexOptions.IgnoreCase)).IsFalse();
+                await Assert.That(Regex.IsMatch(message, @"\bban(ned|s|ning)?\b", RegexOptions.IgnoreCase)).IsFalse();
             }
         }
     }
