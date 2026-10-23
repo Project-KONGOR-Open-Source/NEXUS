@@ -28,13 +28,13 @@
 
  - don't add comments for obvious code; only add comments when they add value by explaining why something is done a certain way or providing context that isn't immediately clear from the code itself
 
- - when adding code comments use StartCase, but not if that would change the letter case for acronyms, initialisms, symbol names, etc.
+ - when adding code comments use Start Case, but not if that would change the letter case for acronyms, initialisms, symbol names, etc.
    - COMMENT: // This Is A Sample Comment Explaining The Purpose Of The "request" Variable In The HTTP Handler
 
  - when adding summaries for code elements (like classes, methods, properties, etc.) use sentence case with correct indentation and punctuation, including a punctuation mark at the end of each sentence
    - SUMMARY LINE #1: /// <summary>
    - SUMMARY LINE #2: ///     This method retrieves user information based on the provided user ID.
-   - SUMMARY LINE #3: ///     It does do by using the "request" variable from the HTTP handler.
+   - SUMMARY LINE #3: ///     It does so by using the "request" variable from the HTTP handler.
    - SUMMARY LINE #4: /// </summary>
 
  - always enclose references to symbol names, branch names, etc. in double quotation marks unless it is possible to use a <see cref="..."/> tag instead
@@ -49,9 +49,9 @@
 
  - when writing comments or XML documentation, never split sentences across multiple lines; it is OK to have multiple sentences per line, but it is not OK to have a sentence spanning multiple lines
 
- - never use the null-forgiving operator (!) to suppress null handling; then only times where this is acceptable are the following:
+ - never use the null-forgiving operator (!) to suppress null handling; the only times where this is acceptable are the following:
    - when using Include or ThenInclude in Entity Framework queries to reference navigation properties that are known to be not null according to the data model, but are reference types or marked as nullable in the code
-   - when assigning "null!" to a nullable variable, field, or property is unavoidable without making the code overly-complex, and it is absolutely certain that the value will not be null at runtime
+   - when assigning "null!" to a nullable variable, field, or property is unavoidable without making the code overly complex, and it is absolutely certain that the value will not be null at runtime
 
  - when creating asynchronous methods, never use the "Async" suffix in the method name unless there is also a synchronous version of the same method in the same scope
 
@@ -63,7 +63,7 @@
 
  - in comments, use "TRUE", "FALSE", and "NULL" when referring to the boolean and null literals, to clearly distinguish them from their natural-language meanings
 
- - in XML documentation, use <see langword="true"/>, <see langword="false"/>, <see langword="null"/>, to refer to language keywords
+ - in XML documentation, use <see langword="true"/>, <see langword="false"/>, and <see langword="null"/> to refer to language keywords
 
  - never create any meta comments or XML documentation that relate to the inference session
    - WRONG: "This Change Fixes Bugs 2, 3, And 5 Discovered During The Analysis Phase"
@@ -71,7 +71,7 @@
  - never create comments or XML documentation with technical details which can cause a risk of drift
    - RIGHT: "Tests For The TCP Service"
    - WRONG: "Tests For The TCP Service Running On Port 12321"
-   
+
  - always use Oxford commas in enumerations of three or more elements
    - RIGHT: this thing, that thing, and the other thing
    - WRONG: this thing, that thing and the other thing
@@ -99,7 +99,7 @@
    - keep the code as straightforward and easy to understand as possible while still meeting the specified requirements
    - keep the code minimalistic and to the point, avoiding unnecessary abstractions, layers, or components that do not add significant value to the overall design or functionality
 
- - always prefer global using directives, and add or move them to a "Internals/UsingDirectives.cs" file in the project root
+ - always prefer global using directives, and add or move them to an "Internals/UsingDirectives.cs" file in the project root
    - keep using directives in lexicographic order ascending, grouped by assembly
    - use global using directive syntax rather than the "global::" alias qualifier
      - RIGHT: global using Aspire.Hosting;
@@ -124,11 +124,11 @@
    - if a request to create commits was denied, don't ask again in the same session; the owner may still grant approval later in the session without being asked to do so
 
  - if approval to create commits was granted, always use imperative Start Case for the commit message
-     - RIGHT: Update Connection String
-     - WRONG: updated connection string
+   - RIGHT: Update Connection String
+   - WRONG: updated connection string
 
  - if approval to create commits was granted, never attribute yourself or another non-human anywhere in the commit
 
  - if approval to create commits was granted, commits should always be atomic and self-descriptive; no commit description is necessary unless the commit is a merge commit
-   - if the commit is a merge commit, the commit description should be a one paragraph summary of the commits, not longer than a few sentences
-     - if there are valid reasons for which an exception should be made when writing a merge commit description, always seek the owners approval to make the exception
+   - if the commit is a merge commit, the commit description should be a one-paragraph summary of the commits, not longer than a few sentences
+     - if there are valid reasons for which an exception should be made when writing a merge commit description, always seek the owner's approval to make the exception
