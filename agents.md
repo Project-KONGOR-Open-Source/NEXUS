@@ -113,6 +113,18 @@
    - RIGHT: SingleOrDefault, SingleOrDefaultAsync
    - WRONG: FirstOrDefault, FirstOrDefaultAsync, LastOrDefault, LastOrDefaultAsync
 
+ - when expecting a single element from an ordered collection as the result of a LINQ operation, where its position is what identifies it, use First, FirstAsync, Last, or LastAsync; never use them on an unordered collection, since duplicated elements are a data problem which should be handled where the data is generated rather than hidden by picking one of them
+   - RIGHT: results.OrderBy(result => result.CreatedDate).Last()
+   - WRONG: results.First(result => result.AccountID == accountID) on an unordered collection
+
+ - when expecting no element or a single element from an ordered collection as the result of a LINQ operation, where its position is what identifies it, use FirstOrDefault, FirstOrDefaultAsync, LastOrDefault, or LastOrDefaultAsync; never use them on an unordered collection, since duplicated elements are a data problem which should be handled where the data is generated rather than hidden by picking one of them
+   - RIGHT: results.OrderBy(result => result.CreatedDate).LastOrDefault()
+   - WRONG: results.FirstOrDefault(result => result.AccountID == accountID) on an unordered collection
+
+ - when expecting an element from a collection as the result of a LINQ operation which can return null, such as SingleOrDefault, FirstOrDefault, LastOrDefault, or their asynchronous counterparts, always check it with "is null" or "is not null" before using it
+   - RIGHT: Account? account = accounts.SingleOrDefault(candidate => candidate.ID == accountID); if (account is not null) { ... }
+   - WRONG: accounts.SingleOrDefault(candidate => candidate.ID == accountID).Name
+
  - when writing tests, use an underscore between every word or logical sequence of numbers
    - RIGHT: Running_10_Instances_Of_The_Service_Does_Not_Exceed_100_MB_Of_Memory
    - WRONG: Running10Instances_OfTheService_DoesNotExceed100MBOfMemory
