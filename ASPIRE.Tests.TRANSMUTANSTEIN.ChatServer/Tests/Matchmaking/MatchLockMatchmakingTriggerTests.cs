@@ -892,6 +892,56 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     [Test]
+    public async Task Queueing_A_Party_With_A_Slot_Account_And_A_Refused_Member_Keeps_The_Slot_Account_In_The_Party_And_Unreadies_It()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket slotGameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+        await using FakeMatchServerGameSocket otherGameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int slotUserID, int slotAccountID, string slotAccountName, string slotCookie) = await ChatTestData.SeedPlayer(host);
+        (int otherUserID, int otherAccountID, string otherAccountName, string otherCookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient slotClient = await host.ConnectAndAuthenticateClientAsync(slotAccountID, slotAccountName, slotCookie, RemoteIP);
+        using TcpClient otherClient = await host.ConnectAndAuthenticateClientAsync(otherAccountID, otherAccountName, otherCookie, RemoteIP);
+
+        NetworkStream slotStream = slotClient.GetStream();
+        NetworkStream otherStream = otherClient.GetStream();
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(slotStream, slotAccountID);
+
+            await JoinGroup(otherStream, slotAccountName, slotStream);
+
+            // The Second Member Is Another Account Of A Locked User, So It Is Refused And Removed While The First Is Sent Back At Once
+            await using LockedMatch slotLockedMatch = await ChatTestData.SeedLockedMatch(host, slotUserID, slotAccountID, slotAccountName, slotGameSocket);
+            await using LockedMatch otherLockedMatch = await ChatTestData.SeedLockedMatch(host, otherUserID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, otherGameSocket);
+
+            MakeReadyToQueue(group);
+
+            await ChatTestProtocol.WriteFrame(slotStream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            List<(ushort Command, ChatBuffer Frame)> slotFrames = await ReadThroughSendBack(slotStream);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(SendsBack(slotFrames, slotLockedMatch)).IsTrue();
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(slotAccountID)).IsNotNull();
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
+                await Assert.That(group.Members.Count).IsEqualTo(1);
+                await Assert.That(group.Members.Single().Account.ID).IsEqualTo(slotAccountID);
+                await Assert.That(group.Leader.IsReady).IsFalse();
+                await Assert.That(group.QueueStartTime).IsNull();
+            }
+        }
+
+        finally
+        {
+            DisbandGroups(slotAccountID, otherAccountID);
+        }
+    }
+
+    [Test]
     public async Task Queueing_A_Party_With_Two_Locked_Members_Tells_Every_Member_About_Both()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

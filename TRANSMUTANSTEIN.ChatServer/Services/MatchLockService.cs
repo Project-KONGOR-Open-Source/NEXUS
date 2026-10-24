@@ -175,7 +175,8 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <param name="session">The chat session of the player whose attempt to play another game is decided.</param>
     /// <param name="relayedRefusal">Whether the attempt is a refusal of the server list, or of a client connection on another match server, which was relayed to the chat server, which proves that the game client is trying to play elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
     /// <param name="matchmaking">Whether the attempt is a queue or a group join, whose refusal must also release the game client's matchmaking screen.</param>
-    public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false)
+    /// <param name="soloGroup">Whether the player's matchmaking group had no member but the player when the attempt began, which the caller decides before any await, because other members of the group may be enforced at the same time and leave it first.</param>
+    public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false, bool soloGroup = false)
     {
         if (IsExempt(session.Account))
             return false;
@@ -268,7 +269,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (matchmaking && (isSlotAccount is false || slotConnected))
             RefuseMatchmaking(session, matchLock);
 
-        else if (matchmaking)
+        else if (matchmaking && soloGroup)
             LeaveSoloGroup(session);
 
         Notify(session, matchLock, isSlotAccount, verdict);
@@ -309,7 +310,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
         // Every Member Is Enforced, Because A Premade Party Outlives The Match It Played Together, So A Locked Player Can Still Queue With Its Teammates
         // The Members Are Enforced Concurrently, Because Each Locked Member May Wait On Its Own Match Server's Answer
-        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, matchmaking: true)));
+        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, matchmaking: true, soloGroup: members.Count is 1)));
 
         List<MatchmakingGroupMember> refusedMembers = [.. members.Where((member, index) => refusals[index])];
 
@@ -319,7 +320,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
             group.GUID, refusedMembers.Count);
 
-        // A Solo Group Gets Nothing More, Because The Game Client Deletes It By Itself When It Is Sent Back, So NEXUS Has Already Removed It Without A Group Update, And A Group Update Would Put It Back
+        // A Solo Group Gets Nothing More, Because The Game Client Deletes It By Itself When It Is Sent Back. NEXUS Has Already Removed It Without A Group Update, Because A Group Update Would Put It Back
         if (members.Count is 1)
             return true;
 
@@ -675,7 +676,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
-    ///     Removes a slot account which is sent back at once from its matchmaking group, when it is the group's only member, without a group update.
+    ///     Removes a slot account which is sent back at once from its solo matchmaking group, without a group update.
     ///     The game client deletes a solo group by itself when it is sent to a match, so a group which NEXUS kept would later be removed with an update which the game client shows as "Group Disbanded".
     ///     A party is left as it is, because the game client keeps a party when it is sent to a match.
     /// </summary>
@@ -683,8 +684,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     {
         MatchmakingGroup? group = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
 
-        if (group is not null && group.Members.All(member => member.Account.ID == session.Account.ID))
-            group.RemoveMember(session.Account.ID, notifyRemovedMember: false);
+        group?.RemoveMember(session.Account.ID, notifyRemovedMember: false);
     }
 
     /// <summary>

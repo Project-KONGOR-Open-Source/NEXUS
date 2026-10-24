@@ -7,7 +7,10 @@ public class GroupJoin(MerrickContext merrick, MatchLockService matchLockService
     {
         GroupJoinRequestData requestData = new (buffer);
 
-        if (await matchLockService.Enforce(session, matchmaking: true))
+        // The Group Is Measured Before Enforcing, Because Its Members Can Change While The Lock Is Checked
+        bool soloGroup = MatchmakingService.GetMatchmakingGroup(session.Account.ID)?.Members.Count is 1;
+
+        if (await matchLockService.Enforce(session, matchmaking: true, soloGroup: soloGroup))
             return;
 
         await MatchmakingGroup
