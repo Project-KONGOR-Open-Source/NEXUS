@@ -268,6 +268,9 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (matchmaking && (isSlotAccount is false || slotConnected))
             RefuseMatchmaking(session, matchLock);
 
+        else if (matchmaking)
+            LeaveSoloGroup(session);
+
         Notify(session, matchLock, isSlotAccount, verdict);
 
         // Only The Account Which Holds The Slot Can Return To The Match, So Another Account Of The Same User Is Only Told Which Account That Is
@@ -316,7 +319,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
             group.GUID, refusedMembers.Count);
 
-        // A Solo Group Gets Nothing More, Because The Game Client Leaves It By Itself When It Is Sent Back, And A Group Update Would Put It Back
+        // A Solo Group Gets Nothing More, Because The Game Client Deletes It By Itself When It Is Sent Back, So NEXUS Has Already Removed It Without A Group Update, And A Group Update Would Put It Back
         if (members.Count is 1)
             return true;
 
@@ -669,6 +672,19 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         MatchmakingService.GetMatchmakingGroup(session.Account.ID)?.RemoveMember(session.Account.ID, notifyRemovedMember: false);
 
         session.SendMatchmakingBan(BanSecondsRemaining(matchLock, DateTimeOffset.UtcNow));
+    }
+
+    /// <summary>
+    ///     Removes a slot account which is sent back at once from its matchmaking group, when it is the group's only member, without a group update.
+    ///     The game client deletes a solo group by itself when it is sent to a match, so a group which NEXUS kept would later be removed with an update which the game client shows as "Group Disbanded".
+    ///     A party is left as it is, because the game client keeps a party when it is sent to a match.
+    /// </summary>
+    private static void LeaveSoloGroup(ClientChatSession session)
+    {
+        MatchmakingGroup? group = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
+
+        if (group is not null && group.Members.All(member => member.Account.ID == session.Account.ID))
+            group.RemoveMember(session.Account.ID, notifyRemovedMember: false);
     }
 
     /// <summary>
