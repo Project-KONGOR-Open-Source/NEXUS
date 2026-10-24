@@ -2338,6 +2338,24 @@ git commit -m "Refuse Invites To And From A Locked Player"
 
 ---
 
+### Task 26: Remove A Pulled Player From Its Solo Group Silently
+
+Found in the live re-test on 2026-10-24: a player sent back from a solo group, who tried to play again, got the client's "Group Disbanded" popup.
+
+**Files:**
+- Modify: `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs` (`Enforce`, and the solo-group comment in `EnforceForGroup`)
+- Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs`
+
+**Cause:** the client deletes a solo group locally when it is sent to a match (HON `K2.Engine/c_chatmanager.cpp`, `CChatManager::MatchmakingConnect`: `LeaveTMMGroup(true, _T("foundmatch"))`), while NEXUS kept the group. The client's next `GroupCreate` found it, and `MatchmakingGroup.Create` removed it with a `TMM_PLAYER_LEFT_GROUP` naming the player, its leader, which the client reads as "disbanded by the group leader"; the client then left its new group too, and its following group commands found no group.
+
+**Fix:** when a queue or group join sends the slot account back at once, and the session is the only member of its group, `Enforce` removes it from that group without a group update. A party is left as it is, because the client keeps a party when it is sent to a match.
+
+**Tests:** a solo queue and a group join which send the slot account back leave no group for it in NEXUS, and its next `GroupCreate` gets no left update naming itself; a party keeps its locked member.
+
+**Commit:** "Remove A Pulled Player From Its Solo Group Silently".
+
+---
+
 ### Task 12: Verify The Match Lock With Real Game Clients (Needs The Owner)
 
 **This task needs the owner, and runs last, after Tasks 19 to 25.** The controller prepares and observes; the owner plays the clients. The first live run (2026-10-21) passed most of the scenarios which it reached, and found what Tasks 19 to 25 change (the spec's "Live Test Amendment (2026-10-21)"). This run re-tests what they change, then carries on with the scenarios which the first run did not reach; the first run's passes are not repeated.
@@ -2405,3 +2423,9 @@ git commit -m "Refuse Invites To And From A Locked Player"
   - It stays open and clickable after NEXUS pulls the player back, and clicking it disconnects and reconnects the player again, at the cost of disconnect allowance and a reload (finding 3). With the pull at login gone (Task 20), it no longer races NEXUS at login, but it can still outlive a later pull. Fix idea: hide `reconnect_dialog` (HON-Assets `ui/fe2/newui/main_dialogs_v2.package`) as soon as the client starts connecting or loading, as `lobby_ack_timeout_dialog` hides on `GamePhase`, and disable its button while the client is connected.
   - It shows a still-connected slot's reply, the largest time less the game time, as a countdown of millions of seconds (finding 6; `CServerList::ProcessReconnectInfoResponse`, HON `K2.Engine/c_hostclient.cpp`). Fix idea: treat a reply above half the range as a slot which is still connected from another game, and say so instead of counting down, in the dialog's `ReconnectTimer` handler or in the engine.
   - Until then, release notes can tell players to close the prompt once they are back in their match.
+- **COMPEL's UDP proxy and the reconnect query,** from the live re-test (2026-10-24). With the proxy enabled, each reconnect query is a new, never-authenticated proxy session, and the proxy refused one once its per-address session cap or its attack indicator applied, so the lock lifted without confirmation. The owner chose to have COMPEL trust its master server's addresses (COMPEL branch `proxy-trusts-master-server`); a COMPEL release with that change must reach match server hosts before the match lock is relied on behind the proxy.
+- **The client's automatic server list requests,** from the live re-test (2026-10-24). The client requests the server list by itself at phase changes of a game and while rejoining one; for a locked player in its own match each request is refused, relayed, and ignored as stale. The master server's Information-level "Refused The Server List" line is misleading for such requests: log it at debug level, and let the chat server log at Information level only when it acts. A request which reaches the chat server before the client reports joining, with no return pending (a rejoin through the client's own reconnect prompt), would send one extra notice and one `AUTO_MATCH_CONNECT` to the match being joined.
+- **A queue from inside a game,** from the live re-test (2026-10-24). In a game, the client's chat button restores the last main menu screen, so a player in its match can queue; NEXUS refuses that queue silently, because the session reports a game. The client fix is recorded as a HON phase 2 follow-up.
+- **Practice games,** from the live re-test (2026-10-24). A practice game, with or without bots, runs on the client's local server and is never reported to the chat server (`CHostClient`: `if (!m_bPractice) ChatManager.JoiningGame(…)`), so a locked player can play one; only a client change can close it, recorded as a HON phase 2 follow-up.
+- **A clan without a leader breaks login.** `SRPAuthenticationHandlers.SetClanMembershipData` finds the clan's owner with `Single`, so a clan with no member at the leader tier makes the login of any of its members fail with a 500. Real clans always have a leader; this predates the branch.
+- **Unrelated to the match lock:** the Caldavar matchmaking options list only "Normal", not "Casual" (owner, 2026-10-24); find out whether NEXUS's matchmaking options or the client's interface is the cause.
