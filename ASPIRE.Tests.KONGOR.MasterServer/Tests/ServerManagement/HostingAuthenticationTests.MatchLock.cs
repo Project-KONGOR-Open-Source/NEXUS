@@ -157,6 +157,38 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    [NotInParallel(DistributedCacheExtensions.MatchLockRefusalChannel)]
+    public async Task Client_Connection_From_The_Locked_Match_Server_For_Another_Account_Of_The_Locked_User_Is_Refused()
+    {
+        await InitialiseIn("Development");
+
+        await CreateSubAccount(NonHostAccountName, NonHostSubAccountName);
+
+        (string lockedSession, int lockedServerID) = await RegisterMatchServer(1);
+
+        MatchLock matchLock = await LockAccount(NonHostAccountName, lockedServerID);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, await CreateClientSessionCookie(NonHostAccountName))))["game_cookie"];
+
+        string subAccountCookie = await CreateClientSessionCookie(NonHostSubAccountName);
+
+        // Another Account Of The User Cannot Take The Slot, So It Could Only Spectate The User's Own Match
+        await AssertClientConnectionIsRejectedAtOnce(await ConnectClient(lockedSession, subAccountCookie), NonHostSubAccountName);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        // The Locked Account Logs In Again And Reconnects, Undisturbed By The Refusal
+        string reconnectedGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(lockedSession, await CreateClientSessionCookie(NonHostAccountName))))["game_cookie"];
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(await distributedCache.GetGameCookie(await GetAccountID(NonHostSubAccountName))).IsNull();
+            await Assert.That(reconnectedGameCookie).IsEqualTo(gameCookie);
+            await Assert.That((await distributedCache.GetMatchLock(matchLock.UserID))?.MatchID).IsEqualTo(matchLock.MatchID);
+        }
+    }
+
+    [Test]
     public async Task Client_Connection_Is_Served_And_The_Lock_Lifted_When_The_Locked_Server_Is_Gone()
     {
         await InitialiseIn("Development");

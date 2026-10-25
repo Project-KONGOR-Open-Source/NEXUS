@@ -167,13 +167,13 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     Decides whether a player's attempt to play another game must be refused, which is only while the player's user is locked to a match and the lock holds.
     ///     A refused player is told why, and the account which holds the slot is sent back to the locked match and reminded to return until it does, unless the game client reports being in a game, in which case it is refused and left undisturbed.
-    ///     A relayed refusal, of the server list or of a client connection on another match server, proves that the game client is trying to play elsewhere, so it is always sent back, whatever the game client reports.
+    ///     A relayed refusal, of the server list or of a client connection which the locked account makes on another match server or another account of its user makes on any, proves that the game client is trying to play elsewhere, so it is always sent back, whatever the game client reports.
     ///     While the slot account is still connected to the match from another machine, it is told to close the game there instead, and is sent back only once that connection has left.
     ///     A refused queue or group join which does not send the player back at once is answered with the game client's "Temporary Ban" popup before the notice, and the player leaves its group, because the game client's matchmaking screen covers the chat in which the notice appears.
     ///     While a return to the same match is pending, an attempt neither starts another return nor queries the match server again within <see cref="ReturnResendInterval"/> of the last verification, and the player is told why again only once <see cref="NoticeRepeatInterval"/> has passed since the last notice.
     /// </summary>
     /// <param name="session">The chat session of the player whose attempt to play another game is decided.</param>
-    /// <param name="relayedRefusal">Whether the attempt is a refusal of the server list, or of a client connection on another match server, which was relayed to the chat server, which proves that the game client is trying to play elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
+    /// <param name="relayedRefusal">Whether the attempt is a refusal of the server list, or of a client connection anywhere but in the locked account's own slot, which was relayed to the chat server, which proves that the game client is trying to play elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
     /// <param name="matchmaking">Whether the attempt is a queue or a group join, whose refusal must also release the game client's matchmaking screen.</param>
     public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false)
     {
@@ -383,7 +383,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
-    ///     Acts on the master server's refusal of a locked user's server list, or of its client connection on a match server other than the locked one, which sends no chat message of its own.
+    ///     Acts on the master server's refusal of a locked user's server list, or of its client connection on a match server other than the locked one, or on the locked one for an account other than the locked account, which sends no chat message of its own.
     ///     The refused account is enforced through its chat session when it has one, and otherwise the user's lock is verified anyway, so that a player who was removed from the match while their chat is down is no longer locked when they next try to play.
     /// </summary>
     public async Task HandleRefusal(MatchLockRefusal refusal)

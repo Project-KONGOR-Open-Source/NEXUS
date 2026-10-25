@@ -136,8 +136,9 @@ public static partial class DistributedCacheExtensions
     }
 
     /// <summary>
-    ///     Finds the match lock which refuses an account's request, which is the lock of the account's user when its match server is still registered and is not the registered match server which the request names.
-    ///     A request which names no match server, as the server list does, is refused by any such lock, while a client connection names the registered match server which asks for it, so that a locked player is always served on the locked match server.
+    ///     Finds the match lock which refuses an account's request, which is the lock of the account's user when its match server is still registered, unless the request is the locked account's own and names that match server.
+    ///     A request which names no match server, as the server list does, is refused by any such lock, while a client connection names the registered match server which asks for it, so that the locked account is always served on the locked match server.
+    ///     Another account of the same user is refused on the locked match server too, because it cannot take the slot and could only spectate its user's own match, and its join would make the chat server refresh the locked account's recorded login cookie with its own, which gets the locked account kicked by the duplicate-session check.
     ///     A lock on a match server which is no longer registered is removed instead, and returned as the lifted lock, because a match lock must never outlive its match server.
     ///     Returns no refusing lock when the request is to be served, which it always is for a guest or staff account.
     /// </summary>
@@ -148,7 +149,7 @@ public static partial class DistributedCacheExtensions
 
         MatchLock? matchLock = await distributedCacheStore.GetMatchLock(account.User.ID);
 
-        if (matchLock is null || matchLock.ServerID == askingServerID)
+        if (matchLock is null || (matchLock.ServerID == askingServerID && matchLock.AccountID == account.ID))
             return (null, null);
 
         if (await distributedCacheStore.GetMatchServerByID(matchLock.ServerID) is not null)
@@ -160,7 +161,7 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     The distributed cache pub/sub channel on which match lock refusals are published by the master server and consumed by the chat server.
-    ///     Used to send a player back to their locked match, or to lift their lock when they can no longer return to it, whenever the master server refuses a locked player's server list, or a match server other than the locked one asks to authenticate their client.
+    ///     Used to send a player back to their locked match, or to lift their lock when they can no longer return to it, whenever the master server refuses a locked player's server list, or a match server other than the locked one asks to authenticate their client, or the locked one asks to authenticate another account of their user.
     /// </summary>
     public const string MatchLockRefusalChannel = "MATCH-LOCK-REFUSAL";
 
