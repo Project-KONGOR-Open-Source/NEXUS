@@ -130,6 +130,7 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
     /// <summary>
     ///     Records this session's session cookie as the one which the client holds on the match server, so that the match server's duplicate session check is answered with it, and never kicks the client as a duplicate login.
     ///     The records which the match server's client connections left for the session's own account and for every other account of the same user are each refreshed independently, and every failure is logged rather than thrown, so that it never stops the other refreshes or disturbs joining the match.
+    ///     The other accounts are left alone when a client connection of the session's own account was served with this session cookie, because the session is then a client of its own on a match server rather than a client in the match which logged in again in place.
     ///     Every refresh which changes a record is logged, naming the account whose record changed, the match server, and this session's account, but never the session cookie, which authenticates its account.
     /// </summary>
     private async Task RefreshMatchServerSessionCookie(IDatabase distributedCacheStore, MatchServer server)
@@ -140,7 +141,7 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
         {
             // A Client Which Logs In Again During Its Match Pushes The Session Cookie Of Whichever Account It Logged In With To Its Match Server ("CHostClient::UpdateCookie"), So The Match Server May Hold It For Another Account Of The Same User
             // Every Other Account Is Refreshed, Rather Than Only The First Which Was Served, Because A Record Which An Earlier Match On The Same Match Server Left Cannot Be Told Apart From The Record Of The Account In The Match
-            accountIDs = SRPAuthenticationHandlers.LoginAffectsOtherAccounts(Account.Type)
+            accountIDs = SRPAuthenticationHandlers.LoginAffectsOtherAccounts(Account.Type) && await WasServedWithThisLogin(distributedCacheStore, server) is false
                 ? [Account.ID, .. Account.User.Accounts.Select(account => account.ID).Where(accountID => accountID != Account.ID)]
                 : [Account.ID];
         }
@@ -168,6 +169,28 @@ public class ClientChatSession(ConnectionContext connection, IServiceProvider se
             {
                 Log.Error(exception, @"Failed To Refresh The Session Cookie Of Account ID ""{RefreshedAccountID}"" For Account ""{AccountName}"" On Match Server ID ""{MatchServerID}""", accountID, Account.Name, server.ID);
             }
+        }
+    }
+
+    /// <summary>
+    ///     Decides whether a client connection of the session's own account was served with this session cookie, which only a client connecting on its own is, because a client which logs in again during its match is never served again.
+    ///     Such a client is not the one in the match, so refreshing the other accounts of its user, such as when it spectates the match of one of them, would get the account in the match kicked as a duplicate login.
+    ///     A failure to read it is logged, and counts as never served, so that the other accounts are refreshed, as a client which logs in again in place needs.
+    /// </summary>
+    private async Task<bool> WasServedWithThisLogin(IDatabase distributedCacheStore, MatchServer server)
+    {
+        try
+        {
+            GameCookie? ownRecord = await distributedCacheStore.GetStoredGameCookie(Account.ID);
+
+            return string.Equals(ownRecord?.ServedSessionCookie, Metadata.SessionCookie, StringComparison.Ordinal);
+        }
+
+        catch (Exception exception)
+        {
+            Log.Error(exception, @"Failed To Read Whether A Client Connection Of Account ""{AccountName}"" Was Served With Its Current Login, So It Refreshes The Session Cookies Of Its User's Other Accounts On Match Server ID ""{MatchServerID}""", Account.Name, server.ID);
+
+            return false;
         }
     }
 

@@ -18,4 +18,11 @@ public class GameCookie
     ///     The match server's duplicate session check is answered with it, so that the answer agrees with the session cookie which the client on the match server holds, and the client is never kicked as a duplicate login.
     /// </summary>
     public required string SessionCookie { get; set; }
+
+    /// <summary>
+    ///     The session cookie of the latest client connection which was served this game cookie, which a refresh never changes.
+    ///     A session holding that session cookie is connected to a match server on its own, because a client which logs in again during its match is never served again, so that its report of joining a match server refreshes no other account of its user.
+    ///     It is optional, so that a game cookie stored without it still reads, and counts as never served.
+    /// </summary>
+    public string? ServedSessionCookie { get; set; }
 }

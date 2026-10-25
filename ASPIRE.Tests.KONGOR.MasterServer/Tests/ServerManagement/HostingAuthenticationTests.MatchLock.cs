@@ -1050,6 +1050,42 @@ public sealed partial class HostingAuthenticationTests
     }
 
     [Test]
+    public async Task A_Refresh_Never_Records_Its_Session_Cookie_As_Served_While_A_Client_Connection_Does()
+    {
+        await InitialiseIn("Development");
+
+        (string session, int serverID) = await RegisterMatchServer(1);
+
+        string firstCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        int accountID = await GetAccountID(NonHostAccountName);
+
+        string gameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, firstCookie)))["game_cookie"];
+
+        string secondCookie = await CreateClientSessionCookie(NonHostAccountName);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        await distributedCache.RefreshClientSessionCookie(accountID, serverID, secondCookie);
+
+        GameCookie? refreshedRecord = await distributedCache.GetStoredGameCookie(accountID);
+
+        // A Client Connection With The Session Cookie Which The Refresh Recorded Is The First To Be Served With It, And Reconnects To The Same Match With The Same Game Cookie
+        string reconnectedGameCookie = (string) (await DeserialisePHPResponse(await ConnectClient(session, secondCookie)))["game_cookie"];
+
+        GameCookie? servedRecord = await distributedCache.GetStoredGameCookie(accountID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(refreshedRecord?.SessionCookie).IsEqualTo(secondCookie);
+            await Assert.That(refreshedRecord?.ServedSessionCookie).IsEqualTo(firstCookie);
+            await Assert.That(servedRecord?.ServedSessionCookie).IsEqualTo(secondCookie);
+            await Assert.That(servedRecord?.Cookie).IsEqualTo(gameCookie);
+            await Assert.That(reconnectedGameCookie).IsEqualTo(gameCookie);
+        }
+    }
+
+    [Test]
     public async Task Refreshing_The_Session_Cookie_For_Another_Match_Server_Changes_Nothing()
     {
         await InitialiseIn("Development");

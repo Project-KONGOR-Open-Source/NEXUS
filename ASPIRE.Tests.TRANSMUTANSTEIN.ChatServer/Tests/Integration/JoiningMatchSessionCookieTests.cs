@@ -2,7 +2,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Integration;
 
 /// <summary>
 ///     Tests that a client which reports joining a match server refreshes the session cookie which the master server answers to that match server's duplicate session check, because a client which logs in again during its match pushes its new session cookie to the match server.
-///     Only the records which the match server's client connections left are refreshed, for the session's own account and for every other account of the same user, though never for another account of a guest or staff account, and their game cookies are never changed.
+///     Only the records which the match server's client connections left are refreshed, for the session's own account and for every other account of the same user, though never for another account of a guest or staff account, nor for another account when a client connection of the session's own account was served with its current login, and their game cookies are never changed.
 ///     Every test removes the match servers and the game cookies which it seeds, because every chat server host shares the unprefixed distributed cache while each host's database restarts its identifiers, so a game cookie left behind would be read as that of a later test's account.
 /// </summary>
 [NotInParallel(nameof(ChatServerHost))]
@@ -150,6 +150,58 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
     }
 
     [Test]
+    public async Task Joining_A_Match_Server_Which_Served_The_Session_Leaves_The_Other_Accounts_Of_The_User_Alone()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        IDatabase distributedCache = host.Services.GetRequiredService<IDatabase>();
+
+        (_, int mainAccountID, _, _) = await ChatTestData.SeedPlayer(host);
+
+        (int subAccountID, string subAccountName) = await ChatTestData.SeedSubAccount(host.Services, mainAccountID);
+
+        string subAccountCookie = Guid.CreateVersion7().ToString();
+
+        await ChatTestData.SeedClientSessionCookie(host.Services, subAccountCookie, subAccountName);
+
+        (int serverID, string serverAddress) = await SeedMatchServer(host);
+
+        try
+        {
+            string mainAccountCookie = Guid.CreateVersion7().ToString();
+
+            string gameCookie = await distributedCache.IssueGameCookie(mainAccountID, serverID, mainAccountCookie);
+
+            // The Match Server Also Served The Sub-Account With Its Current Login, As A Client Of Its Own Beside The Main Account's, Such As A Spectator On Another Machine
+            await distributedCache.IssueGameCookie(subAccountID, serverID, subAccountCookie);
+
+            using TcpClient client = await host.ConnectAndAuthenticateClientAsync(subAccountID, subAccountName, subAccountCookie, RemoteIP);
+
+            ClientChatSession session = Context.ClientChatSessions[subAccountName];
+
+            await ChatTestProtocol.WriteFrame(client.GetStream(), ChatTestProtocol.BuildJoiningGame(serverAddress));
+
+            // The Session Names The Match Server Only Once It Has Tried To Refresh The Recorded Session Cookies
+            bool joined = await ChatTestProtocol.WaitUntil(() => session.Metadata.MatchServerConnectedTo?.ID == serverID, JoinTimeout);
+
+            GameCookie? mainAccountRecord = await distributedCache.GetStoredGameCookie(mainAccountID);
+
+            // The Main Account's Client Still Holds Its Own Session Cookie, So Answering The Sub-Account's Would Get It Kicked As A Duplicate Login
+            using (Assert.Multiple())
+            {
+                await Assert.That(joined).IsTrue();
+                await Assert.That(mainAccountRecord?.SessionCookie).IsEqualTo(mainAccountCookie);
+                await Assert.That(mainAccountRecord?.Cookie).IsEqualTo(gameCookie);
+            }
+        }
+
+        finally
+        {
+            await RemoveSeededRecords(distributedCache, [serverID], [mainAccountID, subAccountID]);
+        }
+    }
+
+    [Test]
     public async Task A_Stale_Record_Of_The_Session_Account_Does_Not_Stop_The_Account_In_The_Match_Being_Refreshed()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
@@ -230,6 +282,65 @@ public sealed class JoiningMatchSessionCookieTests(ServiceContainerContext conta
             {
                 await Assert.That(joined).IsTrue();
                 await Assert.That(matchAccountRecord?.SessionCookie).IsEqualTo(sessionAccountCookie);
+                await Assert.That(matchAccountRecord?.Cookie).IsEqualTo(gameCookie);
+            }
+        }
+
+        finally
+        {
+            await RemoveSeededRecords(distributedCache, [serverID], [sessionAccountID, matchAccountID]);
+        }
+    }
+
+    [Test]
+    public async Task A_Refresh_Which_Failed_Is_Made_Again_When_The_Client_Reports_Joining_Again()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        IDatabase distributedCache = host.Services.GetRequiredService<IDatabase>();
+
+        (_, int sessionAccountID, string sessionAccountName, string sessionAccountCookie) = await ChatTestData.SeedPlayer(host);
+
+        (int matchAccountID, _) = await ChatTestData.SeedSubAccount(host.Services, sessionAccountID);
+
+        (int serverID, string serverAddress) = await SeedMatchServer(host);
+
+        try
+        {
+            // The Session's Account Played An Earlier Match On The Same Match Server, Where Another Account Of The Same User Now Plays The Match In Progress
+            await distributedCache.IssueGameCookie(sessionAccountID, serverID, Guid.CreateVersion7().ToString());
+
+            // The Record Of The Account In The Match Cannot Be Read At First, So That Its Refresh Fails While The Session's Own Record Is Refreshed
+            string matchAccountKey = DistributedCacheExtensions.ConstructAccountGameCookieKey(matchAccountID);
+
+            await distributedCache.SetAddAsync(matchAccountKey, "NOT-A-GAME-COOKIE");
+
+            // The Client In The Match Logged In Again In Place With The Session's Account
+            using TcpClient client = await host.ConnectAndAuthenticateClientAsync(sessionAccountID, sessionAccountName, sessionAccountCookie, RemoteIP);
+
+            NetworkStream stream = client.GetStream();
+
+            ClientChatSession session = Context.ClientChatSessions[sessionAccountName];
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame(serverAddress));
+
+            bool joined = await ChatTestProtocol.WaitUntil(() => session.Metadata.MatchServerConnectedTo?.ID == serverID, JoinTimeout);
+
+            await distributedCache.KeyDeleteAsync(matchAccountKey);
+
+            string gameCookie = await distributedCache.IssueGameCookie(matchAccountID, serverID, Guid.CreateVersion7().ToString());
+
+            // The Client Reports Joining The Same Match Server Again, As Every Chat Connection During The Match Does, Which Must Not Take The Session's Own Refreshed Record For A Client Connection Of Its Own
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame(serverAddress));
+
+            bool refreshed = await ChatTestProtocol.WaitUntil(async () => (await distributedCache.GetStoredGameCookie(matchAccountID))?.SessionCookie == sessionAccountCookie, JoinTimeout);
+
+            GameCookie? matchAccountRecord = await distributedCache.GetStoredGameCookie(matchAccountID);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(joined).IsTrue();
+                await Assert.That(refreshed).IsTrue();
                 await Assert.That(matchAccountRecord?.Cookie).IsEqualTo(gameCookie);
             }
         }

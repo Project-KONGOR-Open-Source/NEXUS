@@ -45,7 +45,7 @@ public static partial class DistributedCacheExtensions
     ///     Issues the game cookie of an account's client connection to a match server, identified by its server ID, or by <see langword="null"/> when its session is not a registered match server's, and returns it.
     ///     The stored game cookie is kept, and its expiry refreshed, when it was issued for the same match server, whatever that match server's session, or when the match server is not known, so that reconnecting to a match in progress keeps it.
     ///     Otherwise, a new game cookie replaces it, so that a match server which the account has left can tell that the account has joined another game.
-    ///     Either way, the stored game cookie carries the session cookie which the client connection posted, which is the one that the client on the match server now holds.
+    ///     Either way, the stored game cookie carries the session cookie which the client connection posted, which is the one that the client on the match server now holds, both as the one answered to the duplicate session check and as the one it was served with.
     ///     When the match server is known, the account is also recorded as served by it.
     ///     The game cookie returned is always the stored one, and when none could be stored or read, even after one retry, an exception is thrown instead.
     /// </summary>
@@ -93,14 +93,14 @@ public static partial class DistributedCacheExtensions
 
         if (storedGameCookie is not null && (serverID is null || storedGameCookie.ServerID == serverID))
         {
-            if (string.Equals(storedGameCookie.SessionCookie, sessionCookie, StringComparison.Ordinal))
+            if (string.Equals(storedGameCookie.SessionCookie, sessionCookie, StringComparison.Ordinal) && string.Equals(storedGameCookie.ServedSessionCookie, sessionCookie, StringComparison.Ordinal))
             {
                 _ = transaction.KeyExpireAsync(key, SessionCookieLifetime);
             }
 
             else
             {
-                GameCookie reissuedGameCookie = new () { Cookie = storedGameCookie.Cookie, ServerID = storedGameCookie.ServerID, SessionCookie = sessionCookie };
+                GameCookie reissuedGameCookie = new () { Cookie = storedGameCookie.Cookie, ServerID = storedGameCookie.ServerID, SessionCookie = sessionCookie, ServedSessionCookie = sessionCookie };
 
                 _ = transaction.StringSetAsync(key, JsonSerializer.Serialize(reissuedGameCookie), SessionCookieLifetime);
             }
@@ -110,7 +110,7 @@ public static partial class DistributedCacheExtensions
 
         else
         {
-            GameCookie issuedGameCookie = new () { Cookie = Guid.CreateVersion7().ToString(), ServerID = serverID, SessionCookie = sessionCookie };
+            GameCookie issuedGameCookie = new () { Cookie = Guid.CreateVersion7().ToString(), ServerID = serverID, SessionCookie = sessionCookie, ServedSessionCookie = sessionCookie };
 
             _ = transaction.StringSetAsync(key, JsonSerializer.Serialize(issuedGameCookie), SessionCookieLifetime);
 
@@ -135,7 +135,7 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Records the session cookie as the one which the client on the match server holds for the account, because a client which logs in again during its match pushes its new session cookie to its match server ("CHostClient::UpdateCookie").
-    ///     Only a stored game cookie which was issued for that match server is changed, and only its session cookie, so that a refresh never creates a record, never changes a game cookie, and never extends its expiry.
+    ///     Only a stored game cookie which was issued for that match server is changed, and only its session cookie, so that a refresh never creates a record, never changes a game cookie or the session cookie which it was served with, and never extends its expiry.
     ///     Returns <see langword="true"/> when it changed the record, which then carries the session cookie, so that the caller can log the refresh.
     ///     Returns <see langword="false"/>, changing nothing, when the account's stored game cookie is not for that match server, when the record already carries the session cookie, or when a client connection changed the record first, and that newer record is kept.
     /// </summary>
@@ -153,7 +153,7 @@ public static partial class DistributedCacheExtensions
         if (string.Equals(storedGameCookie.SessionCookie, sessionCookie, StringComparison.Ordinal))
             return false;
 
-        GameCookie refreshedGameCookie = new () { Cookie = storedGameCookie.Cookie, ServerID = storedGameCookie.ServerID, SessionCookie = sessionCookie };
+        GameCookie refreshedGameCookie = new () { Cookie = storedGameCookie.Cookie, ServerID = storedGameCookie.ServerID, SessionCookie = sessionCookie, ServedSessionCookie = storedGameCookie.ServedSessionCookie };
 
         // The Record Is Only Refreshed If It Is Still Exactly What Was Read, Because Only A Newer Client Connection Or Refresh Changes It In The Meantime, And That Newer Record Is Kept
         ITransaction transaction = distributedCacheStore.CreateTransaction();
