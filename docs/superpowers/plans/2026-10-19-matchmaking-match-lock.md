@@ -28,7 +28,7 @@
 - Account-based reconnect is set by a remote command at server handshake, always.
 - NEXUS conventions (`claude.md` and `agents.md` on `next`); commits in imperative Start Case, with no body and no attribution to non-humans.
 - The match lock is the default behaviour, with no configuration at all: the safety limit is the constant `MatchLock.Lifetime`, one hour from when the lock begins, never renewed, and tests reference it, never a copied value.
-- Reconnecting to the match in progress must never break: `c_conn` from the locked match's own server, or from a server whose session NEXUS does not know, is always served, and every task touching `c_conn`, `aids2cookie`, or game cookies carries a test pinning it.
+- Reconnecting to the match in progress must never break: `c_conn` for the slot account from the locked match's own server, or from a server whose session NEXUS does not know, is always served (Task 28 refuses the user's other accounts there, which can never hold the slot), and every task touching `c_conn`, `aids2cookie`, or game cookies carries a test pinning it.
 - A player who joins another game has left their match, and the original server's duplicate-session guard removes them, so that their team shares their gold and can use or sell their items. Locks exist to stop that during the first hour. Once a lock has lifted, for any reason (confirmed, unanswered, unreachable, or the safety limit), joining another game issues a new game cookie there, and the guard removes the player at its next account check.
 - Reconnecting to one's own match keeps the same game cookie, including across the server's session renewal, so a real reconnect never trips the guard.
 - The duplicate-session guard (Tasks 10 and 11) lands only after the lock and its `c_conn` refusal (Tasks 1 to 8), because before the lock it would terminate rage-quitters instead of sending them back.
@@ -2374,6 +2374,26 @@ Found in the live re-test on 2026-10-25: a pull triggered by an invite left the 
 
 ---
 
+### Task 28: Refuse The User's Other Accounts On The Locked Match Server
+
+The owner's decision of 2026-10-25, after reviewing the rulings: a user's other account must never reach the user's own match.
+
+**Files:**
+- Modify: `KONGOR.MasterServer/Extensions/Cache/DistributedCacheExtensions.MatchLock.cs` (`FindRefusingMatchLock`), `KONGOR.MasterServer/Models/ServerManagement/GameCookie.cs` and `KONGOR.MasterServer/Extensions/Cache/DistributedCacheExtensions.ClientConnections.cs` (the served session cookie), `TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs` (`RefreshMatchServerSessionCookie`), `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs` (`HandleRefusal`'s stale-refusal check), and the summaries which describe where refusals come from
+- Test: `ASPIRE.Tests.KONGOR.MasterServer/Tests/ServerManagement/HostingAuthenticationTests.MatchLock.cs`, `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Integration/JoiningMatchSessionCookieTests.cs`, and `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockRefusalMonitorTests.cs`
+
+**Cause:** the lock exempted every account of the user on the locked match server, so a sub-account could spectate its user's own match, by spectating another player in it, and see the whole map. Its join also made the chat server refresh the locked account's recorded login cookie with its own (Task 15), so the match server's duplicate-session check kicked the locked account: a strike, and a second strike banned it from its own match. The refresh did the same in any game where no lock holds.
+
+**Fix:**
+- `c_conn` serves the locked match server only to the locked account; another account of the user gets the ordinary refusal there, which the chat server relays as the notice that names the locked account. The locked account's own path is unchanged, and an in-place login again never asks `c_conn` once the client has authenticated.
+- A game cookie also records the login cookie which its latest client connection was served with, which a refresh never changes. A session whose own account was served with the session's current login cookie refreshes only its own record, because it is a client of its own, while a client which logs in again in place is never served anew. This covers games where no lock holds, and a refresh which failed for another account is still made at the next report.
+- The stale-refusal check applies only to the slot account, because another account never holds the slot, so its refusal is never the late answer to an abandoned attempt of its own, and a notice is all that acting on it can cost.
+- The client reports joining a match server once it is loading there (HON `K2.Engine/c_hostclient.cpp`), which a refused connection never reaches; the one exception is a chat connection accepted while the client is still connecting, which the spec records as a cost.
+
+**Commits:** "Refuse The User's Other Accounts On The Locked Match Server", "Refresh Only Its Own Record For A Session Served On Its Own", "Act On Another Account's Refusal While It Reports The Locked Server", and "Specify And Plan Keeping A User's Other Accounts Off Their Own Match".
+
+---
+
 ### Task 12: Verify The Match Lock With Real Game Clients (Needs The Owner)
 
 **This task needs the owner, and runs last, after Tasks 19 to 25.** The controller prepares and observes; the owner plays the clients. The first live run (2026-10-21) passed most of the scenarios which it reached, and found what Tasks 19 to 25 change (the spec's "Live Test Amendment (2026-10-21)"). This run re-tests what they change, then carries on with the scenarios which the first run did not reach; the first run's passes are not repeated.
@@ -2412,7 +2432,7 @@ Found in the live re-test on 2026-10-25: a pull triggered by an invite left the 
 - [ ] **A second switch through the reconnect prompt.** While machine 2 holds the slot, log in on machine 1 and click its reconnect prompt at once → watch for a `Cookie failed for` line for machine 2 (the spec's cost of a connecting chat session's refresh).
 - [ ] **An in-place re-login.** On the machine in the match, log in again without leaving it, if the client allows it → it plays on, NEXUS logs the refresh, and no `Cookie failed for` line follows.
 - [ ] **A normal logout on the live machine.** With machine 1 retired and still in the match, log out on machine 2 → only machine 2's chat ends, and machine 1 plays on with no kick.
-- [ ] **A sub-account spectating the main account's match, if possible** → expect a duplicate-login kick of A (the spec's multi-boxing cost), and record whether a second one bans A from the match.
+- [ ] **A sub-account spectating the main account's match, if possible** → expect the sub-account to be refused at once with the notice naming A, and A to stay in its match with no duplicate-login kick (no `Cookie failed for` line in the match server's log). In a public game, where no lock holds, expect the sub-account to spectate and A again not to be kicked.
 - [ ] **Removal by a vote.** With teams of two, let A idle until the match server flags A as idle, and have A's team vote A out → A's next attempt to play lifts the lock and proceeds.
 - [ ] **Reconnecting to one's own match,** through the client's reconnect prompt and through the pull → never refused, and never kicked or terminated by the duplicate-session guard over the following minutes.
 - [ ] **The reconnect query reaching the match server,** with real values: every verification is answered, with one `Sending info to` line per query; record the value for a connected slot, a loading one, and a disconnected one, and check that `ConnectedSlotThreshold` separates the first two from the third.
