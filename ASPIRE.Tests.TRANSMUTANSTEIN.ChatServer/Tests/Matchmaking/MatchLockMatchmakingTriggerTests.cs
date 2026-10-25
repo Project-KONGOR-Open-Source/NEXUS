@@ -392,18 +392,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await AssertSentBack(stream, lockedMatch);
 
-            await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
-
-            // The Game Client Creates A New Group When It Returns To The Menu
-            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupCreate(ChatProtocol.TMMType.TMM_TYPE_PVP));
-
-            List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE, FrameTimeout);
-
-            using (Assert.Multiple())
-            {
-                await Assert.That(GroupUpdateAccountIDs(frames, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP)).IsEmpty();
-                await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNotNull();
-            }
+            await AssertNoGroupLeftBehind(stream, accountID);
         }
 
         finally
@@ -448,6 +437,121 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
         finally
         {
             DisbandGroups(leaderAccountID, accountID);
+        }
+    }
+
+    [Test]
+    public async Task Inviting_From_A_Solo_Group_While_Sent_Back_At_Once_Leaves_No_Group_And_The_Next_Group_Is_Created_Without_A_Left_Update()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+        (_, int receiverAccountID, string receiverAccountName, string receiverCookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+        using TcpClient receiverClient = await host.ConnectAndAuthenticateClientAsync(receiverAccountID, receiverAccountName, receiverCookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        try
+        {
+            // The Game Client Creates A Solo Group Before It Sends An Invite
+            await CreateGroup(stream, accountID);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupInvite(receiverAccountName));
+
+            await AssertSentBack(stream, lockedMatch);
+
+            await AssertNoGroupLeftBehind(stream, accountID);
+        }
+
+        finally
+        {
+            DisbandGroups(accountID, receiverAccountID);
+        }
+    }
+
+    [Test]
+    public async Task A_Relayed_Refusal_With_A_Solo_Group_Leaves_No_Group_And_The_Next_Group_Is_Created_Without_A_Left_Update()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        try
+        {
+            await CreateGroup(stream, accountID);
+
+            // The Master Server Refuses The Player's Server List, Or Its Client Connection On Another Match Server, And Publishes The Refusal
+            await host.Services.GetRequiredService<IDatabase>().PublishMatchLockRefusal(new MatchLockRefusal { UserID = userID, AccountName = accountName });
+
+            await AssertSentBack(stream, lockedMatch);
+
+            await AssertNoGroupLeftBehind(stream, accountID);
+        }
+
+        finally
+        {
+            DisbandGroups(accountID);
+        }
+    }
+
+    [Test]
+    public async Task A_Send_Back_After_Waiting_For_The_Other_Machine_Leaves_No_Group_And_The_Next_Group_Is_Created_Without_A_Left_Update()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(FakeMatchServerGameSocket.ConnectedSlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(stream, accountID);
+
+            // The Slot Is Still Connected From Another Game, So The Queue Is Refused With The Failure Reply, And The Return Waits For That Connection To Leave
+            await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+            MakeReadyToQueue(group);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            (_, (ChatProtocol.TMMFailedToJoinReason Reason, uint Seconds)? failure) = await ReadThroughMatchmakingFailure(stream);
+
+            // The Game Client Leaves Its Group On The Failure Reply, And Creates A Solo Group Again Once It Has Left Its Last One
+            await CreateGroup(stream, accountID);
+
+            // The Game Is Closed On The Other Machine, Which Leaves The Slot Disconnected
+            gameSocket.SlotTimeRemaining = SlotTimeRemaining;
+
+            List<(ushort Command, ChatBuffer Frame)> frames = await ReadThroughSendBack(stream);
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(failure?.Reason).IsEqualTo(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BANNED);
+                await Assert.That(SendsBack(frames, lockedMatch)).IsTrue();
+                await Assert.That(frames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+            }
+
+            await AssertNoGroupLeftBehind(stream, accountID);
+        }
+
+        finally
+        {
+            DisbandGroups(accountID);
         }
     }
 
@@ -917,6 +1021,9 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             await using LockedMatch slotLockedMatch = await ChatTestData.SeedLockedMatch(host, slotUserID, slotAccountID, slotAccountName, slotGameSocket);
             await using LockedMatch otherLockedMatch = await ChatTestData.SeedLockedMatch(host, otherUserID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, otherGameSocket);
 
+            // The Refused Member's Match Server Answers Only A Retry, So That The Refused Member Is Still In The Party When The Slot Account Is Sent Back
+            otherGameSocket.IgnoredRequestsRemaining = 1;
+
             MakeReadyToQueue(group);
 
             await ChatTestProtocol.WriteFrame(slotStream, ChatTestProtocol.BuildGroupJoinQueue());
@@ -926,6 +1033,7 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             using (Assert.Multiple())
             {
                 await Assert.That(SendsBack(slotFrames, slotLockedMatch)).IsTrue();
+                await Assert.That(slotFrames.TakeWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT).Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(slotAccountID)).IsNotNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
                 await Assert.That(group.Members.Count).IsEqualTo(1);
@@ -933,6 +1041,59 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(group.Leader.IsReady).IsFalse();
                 await Assert.That(group.QueueStartTime).IsNull();
             }
+        }
+
+        finally
+        {
+            DisbandGroups(slotAccountID, otherAccountID);
+        }
+    }
+
+    [Test]
+    public async Task Queueing_A_Party_Whose_Refused_Member_Leaves_Before_The_Slot_Account_Is_Sent_Back_Leaves_The_Slot_Account_No_Group()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket slotGameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+        await using FakeMatchServerGameSocket otherGameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int slotUserID, int slotAccountID, string slotAccountName, string slotCookie) = await ChatTestData.SeedPlayer(host);
+        (int otherUserID, int otherAccountID, string otherAccountName, string otherCookie) = await ChatTestData.SeedPlayer(host);
+
+        using TcpClient slotClient = await host.ConnectAndAuthenticateClientAsync(slotAccountID, slotAccountName, slotCookie, RemoteIP);
+        using TcpClient otherClient = await host.ConnectAndAuthenticateClientAsync(otherAccountID, otherAccountName, otherCookie, RemoteIP);
+
+        NetworkStream slotStream = slotClient.GetStream();
+        NetworkStream otherStream = otherClient.GetStream();
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(slotStream, slotAccountID);
+
+            await JoinGroup(otherStream, slotAccountName, slotStream);
+
+            await using LockedMatch slotLockedMatch = await ChatTestData.SeedLockedMatch(host, slotUserID, slotAccountID, slotAccountName, slotGameSocket);
+            await using LockedMatch otherLockedMatch = await ChatTestData.SeedLockedMatch(host, otherUserID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, otherGameSocket);
+
+            // The Slot Account's Match Server Answers Only A Retry, So That The Refused Member Has Left The Party, And The Slot Account Has Been Told So, When The Slot Account Is Sent Back
+            slotGameSocket.IgnoredRequestsRemaining = 1;
+
+            MakeReadyToQueue(group);
+
+            await ChatTestProtocol.WriteFrame(slotStream, ChatTestProtocol.BuildGroupJoinQueue());
+
+            List<(ushort Command, ChatBuffer Frame)> slotFrames = await ReadThroughSendBack(slotStream);
+
+            List<(ushort Command, ChatBuffer Frame)> slotFramesBeforeSendBack = [.. slotFrames.TakeWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT)];
+
+            using (Assert.Multiple())
+            {
+                await Assert.That(SendsBack(slotFrames, slotLockedMatch)).IsTrue();
+                await Assert.That(GroupUpdateAccountIDs(slotFramesBeforeSendBack, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP)).IsEquivalentTo([otherAccountID]);
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
+                await Assert.That(group.QueueStartTime).IsNull();
+            }
+
+            await AssertNoGroupLeftBehind(slotStream, slotAccountID);
         }
 
         finally
@@ -1292,6 +1453,25 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             await Assert.That(MatchLockNotices(frames)).IsEquivalentTo([MatchLockService.SlotAccountMessage]);
             await Assert.That(SendsBack(frames, lockedMatch)).IsTrue();
             await Assert.That(frames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+        }
+    }
+
+    /// <summary>
+    ///     Asserts that the account which was sent back is in no matchmaking group, as its game client is once it has deleted its solo group, and that the group which its game client creates next is created without a group update about the account leaving another group, which the game client would show as "Group Disbanded".
+    /// </summary>
+    private static async Task AssertNoGroupLeftBehind(NetworkStream stream, int accountID)
+    {
+        await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
+
+        // The Game Client Creates A New Group When It Returns To The Menu
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupCreate(ChatProtocol.TMMType.TMM_TYPE_PVP));
+
+        List<(ushort Command, ChatBuffer Frame)> frames = await ChatTestProtocol.ReadCommandsUntil(stream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE, FrameTimeout);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(GroupUpdateAccountIDs(frames, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP)).IsEmpty();
+            await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNotNull();
         }
     }
 

@@ -23,7 +23,7 @@ public class MatchmakingGroup
     private Lock QueueStateLock { get; } = new ();
 
     /// <summary>
-    ///     Serialises the removal of members (refused members of a queue, kicks, leaves, and ended sessions), so that two removals never change the group's members at the same time.
+    ///     Serialises the removal of members (refused members of a queue, kicks, leaves, and ended sessions), so that two removals never change the group's members at the same time, and orders a member's send to a match against them.
     ///     It is taken before <see cref="QueueStateLock"/>, which a removal reaches when it takes the group out of the queue, and never while that lock is held.
     /// </summary>
     private Lock MembershipLock { get; } = new ();
@@ -797,6 +797,23 @@ public class MatchmakingGroup
 
             // Send Full Group Update To Remaining Members
             MulticastUpdate(accountID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+        }
+    }
+
+    /// <summary>
+    ///     Sends a member to a match with the given send, removing the member first, without a group update, when it is the group's only member, because the game client deletes a solo group by itself when it is sent to a match ("CChatManager::MatchmakingConnect").
+    ///     The game client decides from the group updates which it has received, so both happen under <see cref="MembershipLock"/>, which every removal holds while it updates the members, and no membership change or update about one can fall between the decision and the send.
+    ///     A party is left as it is, because the game client keeps a party when it is sent to a match.
+    /// </summary>
+    public void SendMemberToMatch(int accountID, Action send)
+    {
+        lock (MembershipLock)
+        {
+            // The Membership Lock Is Reentrant, So The Removal Takes It Again On The Same Thread Without Waiting
+            if (Members is [MatchmakingGroupMember soleMember] && soleMember.Account.ID == accountID)
+                RemoveMember(accountID, notifyRemovedMember: false);
+
+            send();
         }
     }
 

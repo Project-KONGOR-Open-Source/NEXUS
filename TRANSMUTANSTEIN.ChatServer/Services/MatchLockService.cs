@@ -175,8 +175,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <param name="session">The chat session of the player whose attempt to play another game is decided.</param>
     /// <param name="relayedRefusal">Whether the attempt is a refusal of the server list, or of a client connection on another match server, which was relayed to the chat server, which proves that the game client is trying to play elsewhere, so that the player is sent back even when the game client reports being in a game.</param>
     /// <param name="matchmaking">Whether the attempt is a queue or a group join, whose refusal must also release the game client's matchmaking screen.</param>
-    /// <param name="soloGroup">Whether the player's matchmaking group had no member but the player when the attempt began, which the caller decides before any await, because other members of the group may be enforced at the same time and leave it first.</param>
-    public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false, bool soloGroup = false)
+    public async Task<bool> Enforce(ClientChatSession session, bool relayedRefusal = false, bool matchmaking = false)
     {
         if (IsExempt(session.Account))
             return false;
@@ -269,9 +268,6 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (matchmaking && (isSlotAccount is false || slotConnected))
             RefuseMatchmaking(session, matchLock);
 
-        else if (matchmaking && soloGroup)
-            LeaveSoloGroup(session);
-
         Notify(session, matchLock, isSlotAccount, verdict);
 
         // Only The Account Which Holds The Slot Can Return To The Match, So Another Account Of The Same User Is Only Told Which Account That Is
@@ -310,7 +306,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
         // Every Member Is Enforced, Because A Premade Party Outlives The Match It Played Together, So A Locked Player Can Still Queue With Its Teammates
         // The Members Are Enforced Concurrently, Because Each Locked Member May Wait On Its Own Match Server's Answer
-        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, matchmaking: true, soloGroup: members.Count is 1)));
+        bool[] refusals = await Task.WhenAll(members.Select(member => Enforce(member.Session, matchmaking: true)));
 
         List<MatchmakingGroupMember> refusedMembers = [.. members.Where((member, index) => refusals[index])];
 
@@ -320,7 +316,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
             group.GUID, refusedMembers.Count);
 
-        // A Solo Group Gets Nothing More, Because The Game Client Deletes It By Itself When It Is Sent Back. NEXUS Has Already Removed It Without A Group Update, Because A Group Update Would Put It Back
+        // A Solo Group Gets Nothing More, Because The Game Client Deletes It By Itself When It Is Sent Back. The Send-Back Has Already Removed It Without A Group Update, Because A Group Update Would Put It Back
         if (members.Count is 1)
             return true;
 
@@ -665,7 +661,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     ///     Answers a refused queue or group join with the game client's "Temporary Ban" popup, counting down to the match lock's safety limit, and removes the player from its group, before the player is told why.
     ///     The game client's matchmaking screen covers the chat in which the notice appears, and the "Temporary Ban" popup is the only refusal of the game client whose text fits a match lock.
     ///     The game client leaves its group on that reply without telling the chat server, so the player is removed without a group update, which would make the game client leave its group again.
-    ///     A slot account which is sent back at once needs none of this, because the game client leaves a solo group by itself when it is sent to a match, with the reason "foundmatch" ("CChatManager::MatchmakingConnect").
+    ///     A slot account which is sent back at once needs none of this, because the game client leaves a solo group by itself when it is sent to a match, with the reason "foundmatch" ("CChatManager::MatchmakingConnect"), which <see cref="SendToMatch"/> mirrors.
     /// </summary>
     private static void RefuseMatchmaking(ClientChatSession session, MatchLock matchLock)
     {
@@ -676,15 +672,21 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     }
 
     /// <summary>
-    ///     Removes a slot account which is sent back at once from its solo matchmaking group, without a group update.
-    ///     The game client deletes a solo group by itself when it is sent to a match, so a group which NEXUS kept would later be removed with an update which the game client shows as "Group Disbanded".
-    ///     A party is left as it is, because the game client keeps a party when it is sent to a match.
+    ///     Sends the account which holds the slot to the locked match with an "AUTO_MATCH_CONNECT", either as a send-back or as a reminder.
+    ///     The game client deletes its matchmaking group by itself whenever it is sent to a match as the group's only member, so <see cref="MatchmakingGroup.SendMemberToMatch"/> removes the account from such a group at the same moment, without a group update, which would put the game client back into it.
+    ///     A solo group which NEXUS kept would otherwise be removed when the game client next creates a group, with an update which the game client shows as "Group Disbanded".
     /// </summary>
-    private static void LeaveSoloGroup(ClientChatSession session)
+    private static void SendToMatch(ClientChatSession session, MatchLock matchLock, bool reminder)
     {
+        Action send = () => session.SendAutoMatchConnect(matchLock.ArrangedMatchType, matchLock.MatchID, matchLock.ServerAddress, matchLock.ServerPort, reminder);
+
         MatchmakingGroup? group = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
 
-        group?.RemoveMember(session.Account.ID, notifyRemovedMember: false);
+        if (group is null)
+            send();
+
+        else
+            group.SendMemberToMatch(session.Account.ID, send);
     }
 
     /// <summary>
@@ -734,7 +736,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             bool sentBack = matchLockReturn.SlotConnected is false;
 
             if (sentBack)
-                session.SendAutoMatchConnect(matchLock.ArrangedMatchType, matchLock.MatchID, matchLock.ServerAddress, matchLock.ServerPort, reminder: false);
+                SendToMatch(session, matchLock, reminder: false);
 
             while (true)
             {
@@ -794,7 +796,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                     // A Send-Back After A Wait Lasts Exactly As Long As One Which Was Sent At Once, So That The Return Window Covers The Match Server's And The Game Client's Retries From This Moment
                     matchLockReturn.Expires = DateTimeOffset.UtcNow + ReturnWindow;
 
-                    session.SendAutoMatchConnect(currentLock.ArrangedMatchType, currentLock.MatchID, currentLock.ServerAddress, currentLock.ServerPort, reminder: false);
+                    SendToMatch(session, currentLock, reminder: false);
 
                     logger.LogInformation(@"Sending Account ""{AccountName}"" Back To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"", Because Its Slot Is No Longer Connected From Another Machine",
                         session.Account.NameWithClanTag, currentLock.MatchID, currentLock.ServerID);
@@ -802,7 +804,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
                     continue;
                 }
 
-                session.SendAutoMatchConnect(currentLock.ArrangedMatchType, currentLock.MatchID, currentLock.ServerAddress, currentLock.ServerPort, reminder: true);
+                SendToMatch(session, currentLock, reminder: true);
 
                 logger.LogDebug(@"Reminded Account ""{AccountName}"" To Return To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
                     session.Account.NameWithClanTag, currentLock.MatchID, currentLock.ServerID);
