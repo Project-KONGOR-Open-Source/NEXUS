@@ -17,6 +17,11 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     private const string SlotAccountName = "TEST:SlotAccount";
 
     /// <summary>
+    ///     The name of an account which is never online, so that a whisper to it is answered at once with a failure reply.
+    /// </summary>
+    private const string AbsentAccountName = "TEST:AbsentAccount";
+
+    /// <summary>
     ///     How long a frame which is expected to arrive is awaited.
     /// </summary>
     private static readonly TimeSpan FrameTimeout = TimeSpan.FromSeconds(10);
@@ -994,12 +999,16 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             List<(ushort Command, ChatBuffer Frame)> memberFrames = await ReadThroughSendBack(memberStream);
             List<(ushort Command, ChatBuffer Frame)> leaderFrames = await ChatTestProtocol.ReadCommandsUntil(leaderStream, ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT, QuietPeriod);
 
+            // The Member Was Sent Back While Its Party Still Had Another Member, So Its Game Client Keeps The Party, And The Update Which Unreadies The Party Reaches It
+            List<(ushort Command, ChatBuffer Frame)> memberFramesFromSendBack = [.. memberFrames.SkipWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT)];
+
             string groupMemberLockedMessage = MatchLockService.GroupMemberLockedMessage(memberAccountNameWithClanTag);
 
             using (Assert.Multiple())
             {
                 await Assert.That(SendsBack(memberFrames, lockedMatch)).IsTrue();
                 await Assert.That(memberFrames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN)).IsFalse();
+                await Assert.That(GroupUpdateAccountIDs(memberFramesFromSendBack, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE)).IsEquivalentTo([leaderAccountID]);
                 await Assert.That(MatchLockNotices(memberFrames)).IsEquivalentTo([MatchLockService.SlotAccountMessage, groupMemberLockedMessage]);
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(memberAccountID)).IsEqualTo(group);
                 await Assert.That(leaderFrames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsTrue();
@@ -1166,18 +1175,22 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             // The Game Client Acts On The Send-Back While It Still Sees The Refused Member, So It Keeps Its Party, Which Has Only The Slot Account Left By The Time The Acknowledgement Arrives
             await AcknowledgeSendBack(slotStream);
 
-            // Keeping The Party Changes Nothing Which The Test Could Wait For, So The Acknowledgement Is Given Time To Be Handled
-            await Task.Delay(QuietPeriod);
+            // Frames Are Handled In Order, So The Reply To A Whisper To A Player Who Is Not Online Shows That The Acknowledgement Has Been Handled
+            await ChatTestProtocol.WriteFrame(slotStream, ChatTestProtocol.BuildWhisper(AbsentAccountName, "Are You There?"));
+
+            bool acknowledgementHandled = await ChatTestProtocol.ReadUntilCommand(slotStream, ChatProtocol.Command.CHAT_CMD_WHISPER_FAILED, FrameTimeout) is not null;
 
             using (Assert.Multiple())
             {
                 await Assert.That(SendsBack(slotFrames, slotLockedMatch)).IsTrue();
                 await Assert.That(slotFrames.TakeWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT).Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(acknowledgementHandled).IsTrue();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(slotAccountID)).IsNotNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
                 await Assert.That(group.Members.Count).IsEqualTo(1);
                 await Assert.That(group.Members.Single().Account.ID).IsEqualTo(slotAccountID);
                 await Assert.That(group.Leader.IsReady).IsFalse();
+                await Assert.That(group.Members.All(member => member.LoadingPercent is 0)).IsTrue();
                 await Assert.That(group.QueueStartTime).IsNull();
             }
         }

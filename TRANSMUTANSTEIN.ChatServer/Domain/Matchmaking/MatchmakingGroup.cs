@@ -819,16 +819,20 @@ public class MatchmakingGroup
     }
 
     /// <summary>
-    ///     Removes a member without a group update, but only while it is still the group's only member, as the game client leaves a solo group by itself when it acts on a send to a match.
+    ///     Removes a member without a group update, but only while it is still the group's only member, as the game client leaves a solo group by itself when it acts on a send to a match, and returns whether it removed the member.
     ///     A party is left as it is, because the game client keeps a party when it is sent to a match.
     /// </summary>
-    public void RemoveSoleMember(int accountID)
+    public bool RemoveSoleMember(int accountID)
     {
         lock (MembershipLock)
         {
-            // The Membership Lock Is Reentrant, So The Removal Takes It Again On The Same Thread Without Waiting
-            if (Members is [MatchmakingGroupMember soleMember] && soleMember.Account.ID == accountID)
-                RemoveMember(accountID, notifyRemovedMember: false);
+            if (Members is not [MatchmakingGroupMember soleMember] || soleMember.Account.ID != accountID)
+                return false;
+
+            // The Membership Lock Is Re-Entrant, So The Removal Takes It Again On The Same Thread Without Waiting
+            RemoveMember(accountID, notifyRemovedMember: false);
+
+            return true;
         }
     }
 

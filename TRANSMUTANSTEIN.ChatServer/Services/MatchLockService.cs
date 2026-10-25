@@ -296,7 +296,7 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     /// <summary>
     ///     Decides whether a group's attempt to search for a match must be refused, which is while <see cref="Enforce"/> refuses any of its members.
     ///     Every member is enforced as a matchmaking attempt, so that every locked member who is not in a game is sent back, or shown why when it cannot be sent back at once.
-    ///     A refused party's remaining members are unreadied, and every member which the party had when the queue started is told which members hold a match lock.
+    ///     A refused party's remaining members are unreadied, except that a member whose last send-back found it alone in the group is sent no group update, and nobody is unreadied when no other member remains to receive one; every member which the party had when the queue started is told which members hold a match lock.
     /// </summary>
     /// <param name="group">The group which is about to search for a match.</param>
     public async Task<bool> EnforceForGroup(MatchmakingGroup group)
@@ -316,7 +316,8 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         logger.LogInformation(@"Refusing The Queue Of Matchmaking Group GUID ""{GroupGUID}"", Because {RefusedMemberCount} Member(s) Cannot Play Another Game Until Their Match Ends",
             group.GUID, refusedMembers.Count);
 
-        // A Solo Group Gets Nothing More, Because A Group Update Would Put Its Game Client Back Into It. The Refusal's Reply Has Already Removed It Without A Group Update, Or The Game Client Deletes It By Itself When It Acts On The Send-Back, Which Removes It Then
+        // A Solo Group Gets Nothing More, Because A Group Update Would Put A Game Client Back Into A Group Which It Has Left, Or Disturb A Player In A Game
+        // The Refusal's Reply Has Already Removed The Group Without A Group Update, Or The Game Client Deletes It By Itself When It Acts On The Send-Back, Whose Acknowledgement Then Removes It, Or A Player Who Reports Being In A Game Was Refused With Neither A Reply Nor A Send-Back, And Rightly Keeps It
         if (members.Count is 1)
             return true;
 
@@ -452,7 +453,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
 
             // A Join Which Falls Between The Send And The Acknowledgement Keeps The Group, And Its Update Puts The Game Client Back Into The Group With The New Member
             // Any Other Group Update Which Reaches A Player Still Alone In The Group In That Window Would Leave Its Game Client In A Group Which Is Removed Here, Which Is Accepted, Because A Refused Queue, The Only Path Which Sends One There In The Normal Course, Sends None To Such A Player
-            pendingReturn.SoloGroupAtLastSend?.RemoveSoleMember(session.Account.ID);
+            if (pendingReturn.SoloGroupAtLastSend is { } soloGroup && soloGroup.RemoveSoleMember(session.Account.ID))
+            {
+                logger.LogDebug(@"Removed Account ""{AccountName}"" From Its Solo Matchmaking Group GUID ""{GroupGUID}"", Which Its Game Client Deleted When It Acted On Its Return",
+                    session.Account.NameWithClanTag, soloGroup.GUID);
+            }
         }
     }
 
