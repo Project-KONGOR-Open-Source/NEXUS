@@ -73,11 +73,14 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
         if (supported.Contains((form.OperatingSystem, form.Architecture)).Equals(false))
             return BadRequest($@"Unsupported Requester: Operating System ""{form.OperatingSystem}"", Architecture ""{form.Architecture}""");
 
-        // The Requester's Current Version Number Needs To Include The Revision Number Even If It Is Zero (e.g. "4.10.1.0" Rather Than Just "4.10.1")
-        PatchDetails currentPatch = PatchHandlers.GetPatchDetails(form.OperatingSystem, form.CurrentPatchVersion);
+        // The Requester Names Its Current Version, Which Must Be The Distributions' Version, Because NEXUS Accepts No Other
+        PatchDetails? currentPatch = PatchHandlers.GetPatchDetails(form.OperatingSystem, form.CurrentPatchVersion);
 
-        // Unlike The Requester's Current Version Number, The Revision Number Is Excluded From The Latest Version Number Of The Requester's Distribution If It Is Zero (e.g. "4.10.1.0" Becomes Just "4.10.1")
-        PatchDetails latestPatch = PatchHandlers.GetLatestPatchDetails(form.OperatingSystem);
+        // The Latest Version Of The Requester's Distribution, Which Is The Same Version
+        PatchDetails? latestPatch = PatchHandlers.GetLatestPatchDetails(form.OperatingSystem);
+
+        if (currentPatch is null || latestPatch is null)
+            return BadRequest($@"Unsupported Requester: Distribution ""{form.OperatingSystem}"", Version ""{form.CurrentPatchVersion}""");
 
         LatestPatchResponse response = new ()
         {

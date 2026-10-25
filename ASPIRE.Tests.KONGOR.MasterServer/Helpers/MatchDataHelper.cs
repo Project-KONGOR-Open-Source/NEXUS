@@ -15,7 +15,7 @@ internal static class MatchDataHelper
             ServerName = "Test Server",
             HostAccountName = "TestHost",
             Map = map,
-            Version = "4.10.1.0",
+            Version = Distributions.Version,
             IsCasual = isCasual,
             MatchType = matchType,
             MatchMode = PublicMatchMode.GAME_MODE_NORMAL
@@ -128,7 +128,7 @@ internal static class MatchDataHelper
             FileSize                 = 0,
             FileName                 = "test.honreplay",
             ConnectionState          = 0,
-            Version                  = "4.10.1.0",
+            Version                  = Distributions.Version,
             AveragePSR               = 1500,
             AveragePSRTeamOne        = 1500,
             AveragePSRTeamTwo        = 1500,

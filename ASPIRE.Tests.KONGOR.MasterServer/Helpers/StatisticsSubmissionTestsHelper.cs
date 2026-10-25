@@ -20,7 +20,7 @@ internal static class StatisticsSubmissionTestsHelper
         ["match_stats[file_size]"]          = "0",
         ["match_stats[file_name]"]          = $"M{matchID}.honreplay",
         ["match_stats[c_state]"]            = "0",
-        ["match_stats[version]"]            = "4.10.1.0",
+        ["match_stats[version]"]            = Distributions.Version,
         ["match_stats[avgpsr]"]             = "0",
         ["match_stats[avgpsr_team1]"]       = "0",
         ["match_stats[avgpsr_team2]"]       = "0",

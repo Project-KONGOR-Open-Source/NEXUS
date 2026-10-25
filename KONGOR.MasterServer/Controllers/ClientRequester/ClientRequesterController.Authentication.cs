@@ -153,7 +153,10 @@ public partial class ClientRequesterController
         {
             string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
 
-            if (UserAgentRegex().IsMatch(agent).Equals(false))
+            Match agentMatch = UserAgentRegex().Match(agent);
+
+            // The Game Client Must Run The Distributions' Version, Which Is The Only Version NEXUS Accepts
+            if (agentMatch.Success.Equals(false) || agentMatch.Groups["version"].Value.Equals(Distributions.Version).Equals(false))
             {
                 Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
 

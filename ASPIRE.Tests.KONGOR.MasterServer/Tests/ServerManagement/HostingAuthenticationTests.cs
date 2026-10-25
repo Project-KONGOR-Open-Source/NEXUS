@@ -679,6 +679,38 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
         }
     }
 
+    [Test]
+    public async Task Start_Game_With_Another_Version_Is_Refused()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateMatchServer();
+
+        HttpResponseMessage response = await SendServerRequest("start_game", MatchStartForm(session, "4.10.1.0"));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+            await Assert.That(await response.Content.ReadAsStringAsync()).Contains("4.10.1.0");
+        }
+    }
+
+    [Test]
+    public async Task Start_Game_With_The_Distributions_Version_Passes_The_Version_Check()
+    {
+        await InitialiseIn("Development");
+
+        string session = await AuthenticateMatchServer();
+
+        HttpResponseMessage response = await SendServerRequest("start_game", MatchStartForm(session, Distributions.Version));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That((await DeserialisePHPResponse(response)).ContainsKey("match_id")).IsTrue();
+        }
+    }
+
     private async Task InitialiseIn(string environment)
     {
         await webApplicationFactory.WithEnvironment(environment).WithSQLServerContainer().WithDistributedCacheContainer().InitialiseAsync();
@@ -692,7 +724,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -707,7 +739,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -801,7 +833,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = [];
 
@@ -826,7 +858,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         List<KeyValuePair<string, string>> formData = [new ("session", session), .. accountIDValues.Select(accountIDValue => new KeyValuePair<string, string>("aids[]", accountIDValue))];
 
@@ -840,7 +872,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -865,7 +897,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = [];
 
@@ -899,11 +931,26 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
         return await httpClient.PostAsync(endpoint, new FormUrlEncodedContent(formData));
     }
 
+    /// <summary>
+    ///     The form a match server posts to start a match, as "start_game" reads it.
+    /// </summary>
+    private static Dictionary<string, string> MatchStartForm(string session, string version) => new ()
+    {
+        { "session", session },
+        { "map", "caldavar" },
+        { "version", version },
+        { "mname", "TEST-MATCH" },
+        { "mstr", $"{DedicatedHostAccountName}:" },
+        { "casual", "0" },
+        { "arrangedmatchtype", "0" },
+        { "match_mode", "1" }
+    };
+
     private async Task<HttpResponseMessage> SendServerRequest(string function, Dictionary<string, string> formData)
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         return await httpClient.PostAsync($"server_requester.php?f={function}", new FormUrlEncodedContent(formData));
     }

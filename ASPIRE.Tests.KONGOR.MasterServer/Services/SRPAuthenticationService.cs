@@ -73,17 +73,17 @@ public sealed class SRPAuthenticationService(KONGORIntegrationWebApplicationFact
     /// <summary>
     ///     Creates an account and then performs the complete SRP authentication flow against it.
     /// </summary>
-    public async Task<SRPAuthenticationData> AuthenticateWithSRP(string emailAddress, string accountName, string password)
+    public async Task<SRPAuthenticationData> AuthenticateWithSRP(string emailAddress, string accountName, string password, string? userAgent = null)
     {
         (Account account, string _) = await CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
-        return await PerformFullAuthentication(account, password);
+        return await PerformFullAuthentication(account, password, userAgent);
     }
 
     /// <summary>
     ///     Performs the complete SRP authentication flow without creating an account first.
     /// </summary>
-    public async Task<SRPAuthenticationData> PerformFullAuthentication(Account account, string password)
+    public async Task<SRPAuthenticationData> PerformFullAuthentication(Account account, string password, string? userAgent = null)
     {
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
@@ -98,7 +98,8 @@ public sealed class SRPAuthenticationService(KONGORIntegrationWebApplicationFact
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        // The Game Client's User Agent, At The Distributions' Version, Unless A Test Names Another
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent ?? $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);

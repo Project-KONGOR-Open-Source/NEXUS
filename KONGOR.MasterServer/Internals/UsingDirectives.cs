@@ -1,5 +1,6 @@
 global using ASPIRE.Common;
 global using ASPIRE.Common.Communication;
+global using ASPIRE.Common.Compatibility;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Enumerations.Statistics;
