@@ -390,10 +390,11 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     {
         if (Context.ClientChatSessions.TryGetValue(refusal.AccountName, out ClientChatSession? session))
         {
-            // A Client Which Reports Being In Its Own Match Cannot Be Connecting Elsewhere, So The Refusal Is The Late Answer To An Attempt Which It Has Abandoned, Whereas A Client Which Reports Another Match Server May Be In A Chat Reconnect During A Refused Client Connection, And A Refused Server List Shows Only That The Client Is Trying To Play Elsewhere
+            // A Slot Account Which Reports Being In Its Own Match Cannot Be Connecting Elsewhere, So The Refusal Is The Late Answer To An Attempt Which It Has Abandoned, Whereas A Client Which Reports Another Match Server May Be In A Chat Reconnect During A Refused Client Connection, And A Refused Server List Shows Only That The Client Is Trying To Play Elsewhere
+            // Another Account Of The User Never Holds The Slot, So Its Refusal Is Never The Late Answer To An Abandoned Attempt To Leave Its Own Match, And Acting On It Costs A Notice At Most, Because It Is Never Sent Back
             MatchLock? lockedMatch = await distributedCacheStore.GetMatchLock(refusal.UserID);
 
-            if (lockedMatch is not null && session.ReportedGameServerAddress is { } reportedAddress && await NamesLockedServer(lockedMatch, reportedAddress))
+            if (lockedMatch is not null && lockedMatch.AccountID == session.Account.ID && session.ReportedGameServerAddress is { } reportedAddress && await NamesLockedServer(lockedMatch, reportedAddress))
             {
                 logger.LogDebug(@"Ignoring A Stale Refusal Of Account ""{AccountName}"", Because It Reports Being In Match ID ""{MatchID}""",
                     session.Account.NameWithClanTag, lockedMatch.MatchID);

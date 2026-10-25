@@ -3,7 +3,7 @@ using PhpSerializerNET;
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests.Matchmaking;
 
 /// <summary>
-///     Tests for relaying the master server's refusals of a locked player's server list, and of its connections to other match servers: the chat server sends the player back through their chat session when they have one, and otherwise verifies their lock anyway, so that a player who was removed from their match while their chat is down is served on their next attempt.
+///     Tests for relaying the master server's refusals of a locked player's server list, and of its connections to other match servers or, for another account of its user, to the locked one: the chat server sends the player back through their chat session when they have one, and otherwise verifies their lock anyway, so that a player who was removed from their match while their chat is down is served on their next attempt.
 ///     Every test logs in with a fresh session cookie and disposes its locked match, because every chat server host shares the unprefixed distributed cache while each host's database restarts its identifiers, so a lock left behind would bind a later test.
 /// </summary>
 [NotInParallel(nameof(ChatServerHost))]
@@ -288,6 +288,39 @@ public sealed class MatchLockRefusalMonitorTests(ServiceContainerContext contain
             await Assert.That(notice?.SenderName).IsEqualTo(MatchLockService.MessageSenderName);
             await Assert.That(notice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName));
             await Assert.That(connect).IsNull();
+        }
+    }
+
+    [Test]
+    public async Task A_Refusal_For_Another_Account_Which_Reports_The_Locked_Server_Names_The_Slot_Account()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, Random.Shared.Next(1_000_000, int.MaxValue), SlotAccountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        ClientChatSession session = Context.ClientChatSessions[accountName];
+
+        // A Chat Reconnect While The Refused Connection To The Locked Match Server Is Still Connecting Reports Joining That Match Server
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildJoiningGame($"{lockedMatch.Lock.ServerAddress}:{lockedMatch.Lock.ServerPort}"));
+
+        bool reported = await ChatTestProtocol.WaitUntil(() => session.ReportedGameServerAddress is not null, FrameTimeout);
+
+        await PublishRefusal(host, userID, accountName);
+
+        (string SenderName, string Message)? notice = await ChatTestProtocol.ReadNotice(stream, FrameTimeout);
+
+        // Only The Slot Account Can Be In The Locked Match, So Another Account's Refusal Is Never The Late Answer To An Abandoned Attempt
+        using (Assert.Multiple())
+        {
+            await Assert.That(reported).IsTrue();
+            await Assert.That(notice?.Message).IsEqualTo(MatchLockService.OtherAccountMessage(lockedMatch.Lock.TaggedAccountName));
         }
     }
 
