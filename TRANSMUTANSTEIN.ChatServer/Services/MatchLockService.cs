@@ -320,12 +320,15 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
         if (members.Count is 1)
             return true;
 
+        // A Member Whose Send-Back Found It Alone In The Group Gets No Group Update, Because Its Game Client Deletes The Group When It Acts On The Send-Back, And An Update Would Put The Game Client Back Into A Group Which The Acknowledgement Then Removes
+        List<MatchmakingGroupMember> recipients = [.. group.Members.Where(member => member.Session.PendingMatchLockReturn?.SoloGroupAtLastSend != group)];
+
         // A Sent-Back Member's Game Client Keeps Its Party, And A Member In A Game Gets No Frame, So Only A Group Update Which Unreadies The Party Releases The Matchmaking Screens Of The Members Which Remain
-        if (group.Members.Count > 0)
+        if (recipients.Count > 0)
         {
             group.UnloadAndUnreadyMembers();
 
-            group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+            group.MulticastUpdate(group.Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE, isRecipient: member => recipients.Contains(member));
         }
 
         // Every Member Which The Party Had When The Queue Started, The Leader And The Refused Members Included, Is Told About Each Refused Member, So That Nobody Blames The Leader For The Queue Not Starting
@@ -447,7 +450,8 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
             logger.LogDebug(@"Account ""{AccountName}"" Acknowledged Its Return To Match ID ""{MatchID}"" With Action ""{Action}""",
                 session.Account.NameWithClanTag, pendingReturn.MatchID, action);
 
-            // A Join Which Falls Between The Send And The Acknowledgement Keeps The Group, Although The Game Client Has Deleted It, Which Is Accepted, Because Joins Do Not Take The Group's Membership Lock
+            // A Join Which Falls Between The Send And The Acknowledgement Keeps The Group, And Its Update Puts The Game Client Back Into The Group With The New Member
+            // Any Other Group Update Which Reaches A Player Still Alone In The Group In That Window Would Leave Its Game Client In A Group Which Is Removed Here, Which Is Accepted, Because A Refused Queue, The Only Path Which Sends One There In The Normal Course, Sends None To Such A Player
             pendingReturn.SoloGroupAtLastSend?.RemoveSoleMember(session.Account.ID);
         }
     }

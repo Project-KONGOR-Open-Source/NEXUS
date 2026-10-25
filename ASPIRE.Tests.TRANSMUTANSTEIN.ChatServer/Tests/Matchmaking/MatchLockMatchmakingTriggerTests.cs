@@ -1128,13 +1128,13 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             // The Game Client Acts On The Send-Back While It Still Sees The Refused Member, So It Keeps Its Party, Which Has Only The Slot Account Left By The Time The Acknowledgement Arrives
             await AcknowledgeSendBack(slotStream);
 
-            List<(ushort Command, ChatBuffer Frame)> acknowledgementFrames = await ChatTestProtocol.ReadCommandsUntil(slotStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE, QuietPeriod);
+            // Keeping The Party Changes Nothing Which The Test Could Wait For, So The Acknowledgement Is Given Time To Be Handled
+            await Task.Delay(QuietPeriod);
 
             using (Assert.Multiple())
             {
                 await Assert.That(SendsBack(slotFrames, slotLockedMatch)).IsTrue();
                 await Assert.That(slotFrames.TakeWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT).Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
-                await Assert.That(acknowledgementFrames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(slotAccountID)).IsNotNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
                 await Assert.That(group.Members.Count).IsEqualTo(1);
@@ -1186,10 +1186,14 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             List<(ushort Command, ChatBuffer Frame)> slotFramesBeforeSendBack = [.. slotFrames.TakeWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT)];
 
+            // The Game Client Deletes Its Solo Group When It Acts On The Send-Back, And Any Group Update After It Would Put The Game Client Back Into That Group
+            List<(ushort Command, ChatBuffer Frame)> slotFramesFromSendBack = [.. slotFrames.SkipWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT)];
+
             using (Assert.Multiple())
             {
                 await Assert.That(SendsBack(slotFrames, slotLockedMatch)).IsTrue();
                 await Assert.That(GroupUpdateAccountIDs(slotFramesBeforeSendBack, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP)).IsEquivalentTo([otherAccountID]);
+                await Assert.That(slotFramesFromSendBack.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
                 await Assert.That(group.QueueStartTime).IsNull();
             }

@@ -590,9 +590,9 @@ public class MatchmakingGroup
     }
 
     /// <summary>
-    ///     Sends a group update about the emitting member to every member of the group, or to every member but the emitting one when <paramref name="notifyEmitter"/> is <see langword="false"/>.
+    ///     Sends a group update about the emitting member to every member of the group, or to every member but the emitting one when <paramref name="notifyEmitter"/> is <see langword="false"/>, and only to the members which <paramref name="isRecipient"/> accepts when it is given.
     /// </summary>
-    public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType, bool notifyEmitter = true)
+    public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType, bool notifyEmitter = true, Func<MatchmakingGroupMember, bool>? isRecipient = null)
     {
         ChatBuffer update = new ();
 
@@ -680,6 +680,9 @@ public class MatchmakingGroup
                 if (notifyEmitter is false && recipient.Account.ID == emitterAccountID)
                     continue;
 
+                if (isRecipient is not null && isRecipient(recipient) is false)
+                    continue;
+
                 update.Resize(sharedBufferLength);
 
                 foreach (MatchmakingGroupMember member in Members)
@@ -698,6 +701,9 @@ public class MatchmakingGroup
             foreach (MatchmakingGroupMember member in Members)
             {
                 if (notifyEmitter is false && member.Account.ID == emitterAccountID)
+                    continue;
+
+                if (isRecipient is not null && isRecipient(member) is false)
                     continue;
 
                 member.Session.Send(update);
