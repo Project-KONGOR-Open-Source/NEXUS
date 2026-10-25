@@ -28,7 +28,7 @@ internal static class MatchmakingTestBuilder
     /// </summary>
     public static MatchmakingGroupInformation NormalRankedInformation() => new ()
     {
-        ClientVersion   = "4.10.1.0",
+        ClientVersion   = Distributions.Version,
         GroupType       = ChatProtocol.TMMType.TMM_TYPE_PVP,
         GameType        = ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL,
         MapName         = "caldavar",
@@ -45,7 +45,7 @@ internal static class MatchmakingTestBuilder
     /// </summary>
     public static MatchmakingGroupInformation CoopInformation() => new ()
     {
-        ClientVersion   = "4.10.1.0",
+        ClientVersion   = Distributions.Version,
         GroupType       = ChatProtocol.TMMType.TMM_TYPE_COOP,
         GameType        = ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL,
         MapName         = "caldavar",

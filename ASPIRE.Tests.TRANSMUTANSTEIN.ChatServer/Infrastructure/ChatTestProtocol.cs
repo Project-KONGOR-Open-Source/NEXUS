@@ -8,7 +8,7 @@ internal static class ChatTestProtocol
     /// <summary>
     ///     The game client version which the matchmaking requests carry, which is the version that the client handshake reports.
     /// </summary>
-    private const string ClientVersion = "4.10.1.0";
+    private const string ClientVersion = Distributions.Version;
 
     /// <summary>
     ///     Wraps a buffer in the chat protocol's little-endian 2-byte length prefix and writes it to the stream.
@@ -289,8 +289,11 @@ internal static class ChatTestProtocol
         return await condition();
     }
 
-    public static ChatBuffer BuildClientHandshake(int accountID, string cookie, string remoteIP, string authenticationHash)
+    public static ChatBuffer BuildClientHandshake(int accountID, string cookie, string remoteIP, string authenticationHash, byte[]? clientVersion = null)
     {
+        // The Distributions' Version By Default, So That A Lock-Step Version Change Needs No Test Changes
+        byte[] version = clientVersion ?? [.. Distributions.Version.Split('.').Select(byte.Parse)];
+
         ChatBuffer buffer = new ();
 
         buffer.WriteCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT);
@@ -305,10 +308,10 @@ internal static class ChatTestProtocol
         buffer.WriteInt8(0);          // Operating System Version Patch
         buffer.WriteString("0");      // Operating System Build Code
         buffer.WriteString("x86_64"); // Operating System Architecture
-        buffer.WriteInt8(4);          // Client Version Major
-        buffer.WriteInt8(10);         // Client Version Minor
-        buffer.WriteInt8(1);          // Client Version Patch
-        buffer.WriteInt8(0);          // Client Version Revision
+        buffer.WriteInt8(version[0]); // Client Version Major
+        buffer.WriteInt8(version[1]); // Client Version Minor
+        buffer.WriteInt8(version[2]); // Client Version Patch
+        buffer.WriteInt8(version[3]); // Client Version Revision
         buffer.WriteInt8(0);          // Crash Reporting Client State
         buffer.WriteInt8(0);          // Client Chat Mode State (Normal)
         buffer.WriteString("USE");    // Client Region
