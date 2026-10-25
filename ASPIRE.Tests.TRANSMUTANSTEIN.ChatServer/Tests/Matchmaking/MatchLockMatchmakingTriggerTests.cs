@@ -561,6 +561,44 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     [Test]
+    public async Task A_Group_Lookup_Which_Fails_Still_Sends_The_Player_Back()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        // No Account Has A Negative ID, So This Key Holds Nothing But The Duplicate
+        int duplicateGroupKey = -accountID;
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(stream, accountID);
+
+            // The Group Is Registered A Second Time, So That Looking Up The Player's Group Finds It Twice And Throws, As A Duplicated Membership Would
+            MatchmakingService.Groups.TryAdd(duplicateGroupKey, group);
+
+            await host.Services.GetRequiredService<IDatabase>().PublishMatchLockRefusal(new MatchLockRefusal { UserID = userID, AccountName = accountName });
+
+            // The Player Has Been Told That They Are Being Sent Back, So The Frame Must Follow Whatever The Group Lookup Does
+            await AssertSentBack(stream, lockedMatch);
+        }
+
+        finally
+        {
+            MatchmakingService.Groups.TryRemove(duplicateGroupKey, out _);
+
+            DisbandGroups(accountID);
+        }
+    }
+
+    [Test]
     public async Task A_Send_Back_Which_The_Game_Client_Does_Not_Acknowledge_Keeps_Its_Solo_Group()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

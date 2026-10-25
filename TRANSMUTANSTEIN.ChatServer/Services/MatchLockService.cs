@@ -683,12 +683,26 @@ public class MatchLockService(IDatabase distributedCacheStore, MatchServerReconn
     ///     Sends the account which holds the slot to the locked match with an "AUTO_MATCH_CONNECT", either as a send-back or as a reminder, and records on the return whether the account was its matchmaking group's only member at that send.
     ///     The game client deletes such a group by itself when it acts on the send, but it ignores the send while it is still connecting, authenticating, or loading, so nothing is removed here, and <see cref="HandleReturnAcknowledgement"/> removes the group only once the game client acknowledges the send.
     ///     A solo group which NEXUS kept after the game client deleted it would be removed when the game client next creates a group, with an update which the game client shows as "Group Disbanded".
+    ///     The frame is sent even when the group lookup fails, because the player has already been told that they are being sent back.
     /// </summary>
-    private static void SendToMatch(ClientChatSession session, MatchLock matchLock, MatchLockReturn matchLockReturn, bool reminder)
+    private void SendToMatch(ClientChatSession session, MatchLock matchLock, MatchLockReturn matchLockReturn, bool reminder)
     {
         Action send = () => session.SendAutoMatchConnect(matchLock.ArrangedMatchType, matchLock.MatchID, matchLock.ServerAddress, matchLock.ServerPort, reminder);
 
-        MatchmakingGroup? group = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
+        MatchmakingGroup? group;
+
+        try
+        {
+            group = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
+        }
+
+        catch (Exception exception)
+        {
+            logger.LogError(exception, @"[BUG] Could Not Look Up The Matchmaking Group Of Account ""{AccountName}"", Which Is Sent Back To Match ID ""{MatchID}"" Without Its Group Being Recorded",
+                session.Account.NameWithClanTag, matchLock.MatchID);
+
+            group = null;
+        }
 
         if (group is null)
         {
