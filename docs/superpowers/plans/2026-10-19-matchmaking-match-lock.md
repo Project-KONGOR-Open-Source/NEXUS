@@ -2354,6 +2354,24 @@ Found in the live re-test on 2026-10-24: a player sent back from a solo group, w
 
 **Commit:** "Remove A Pulled Player From Its Solo Group Silently".
 
+Task 27 replaces this task's mechanism.
+
+---
+
+### Task 27: Remove A Solo Group When The Client Acts On A Pull
+
+Found in the live re-test on 2026-10-25: a pull triggered by an invite left the same stale solo group as Task 26's, because the client deletes a solo group on every pull of a matchmade match, whatever triggered it, while Task 26 removed it only for a queue or group join.
+
+**Files:**
+- Modify: `TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingGroup.cs`, `TRANSMUTANSTEIN.ChatServer/Services/MatchLockService.cs`, `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoin.cs`, and the acknowledgement in `TRANSMUTANSTEIN.ChatServer/CommandProcessors/Actions/TrackPlayerAction.cs`
+- Test: `ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer/Tests/Matchmaking/MatchLockMatchmakingTriggerTests.cs`
+
+**Mechanism:** the client acts on `AUTO_MATCH_CONNECT` only while idle; it then acknowledges the pull (`AC_MATCHMAKING_MATCH_READY` or `AC_MATCHMAKING_MATCH_READY_REMINDER`) and deletes a solo group locally (HON `CChatManager::HandleAutoMatchConnect` and `MatchmakingConnect`). So every lock pull records, under the group's membership lock and before the frame, whether the player was its group's sole member; the acknowledgement removes the player from that group without a group update if it is still the sole member; and `EnforceForGroup` sends its unreadying update to no member whose last pull found it alone, because any group update would put the client back into the group it deleted. The pull's frame, its timing, the notice, the pending return, and `RemindToReturn` are unchanged. Task 26's `soloGroup` parameter is removed.
+
+**Accepted windows:** an unrelated group action within one round trip of the pull (a join and then a leave, the player's own group commands in flight, or the rejection of an invite sent before the lock) can still leave the client and NEXUS disagreeing about a solo group; a join alone heals itself.
+
+**Commits:** "Remove A Solo Group Whenever The Match Lock Pulls Its Player Back", "Remove A Pulled Player's Solo Group When The Client Acts On The Pull", and "Send No Group Update To A Player Pulled From Its Solo Group".
+
 ---
 
 ### Task 12: Verify The Match Lock With Real Game Clients (Needs The Owner)
@@ -2383,7 +2401,7 @@ Found in the live re-test on 2026-10-24: a player sent back from a solo group, w
 - [ ] **A second machine.** While A plays on machine 1, A logs in on machine 2 → machine 1's chat ends with the logged-in-elsewhere notice naming A with its clan tag, and its game plays on; machine 2 gets the login notice, and no pull and no wait. Machine 2 clicks Play → the "Temporary Ban" popup and the notice to close the other game; closing machine 1's game sends machine 2 back within one reminder interval.
 - [ ] **A crash and relaunch.** Kill A's client mid-match, relaunch it, and log in → the login notice, and the client's own reconnect prompt (record its countdown: finding 6). Clicking it once the match server has dropped the dead connection returns A; clicking Play instead pulls A back as soon as the slot frees.
 - [ ] **A crashed match server.** Kill the match server process mid-match → at A's next login or attempt to play, the lock lifts, silently or with the try-again notice after a refusal; A plays normally, and is never sent to the dead server.
-- [ ] **A chat server restart.** Restart the chat server while A plays → nobody in the match gets a notice. Restart it while A is locked at the menu → A gets the login notice once the client's chat reconnects, and only once.
+- [ ] **A chat server restart.** Restart the chat server while A plays → nobody in the match gets a notice. Restart it while A is locked at the menu → A's chat reconnects with no pull, and with no repeated login notice, because Task 20 tells each login once; A's next attempt to play sends it back.
 - [ ] **A lock which has gone stale.** Have A removed from the match (voted out, or terminated after the disconnect window) while A waits at the menu, then open the public game list → one empty list with the try-again notice, and the next refresh lists the games.
 
 **Still to run from the first live test.**
