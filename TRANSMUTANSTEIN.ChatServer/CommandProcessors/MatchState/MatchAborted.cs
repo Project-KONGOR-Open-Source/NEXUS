@@ -23,6 +23,9 @@ public class MatchAborted(IDatabase distributedCacheStore) : IAsynchronousComman
         // This Is Harmless If The Subsequent MatchAbandoned "Server Reset" Signal Has Already Cleaned The Match Up
         MatchmakingService.CleanUpMatchesForServer(session.Metadata.ServerID);
 
+        // A Match Server Hosts One Match At A Time, So Every Lock On The Server Is For The Aborted Match
+        await distributedCacheStore.RemoveMatchLocksForServer(session.Metadata.ServerID);
+
         // TODO: Apply Leaver Penalties (Not Yet Implemented)
         //
         // There Are Two Distinct Leaver Signals From The Game Server:

@@ -28,13 +28,25 @@ internal sealed class ChatServerHost : IAsyncDisposable
     /// </summary>
     public int MatchServerManagerPort { get; }
 
-    private ChatServerHost(WebApplication application, Uri httpBaseAddress, int clientPort, int matchServerPort, int matchServerManagerPort)
+    /// <summary>
+    ///     The connection string of the host's database, which another host in the same test can share.
+    /// </summary>
+    public string DatabaseConnectionString { get; }
+
+    /// <summary>
+    ///     The connection string of the distributed cache, which the host reads without a key prefix.
+    /// </summary>
+    public string DistributedCacheConnectionString { get; }
+
+    private ChatServerHost(WebApplication application, Uri httpBaseAddress, int clientPort, int matchServerPort, int matchServerManagerPort, string databaseConnectionString, string distributedCacheConnectionString)
     {
         Application = application;
         HTTPBaseAddress = httpBaseAddress;
         ClientPort = clientPort;
         MatchServerPort = matchServerPort;
         MatchServerManagerPort = matchServerManagerPort;
+        DatabaseConnectionString = databaseConnectionString;
+        DistributedCacheConnectionString = distributedCacheConnectionString;
     }
 
     public static async Task<ChatServerHost> StartAsync(ServiceContainerContext containerContext)
@@ -78,7 +90,7 @@ internal sealed class ChatServerHost : IAsyncDisposable
 
         await application.StartAsync();
 
-        return new ChatServerHost(application, new Uri($"http://127.0.0.1:{httpPort}"), clientPort, matchServerPort, matchServerManagerPort);
+        return new ChatServerHost(application, new Uri($"http://127.0.0.1:{httpPort}"), clientPort, matchServerPort, matchServerManagerPort, databaseConnectionString, cacheConnectionString);
     }
 
     public HttpClient CreateHTTPClient() => new () { BaseAddress = HTTPBaseAddress };
@@ -130,6 +142,32 @@ internal sealed class ChatServerHost : IAsyncDisposable
 
         if (await ChatTestProtocol.WaitUntil(() => Context.ClientChatSessions.ContainsKey(accountName), TimeSpan.FromSeconds(10)) is false)
             throw new InvalidOperationException(@$"The Client Session For Account ""{accountName}"" Was Not Registered Within The Timeout");
+
+        return client;
+    }
+
+    /// <summary>
+    ///     Connects a match server, performs a valid handshake, and waits until its session is registered in the match server pool, returning the connected match server.
+    ///     The match server must already be seeded with the given identifier and cookie.
+    /// </summary>
+    public async Task<TcpClient> ConnectAndAuthenticateMatchServerAsync(int serverID, string cookie)
+    {
+        TcpClient client = await ConnectMatchServerAsync();
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildServerHandshake(serverID, cookie));
+
+        using (CancellationTokenSource timeout = new (TimeSpan.FromSeconds(10)))
+        {
+            ushort command = await ChatTestProtocol.ReadCommand(stream, timeout.Token);
+
+            if (command != (ushort) ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT)
+                throw new InvalidOperationException(@$"The Match Server Handshake For Server ID ""{serverID}"" Was Not Accepted (Received Command {command})");
+        }
+
+        if (await ChatTestProtocol.WaitUntil(() => Context.MatchServerChatSessions.ContainsKey(serverID), TimeSpan.FromSeconds(10)) is false)
+            throw new InvalidOperationException(@$"The Match Server Session For Server ID ""{serverID}"" Was Not Registered Within The Timeout");
 
         return client;
     }

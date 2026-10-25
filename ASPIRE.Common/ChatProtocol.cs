@@ -449,7 +449,7 @@ public static class ChatProtocol
 
         /// <summary>
         ///     Server is running and ready but has no active match.
-        ///     World is either not loaded, or loaded but has zero connected clients.
+        ///     World is not loaded, and no client is connected or still connecting; a loaded world is ACTIVE, even with zero connected clients.
         ///     Server is listening and can accept connections.
         ///     Expected state for "CowMaster" (Copy-on-Write master) servers.
         ///     Can transition to ACTIVE when clients connect.
@@ -465,7 +465,7 @@ public static class ChatProtocol
 
         /// <summary>
         ///     Server has an active match session running.
-        ///     Either the world is loaded with connected clients, or clients are in the lobby.
+        ///     Either the world is loaded, even with zero connected clients, or clients are connected or still connecting while the world is not loaded.
         ///     Match may or may not have started (m_bMatchStarted distinguishes between "lobby" and "active" in HTTP responses).
         ///     Normal operational state during gameplay.
         /// </summary>

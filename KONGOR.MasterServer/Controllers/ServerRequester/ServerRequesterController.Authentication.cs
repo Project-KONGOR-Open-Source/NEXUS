@@ -283,7 +283,7 @@ public partial class ServerRequesterController
 
     private async Task<IActionResult> HandleConnectClient()
     {
-        // The Session Is Deliberately Not Checked Against The Registered Match Servers, So That A Player Reconnecting To A Match In Progress Is Still Authenticated After The Master Server Has Lost The Match Server's Session
+        // A Session Which Is Not A Registered Match Server's, Including A Copy-On-Write Master's, Is Still Served, So That A Player Reconnecting To A Match In Progress Is Still Authenticated After The Master Server Has Lost The Match Server's Session
         string? session = Request.Form["session"];
 
         if (session is null)
@@ -329,6 +329,52 @@ public partial class ServerRequesterController
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
 
+        MatchServer? askingServer = null;
+
+        MatchLock? refusingLock = null;
+
+        // Reconnecting To A Match In Progress Must Never Break, So A Client Whose Match Lock Cannot Be Evaluated Is Served As If There Were No Lock, And A Failed Session Look-Up Leaves No Asking Match Server
+        try
+        {
+            askingServer = await DistributedCache.GetMatchServerBySessionCookie(session);
+
+            if (askingServer is not null)
+            {
+                (refusingLock, MatchLock? liftedLock) = await DistributedCache.FindRefusingMatchLock(account, askingServer.ID);
+
+                if (liftedLock is not null)
+                {
+                    Logger.LogInformation(@"Lifted The Match Lock Of Account ""{AccountName}"" On Match ID ""{MatchID}"", Because Match Server ID ""{MatchServerID}"" Is No Longer Registered",
+                        liftedLock.TaggedAccountName, liftedLock.MatchID, liftedLock.ServerID);
+                }
+            }
+        }
+
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, @"Serving The Client Connection Of Account ""{AccountName}"" As If It Had No Match Lock, Because Its Match Lock Could Not Be Evaluated", account.NameWithClanTag);
+        }
+
+        if (askingServer is not null && refusingLock is not null)
+        {
+            try
+            {
+                await DistributedCache.PublishMatchLockRefusal(new MatchLockRefusal { UserID = account.User.ID, AccountName = account.Name });
+            }
+
+            catch (Exception exception)
+            {
+                // The Refusal Stands Even When It Cannot Be Relayed To The Chat Server, Rather Than Turning Into A Server Error, Because Serving The Client Would Break The Lock, And The Player's Next Attempt Publishes Its Refusal Anew
+                Logger.LogError(exception, @"Failed To Publish The Match Lock Refusal Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}""", account.NameWithClanTag, askingServer.ID);
+            }
+
+            Logger.LogInformation(@"Refused The Client Connection Of Account ""{AccountName}"" On Match Server ID ""{AskingMatchServerID}"", Because Its User Is Locked To Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}""",
+                account.NameWithClanTag, askingServer.ID, refusingLock.MatchID, refusingLock.ServerID);
+
+            // The Match Server Retries Any Reply Which It Cannot Read While The Client Waits, And Blacklists The Login Cookie On "Invalid cookie.", Whereas A Reply Which Names The Account But Carries No Game Cookie Disconnects The Client At Once ("DISCONNECT_UNIQUE_LOGIN_FAILED"), With No Retry, No Blacklisting, And No Harm To The Match Server's Session ("CClientConnection::CheckAuthResult")
+            return Conflict(PhpSerialization.Serialize(new Dictionary<string, object> { { "account_id", account.ID } }));
+        }
+
         Dictionary<string, object> response = new ()
         {
             { "cookie", cookie },
@@ -351,7 +397,10 @@ public partial class ServerRequesterController
         AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
 
         response.Add("infos", new List<DataPoint> { DataPoint.FromAccount(account, aggregates, statisticsByType) });
-        response.Add("game_cookie", "00005072-6f6a-6563-7420-4b4f4e474f52"); // TODO: Generate And Store This Cookie Per Match (Must Exist, But The Value Doesn't Really Matter)
+
+        // The Game Cookie Is Only Issued Once The Client Connection Is Served, So That A Refused Attempt To Join Another Game Never Replaces The Game Cookie Of The Locked Match
+        response.Add("game_cookie", await DistributedCache.IssueGameCookie(account.ID, askingServer?.ID, cookie));
+
         response.Add("my_upgrades", account.User.OwnedStoreItems);
         response.Add("selected_upgrades", account.SelectedStoreItems);
 

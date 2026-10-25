@@ -1,0 +1,193 @@
+namespace KONGOR.MasterServer.Extensions.Cache;
+
+public static partial class DistributedCacheExtensions
+{
+    /// <summary>
+    ///     Constructs the key of the match lock of a user, of which there is at most one.
+    /// </summary>
+    internal static string ConstructMatchLockKey(int userID) => $@"MATCH-LOCK:[""{userID}""]";
+
+    /// <summary>
+    ///     Constructs the key of the per-server index which lists the users whose match lock is on the server.
+    ///     The index allows the locks of a server to be found without scanning the entire key space.
+    /// </summary>
+    internal static string ConstructMatchLockServerKey(int serverID) => $@"MATCH-LOCK-SERVER:[""{serverID}""]";
+
+    /// <summary>
+    ///     Constructs the key of the marker which records that the match lock's login trigger has run for the session cookie of a login.
+    /// </summary>
+    internal static string ConstructMatchLockLoginCheckedKey(string sessionCookie) => $@"MATCH-LOCK-LOGIN-CHECKED:[""{sessionCookie}""]";
+
+    /// <summary>
+    ///     Stores the match lock of a user, replacing any previous one, and adds it to the index of its server.
+    ///     Both expire when the lock reaches its safety limit, and a lock which is already past it is not stored.
+    /// </summary>
+    public static async Task SetMatchLock(this IDatabase distributedCacheStore, MatchLock matchLock)
+    {
+        TimeSpan timeToLive = matchLock.TimestampExpires - DateTimeOffset.UtcNow;
+
+        if (timeToLive <= TimeSpan.Zero)
+            return;
+
+        string serializedMatchLock = JsonSerializer.Serialize(matchLock);
+
+        string serverKey = ConstructMatchLockServerKey(matchLock.ServerID);
+
+        ITransaction transaction = distributedCacheStore.CreateTransaction();
+
+        _ = transaction.StringSetAsync(ConstructMatchLockKey(matchLock.UserID), serializedMatchLock, timeToLive);
+        _ = transaction.SetAddAsync(serverKey, matchLock.UserID);
+
+        // The Index Only Ever Extends To The Latest Expiry, So That A Lock Which Started Earlier Never Shortens It Under The Locks Of Other Users
+        _ = transaction.KeyExpireAsync(serverKey, timeToLive, ExpireWhen.HasNoExpiry);
+        _ = transaction.KeyExpireAsync(serverKey, timeToLive, ExpireWhen.GreaterThanCurrentExpiry);
+
+        await transaction.ExecuteAsync();
+    }
+
+    public static async Task<MatchLock?> GetMatchLock(this IDatabase distributedCacheStore, int userID)
+        => DeserialiseMatchLock(await distributedCacheStore.StringGetAsync(ConstructMatchLockKey(userID)));
+
+    /// <summary>
+    ///     Marks that the match lock's login trigger has run for the session cookie of a login, so that the chat reconnects of the same login do not run it again.
+    ///     Returns <see langword="true"/> only the first time for a session cookie, and the marker expires with the session cookie, or after <see cref="SessionCookieLifetime"/> when the session cookie's remaining lifetime is unknown.
+    /// </summary>
+    public static async Task<bool> MarkMatchLockLoginChecked(this IDatabase distributedCacheStore, string sessionCookie)
+    {
+        TimeSpan? sessionCookieTimeToLive = await distributedCacheStore.KeyTimeToLiveAsync(ConstructAccountSessionCookieKey(sessionCookie));
+
+        TimeSpan timeToLive = sessionCookieTimeToLive is { } remainingLifetime && remainingLifetime > TimeSpan.Zero ? remainingLifetime : SessionCookieLifetime;
+
+        return await distributedCacheStore.StringSetAsync(ConstructMatchLockLoginCheckedKey(sessionCookie), true, timeToLive, When.NotExists);
+    }
+
+    /// <summary>
+    ///     Removes the match lock of a user only if it is for the given match, so that a lock for a newer match is never lifted by an older one ending.
+    ///     Returns whether a lock was removed.
+    /// </summary>
+    public static async Task<bool> RemoveMatchLock(this IDatabase distributedCacheStore, int userID, int matchID)
+    {
+        string key = ConstructMatchLockKey(userID);
+
+        RedisValue cachedValue = await distributedCacheStore.StringGetAsync(key);
+
+        MatchLock? matchLock = DeserialiseMatchLock(cachedValue);
+
+        if (matchLock is null || matchLock.MatchID != matchID)
+            return false;
+
+        // The Lock Is Only Removed If It Is Still Exactly What Was Read, So That A Lock Written In The Meantime Survives
+        ITransaction transaction = distributedCacheStore.CreateTransaction();
+
+        transaction.AddCondition(Condition.StringEqual(key, cachedValue));
+
+        _ = transaction.KeyDeleteAsync(key);
+        _ = transaction.SetRemoveAsync(ConstructMatchLockServerKey(matchLock.ServerID), userID);
+
+        return await transaction.ExecuteAsync();
+    }
+
+    /// <summary>
+    ///     Removes the match locks on a server which satisfy the predicate, or all of them when there is no predicate.
+    ///     Returns the number of locks removed.
+    /// </summary>
+    public static async Task<int> RemoveMatchLocksForServer(this IDatabase distributedCacheStore, int serverID, Func<MatchLock, bool>? predicate = null)
+    {
+        string serverKey = ConstructMatchLockServerKey(serverID);
+
+        RedisValue[] members = await distributedCacheStore.SetMembersAsync(serverKey);
+
+        int removed = 0;
+
+        foreach (RedisValue member in members)
+        {
+            if (!int.TryParse(member.ToString(), out int userID))
+                continue;
+
+            string lockKey = ConstructMatchLockKey(userID);
+
+            RedisValue cachedValue = await distributedCacheStore.StringGetAsync(lockKey);
+
+            MatchLock? matchLock = DeserialiseMatchLock(cachedValue);
+
+            // A Member Whose Lock Is Gone, Unreadable, Or Now On Another Server Is Stale, So It Is Dropped From The Index
+            // The Drop Is Conditioned On What Was Read, So That A Lock Written In The Meantime Keeps Its Place In The Index
+            if (matchLock is null || matchLock.ServerID != serverID)
+            {
+                ITransaction staleTransaction = distributedCacheStore.CreateTransaction();
+
+                staleTransaction.AddCondition(cachedValue.IsNull ? Condition.KeyNotExists(lockKey) : Condition.StringEqual(lockKey, cachedValue));
+
+                _ = staleTransaction.SetRemoveAsync(serverKey, member);
+
+                await staleTransaction.ExecuteAsync();
+
+                continue;
+            }
+
+            if (predicate is not null && !predicate(matchLock))
+                continue;
+
+            if (await distributedCacheStore.RemoveMatchLock(userID, matchLock.MatchID))
+                removed++;
+        }
+
+        return removed;
+    }
+
+    /// <summary>
+    ///     Finds the match lock which refuses an account's request, which is the lock of the account's user when its match server is still registered, unless the request is the locked account's own and names that match server.
+    ///     A request which names no match server, as the server list does, is refused by any such lock, while a client connection names the registered match server which asks for it, so that the locked account is always served on the locked match server.
+    ///     Another account of the same user is refused on the locked match server too, because it cannot take the slot and could only spectate its user's own match, and its join would make the chat server refresh the locked account's recorded login cookie with its own, which gets the locked account kicked by the duplicate-session check.
+    ///     A lock on a match server which is no longer registered is removed instead, and returned as the lifted lock, because a match lock must never outlive its match server.
+    ///     Returns no refusing lock when the request is to be served, which it always is for a guest or staff account.
+    /// </summary>
+    public static async Task<(MatchLock? RefusingLock, MatchLock? LiftedLock)> FindRefusingMatchLock(this IDatabase distributedCacheStore, Account account, int? askingServerID)
+    {
+        if (MatchLock.IsExempt(account.Type))
+            return (null, null);
+
+        MatchLock? matchLock = await distributedCacheStore.GetMatchLock(account.User.ID);
+
+        if (matchLock is null || (matchLock.ServerID == askingServerID && matchLock.AccountID == account.ID))
+            return (null, null);
+
+        if (await distributedCacheStore.GetMatchServerByID(matchLock.ServerID) is not null)
+            return (matchLock, null);
+
+        // A Lock Which Was Replaced Or Removed In The Meantime Is Not Removed Here, So It Is Not Reported As Lifted
+        return (null, await distributedCacheStore.RemoveMatchLock(matchLock.UserID, matchLock.MatchID) ? matchLock : null);
+    }
+
+    /// <summary>
+    ///     The distributed cache pub/sub channel on which match lock refusals are published by the master server and consumed by the chat server.
+    ///     Used to send a player back to their locked match, or to lift their lock when they can no longer return to it, whenever the master server refuses a locked player's server list, or a match server other than the locked one asks to authenticate their client, or the locked one asks to authenticate another account of their user.
+    /// </summary>
+    public const string MatchLockRefusalChannel = "MATCH-LOCK-REFUSAL";
+
+    /// <summary>
+    ///     Publishes a match lock refusal on <see cref="MatchLockRefusalChannel"/>.
+    ///     The payload is the refusal serialised as JSON.
+    /// </summary>
+    public static async Task PublishMatchLockRefusal(this IDatabase distributedCacheStore, MatchLockRefusal refusal)
+        => await distributedCacheStore.Multiplexer.GetSubscriber().PublishAsync(RedisChannel.Literal(MatchLockRefusalChannel), JsonSerializer.Serialize(refusal));
+
+    /// <summary>
+    ///     Deserialises a stored match lock, which counts as absent when it cannot be deserialised, as after a change to the shape of the match lock, so that it never fails the requests which check for a lock, and the index of its server drops it as stale.
+    /// </summary>
+    private static MatchLock? DeserialiseMatchLock(RedisValue cachedValue)
+    {
+        if (cachedValue.IsNullOrEmpty)
+            return null;
+
+        try
+        {
+            return JsonSerializer.Deserialize<MatchLock>(cachedValue.ToString());
+        }
+
+        catch (JsonException)
+        {
+            return null;
+        }
+    }
+}

@@ -81,6 +81,13 @@ public static class SRPAuthenticationHandlers
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(magickedMagickedPasswordHashHash))).ToLower();
     }
 
+    /// <summary>
+    ///     Decides whether a login of an account of the type affects the other accounts of its user as well: it retires their logins, it ends their chat sessions, and a client which logs in again in place can push its new login cookie to its match server in place of any of theirs.
+    ///     Every guest account shares one user, as does every staff account, so the other accounts of such a user belong to other players, and each guest or staff account stands alone.
+    ///     This is not the match lock's exemption (<see cref="MatchLock.IsExempt"/>), which keeps guest and staff accounts out of the match lock altogether, although it rests on the same shared users.
+    /// </summary>
+    public static bool LoginAffectsOtherAccounts(AccountType accountType) => accountType is not (AccountType.Guest or AccountType.Staff);
+
     public class StageTwoResponseParameters()
     {
         public required Account Account { get; set; }

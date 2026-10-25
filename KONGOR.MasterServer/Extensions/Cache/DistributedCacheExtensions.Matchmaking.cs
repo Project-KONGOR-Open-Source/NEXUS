@@ -175,6 +175,9 @@ public static partial class DistributedCacheExtensions
 
     public static async Task RemoveMatchServerByID(this IDatabase distributedCacheStore, int serverID)
     {
+        // A Match Lock Must Never Outlive Its Match Server, So The Server's Locks Are Lifted Even When Its Cache Entry Is Already Gone
+        await distributedCacheStore.RemoveMatchLocksForServer(serverID);
+
         MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(serverID);
 
         if (matchServer is null)

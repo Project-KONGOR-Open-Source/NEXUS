@@ -32,6 +32,29 @@ public sealed class MatchServerHandshakeIntegrationTests(ServiceContainerContext
     }
 
     [Test]
+    public async Task The_Handshake_Lets_The_Match_Server_Reconnect_Players_By_Account()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+
+        (int hostAccountID, string hostAccountName) = await ChatTestData.SeedAccount(host.Services, AccountType.ServerHost);
+
+        int serverID = Random.Shared.Next(100_000, 999_999);
+        string cookie = Guid.CreateVersion7().ToString();
+
+        await ChatTestData.SeedMatchServer(host.Services, serverID, hostAccountID, hostAccountName, cookie);
+
+        using TcpClient client = await host.ConnectMatchServerAsync();
+
+        NetworkStream stream = client.GetStream();
+
+        await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildServerHandshake(serverID, cookie));
+
+        List<string> remoteCommands = await ChatTestProtocol.ReadRemoteCommandsUntilEcho(stream, TimeSpan.FromSeconds(10));
+
+        await Assert.That(remoteCommands).Contains("svr_ignoreConnectionIDForReconnect true");
+    }
+
+    [Test]
     public async Task Reconnect_Supersedes_The_Existing_Session_And_Preserves_The_Cache_Entry()
     {
         await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);

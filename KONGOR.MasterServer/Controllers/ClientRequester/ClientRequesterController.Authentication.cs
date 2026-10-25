@@ -245,7 +245,14 @@ public partial class ClientRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        await DistributedCache.SetAccountNameForSessionCookie(cookie, account.Name);
+        // A Login Retires The Earlier Login Of The Same Account, And Also Those Of The User's Other Accounts Unless The Account Stands Alone
+        List<int> otherAccountIDs = SRPAuthenticationHandlers.LoginAffectsOtherAccounts(account.Type)
+            ? [.. account.User.Accounts.Where(userAccount => userAccount.ID != account.ID).Select(userAccount => userAccount.ID)]
+            : [];
+
+        List<string> retiredCookies = await DistributedCache.SupersedeSessionCookies(account.ID, account.Name, cookie, otherAccountIDs);
+
+        Logger.LogInformation(@"Account ""{AccountName}"" (ID: {AccountID}) Has Logged In, Which Retired {RetiredLoginCount} Earlier Login(s) Of Its User", account.Name, account.ID, retiredCookies.Count);
 
         return Ok(PhpSerialization.Serialize(response));
     }

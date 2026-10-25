@@ -46,6 +46,31 @@ public sealed class SRPAuthenticationService(KONGORIntegrationWebApplicationFact
     }
 
     /// <summary>
+    ///     Creates an account of the user of the main account, which is not the user's main account, and which logs in with the user's password.
+    /// </summary>
+    public async Task<Account> CreateSubAccount(Account mainAccount, string subAccountName)
+    {
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        User user = await merrickContext.Users.SingleAsync(user => user.Accounts.Any(account => account.ID == mainAccount.ID));
+
+        Account subAccount = new ()
+        {
+            Name = subAccountName,
+            User = user,
+            IsMain = false
+        };
+
+        user.Accounts.Add(subAccount);
+
+        await merrickContext.SaveChangesAsync();
+
+        return subAccount;
+    }
+
+    /// <summary>
     ///     Creates an account and then performs the complete SRP authentication flow against it.
     /// </summary>
     public async Task<SRPAuthenticationData> AuthenticateWithSRP(string emailAddress, string accountName, string password)

@@ -155,7 +155,10 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             $"svr_submitMatchStatFrags {BooleanToString(settings.SubmitMatchStatisticsFrags)}",
 
             // Server Identity
-            $"svr_name {uniqueServerName}"
+            $"svr_name {uniqueServerName}",
+
+            // Reclaim A Reconnecting Player's Slot By Account Instead Of By Connection ID, So That A Locked Player Can Return From Another Machine; This Is Safe Because "c_conn" Has Already Verified The Account Before The Match Server Reclaims The Slot, And It Is Sent At The Handshake Because The Engine Accepts Remote Commands Only With Its Current Session Cookie
+            "svr_ignoreConnectionIDForReconnect true"
         ];
 
         // Maximum Outgoing Bandwidth Per Client (0 Uses Game Server Default)

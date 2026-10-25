@@ -82,28 +82,44 @@ internal static class MatchmakingTestBuilder
 
             ClientChatSession session = CreateNullSession(accountID, accountName);
 
-            MatchmakingGroupMember member = new (session)
-            {
-                Slot                     = Convert.ToByte(index + 1),
-                IsLeader                 = index == 0,
-                IsReady                  = true,
-                IsInGame                 = false,
-                IsEligibleForMatchmaking = true,
-                LoadingPercent           = 100,
-                GameModeAccess           = string.Empty,
-                TMR                      = memberTMRs[index],
-                CasualTMR                = memberTMRs[index],
-                TotalMatchCount          = totalMatchCount,
-                GameTypeMatchCount       = totalMatchCount
-            };
-
-            members.Add(member);
+            members.Add(BuildMember(session, index, memberTMRs[index], totalMatchCount));
         }
 
         DateTimeOffset? queueStartTime = queuedMinutesAgo >= 0
             ? DateTimeOffset.UtcNow - TimeSpan.FromMinutes(queuedMinutesAgo)
             : null;
 
+        return AssembleGroup(members, information, queueStartTime);
+    }
+
+    /// <summary>
+    ///     Constructs a group of the supplied chat sessions at <see cref="BaselineTMR"/>, queued from now. The first session becomes the leader.
+    ///     Integration tests pass the sessions of authenticated clients, so that the chat server can send the members what it sends real players.
+    /// </summary>
+    public static MatchmakingGroup BuildGroup(IReadOnlyList<ClientChatSession> sessions, MatchmakingGroupInformation information)
+    {
+        List<MatchmakingGroupMember> members = [.. sessions.Select((session, index) => BuildMember(session, index, BaselineTMR, totalMatchCount: 100))];
+
+        return AssembleGroup(members, information, DateTimeOffset.UtcNow);
+    }
+
+    private static MatchmakingGroupMember BuildMember(ClientChatSession session, int index, double tmr, int totalMatchCount) => new (session)
+    {
+        Slot                     = Convert.ToByte(index + 1),
+        IsLeader                 = index == 0,
+        IsReady                  = true,
+        IsInGame                 = false,
+        IsEligibleForMatchmaking = true,
+        LoadingPercent           = 100,
+        GameModeAccess           = string.Empty,
+        TMR                      = tmr,
+        CasualTMR                = tmr,
+        TotalMatchCount          = totalMatchCount,
+        GameTypeMatchCount       = totalMatchCount
+    };
+
+    private static MatchmakingGroup AssembleGroup(List<MatchmakingGroupMember> members, MatchmakingGroupInformation information, DateTimeOffset? queueStartTime)
+    {
         MatchmakingGroup group = (MatchmakingGroup)Activator.CreateInstance(typeof(MatchmakingGroup), nonPublic: true)!;
 
         group.Members        = members;

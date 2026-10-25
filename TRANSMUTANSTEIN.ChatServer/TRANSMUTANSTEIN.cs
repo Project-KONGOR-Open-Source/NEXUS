@@ -116,8 +116,17 @@ public class TRANSMUTANSTEIN
         // Register Flood Prevention Service
         builder.Services.AddSingleton<FloodPreventionService>();
 
+        // Register The Match Server Reconnect Query That Asks Match Servers Whether A Player's Slot Can Still Be Reclaimed
+        builder.Services.AddSingleton<MatchServerReconnectQuery>();
+
+        // Register The Match Lock Service That Verifies A Match Lock Before Its Player Is Sent Back To The Locked Match
+        builder.Services.AddSingleton<MatchLockService>();
+
         // Register Account Logout Subscriber Service That Consumes Force-Logout Signals Published By The Master Server
         builder.Services.AddHostedService<LogoutMonitor>();
+
+        // Register Match Lock Refusal Subscriber Service That Consumes The Master Server's Refusals Of Locked Players' Client Connections, Which Match Servers Do Not Report Over Chat
+        builder.Services.AddHostedService<MatchLockRefusalMonitor>();
 
         // Register The Stale Host Reaper That Removes Cached Match Servers And Managers With No Live Chat Session
         builder.Services.AddHostedService<StaleHostReaper>();

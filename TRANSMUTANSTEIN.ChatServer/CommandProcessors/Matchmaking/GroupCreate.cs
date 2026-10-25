@@ -7,6 +7,7 @@ public class GroupCreate(MerrickContext merrick) : IAsynchronousCommandProcessor
     {
         GroupCreateRequestData requestData = new (buffer);
 
+        // The Game Client Creates A Solo Group By Itself Shortly After Login And Whenever It Returns To The Menu, So The Group Stands, And The Lock Refuses The Queue Instead
         await MatchmakingGroup
             .Create(session, requestData.ToGroupInformation(), merrick);
     }

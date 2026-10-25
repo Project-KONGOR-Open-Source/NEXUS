@@ -77,6 +77,9 @@ public partial class StatisticsRequesterController
         // Remove The Match Information From The Distributed Cache Now That The Database Snapshot Is The Single Source Of Truth
         await DistributedCache.RemoveMatchInformation(form.MatchStats.MatchID);
 
+        // Submitted Statistics Show That The Match Is Over, So Its Locks Are Lifted
+        await LiftMatchLocks(matchServer.ID, form.MatchStats.MatchID);
+
         return Ok(PhpSerialization.Serialize(new StatisticsSubmissionResponse()));
     }
 
@@ -172,6 +175,26 @@ public partial class StatisticsRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
+        // Resubmitted Statistics Show That The Match Is Over, So Its Locks Are Lifted
+        await LiftMatchLocks(form.ServerID.Value, form.MatchStats.MatchID);
+
         return Ok(PhpSerialization.Serialize(new StatisticsResubmissionResponse(form.MatchStats.MatchID)));
+    }
+
+    /// <summary>
+    ///     Lifts the locks of a match whose statistics have been saved, while the locks of any newer match on the same match server are kept.
+    ///     A failure is logged rather than failing the request, because the statistics matter more than lifting the locks early, and every lock expires on its own.
+    /// </summary>
+    private async Task LiftMatchLocks(int serverID, int matchID)
+    {
+        try
+        {
+            await DistributedCache.RemoveMatchLocksForServer(serverID, matchLock => matchLock.MatchID == matchID);
+        }
+
+        catch (Exception exception)
+        {
+            Logger.LogError(exception, @"Failed To Lift The Match Locks Of Match ID ""{MatchID}"" On Match Server ID ""{MatchServerID}"" After Its Statistics Were Saved", matchID, serverID);
+        }
     }
 }

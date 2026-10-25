@@ -336,6 +336,120 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     }
 
     [Test]
+    public async Task Each_Login_Retires_The_Earlier_Session_Cookie_Of_The_Account()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account account, string password) = await srpAuthenticationService.CreateAccountWithSRPCredentials("latest.cookie@kongor.com", "LatestCookie", "SecurePassword123!");
+
+        SRPAuthenticationData firstResult = await srpAuthenticationService.PerformFullAuthentication(account, password);
+        SRPAuthenticationData secondResult = await srpAuthenticationService.PerformFullAuthentication(account, password);
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        string? latestSessionCookie = await distributedCache.GetLatestSessionCookie(account.ID);
+
+        string firstCookie = firstResult.Cookie ?? throw new InvalidOperationException("First Session Cookie Is NULL");
+        string secondCookie = secondResult.Cookie ?? throw new InvalidOperationException("Second Session Cookie Is NULL");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(firstResult.Success).IsTrue();
+            await Assert.That(secondResult.Success).IsTrue();
+            await Assert.That(latestSessionCookie).IsEqualTo(secondResult.Cookie);
+            await Assert.That(latestSessionCookie).IsNotEqualTo(firstResult.Cookie);
+            await Assert.That(await distributedCache.GetAccountNameForSessionCookie(firstCookie)).IsNull();
+            await Assert.That(await distributedCache.GetAccountNameForSessionCookie(secondCookie)).IsEqualTo(account.Name);
+        }
+    }
+
+    [Test]
+    public async Task A_Login_Retires_The_Session_Cookies_Of_The_Other_Accounts_Of_The_User()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account mainAccount, string password) = await srpAuthenticationService.CreateAccountWithSRPCredentials("retire.others@kongor.com", "RetireMain", "SecurePassword123!");
+
+        Account subAccount = await srpAuthenticationService.CreateSubAccount(mainAccount, "RetireSub");
+
+        SRPAuthenticationData mainResult = await srpAuthenticationService.PerformFullAuthentication(mainAccount, password);
+        SRPAuthenticationData subResult = await srpAuthenticationService.PerformFullAuthentication(subAccount, password);
+
+        string mainCookie = mainResult.Cookie ?? throw new InvalidOperationException("Main Account Session Cookie Is NULL");
+        string subCookie = subResult.Cookie ?? throw new InvalidOperationException("Sub-Account Session Cookie Is NULL");
+
+        IDatabase distributedCache = webApplicationFactory.Services.GetRequiredService<IDatabase>();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(await distributedCache.GetAccountNameForSessionCookie(mainCookie)).IsNull();
+            await Assert.That(await distributedCache.GetLatestSessionCookie(mainAccount.ID)).IsNull();
+            await Assert.That(await distributedCache.GetAccountNameForSessionCookie(subCookie)).IsEqualTo(subAccount.Name);
+        }
+    }
+
+    [Test]
+    [Arguments(AccountType.Guest)]
+    [Arguments(AccountType.Staff)]
+    public async Task A_Guest_Or_Staff_Login_Leaves_The_Other_Accounts_Of_The_User_Logged_In(AccountType accountType)
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account mainAccount, string password) = await srpAuthenticationService.CreateAccountWithSRPCredentials("shared.user@kongor.com", "SharedMain", "SecurePassword123!");
+
+        Account subAccount = await srpAuthenticationService.CreateSubAccount(mainAccount, "SharedSub");
+
+        using (IServiceScope scope = webApplicationFactory.Services.CreateScope())
+        {
+            MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+            List<Account> tracked = await databaseContext.Accounts.Where(candidate => candidate.ID == mainAccount.ID || candidate.ID == subAccount.ID).ToListAsync();
+
+            foreach (Account trackedAccount in tracked)
+                trackedAccount.Type = accountType;
+
+            await databaseContext.SaveChangesAsync();
+        }
+
+        SRPAuthenticationData mainResult = await srpAuthenticationService.PerformFullAuthentication(mainAccount, password);
+        SRPAuthenticationData subResult = await srpAuthenticationService.PerformFullAuthentication(subAccount, password);
+
+        string mainCookie = mainResult.Cookie ?? throw new InvalidOperationException("Main Account Session Cookie Is NULL");
+
+        // Each Group Of Guest Or Staff Accounts Shares One User, So That The Login Of One Of Them Never Retires Another's
+        using (Assert.Multiple())
+        {
+            await Assert.That(subResult.Success).IsTrue();
+            await Assert.That(await webApplicationFactory.Services.GetRequiredService<IDatabase>().GetAccountNameForSessionCookie(mainCookie)).IsEqualTo(mainAccount.Name);
+        }
+    }
+
+    [Test]
+    public async Task A_Retired_Session_Cookie_Is_Refused_By_The_Client_Requester()
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account account, string password) = await srpAuthenticationService.CreateAccountWithSRPCredentials("retired.cookie@kongor.com", "RetiredCookie", "SecurePassword123!");
+
+        SRPAuthenticationData firstResult = await srpAuthenticationService.PerformFullAuthentication(account, password);
+        SRPAuthenticationData secondResult = await srpAuthenticationService.PerformFullAuthentication(account, password);
+
+        string firstCookie = firstResult.Cookie ?? throw new InvalidOperationException("First Session Cookie Is NULL");
+        string secondCookie = secondResult.Cookie ?? throw new InvalidOperationException("Second Session Cookie Is NULL");
+
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        HttpResponseMessage retiredResponse = await httpClient.PostAsync("client_requester.php?f=get_products", new FormUrlEncodedContent(new Dictionary<string, string> { { "cookie", firstCookie } }));
+        HttpResponseMessage liveResponse = await httpClient.PostAsync("client_requester.php?f=get_products", new FormUrlEncodedContent(new Dictionary<string, string> { { "cookie", secondCookie } }));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(retiredResponse.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(liveResponse.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        }
+    }
+
+    [Test]
     [Arguments("casepass@kongor.com", "CasePass", "SecurePassword123!")]
     public async Task Authenticate_With_SRP_With_Different_Password_Case_Returns_Authentication_Failure(string emailAddress, string accountName, string password)
     {

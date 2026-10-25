@@ -1,17 +1,15 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_JOINING_GAME)]
-public class JoiningMatch(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ClientChatSession>
+public class JoiningMatch(IDatabase distributedCacheStore, MatchLockService matchLockService) : IAsynchronousCommandProcessor<ClientChatSession>
 {
     public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         JoiningMatchRequestData requestData = new (buffer);
 
-        // TODO: Attempt To Reconnect Client To Their Last Unfinished Game
-        // INFO: Check If Client Has A Valid LastPlayedMatchID In Session Or Database
-        // INFO: If Yes, Find Game Servers Hosting That Match
-        // INFO: Validate Game Is In Progress (Phase 2-6, Not Lobby/Inactive/Finished)
-        // INFO: If Valid, Send AutoMatchConnectBroadcast With Server Details And Return Early
+        session.ReportedGameServerAddress = requestData.ServerAddress;
+
+        await matchLockService.EndReturnOnJoiningGame(session, requestData.ServerAddress);
 
         await session
             .PrepareToJoinMatch(distributedCacheStore, requestData.ServerAddress);

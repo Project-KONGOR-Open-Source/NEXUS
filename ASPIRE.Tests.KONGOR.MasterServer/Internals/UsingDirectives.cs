@@ -19,6 +19,7 @@ global using KONGOR.MasterServer.Configuration.Economy;
 global using KONGOR.MasterServer.Configuration.Plinko;
 global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
+global using KONGOR.MasterServer.Controllers.StatisticsRequester;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.CDN;
 global using KONGOR.MasterServer.Handlers.SRP;
@@ -66,6 +67,7 @@ global using System.Net.Http.Json;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 global using System.Text.RegularExpressions;
 
 global using TUnit.Assertions;
