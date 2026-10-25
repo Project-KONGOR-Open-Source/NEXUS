@@ -33,6 +33,12 @@ public sealed class MatchLockReturn(int matchID, DateTimeOffset expires)
     public DateTimeOffset LastNotified { get; set; }
 
     /// <summary>
+    ///     The matchmaking group of which the player was the only member when the last "AUTO_MATCH_CONNECT" was sent, or <see langword="null"/> when the player was in no group or in a party.
+    ///     The game client deletes such a group by itself only when it acts on the send, which it acknowledges, so the group is removed when the acknowledgement arrives rather than at the send.
+    /// </summary>
+    public MatchmakingGroup? SoloGroupAtLastSend { get; set; }
+
+    /// <summary>
     ///     Cancelled when the return ends, which stops its reminders.
     ///     It is never disposed, because it holds no timer, and because the return may be cancelled from any thread at any time.
     /// </summary>

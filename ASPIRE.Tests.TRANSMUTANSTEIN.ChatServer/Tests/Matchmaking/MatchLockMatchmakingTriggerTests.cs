@@ -392,6 +392,8 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await AssertSentBack(stream, lockedMatch);
 
+            await AcknowledgeSendBack(stream);
+
             await AssertNoGroupLeftBehind(stream, accountID);
         }
 
@@ -427,9 +429,13 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await AssertSentBack(stream, lockedMatch);
 
+            await AcknowledgeSendBack(stream);
+
+            bool groupLeft = await ChatTestProtocol.WaitUntil(() => MatchmakingService.GetMatchmakingGroup(accountID) is null, FrameTimeout);
+
             using (Assert.Multiple())
             {
-                await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
+                await Assert.That(groupLeft).IsTrue();
                 await Assert.That(leaderGroup.Members.Count).IsEqualTo(1);
             }
         }
@@ -465,6 +471,52 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await AssertSentBack(stream, lockedMatch);
 
+            await AcknowledgeSendBack(stream);
+
+            await AssertNoGroupLeftBehind(stream, accountID);
+        }
+
+        finally
+        {
+            DisbandGroups(accountID, receiverAccountID);
+        }
+    }
+
+    [Test]
+    public async Task An_Acknowledged_Reminder_After_The_Game_Client_Created_A_New_Solo_Group_Leaves_No_Group_And_The_Next_Group_Is_Created_Without_A_Left_Update()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+        (_, int receiverAccountID, string receiverAccountName, string receiverCookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+        using TcpClient receiverClient = await host.ConnectAndAuthenticateClientAsync(receiverAccountID, receiverAccountName, receiverCookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        try
+        {
+            await CreateGroup(stream, accountID);
+
+            await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupInvite(receiverAccountName));
+
+            await AssertSentBack(stream, lockedMatch);
+
+            await AcknowledgeSendBack(stream);
+
+            // The Game Client's Connection To The Match Server Fails, So It Returns To The Menu And Creates A Solo Group Again Before The Reminder
+            await CreateGroup(stream, accountID);
+
+            (byte ArrangedMatchType, int MatchID, string Address, short Port, int RandomInteger)? reminder = await ChatTestProtocol.ReadAutoMatchConnect(stream, MatchLockService.ReturnResendInterval + QuietPeriod);
+
+            await Assert.That(reminder?.RandomInteger).IsEqualTo(-1);
+
+            await AcknowledgeSendBack(stream, reminder: true);
+
             await AssertNoGroupLeftBehind(stream, accountID);
         }
 
@@ -497,7 +549,46 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             await AssertSentBack(stream, lockedMatch);
 
+            await AcknowledgeSendBack(stream);
+
             await AssertNoGroupLeftBehind(stream, accountID);
+        }
+
+        finally
+        {
+            DisbandGroups(accountID);
+        }
+    }
+
+    [Test]
+    public async Task A_Send_Back_Which_The_Game_Client_Does_Not_Acknowledge_Keeps_Its_Solo_Group()
+    {
+        await using ChatServerHost host = await ChatServerHost.StartAsync(containerContext);
+        await using FakeMatchServerGameSocket gameSocket = FakeMatchServerGameSocket.Start(SlotTimeRemaining);
+
+        (int userID, int accountID, string accountName, string cookie) = await ChatTestData.SeedPlayer(host);
+
+        await using LockedMatch lockedMatch = await ChatTestData.SeedLockedMatch(host, userID, accountID, accountName, gameSocket);
+
+        using TcpClient client = await host.ConnectAndAuthenticateClientAsync(accountID, accountName, cookie, RemoteIP);
+
+        NetworkStream stream = client.GetStream();
+
+        try
+        {
+            MatchmakingGroup group = await CreateGroup(stream, accountID);
+
+            // The Client Connection Is Refused On Another Match Server, While The Game Client Is Still Connecting There
+            await host.Services.GetRequiredService<IDatabase>().PublishMatchLockRefusal(new MatchLockRefusal { UserID = userID, AccountName = accountName });
+
+            await AssertSentBack(stream, lockedMatch);
+
+            // The Game Client Ignores The Send-Back While It Is Still Connecting, So It Neither Acknowledges It Nor Deletes Its Group
+            using (Assert.Multiple())
+            {
+                await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsEqualTo(group);
+                await Assert.That(group.Members.Select(member => member.Account.ID)).IsEquivalentTo([accountID]);
+            }
         }
 
         finally
@@ -545,6 +636,8 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(SendsBack(frames, lockedMatch)).IsTrue();
                 await Assert.That(frames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN or ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
             }
+
+            await AcknowledgeSendBack(stream);
 
             await AssertNoGroupLeftBehind(stream, accountID);
         }
@@ -714,6 +807,8 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
             await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupJoinQueue());
 
             await AssertSentBack(stream, lockedMatch);
+
+            await AcknowledgeSendBack(stream);
 
             // The Game Client Deleted Its Solo Group When It Was Sent Back, So The Player Creates A New One Before Queueing Again
             group = await CreateGroup(stream, accountID);
@@ -1030,10 +1125,16 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
 
             List<(ushort Command, ChatBuffer Frame)> slotFrames = await ReadThroughSendBack(slotStream);
 
+            // The Game Client Acts On The Send-Back While It Still Sees The Refused Member, So It Keeps Its Party, Which Has Only The Slot Account Left By The Time The Acknowledgement Arrives
+            await AcknowledgeSendBack(slotStream);
+
+            List<(ushort Command, ChatBuffer Frame)> acknowledgementFrames = await ChatTestProtocol.ReadCommandsUntil(slotStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE, QuietPeriod);
+
             using (Assert.Multiple())
             {
                 await Assert.That(SendsBack(slotFrames, slotLockedMatch)).IsTrue();
                 await Assert.That(slotFrames.TakeWhile(frame => frame.Command is not ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT).Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
+                await Assert.That(acknowledgementFrames.Any(frame => frame.Command is ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)).IsFalse();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(slotAccountID)).IsNotNull();
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
                 await Assert.That(group.Members.Count).IsEqualTo(1);
@@ -1092,6 +1193,8 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
                 await Assert.That(MatchmakingService.GetMatchmakingGroup(otherAccountID)).IsNull();
                 await Assert.That(group.QueueStartTime).IsNull();
             }
+
+            await AcknowledgeSendBack(slotStream);
 
             await AssertNoGroupLeftBehind(slotStream, slotAccountID);
         }
@@ -1457,11 +1560,19 @@ public sealed class MatchLockMatchmakingTriggerTests(ServiceContainerContext con
     }
 
     /// <summary>
-    ///     Asserts that the account which was sent back is in no matchmaking group, as its game client is once it has deleted its solo group, and that the group which its game client creates next is created without a group update about the account leaving another group, which the game client would show as "Group Disbanded".
+    ///     Acknowledges an "AUTO_MATCH_CONNECT", as the game client does when it acts on one, immediately before it connects to the match and deletes a solo group by itself.
+    /// </summary>
+    private static async Task AcknowledgeSendBack(NetworkStream stream, bool reminder = false)
+        => await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildTrackPlayerAction(reminder ? ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY_REMINDER : ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY));
+
+    /// <summary>
+    ///     Asserts that the account which acknowledged its send-back leaves its matchmaking group, as its game client does by deleting its solo group, and that the group which its game client creates next is created without a group update about the account leaving another group, which the game client would show as "Group Disbanded".
     /// </summary>
     private static async Task AssertNoGroupLeftBehind(NetworkStream stream, int accountID)
     {
-        await Assert.That(MatchmakingService.GetMatchmakingGroup(accountID)).IsNull();
+        bool groupLeft = await ChatTestProtocol.WaitUntil(() => MatchmakingService.GetMatchmakingGroup(accountID) is null, FrameTimeout);
+
+        await Assert.That(groupLeft).IsTrue();
 
         // The Game Client Creates A New Group When It Returns To The Menu
         await ChatTestProtocol.WriteFrame(stream, ChatTestProtocol.BuildGroupCreate(ChatProtocol.TMMType.TMM_TYPE_PVP));

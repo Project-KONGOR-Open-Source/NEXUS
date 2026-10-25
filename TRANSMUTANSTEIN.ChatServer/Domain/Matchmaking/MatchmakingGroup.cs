@@ -801,19 +801,28 @@ public class MatchmakingGroup
     }
 
     /// <summary>
-    ///     Sends a member to a match with the given send, removing the member first, without a group update, when it is the group's only member, because the game client deletes a solo group by itself when it is sent to a match ("CChatManager::MatchmakingConnect").
-    ///     The game client decides from the group updates which it has received, so both happen under <see cref="MembershipLock"/>, which every removal holds while it updates the members, and no membership change or update about one can fall between the decision and the send.
+    ///     Runs a send to a match for a member under <see cref="MembershipLock"/>, telling the send whether the member is the group's only member at that moment, which is what the game client judges when it acts on the send by deleting a solo group by itself ("CChatManager::MatchmakingConnect").
+    ///     Every removal holds the membership lock while it changes the members and sends its group updates, so no removal, and no update about one, can fall between that judgement and the send, whereas joins and group creation do not take the lock.
+    /// </summary>
+    public void SendMemberToMatch(int accountID, Action<bool> send)
+    {
+        lock (MembershipLock)
+        {
+            send(Members is [MatchmakingGroupMember soleMember] && soleMember.Account.ID == accountID);
+        }
+    }
+
+    /// <summary>
+    ///     Removes a member without a group update, but only while it is still the group's only member, as the game client leaves a solo group by itself when it acts on a send to a match.
     ///     A party is left as it is, because the game client keeps a party when it is sent to a match.
     /// </summary>
-    public void SendMemberToMatch(int accountID, Action send)
+    public void RemoveSoleMember(int accountID)
     {
         lock (MembershipLock)
         {
             // The Membership Lock Is Reentrant, So The Removal Takes It Again On The Same Thread Without Waiting
             if (Members is [MatchmakingGroupMember soleMember] && soleMember.Account.ID == accountID)
                 RemoveMember(accountID, notifyRemovedMember: false);
-
-            send();
         }
     }
 

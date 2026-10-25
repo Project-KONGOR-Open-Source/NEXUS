@@ -57,7 +57,7 @@ public class TrackPlayerAction(MatchLockService matchLockService) : IAsynchronou
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY:
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY_REMINDER:
                 Log.Debug(@"Matchmaking Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
-                matchLockService.RecordReturnAcknowledgement(session, requestData.Action);
+                matchLockService.HandleReturnAcknowledgement(session, requestData.Action);
                 break;
 
             default:
