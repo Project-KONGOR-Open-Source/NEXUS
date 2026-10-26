@@ -69,6 +69,7 @@ global using StackExchange.Redis;
 
 global using System.Collections;
 global using System.Collections.Specialized;
+global using System.Diagnostics.CodeAnalysis;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Sockets;

@@ -93,7 +93,7 @@ public partial class ServerRequesterController
     }
 
     /// <summary>
-    ///     Refuses a match server, or the manager of match servers, which does not run the distributions' version, or whose user agent does not have the game's shape, and returns NULL otherwise.
+    ///     Refuses a match server, or the manager of match servers, which does not run the distributions' version, or whose user agent does not have the game's shape, and returns <see langword="null"/> otherwise.
     ///     It is called after the password is checked, so that only an authenticated host learns the expected version, and its "error" text is what the match server and the manager show in their console windows.
     /// </summary>
     private BadRequestObjectResult? RefuseAnotherMatchServerVersion(string hostAccountName)

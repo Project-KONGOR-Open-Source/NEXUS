@@ -80,7 +80,11 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
         PatchDetails? latestPatch = PatchHandlers.GetLatestPatchDetails(form.OperatingSystem);
 
         if (currentPatch is null || latestPatch is null)
+        {
+            Logger.LogWarning(@"Rejected Patch Request For Distribution ""{Distribution}"": Version ""{Version}"" Is Not The Expected Version ""{ExpectedVersion}""", form.OperatingSystem, form.CurrentPatchVersion, Distributions.Version);
+
             return BadRequest($@"Unsupported Requester: Distribution ""{form.OperatingSystem}"", Version ""{form.CurrentPatchVersion}""");
+        }
 
         LatestPatchResponse response = new ()
         {

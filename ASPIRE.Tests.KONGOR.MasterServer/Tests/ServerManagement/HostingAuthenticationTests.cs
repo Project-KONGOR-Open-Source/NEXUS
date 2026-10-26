@@ -726,6 +726,39 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     }
 
     [Test]
+    public async Task Manager_Authentication_With_An_Unexpected_User_Agent_Is_Refused_Without_Versions()
+    {
+        await InitialiseIn("Development");
+
+        HttpResponseMessage response = await AuthenticateManager(DedicatedHostAccountName, userAgent: "curl/8.0");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo("Unexpected User Agent");
+        }
+    }
+
+    [Test]
+    public async Task Server_Authentication_With_An_Incorrect_Password_At_Another_Version_Names_No_Version()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", password: "INCORRECT-PASSWORD", userAgent: "S2 Games/Heroes of Newerth/4.10.1.0/was/x86_64");
+
+        string body = await response.Content.ReadAsStringAsync();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            await Assert.That(body).Contains("Incorrect Password");
+            await Assert.That(body).DoesNotContain(Distributions.Version);
+        }
+    }
+
+    [Test]
     public async Task Start_Game_With_Another_Version_Is_Refused()
     {
         await InitialiseIn("Development");

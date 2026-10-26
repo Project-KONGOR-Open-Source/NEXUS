@@ -1,14 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace KONGOR.MasterServer.Handlers.Compatibility;
+﻿namespace KONGOR.MasterServer.Handlers.Compatibility;
 
 /// <summary>
-///     Reads the version from the user agent the game sends with every request, such as "S2 Games/Heroes of Newerth/5.26.10.31/wac/x86_64", and words the refusals for another version.
+///     Reads the version from the user agent the game sends with every request, "S2 Games/Heroes of Newerth/{version}/{distribution}/{architecture}", and words the refusals for another version.
 /// </summary>
 public static partial class UserAgentHandlers
 {
     /// <summary>
-    ///     Returns TRUE, with the version, for a user agent of the game's shape.
+    ///     Returns <see langword="true"/>, with the version, for a user agent of the game's shape.
     /// </summary>
     public static bool TryGetVersion(string userAgent, [NotNullWhen(true)] out string? version)
     {
