@@ -83,6 +83,9 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         // Validate Client Version, Before Anything Is Disconnected, So That A Client Which Is Turned Away Takes Nothing From The Account's Existing Sessions
         if (Distributions.FormatVersion(requestData.ClientVersionMajor, requestData.ClientVersionMinor, requestData.ClientVersionPatch, requestData.ClientVersionRevision) is not Distributions.Version)
         {
+            Log.Warning(@"Rejected Chat Connection For Account ""{AccountName}"": Version ""{Version}"" Is Not The Expected Version ""{ExpectedVersion}""",
+                account.Name, Distributions.FormatVersion(requestData.ClientVersionMajor, requestData.ClientVersionMinor, requestData.ClientVersionPatch, requestData.ClientVersionRevision), Distributions.Version);
+
             await session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
                 .Terminate();

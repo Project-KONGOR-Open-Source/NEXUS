@@ -153,10 +153,8 @@ public partial class ClientRequesterController
         {
             string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
 
-            Match agentMatch = UserAgentRegex().Match(agent);
-
             // The Game Client Must Run The Distributions' Version, Which Is The Only Version NEXUS Accepts
-            if (agentMatch.Success.Equals(false) || agentMatch.Groups["version"].Value.Equals(Distributions.Version).Equals(false))
+            if (UserAgentHandlers.TryGetVersion(agent, out string? version) is false || version.Equals(Distributions.Version) is false)
             {
                 Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
 
@@ -271,7 +269,4 @@ public partial class ClientRequesterController
 
         return BadRequest(response);
     }
-
-    [GeneratedRegex(@"(?>S2 Games)\/(?>Heroes [oO]f Newerth)\/(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2})\/(?<platform>[wlm]a[cs])\/(?<architecture>x86_64|x86-biarch|universal-64)")]
-    private static partial Regex UserAgentRegex();
 }

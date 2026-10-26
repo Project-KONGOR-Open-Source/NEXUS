@@ -680,6 +680,52 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     }
 
     [Test]
+    public async Task Manager_Authentication_At_Another_Version_Is_Refused_With_Both_Versions()
+    {
+        await InitialiseIn("Development");
+
+        HttpResponseMessage response = await AuthenticateManager(DedicatedHostAccountName, userAgent: "S2 Games/Heroes of Newerth/4.10.1.0/was/x86_64");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo($"The Heroes Of Newerth Match Server Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+        }
+    }
+
+    [Test]
+    public async Task Server_Authentication_At_Another_Version_Is_Refused_With_Both_Versions()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", userAgent: "S2 Games/Heroes of Newerth/4.10.1.0/was/x86_64");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo($"The Heroes Of Newerth Match Server Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+        }
+    }
+
+    [Test]
+    public async Task Server_Authentication_With_An_Unexpected_User_Agent_Is_Refused_Without_Versions()
+    {
+        await InitialiseIn("Development");
+
+        await AuthenticateManager(DedicatedHostAccountName);
+
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", userAgent: "curl/8.0");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
+            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo("Unexpected User Agent");
+        }
+    }
+
+    [Test]
     public async Task Start_Game_With_Another_Version_Is_Refused()
     {
         await InitialiseIn("Development");
@@ -720,11 +766,11 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
         await EnsureAccountExists(NonHostAccountName, "non-host@kongor.test", AccountType.Normal);
     }
 
-    private async Task<HttpResponseMessage> AuthenticateManager(string login)
+    private async Task<HttpResponseMessage> AuthenticateManager(string login, string? userAgent = null)
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent ?? $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -735,11 +781,11 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
         return await httpClient.PostAsync("server_requester.php?f=replay_auth", new FormUrlEncodedContent(formData));
     }
 
-    private async Task<HttpResponseMessage> AuthenticateServer(string login, string password = HostPassword, string port = "11235")
+    private async Task<HttpResponseMessage> AuthenticateServer(string login, string password = HostPassword, string port = "11235", string? userAgent = null)
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent ?? $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
