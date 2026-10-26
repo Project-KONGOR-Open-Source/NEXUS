@@ -98,11 +98,11 @@ public partial class ServerRequesterController
     /// </summary>
     private BadRequestObjectResult? RefuseAnotherMatchServerVersion(string hostAccountName)
     {
-        string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
+        StringValues agent = Request.Headers.UserAgent;
 
         if (UserAgentHandlers.TryGetVersion(agent, out string? version) is false)
         {
-            Logger.LogWarning(@"Rejected Match Server Authentication For Host Account ""{HostAccountName}"": Unexpected User Agent ""{UserAgent}""", hostAccountName, agent);
+            Logger.LogWarning(@"Rejected Match Server Authentication For Host Account ""{HostAccountName}"": Unexpected User Agent ""{UserAgent}""", hostAccountName, agent.ToString());
 
             return BadRequest(PhpSerialization.Serialize(new Dictionary<string, object> { ["error"] = "Unexpected User Agent" }));
         }

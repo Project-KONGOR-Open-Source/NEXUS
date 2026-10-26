@@ -149,7 +149,7 @@ public partial class ClientRequesterController
 
         string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
-        string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
+        StringValues agent = Request.Headers.UserAgent;
 
         // A User Agent That Does Not Have The Game's Shape Learns Nothing About The Version NEXUS Expects
         if (UserAgentHandlers.TryGetVersion(agent, out string? version) is false)

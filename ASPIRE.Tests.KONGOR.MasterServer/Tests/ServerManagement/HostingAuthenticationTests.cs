@@ -740,6 +740,35 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     }
 
     [Test]
+    public async Task Manager_Authentication_With_Two_User_Agents_Is_Refused_As_An_Unexpected_User_Agent()
+    {
+        await InitialiseIn("Development");
+
+        string userAgent = $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64";
+
+        byte[] form = await new FormUrlEncodedContent(new Dictionary<string, string> { { "login", DedicatedHostAccountName }, { "pass", ComputeServerPasswordHash(HostPassword) } }).ReadAsByteArrayAsync();
+
+        // An HTTP Client Sends Every User-Agent Value In One Header, So The Request Is Built On The Test Server Directly, With The Header Repeated As A Hand-Made Request Can Repeat It
+        HttpContext context = await webApplicationFactory.Server.SendAsync(httpContext =>
+        {
+            httpContext.Request.Method = HttpMethods.Post;
+            httpContext.Request.Path = "/server_requester.php";
+            httpContext.Request.QueryString = new QueryString("?f=replay_auth");
+            httpContext.Request.Headers.UserAgent = new StringValues([ userAgent, userAgent ]);
+            httpContext.Request.ContentType = "application/x-www-form-urlencoded";
+            httpContext.Request.Body = new MemoryStream(form);
+        });
+
+        string body = await new StreamReader(context.Response.Body).ReadToEndAsync();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(context.Response.StatusCode).IsEqualTo(StatusCodes.Status400BadRequest);
+            await Assert.That(body).Contains("Unexpected User Agent");
+        }
+    }
+
+    [Test]
     public async Task Server_Authentication_With_An_Incorrect_Password_At_Another_Version_Names_No_Version()
     {
         await InitialiseIn("Development");

@@ -6,11 +6,12 @@
 public static partial class UserAgentHandlers
 {
     /// <summary>
-    ///     Returns <see langword="true"/>, with the version, for a user agent of the game's shape.
+    ///     Returns <see langword="true"/>, with the version, for exactly one user agent of the game's shape.
+    ///     The game sends a single user agent, so a request which repeats the header does not come from the game.
     /// </summary>
-    public static bool TryGetVersion(string userAgent, [NotNullWhen(true)] out string? version)
+    public static bool TryGetVersion(StringValues userAgent, [NotNullWhen(true)] out string? version)
     {
-        Match match = UserAgentRegex().Match(userAgent);
+        Match match = userAgent.Count is 1 ? UserAgentRegex().Match(userAgent.ToString()) : Match.Empty;
 
         version = match.Success ? match.Groups["version"].Value : null;
 
