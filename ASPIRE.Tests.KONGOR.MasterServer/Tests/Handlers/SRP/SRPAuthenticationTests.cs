@@ -469,6 +469,109 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     }
 
     [Test]
+    [Arguments("olderversion@kongor.com", "OlderVersion", "SecurePassword123!")]
+    public async Task Authenticate_With_SRP_With_Another_Version_Names_Both_Versions(string emailAddress, string accountName, string password)
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password, userAgent: "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(result.Success).IsFalse();
+            await Assert.That(result.ErrorMessage).IsEqualTo($"The Heroes Of Newerth Game Client Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+        }
+    }
+
+    [Test]
+    [Arguments("unexpectedagent@kongor.com", "UnexpectedAgent", "SecurePassword123!")]
+    public async Task Authenticate_With_SRP_With_An_Unexpected_User_Agent_Returns_Unexpected_User_Agent(string emailAddress, string accountName, string password)
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password, userAgent: "curl/8.0");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(result.Success).IsFalse();
+            await Assert.That(result.ErrorMessage).IsEqualTo("Unexpected User Agent");
+        }
+    }
+
+    [Test]
+    [Arguments("staffoldversion@kongor.com", "StaffOldVersion", "SecurePassword123!")]
+    public async Task Authenticate_With_SRP_As_Staff_With_Another_Version_Is_Refused(string emailAddress, string accountName, string password)
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
+
+        await MakeStaff(account.ID);
+
+        SRPAuthenticationData result = await srpAuthenticationService.PerformFullAuthentication(account, password, userAgent: "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(result.Success).IsFalse();
+            await Assert.That(result.ErrorMessage).IsEqualTo($"The Heroes Of Newerth Game Client Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+        }
+    }
+
+    [Test]
+    [Arguments("staffrecorded@kongor.com", "StaffRecorded", "SecurePassword123!")]
+    public async Task Authenticate_With_SRP_As_Staff_Records_The_Login(string emailAddress, string accountName, string password)
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
+
+        await MakeStaff(account.ID);
+
+        SRPAuthenticationData result = await srpAuthenticationService.PerformFullAuthentication(account, password);
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account recorded = await merrickContext.Accounts.SingleAsync(accountRecord => accountRecord.ID == account.ID);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(result.Success).IsTrue();
+            await Assert.That(recorded.IPAddressCollection).IsNotEmpty();
+            await Assert.That(recorded.SystemInformationCollection).IsNotEmpty();
+        }
+    }
+
+    /// <summary>
+    ///     Makes the account a staff account, which the login checks and records like any other.
+    /// </summary>
+    private async Task MakeStaff(int accountID)
+    {
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        Account account = await merrickContext.Accounts.SingleAsync(accountRecord => accountRecord.ID == accountID);
+
+        account.Type = AccountType.Staff;
+
+        await merrickContext.SaveChangesAsync();
+    }
+
+    [Test]
+    [Arguments("enginespelling@kongor.com", "EngineSpelling", "SecurePassword123!")]
+    public async Task Authenticate_With_SRP_With_The_Engines_Own_Spelling_Is_Accepted(string emailAddress, string accountName, string password)
+    {
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+
+        // The Engine Spells The Name With A Lower-Case "of"
+        SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password, userAgent: $"S2 Games/Heroes of Newerth/{Distributions.Version}/wac/x86_64");
+
+        await Assert.That(result.Success).IsTrue();
+    }
+
+    [Test]
     [Arguments("tamperedproof@kongor.com", "TamperProof", "SecurePassword123!")]
     public async Task Authenticate_With_SRP_With_Tampered_Client_Proof_Returns_Authentication_Failure(string emailAddress, string accountName, string password)
     {
@@ -478,7 +581,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
@@ -532,7 +635,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);

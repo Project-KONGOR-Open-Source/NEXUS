@@ -1,4 +1,5 @@
 global using ASPIRE.Common;
+global using ASPIRE.Common.Compatibility;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Enumerations.Statistics;
@@ -22,6 +23,7 @@ global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Controllers.StatisticsRequester;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.CDN;
+global using KONGOR.MasterServer.Handlers.Compatibility;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Helpers.Stats;
 global using KONGOR.MasterServer.Internals;
@@ -53,6 +55,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Logging.Abstractions;
 global using Microsoft.Extensions.Options;
+global using Microsoft.Extensions.Primitives;
 
 global using PhpSerializerNET;
 

@@ -29,7 +29,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -67,7 +67,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -136,7 +136,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
@@ -217,7 +217,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -248,7 +248,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {
@@ -287,7 +287,7 @@ public sealed class NotificationTests(KONGORIntegrationWebApplicationFactory web
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {

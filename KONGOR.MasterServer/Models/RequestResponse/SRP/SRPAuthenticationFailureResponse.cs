@@ -1,6 +1,6 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
-public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, string? accountName = null)
+public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, string? accountName = null, string? version = null)
 {
     /// <summary>
     ///     A string of error output in the event of an authentication failure, e.g. "Invalid Nickname Or Password.".
@@ -25,6 +25,7 @@ public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason rea
         SRPAuthenticationFailureReason.MissingSystemInformation         => "Missing System Information",
         SRPAuthenticationFailureReason.SRPAuthenticationDisabled        => "SRP Authentication Is Disabled" + Environment.NewLine + "1) Open The Console (CTRL + F8)" + Environment.NewLine + @"2) Execute ""SetSave login_useSRP true""",
         SRPAuthenticationFailureReason.UnexpectedUserAgent              => "Unexpected User Agent",
+        SRPAuthenticationFailureReason.UnexpectedVersion                => UserAgentHandlers.GameClientVersionMismatch(version ?? "Unknown"),
         _                                                               => "Unsupported Authentication Failure Reason" + " " + $@"""{nameof(reason)}"""
     };
 
@@ -55,5 +56,6 @@ public enum SRPAuthenticationFailureReason
     MissingSRPClientProof,
     MissingSystemInformation,
     SRPAuthenticationDisabled,
-    UnexpectedUserAgent
+    UnexpectedUserAgent,
+    UnexpectedVersion
 }

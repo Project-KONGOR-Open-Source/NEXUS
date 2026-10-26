@@ -1,5 +1,6 @@
 global using ASPIRE.Common;
 global using ASPIRE.Common.Communication;
+global using ASPIRE.Common.Compatibility;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Enumerations.Statistics;
@@ -19,6 +20,7 @@ global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Handlers.CDN;
+global using KONGOR.MasterServer.Handlers.Compatibility;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Helpers.Serialisation;
@@ -57,6 +59,7 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.Options;
+global using Microsoft.Extensions.Primitives;
 global using Microsoft.OpenApi;
 
 global using PhpSerializerNET;
@@ -67,6 +70,7 @@ global using StackExchange.Redis;
 
 global using System.Collections;
 global using System.Collections.Specialized;
+global using System.Diagnostics.CodeAnalysis;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Sockets;

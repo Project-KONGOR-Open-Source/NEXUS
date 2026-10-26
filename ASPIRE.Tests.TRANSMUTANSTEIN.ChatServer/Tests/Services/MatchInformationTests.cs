@@ -9,7 +9,7 @@ public sealed class MatchInformationTests
     public async Task Match_Information_Version_Comes_From_The_Group_Client_Version()
     {
         // A Version Distinct From The Production Default, So The Assertion Fails If The Field Reverts To A Hard-Coded Constant
-        const string clientVersion = "4.10.1.666";
+        const string clientVersion = "5.26.10.30";
 
         MatchmakingGroupInformation information = new ()
         {

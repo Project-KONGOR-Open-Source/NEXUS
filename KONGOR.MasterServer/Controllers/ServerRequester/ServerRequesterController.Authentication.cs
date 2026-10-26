@@ -31,6 +31,9 @@ public partial class ServerRequesterController
         if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
             return Unauthorized("Incorrect Password");
 
+        if (RefuseAnotherMatchServerVersion(hostAccountName) is { } managerVersionRefusal)
+            return managerVersionRefusal;
+
         if (Request.HttpContext.Connection.RemoteIpAddress is null)
         {
             Logger.LogError(@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL", hostAccountName);
@@ -87,6 +90,31 @@ public partial class ServerRequesterController
             matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Refuses a match server, or the manager of match servers, which does not run the distributions' version, or whose user agent does not have the game's shape, and returns <see langword="null"/> otherwise.
+    ///     It is called after the password is checked, so that only an authenticated host learns the expected version, and its "error" text is what the match server and the manager show in their console windows.
+    /// </summary>
+    private BadRequestObjectResult? RefuseAnotherMatchServerVersion(string hostAccountName)
+    {
+        StringValues agent = Request.Headers.UserAgent;
+
+        if (UserAgentHandlers.TryGetVersion(agent, out string? version) is false)
+        {
+            Logger.LogWarning(@"Rejected Match Server Authentication For Host Account ""{HostAccountName}"": Unexpected User Agent ""{UserAgent}""", hostAccountName, agent.ToString());
+
+            return BadRequest(PhpSerialization.Serialize(new Dictionary<string, object> { ["error"] = "Unexpected User Agent" }));
+        }
+
+        if (version.Equals(Distributions.Version) is false)
+        {
+            Logger.LogWarning(@"Rejected Match Server Authentication For Host Account ""{HostAccountName}"": Version ""{Version}"" Is Not The Expected Version ""{ExpectedVersion}""", hostAccountName, version, Distributions.Version);
+
+            return BadRequest(PhpSerialization.Serialize(new Dictionary<string, object> { ["error"] = UserAgentHandlers.MatchServerVersionMismatch(version) }));
+        }
+
+        return null;
     }
 
     private async Task<IActionResult> HandleServerAuthentication()
@@ -158,7 +186,8 @@ public partial class ServerRequesterController
         if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
             return Unauthorized("Incorrect Password");
 
-        // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
+        if (RefuseAnotherMatchServerVersion(hostAccountName) is { } serverVersionRefusal)
+            return serverVersionRefusal;
 
         // The Built-In Host Account Which Ships With A Publicly-Known Password And Is Intended For Usage By Self-Hosters Must Not Be Used To Host On The Production Server
         if (HostEnvironment.IsProduction() && account.Name.Equals(OOTB.Accounts.OPERATOR.Name))

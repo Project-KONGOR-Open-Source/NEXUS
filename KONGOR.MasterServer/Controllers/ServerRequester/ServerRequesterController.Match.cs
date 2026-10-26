@@ -24,8 +24,12 @@ public partial class ServerRequesterController
         if (version is null)
             return BadRequest(@"Missing Value For Form Parameter ""version""");
 
-        if (version is not "4.10.1.0")
+        if (version is not Distributions.Version)
+        {
+            Logger.LogWarning(@"Rejected Match Start For Match Server ""{MatchServerName}"": Version ""{Version}"" Is Not The Expected Version ""{ExpectedVersion}""", matchServer.Name, version, Distributions.Version);
+
             return BadRequest($@"Unsupported Match Server Version ""{version}""");
+        }
 
         string matchName = Request.Form["mname"].ToString() ?? throw new NullReferenceException("Match Name Is NULL");
 

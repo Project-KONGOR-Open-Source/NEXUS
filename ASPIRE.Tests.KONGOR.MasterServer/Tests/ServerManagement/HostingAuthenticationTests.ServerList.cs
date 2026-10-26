@@ -263,7 +263,7 @@ public sealed partial class HostingAuthenticationTests
     {
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
 
         Dictionary<string, string> formData = new ()
         {

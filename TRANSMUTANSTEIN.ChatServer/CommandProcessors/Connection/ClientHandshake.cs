@@ -80,6 +80,19 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
+        // Validate Client Version, Before Anything Is Disconnected, So That A Client Which Is Turned Away Takes Nothing From The Account's Existing Sessions
+        if (Distributions.FormatVersion(requestData.ClientVersionMajor, requestData.ClientVersionMinor, requestData.ClientVersionPatch, requestData.ClientVersionRevision) is not Distributions.Version)
+        {
+            Log.Warning(@"Rejected Chat Connection For Account ""{AccountName}"": Version ""{Version}"" Is Not The Expected Version ""{ExpectedVersion}""",
+                account.Name, Distributions.FormatVersion(requestData.ClientVersionMajor, requestData.ClientVersionMinor, requestData.ClientVersionPatch, requestData.ClientVersionRevision), Distributions.Version);
+
+            await session
+                .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
+                .Terminate();
+
+            return;
+        }
+
         // The Game Client's Text For The Account Sharing Reject Talks About Sharing Linked Sub-Accounts, So A Plain Notice Precedes It
         // The Client Handles Frames In Order And Shows The Notice In The Same Chat Panes, So It Reads Before The Reject
         // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
@@ -114,16 +127,6 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                 .SendNotice(LoggedInElsewhereSenderName, LoggedInElsewhereMessage(account.NameWithClanTag))
                 .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
                 .Terminate();
-        }
-
-        // Validate Client Version
-        if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}" is not "4.10.1.0")
-        {
-            await session
-                .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
-                .Terminate();
-
-            return;
         }
 
         // Accept Connection, Send Options, Then Complete The Connection

@@ -17,7 +17,7 @@ public class LatestPatchRequestForm
     public required string PatchVersion { get; set; }
 
     /// <summary>
-    ///     The HoN client's version, in the format "1.2.3(.4)", sent by the HoN client making the request.
+    ///     The HoN client's whole version, in the distributions' format (see <see cref="Distributions"/>), sent by the HoN client making the request.
     /// </summary>
     [FromForm(Name = "current_version")]
     public required string CurrentPatchVersion { get; set; }
