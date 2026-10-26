@@ -149,74 +149,79 @@ public partial class ClientRequesterController
 
         string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
-        if (account.Type is not AccountType.Staff)
+        string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
+
+        // A User Agent That Does Not Have The Game's Shape Learns Nothing About The Version NEXUS Expects
+        if (UserAgentHandlers.TryGetVersion(agent, out string? version) is false)
         {
-            string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
+            Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
 
-            // The Game Client Must Run The Distributions' Version, Which Is The Only Version NEXUS Accepts
-            if (UserAgentHandlers.TryGetVersion(agent, out string? version) is false || version.Equals(Distributions.Version) is false)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedUserAgent)));
+        }
+
+        // The Game Client Must Run The Distributions' Version, Which Is The Only Version NEXUS Accepts
+        if (version.Equals(Distributions.Version) is false)
+        {
+            Logger.LogWarning(@"Account ""{AccountName}"" Has Made A Request To Log In At Version ""{Version}"", Which Is Not The Expected Version ""{ExpectedVersion}""", account.NameWithClanTag, version, Distributions.Version);
+
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedVersion, version: version)));
+        }
+
+        if (account.IPAddressCollection.Contains(remoteIPAddress).Equals(false))
+            account.IPAddressCollection.Add(remoteIPAddress);
+
+        /*
+            Stage One (pre_auth) System Information Format:
+              - Windows: "MAC|OS|Processor|Video|RAM" (five pipe-separated data points)
+              - Linux/macOS: "not running on windows" (plain string)
+        */
+        bool isNonWindowsClient = systemInformation.Equals("not running on windows", StringComparison.Ordinal);
+
+        if (isNonWindowsClient)
+        {
+            if (account.SystemInformationCollection.Contains(systemInformation).Equals(false))
+                account.SystemInformationCollection.Add(systemInformation);
+        }
+
+        else
+        {
+            string[] systemInformationDataPoints = [.. systemInformation.Split('|', StringSplitOptions.RemoveEmptyEntries)];
+
+            if (systemInformationDataPoints.Length is not 5 /* the expected count of data points */)
             {
-                Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
-
-                return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedUserAgent)));
-            }
-
-            if (account.IPAddressCollection.Contains(remoteIPAddress).Equals(false))
-                account.IPAddressCollection.Add(remoteIPAddress);
-
-            /*
-                Stage One (pre_auth) System Information Format:
-                  - Windows: "MAC|OS|Processor|Video|RAM" (five pipe-separated data points)
-                  - Linux/macOS: "not running on windows" (plain string)
-            */
-            bool isNonWindowsClient = systemInformation.Equals("not running on windows", StringComparison.Ordinal);
-
-            if (isNonWindowsClient)
-            {
-                if (account.SystemInformationCollection.Contains(systemInformation).Equals(false))
-                    account.SystemInformationCollection.Add(systemInformation);
-            }
-
-            else
-            {
-                string[] systemInformationDataPoints = [.. systemInformation.Split('|', StringSplitOptions.RemoveEmptyEntries)];
-
-                if (systemInformationDataPoints.Length is not 5 /* the expected count of data points */)
-                {
-                    Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
-
-                    return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectSystemInformationFormat)));
-                }
-
-                if (account.MACAddressCollection.Contains(systemInformationDataPoints.First()).Equals(false))
-                    account.MACAddressCollection.Add(systemInformationDataPoints.First());
-
-                if (account.SystemInformationCollection.Contains(string.Join('|', systemInformationDataPoints.Skip(1))).Equals(false))
-                    account.SystemInformationCollection.Add(string.Join('|', systemInformationDataPoints.Skip(1)));
-            }
-
-            /*
-                The HWID hash implementation appears to be bugged in the client.
-                The intention was probably for each of the five system information data points to be hashed separately, but instead the same HWID hash is repeated five times.
-
-                Stage Two (srpAuth) System Information Hashes Format:
-                  - All Platforms (HWID obtained): "hash|hash|hash|hash|hash" (same HWID hash repeated 5 times, likely a bug)
-                  - All Platforms (HWID not obtained): "not obtainable" (plain string)
-            */
-            string? systemInformationHash = systemInformationHashes.Split('|', StringSplitOptions.RemoveEmptyEntries).Distinct().SingleOrDefault();
-
-            if (systemInformationHash is null)
-            {
-                Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information Hashes ""{systemInformationHashes}""");
+                Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
 
                 return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectSystemInformationFormat)));
             }
 
-            if (account.SystemInformationHashCollection.Contains(systemInformationHash).Equals(false))
-                account.SystemInformationHashCollection.Add(systemInformationHash);
+            if (account.MACAddressCollection.Contains(systemInformationDataPoints.First()).Equals(false))
+                account.MACAddressCollection.Add(systemInformationDataPoints.First());
 
-            await MerrickContext.SaveChangesAsync();
+            if (account.SystemInformationCollection.Contains(string.Join('|', systemInformationDataPoints.Skip(1))).Equals(false))
+                account.SystemInformationCollection.Add(string.Join('|', systemInformationDataPoints.Skip(1)));
         }
+
+        /*
+            The HWID hash implementation appears to be bugged in the client.
+            The intention was probably for each of the five system information data points to be hashed separately, but instead the same HWID hash is repeated five times.
+
+            Stage Two (srpAuth) System Information Hashes Format:
+              - All Platforms (HWID obtained): "hash|hash|hash|hash|hash" (same HWID hash repeated 5 times, likely a bug)
+              - All Platforms (HWID not obtained): "not obtainable" (plain string)
+        */
+        string? systemInformationHash = systemInformationHashes.Split('|', StringSplitOptions.RemoveEmptyEntries).Distinct().SingleOrDefault();
+
+        if (systemInformationHash is null)
+        {
+            Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information Hashes ""{systemInformationHashes}""");
+
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectSystemInformationFormat)));
+        }
+
+        if (account.SystemInformationHashCollection.Contains(systemInformationHash).Equals(false))
+            account.SystemInformationHashCollection.Add(systemInformationHash);
+
+        await MerrickContext.SaveChangesAsync();
 
         // TODO: Resolve Suspensions
 

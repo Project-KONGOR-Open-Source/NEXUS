@@ -84,8 +84,8 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
 
         LatestPatchResponse response = new ()
         {
-            PatchVersion = currentPatch.FullVersion,
-            CurrentPatchVersion = currentPatch.FullVersion,
+            PatchVersion = currentPatch.Version,
+            CurrentPatchVersion = currentPatch.Version,
             CurrentManifestArchiveSHA1Hash = currentPatch.ManifestArchiveSHA1Hash,
             CurrentManifestArchiveSizeInBytes = currentPatch.ManifestArchiveSizeInBytes,
             PatchDetails = new PatchDetailsForResponse
