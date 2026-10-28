@@ -44,7 +44,7 @@ public sealed class PatcherTests(KONGORIntegrationWebApplicationFactory webAppli
         using (Assert.Multiple())
         {
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-            await Assert.That(await response.Content.ReadAsStringAsync()).Contains("Unsupported Requester");
+            await Assert.That(await response.Content.ReadAsStringAsync()).Contains(@"Unsupported Requester: Operating System ""mac""");
         }
     }
 
