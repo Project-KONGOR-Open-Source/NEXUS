@@ -26,7 +26,7 @@ internal sealed class MasterServerHost(ChatServerHost chatServerHost) : WebAppli
     {
         HttpClient httpClient = CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games | Heroes Of Newerth | {Distributions.Version} | WAC");
 
         Dictionary<string, string> formData = new () { { "session", session }, { "cookie", cookie }, { "ip", "127.0.0.1" }, { "cas", "0" }, { "new", "1" } };
 

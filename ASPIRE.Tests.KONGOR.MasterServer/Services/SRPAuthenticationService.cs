@@ -99,7 +99,7 @@ public sealed class SRPAuthenticationService(KONGORIntegrationWebApplicationFact
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
         // The Game Client's User Agent, At The Distributions' Version, Unless A Test Names Another
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent ?? $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", userAgent ?? $"S2 Games | Heroes Of Newerth | {Distributions.Version} | WAC");
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);

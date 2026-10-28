@@ -561,12 +561,12 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
     [Test]
     [Arguments("enginespelling@kongor.com", "EngineSpelling", "SecurePassword123!")]
-    public async Task Authenticate_With_SRP_With_The_Engines_Own_Spelling_Is_Accepted(string emailAddress, string accountName, string password)
+    public async Task Authenticate_With_SRP_With_The_Engines_Own_User_Agent_Is_Accepted(string emailAddress, string accountName, string password)
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
-        // The Engine Spells The Name With A Lower-Case "of"
-        SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password, userAgent: $"S2 Games/Heroes of Newerth/{Distributions.Version}/wac/x86_64");
+        // The Engine Sends "S2 Games | Heroes Of Newerth | <version> | <DISTRIBUTION>", With The Distribution In Capitals
+        SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password, userAgent: $"S2 Games | Heroes Of Newerth | {Distributions.Version} | WAC");
 
         await Assert.That(result.Success).IsTrue();
     }
@@ -581,7 +581,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games | Heroes Of Newerth | {Distributions.Version} | WAC");
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
@@ -635,7 +635,7 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
-        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games/Heroes Of Newerth/{Distributions.Version}/wac/x86_64");
+        httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", $"S2 Games | Heroes Of Newerth | {Distributions.Version} | WAC");
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
