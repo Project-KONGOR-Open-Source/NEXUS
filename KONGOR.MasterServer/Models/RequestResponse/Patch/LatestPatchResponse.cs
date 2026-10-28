@@ -53,15 +53,14 @@ public class PatchDetailsForResponse
 
     /// <summary>
     ///     The HoN client's operating system.
-    ///     Generally, (ignoring RCT/SBT/etc.) this will be one of three values: "wac" (Windows client), "lac" (Linux client), or "mac" (macOS client).
+    ///     Generally, (ignoring RCT/SBT/etc.) this will be one of two values: "wac" (Windows client) or "lac" (Linux client).
     /// </summary>
     [PHPProperty("os")]
     public required string OperatingSystem { get; set; }
 
     /// <summary>
     ///     The HoN client's operating system architecture.
-    ///     Generally, this will be one of three values: "x86_64" (Windows client), "x86-biarch" (Linux client), or "universal-64" (macOS client).
-    ///     The 32-bit versions of Windows ("i686") and macOS ("universal"), alongside other legacy architectures, are not supported by Project KONGOR.
+    ///     Generally, this will be one of two values: "x86_64" (Windows client) or "x86-biarch" (Linux client); no other architecture is supported.
     /// </summary>
     [PHPProperty("arch")]
     public required string Architecture { get; set; }

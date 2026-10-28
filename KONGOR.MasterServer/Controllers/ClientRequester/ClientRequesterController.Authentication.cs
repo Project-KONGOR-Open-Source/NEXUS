@@ -173,7 +173,7 @@ public partial class ClientRequesterController
         /*
             Stage One (pre_auth) System Information Format:
               - Windows: "MAC|OS|Processor|Video|RAM" (five pipe-separated data points)
-              - Linux/macOS: "not running on windows" (plain string)
+              - Linux: "not running on windows" (plain string)
         */
         bool isNonWindowsClient = systemInformation.Equals("not running on windows", StringComparison.Ordinal);
 

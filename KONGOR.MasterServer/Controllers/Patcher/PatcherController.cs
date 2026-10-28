@@ -63,7 +63,6 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
             // Client Distribution Identifiers And Their Corresponding Supported Architectures
             ("wac", "x86_64"),
             ("lac", "x86-biarch"),
-            ("mac", "universal-64"),
 
             // Server Distribution Identifiers And Their Corresponding Supported Architectures
             ("was-crIac6LASwoafrl8FrOa", "x86_64"),

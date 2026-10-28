@@ -5,7 +5,7 @@ namespace ASPIRE.Tests.Utilities.Container;
 ///     Pulling images up front (rather than on first container start) keeps per-test timings accurate and prevents concurrent tests from racing against the same pull.
 /// </summary>
 /// <remarks>
-///     Talks to the Docker Engine HTTP API directly over the platform-native transport (named pipe on Windows, Unix domain socket on Linux and macOS, raw TCP/HTTP otherwise) so the host running the tests does not need the <c>docker</c> CLI on its <c>PATH</c> and so that the test suite does not depend on any specific managed Docker client library.
+///     Talks to the Docker Engine HTTP API directly over the platform-native transport (named pipe on Windows, Unix domain socket on Linux, raw TCP/HTTP otherwise) so the host running the tests does not need the <c>docker</c> CLI on its <c>PATH</c> and so that the test suite does not depend on any specific managed Docker client library.
 /// </remarks>
 public static class DockerImageManager
 {

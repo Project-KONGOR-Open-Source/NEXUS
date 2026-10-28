@@ -28,14 +28,6 @@ public static class PatchHandlers
         },
         new PatchDetails()
         {
-            DistributionIdentifier = "mac",
-            Version = Distributions.Version,
-            ManifestArchiveSHA1Hash = "3933009",
-            ManifestArchiveSizeInBytes = "ce18408b94a14a968736bb39213daac9a09e4026",
-            Latest = true
-        },
-        new PatchDetails()
-        {
             DistributionIdentifier = "was-crIac6LASwoafrl8FrOa",
             Version = Distributions.Version,
             ManifestArchiveSHA1Hash = "37fc03fc781925e00ae633f8855f3bbd2996c5e7",

@@ -23,7 +23,7 @@ public static class DockerEndpointResolver
             return @"npipe://./pipe/docker_engine";
         }
 
-        if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+        if (OperatingSystem.IsLinux())
         {
             return @"unix:///var/run/docker.sock";
         }
