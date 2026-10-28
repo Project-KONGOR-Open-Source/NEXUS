@@ -474,12 +474,12 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
     {
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
-        SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password, userAgent: "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password, userAgent: "S2 Games | Heroes Of Newerth | 5.26.01.01 | WAC");
 
         using (Assert.Multiple())
         {
             await Assert.That(result.Success).IsFalse();
-            await Assert.That(result.ErrorMessage).IsEqualTo($"The Heroes Of Newerth Game Client Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+            await Assert.That(result.ErrorMessage).IsEqualTo($"The Heroes Of Newerth Game Client Version 5.26.01.01 Does Not Match The Expected Version {Distributions.Version}");
         }
     }
 
@@ -508,12 +508,12 @@ public sealed class SRPAuthenticationTests(KONGORIntegrationWebApplicationFactor
 
         await MakeStaff(account.ID);
 
-        SRPAuthenticationData result = await srpAuthenticationService.PerformFullAuthentication(account, password, userAgent: "S2 Games/Heroes Of Newerth/4.10.1.0/wac/x86_64");
+        SRPAuthenticationData result = await srpAuthenticationService.PerformFullAuthentication(account, password, userAgent: "S2 Games | Heroes Of Newerth | 5.26.01.01 | WAC");
 
         using (Assert.Multiple())
         {
             await Assert.That(result.Success).IsFalse();
-            await Assert.That(result.ErrorMessage).IsEqualTo($"The Heroes Of Newerth Game Client Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+            await Assert.That(result.ErrorMessage).IsEqualTo($"The Heroes Of Newerth Game Client Version 5.26.01.01 Does Not Match The Expected Version {Distributions.Version}");
         }
     }
 

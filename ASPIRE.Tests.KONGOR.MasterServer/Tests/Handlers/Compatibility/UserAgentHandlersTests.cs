@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Handlers.Compatibility;
 
 /// <summary>
-///     Covers <see cref="UserAgentHandlers"/>: a request has a version only when it carries exactly one user agent, of the game's shape or of retail's.
+///     Covers <see cref="UserAgentHandlers"/>: a request has a version only when it carries exactly one user agent of the game's shape.
 /// </summary>
 public sealed class UserAgentHandlersTests
 {
@@ -32,23 +32,12 @@ public sealed class UserAgentHandlersTests
     }
 
     [Test]
-    public async Task A_User_Agent_Of_Retail_Has_Its_Version_So_That_Retail_Is_Refused_For_Its_Version()
-    {
-        bool hasVersion = UserAgentHandlers.TryGetVersion("S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64", out string? version);
-
-        using (Assert.Multiple())
-        {
-            await Assert.That(hasVersion).IsTrue();
-            await Assert.That(version).IsEqualTo("4.10.1.0");
-        }
-    }
-
-    [Test]
     [Arguments("S2 Games | Heroes Of Newerth | 5.26.10.31 | wac")]
     [Arguments("S2 Games | Heroes Of Newerth | 5.26.10.31 | WAC | x86_64")]
     [Arguments("S2 Games | Heroes of Newerth | 5.26.10.31 | WAC")]
     [Arguments("Project KONGOR | Heroes Of Newerth | 5.26.10.31 | WAC")]
     [Arguments("S2 Games | Heroes Of Newerth | 5.26.10.31 | MAC")]
+    [Arguments("S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64")]
     public async Task A_User_Agent_Of_Another_Shape_Has_No_Version(string userAgent)
         => await Assert.That(UserAgentHandlers.TryGetVersion(userAgent, out _)).IsFalse();
 

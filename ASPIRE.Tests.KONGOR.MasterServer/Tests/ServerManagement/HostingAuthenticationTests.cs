@@ -684,12 +684,12 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     {
         await InitialiseIn("Development");
 
-        HttpResponseMessage response = await AuthenticateManager(DedicatedHostAccountName, userAgent: "S2 Games/Heroes of Newerth/4.10.1.0/was/x86_64");
+        HttpResponseMessage response = await AuthenticateManager(DedicatedHostAccountName, userAgent: "S2 Games | Heroes Of Newerth | 5.26.01.01 | WAS");
 
         using (Assert.Multiple())
         {
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo($"The Heroes Of Newerth Match Server Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo($"The Heroes Of Newerth Match Server Version 5.26.01.01 Does Not Match The Expected Version {Distributions.Version}");
         }
     }
 
@@ -700,12 +700,12 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
 
         await AuthenticateManager(DedicatedHostAccountName);
 
-        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", userAgent: "S2 Games/Heroes of Newerth/4.10.1.0/was/x86_64");
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", userAgent: "S2 Games | Heroes Of Newerth | 5.26.01.01 | WAS");
 
         using (Assert.Multiple())
         {
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo($"The Heroes Of Newerth Match Server Version 4.10.1.0 Does Not Match The Expected Version {Distributions.Version}");
+            await Assert.That((string) (await DeserialisePHPResponse(response))["error"]).IsEqualTo($"The Heroes Of Newerth Match Server Version 5.26.01.01 Does Not Match The Expected Version {Distributions.Version}");
         }
     }
 
@@ -775,7 +775,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
 
         await AuthenticateManager(DedicatedHostAccountName);
 
-        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", password: "INCORRECT-PASSWORD", userAgent: "S2 Games/Heroes of Newerth/4.10.1.0/was/x86_64");
+        HttpResponseMessage response = await AuthenticateServer($"{DedicatedHostAccountName}:1", password: "INCORRECT-PASSWORD", userAgent: "S2 Games | Heroes Of Newerth | 5.26.01.01 | WAS");
 
         string body = await response.Content.ReadAsStringAsync();
 
