@@ -1,7 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Handlers.Compatibility;
 
 /// <summary>
-///     Reads the version from the user agent the game sends with every request, "S2 Games/Heroes of Newerth/{version}/{distribution}/{architecture}", and words the refusals for another version.
+///     Reads the version from the user agent the game sends with every request, "S2 Games | Heroes Of Newerth | {version} | {DISTRIBUTION}", and words the refusals for another version.
 /// </summary>
 public static partial class UserAgentHandlers
 {
@@ -30,6 +30,6 @@ public static partial class UserAgentHandlers
     public static string MatchServerVersionMismatch(string version)
         => $"The Heroes Of Newerth Match Server Version {version} Does Not Match The Expected Version {Distributions.Version}";
 
-    [GeneratedRegex(@"(?>S2 Games)\/(?>Heroes [oO]f Newerth)\/(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2})\/(?<platform>[wlm]a[cs])\/(?<architecture>x86_64|x86-biarch|universal-64)")]
+    [GeneratedRegex(@"^S2 Games \| Heroes Of Newerth \| (?<version>\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2}) \| (?<distribution>[WL]A[CS])$")]
     private static partial Regex UserAgentRegex();
 }
