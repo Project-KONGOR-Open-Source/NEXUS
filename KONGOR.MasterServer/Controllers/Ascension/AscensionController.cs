@@ -47,7 +47,7 @@ public class AscensionController : ControllerBase
             return BadRequest(new { error_code = 400, message = @"Missing Required Parameter ""match_id""" });
 
         // TODO: Look Into What A Season Match Turns On (The Streamed Replay, The Live Match Statistics, And The Betting Results) And Whatever Else Ascension Provides
-        // Until Then, No Match Is A Season Match, So Matches Behave As They Did While This Request Failed
+        // INFO: Until Then, No Match Is A Season Match, So Matches Behave As They Did While This Request Failed
 
         return Ok(new { error_code = 100, data = new { is_season_match = false, comment = Array.Empty<string>(), referee = Array.Empty<string>() } });
     }
