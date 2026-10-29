@@ -42,11 +42,8 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
 
                 string requestContext = JsonSerializer.Serialize(new
                 {
-                    form.Update,
-                    form.PatchVersion,
                     form.CurrentPatchVersion,
                     form.OperatingSystem,
-                    form.Architecture,
                     RemoteEndpoint = $"{remoteIPAddress}:{Request.HttpContext.Connection.RemotePort}",
                     UserAgent = Request.Headers.UserAgent.ToString()
                 });
@@ -58,19 +55,19 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
             }
         }
 
-        (string, string)[] supported =
+        string[] supported =
         [
-            // Client Distribution Identifiers And Their Corresponding Supported Architectures
-            ("wac", "x86_64"),
-            ("lac", "x86-biarch"),
+            // Client Distribution Identifiers
+            "wac",
+            "lac",
 
-            // Server Distribution Identifiers And Their Corresponding Supported Architectures
-            ("was-crIac6LASwoafrl8FrOa", "x86_64"),
-            ("las-crIac6LASwoafrl8FrOa", "x86-biarch")
+            // Server Distribution Identifiers
+            "was-crIac6LASwoafrl8FrOa",
+            "las-crIac6LASwoafrl8FrOa"
         ];
 
-        if (supported.Contains((form.OperatingSystem, form.Architecture)).Equals(false))
-            return BadRequest($@"Unsupported Requester: Operating System ""{form.OperatingSystem}"", Architecture ""{form.Architecture}""");
+        if (supported.Contains(form.OperatingSystem).Equals(false))
+            return BadRequest($@"Unsupported Requester: Operating System ""{form.OperatingSystem}""");
 
         // The Requester Names Its Current Version, Which Must Be The Distributions' Version, Because NEXUS Accepts No Other
         PatchDetails? currentPatch = PatchHandlers.GetPatchDetails(form.OperatingSystem, form.CurrentPatchVersion);
@@ -94,7 +91,6 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
             PatchDetails = new PatchDetailsForResponse
             {
                 OperatingSystem = form.OperatingSystem,
-                Architecture = form.Architecture,
                 PatchVersion = latestPatch.Version,
                 LatestPatchVersion = latestPatch.Version,
                 LatestManifestArchiveSHA1Hash = latestPatch.ManifestArchiveSHA1Hash,

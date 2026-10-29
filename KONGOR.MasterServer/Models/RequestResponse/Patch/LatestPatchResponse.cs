@@ -59,13 +59,6 @@ public class PatchDetailsForResponse
     public required string OperatingSystem { get; set; }
 
     /// <summary>
-    ///     The HoN client's operating system architecture.
-    ///     Generally, this will be one of two values: "x86_64" (Windows client) or "x86-biarch" (Linux client); no other architecture is supported.
-    /// </summary>
-    [PHPProperty("arch")]
-    public required string Architecture { get; set; }
-
-    /// <summary>
     ///     The primary download URL for the patch files.
     ///     This was originally set to "http://cdn.naeu.patch.heroesofnewerth.com/" for the international client.
     /// </summary>

@@ -1,7 +1,7 @@
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests.Handlers.Patch;
 
 /// <summary>
-///     Tests for the patcher, which the game's updater asks whether a newer version exists: it answers with the distributions' version, and refuses every other version.
+///     Tests for the patcher, which the game's update check asks whether a newer version exists: it answers with the distributions' version, and refuses every other version.
 /// </summary>
 public sealed class PatcherTests(KONGORIntegrationWebApplicationFactory webApplicationFactory)
 {
@@ -25,6 +25,7 @@ public sealed class PatcherTests(KONGORIntegrationWebApplicationFactory webAppli
             await Assert.That((string) body["version"]).IsEqualTo(Distributions.Version);
             await Assert.That((string) body["current_version"]).IsEqualTo(Distributions.Version);
             await Assert.That((string) latest["latest_version"]).IsEqualTo(Distributions.Version);
+            await Assert.That(await response.Content.ReadAsStringAsync()).DoesNotContain(@"s:4:""arch""");
         }
     }
 
@@ -39,7 +40,7 @@ public sealed class PatcherTests(KONGORIntegrationWebApplicationFactory webAppli
     [Test]
     public async Task A_Request_From_The_macOS_Client_Is_An_Unsupported_Requester()
     {
-        HttpResponseMessage response = await RequestPatch("patchermacos@kongor.com", "PatcherMacOS", Distributions.Version, operatingSystem: "mac", architecture: "universal-64");
+        HttpResponseMessage response = await RequestPatch("patchermacos@kongor.com", "PatcherMacOS", Distributions.Version, operatingSystem: "mac");
 
         using (Assert.Multiple())
         {
@@ -49,9 +50,9 @@ public sealed class PatcherTests(KONGORIntegrationWebApplicationFactory webAppli
     }
 
     /// <summary>
-    ///     Logs a new account in, then asks the patcher about a distribution, the Windows game client's unless another is named, with the account's session cookie, as the game's updater does.
+    ///     Logs a new account in, then asks the patcher about a distribution, the Windows game client's unless another is named, with the account's session cookie, as the game's update check does.
     /// </summary>
-    private async Task<HttpResponseMessage> RequestPatch(string emailAddress, string accountName, string currentVersion, string operatingSystem = "wac", string architecture = "x86_64")
+    private async Task<HttpResponseMessage> RequestPatch(string emailAddress, string accountName, string currentVersion, string operatingSystem = "wac")
     {
         SRPAuthenticationData login = await new SRPAuthenticationService(webApplicationFactory).AuthenticateWithSRP(emailAddress, accountName, "SecurePassword123!");
 
@@ -59,11 +60,8 @@ public sealed class PatcherTests(KONGORIntegrationWebApplicationFactory webAppli
 
         Dictionary<string, string> formData = new ()
         {
-            { "update", "1" },
-            { "version", "0.0.0.0" },
             { "current_version", currentVersion },
             { "os", operatingSystem },
-            { "arch", architecture },
             { "cookie", login.Cookie ?? throw new InvalidOperationException("The Login Returned No Session Cookie") }
         };
 
