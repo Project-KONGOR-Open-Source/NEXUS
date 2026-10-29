@@ -6,15 +6,10 @@ public class AscensionController : ControllerBase
 {
     /// <summary>
     ///     Routes ascension API requests based on the "r" query parameter.
-    ///     This endpoint handles all client.sea.heroesofnewerth.com requests.
+    ///     This endpoint handles the requests that retail sent to client.sea.heroesofnewerth.com.
     /// </summary>
     /// <remarks>
-    ///     The address is hard-coded in the game client, and needs to be patched either in memory or in the executable file.
-    ///
-    ///     <code>
-    ///         c  l  i  e  n  t  .  s  e  a  .  h  e  r  o  e  s  o  f  n  e  w  e  r  t  h  .  c  o  m
-    ///         63 6C 69 65 6E 74 2E 73 65 61 2E 68 65 72 6F 65 73 6F 66 6E 65 77 65 72 74 68 2E 63 6F 6D
-    ///     </code>
+    ///     The game reaches this endpoint at the address it is given with "-ascensionserver", which COMPEL and WILLOWMAKER set to the master server's address.
     /// </remarks>
     [HttpGet("/", Name = "Ascension Root"), HttpGet("index.php", Name = "Ascension Index"), HttpPost("/", Name = "Ascension Root Post"), HttpPost("index.php", Name = "Ascension Index Post")]
     public IActionResult RouteAscensionRequest([FromQuery(Name = "r")] string route)
@@ -36,7 +31,7 @@ public class AscensionController : ControllerBase
 
     /// <summary>
     ///     Checks if a match is a season match before it starts.
-    ///     The server uses this information to determine whether statistics should be recorded or not for the match.
+    ///     For a season match, the server streams the match's replay, posts its live statistics, and posts its betting results.
     /// </summary>
     /// <remarks>
     ///     Called by the game server before match initialisation.
@@ -51,7 +46,10 @@ public class AscensionController : ControllerBase
         if (string.IsNullOrEmpty(matchID))
             return BadRequest(new { error_code = 400, message = @"Missing Required Parameter ""match_id""" });
 
-        return Ok(new { error_code = 100, data = new { is_season_match = true, comment = Array.Empty<string>(), referee = Array.Empty<string>() } });
+        // TODO: Look Into What A Season Match Turns On (The Streamed Replay, The Live Match Statistics, And The Betting Results) And Whatever Else Ascension Provides
+        // INFO: Until Then, No Match Is A Season Match, So Matches Behave As They Did While This Request Failed
+
+        return Ok(new { error_code = 100, data = new { is_season_match = false, comment = Array.Empty<string>(), referee = Array.Empty<string>() } });
     }
 
     /// <summary>
