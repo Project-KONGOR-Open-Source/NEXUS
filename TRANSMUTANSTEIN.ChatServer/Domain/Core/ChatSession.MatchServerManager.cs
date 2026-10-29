@@ -104,27 +104,27 @@ public class MatchServerManagerChatSession(ConnectionContext connection, IServic
     }
 
     /// <summary>
-    ///     Requests that the server manager begin a graceful shutdown of itself and the match servers it manages.
+    ///     Requests that the server manager drain its match servers: the idle ones stop at once, and each other one once its match ends, while the server manager keeps running.
     /// </summary>
-    public MatchServerManagerChatSession ScheduleShutdown()
+    public MatchServerManagerChatSession DrainMatchServers()
     {
-        return SendRemoteCommand("ManagerStartShutdown");
+        return SendRemoteCommand("ManagerDrainMatchServers");
     }
 
     /// <summary>
-    ///     Requests that the server manager cancel a graceful shutdown which has been scheduled but has not yet completed.
+    ///     Requests that the server manager cancel a drain which has not yet completed, starting again the match servers which the drain stopped.
     /// </summary>
-    public MatchServerManagerChatSession CancelShutdown()
+    public MatchServerManagerChatSession CancelMatchServerDrain()
     {
-        return SendRemoteCommand("ManagerCancelShutdown");
+        return SendRemoteCommand("ManagerCancelMatchServerDrain");
     }
 
     /// <summary>
-    ///     Requests that the server manager begin a graceful reset, restarting the match servers it manages once they are no longer hosting matches.
+    ///     Requests that the server manager drain its match servers and then shut down, so that the server manager's supervisor relaunches it.
     /// </summary>
-    public MatchServerManagerChatSession ScheduleReset()
+    public MatchServerManagerChatSession DrainMatchServersAndShutDown()
     {
-        return SendRemoteCommand("ManagerStartReset");
+        return SendRemoteCommand("ManagerDrainMatchServersAndShutDown");
     }
 
     /// <summary>
