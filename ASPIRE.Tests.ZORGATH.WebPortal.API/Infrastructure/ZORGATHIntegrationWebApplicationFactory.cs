@@ -7,10 +7,15 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 public sealed class ZORGATHIntegrationWebApplicationFactory(ServiceContainerContext containerContext)
     : ServiceIntegrationWebApplicationFactory<ZORGATHIntegrationWebApplicationFactory, ZORGATHAssemblyMarker>(containerContext)
 {
+    // No Settings File Holds The JWT Signing Key, Which The Application Host Generates In Production, So Each Factory Generates Its Own
+    private readonly string jwtSigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
     protected override void ConfigureEnvironment(IWebHostBuilder builder)
     {
         // Production Reads These Via Environment.GetEnvironmentVariable Rather Than IConfiguration, So builder.UseSetting Would Not Reach Them.
         Environment.SetEnvironmentVariable("INFRASTRUCTURE_GATEWAY", "localhost");
+
+        builder.UseSetting("Operational:JWT:SigningKey", jwtSigningKey);
     }
 
     protected override void ConfigureAdditionalServices(IServiceCollection services)
