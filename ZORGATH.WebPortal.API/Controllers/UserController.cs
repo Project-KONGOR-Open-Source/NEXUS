@@ -180,7 +180,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             audience: Configuration.JWT.Audience,
             claims: allTokenClaims,
             expires: DateTimeOffset.UtcNow.AddHours(Configuration.JWT.DurationInHours).DateTime,
-            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey)), SecurityAlgorithms.HmacSha256) // TODO: Put The Signing Key In A Secrets Vault
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey)), SecurityAlgorithms.HmacSha256)
         );
 
         string jwt = new JwtSecurityTokenHandler().WriteToken(token);
