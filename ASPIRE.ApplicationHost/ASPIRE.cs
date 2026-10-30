@@ -163,7 +163,7 @@ public class ASPIRE
             .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
-        // The Web Portal's JWT Signing Key Is Generated At Random On The First Run And Kept In The Application Host's User Secrets, Because Every Settings File Is Public
+        // The Web Portal's JWT Signing Key Is Generated At Random On The First Run And Stored As A Persistent Secret
         IResourceBuilder<ParameterResource> webPortalJWTSigningKey = builder.AddParameter("web-portal-jwt-signing-key", new GenerateParameterDefault { MinLength = 64, Special = false }, secret: true, persist: true);
 
         webPortalAPI.WithEnvironment("Operational__JWT__SigningKey", webPortalJWTSigningKey);

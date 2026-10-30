@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 
 /// <summary>

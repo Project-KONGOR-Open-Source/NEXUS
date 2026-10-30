@@ -10,8 +10,7 @@ public class ZORGATH
         // Map User-Defined Configuration Section, And Refuse To Start Without A JWT Signing Key, Which No Settings File Holds
         builder.Services.AddOptions<OperationalConfiguration>()
             .Bind(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection))
-            .Validate(configuration => string.IsNullOrWhiteSpace(configuration.JWT.SigningKey) is false,
-                @"The Web Portal's JWT Signing Key Is Missing; NEXUS's Application Host Generates It As The ""web-portal-jwt-signing-key"" Parameter")
+            .Validate(configuration => string.IsNullOrWhiteSpace(configuration.JWT.SigningKey) is false, @"JSON Web Token Signing Key Not Found (The Application Host Sets It At Startup)")
             .ValidateOnStart();
 
         // Add Aspire Service Defaults
