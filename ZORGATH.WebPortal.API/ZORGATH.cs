@@ -7,8 +7,12 @@ public class ZORGATH
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(arguments);
 
-        // Map User-Defined Configuration Section
-        builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
+        // Map User-Defined Configuration Section, And Refuse To Start Without A JWT Signing Key, Which No Settings File Holds
+        builder.Services.AddOptions<OperationalConfiguration>()
+            .Bind(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection))
+            .Validate(configuration => string.IsNullOrWhiteSpace(configuration.JWT.SigningKey) is false,
+                @"The Web Portal's JWT Signing Key Is Missing; NEXUS's Application Host Generates It As The ""web-portal-jwt-signing-key"" Parameter")
+            .ValidateOnStart();
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
@@ -122,7 +126,7 @@ public class ZORGATH
                 // Configure JWT Validation Parameters
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JWT.SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JWT.SigningKey)),
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = configuration.JWT.Issuer,
                     ValidateIssuer = true,
