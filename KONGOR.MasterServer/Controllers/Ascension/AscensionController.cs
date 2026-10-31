@@ -6,7 +6,7 @@ public class AscensionController : ControllerBase
 {
     /// <summary>
     ///     Routes ascension API requests based on the "r" query parameter.
-    ///     This endpoint handles the requests that retail sent to client.sea.heroesofnewerth.com.
+    ///     This endpoint handles the requests that the game client sent to client.sea.heroesofnewerth.com.
     /// </summary>
     /// <remarks>
     ///     The game reaches this endpoint at the address it is given with "-ascensionserver", which COMPEL and WILLOWMAKER set to the master server's address.

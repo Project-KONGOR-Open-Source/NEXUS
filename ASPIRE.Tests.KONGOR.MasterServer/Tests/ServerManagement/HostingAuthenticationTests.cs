@@ -505,7 +505,7 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
     }
 
     /// <summary>
-    ///     A match server in a lobby, with its world loaded and its match not started, ends that match and disconnects its players when it reads "auth_failure", as it does for the retail master server.
+    ///     A match server in a lobby, with its world loaded and its match not started, ends that match and disconnects its players when it reads "auth_failure", as it does for the original master server.
     ///     This is the intended reply, because "start_game" refuses the unregistered session, so that match could never start anyway.
     /// </summary>
     [Test]
@@ -794,12 +794,12 @@ public sealed partial class HostingAuthenticationTests(KONGORIntegrationWebAppli
 
         string session = await AuthenticateMatchServer();
 
-        HttpResponseMessage response = await SendServerRequest("start_game", MatchStartForm(session, "4.10.1.0"));
+        HttpResponseMessage response = await SendServerRequest("start_game", MatchStartForm(session, "5.26.10.30"));
 
         using (Assert.Multiple())
         {
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
-            await Assert.That(await response.Content.ReadAsStringAsync()).Contains("4.10.1.0");
+            await Assert.That(await response.Content.ReadAsStringAsync()).Contains("5.26.10.30");
         }
     }
 

@@ -55,7 +55,7 @@ public static partial class DistributedCacheExtensions
         => await distributedCacheStore.StringSetAsync(ConstructAccountSessionCookieKey(cookie), accountName, SessionCookieLifetime);
 
     /// <summary>
-    ///     Logs an account in with the session cookie, and retires the earlier login of the account and the logins of the other given accounts, which are the other accounts of the account's user, so that a user holds one live login, as retail did.
+    ///     Logs an account in with the session cookie, and retires the earlier login of the account and the logins of the other given accounts, which are the other accounts of the account's user, so that a user holds one live login, as the original master server did.
     ///     In one transaction, the session cookie is stored for the account name, the account's latest-login record points at it, every session cookie which the records of the account and of the other accounts point at stops resolving, and the other accounts' records are deleted.
     ///     A login is never refused because another login is live, so that a player can always log in again, after a crash included.
     ///     Returns the retired session cookies, and throws an exception once <see cref="SessionCookieSupersessionAttempts"/> attempts have lost their races to other logins of the same user.

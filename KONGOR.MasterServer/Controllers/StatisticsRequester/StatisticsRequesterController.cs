@@ -17,7 +17,7 @@ public partial class StatisticsRequesterController(MerrickContext databaseContex
     ///         StatsResubmissionKey = SHA1.HashData(Encoding.UTF8.GetBytes(matchID + MatchStatsSubmissionSalt));
     ///     </code>
     ///     <para>
-    ///         This key can be found at offset 0x00F03A10 in k2_x64.dll of the WAS distribution.
+    ///         This key can be found in k2.dll of the WAS distribution.
     ///     </para>
     /// </summary>
     internal static string MatchStatsSubmissionSalt => "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";

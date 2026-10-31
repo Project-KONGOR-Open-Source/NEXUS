@@ -5,7 +5,7 @@ public static class SRPRegistrationHandlers
     # region Secure Remote Password Magic Strings
 
     // Thank you, Anton Romanov (aka Theli), for making these values public: https://github.com/theli-ua/pyHoNBot/blob/cabde31b8601c1ca55dc10fcf663ec663ec0eb71/hon/masterserver.py#L37.
-    // The first magic string is also present in the k2_x64 DLL of the Windows client, between offsets 0xF2F4D0 and 0xF2F4D0.
+    // The first magic string is also present in the k2 DLL of the Windows client.
     // It is not clear how the second magic string was obtained.
     // Project KONGOR would have not been possible without having these values in the public domain.
 

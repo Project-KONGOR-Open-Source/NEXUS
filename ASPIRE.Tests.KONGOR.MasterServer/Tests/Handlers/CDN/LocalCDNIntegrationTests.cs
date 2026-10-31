@@ -24,7 +24,7 @@ public sealed class LocalCDNIntegrationTests(KONGORIntegrationWebApplicationFact
     {
         Directory.CreateDirectory(Path.Combine(LocalCDNDirectory, "wac"));
 
-        await File.WriteAllTextAsync(Path.Combine(LocalCDNDirectory, "wac", "manifest.json"), """{ "version": "4.10.1" }""");
+        await File.WriteAllTextAsync(Path.Combine(LocalCDNDirectory, "wac", "manifest.json"), """{ "versionExecutable": "5.26.10.31" }""");
 
         await using WebApplicationFactory<KONGORAssemblyMarker> factory = CreateFactoryWithLocalCDNDirectory(LocalCDNDirectory);
 
@@ -34,7 +34,7 @@ public sealed class LocalCDNIntegrationTests(KONGORIntegrationWebApplicationFact
         using (Assert.Multiple())
         {
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-            await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo("""{ "version": "4.10.1" }""");
+            await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo("""{ "versionExecutable": "5.26.10.31" }""");
         }
     }
 

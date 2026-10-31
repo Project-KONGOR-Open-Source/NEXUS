@@ -37,7 +37,7 @@ public sealed class UserAgentHandlersTests
     [Arguments("S2 Games | Heroes of Newerth | 5.26.10.31 | WAC")]
     [Arguments("Project KONGOR | Heroes Of Newerth | 5.26.10.31 | WAC")]
     [Arguments("S2 Games | Heroes Of Newerth | 5.26.10.31 | MAC")]
-    [Arguments("S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64")]
+    [Arguments("S2 Games/Heroes Of Newerth/5.26.10.31/WAC")]
     public async Task A_User_Agent_Of_Another_Shape_Has_No_Version(string userAgent)
         => await Assert.That(UserAgentHandlers.TryGetVersion(userAgent, out _)).IsFalse();
 

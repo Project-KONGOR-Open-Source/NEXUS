@@ -32,7 +32,7 @@ public sealed class PatcherTests(KONGORIntegrationWebApplicationFactory webAppli
     [Test]
     public async Task Patcher_Refuses_Another_Version_With_Bad_Request()
     {
-        HttpResponseMessage response = await RequestPatch("patcherolder@kongor.com", "PatcherOlder", "4.10.1");
+        HttpResponseMessage response = await RequestPatch("patcherolder@kongor.com", "PatcherOlder", "5.26.10.30");
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.BadRequest);
     }

@@ -304,7 +304,7 @@ public partial class ServerRequesterController
 
     /// <summary>
     ///     Builds the "auth_failure" response, which tells a match server that its session is not registered, so that it discards the session and authenticates again.
-    ///     A match server which has loaded a world for a match which has not started yet also ends that match and disconnects its players, as it does for the retail master server, which is kept because "start_game" refuses the unregistered session, so that match could never start anyway.
+    ///     A match server which has loaded a world for a match which has not started yet also ends that match and disconnects its players, as it does for the original master server, which is kept because "start_game" refuses the unregistered session, so that match could never start anyway.
     ///     The match server reads this response whatever the HTTP status code, so it is sent with a success status code, as the protocol answer which it is, rather than as an error.
     /// </summary>
     private static string ServerAuthenticationFailureResponse()
@@ -534,7 +534,7 @@ public partial class ServerRequesterController
             }
 
             // A Session Which Is Not Registered Belongs To A Match Server Which Was Reaped Or Replaced, Or Whose Registration Was Lost, So The Match Server Is Told To Authenticate Again
-            // A Match Server In A Lobby ("c_state" 2: World Loaded, Match Not Started) Also Ends That Match And Disconnects Its Players, As It Does For The Retail Master Server; This Is Kept, Because "start_game" Refuses The Unregistered Session, So That Match Could Never Start Anyway
+            // A Match Server In A Lobby ("c_state" 2: World Loaded, Match Not Started) Also Ends That Match And Disconnects Its Players, As It Does For The Original Master Server; This Is Kept, Because "start_game" Refuses The Unregistered Session, So That Match Could Never Start Anyway
             return Ok(ServerAuthenticationFailureResponse());
         }
 

@@ -7,7 +7,7 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Services;
 /// </summary>
 /// <remarks>
 ///     The two magic strings below are part of the SRP wire protocol expected by the Heroes Of Newerth client.
-///     The first is present in the <c>k2_x64</c> DLL shipped with the Windows client; the second was obtained from the public <c>pyHoNBot</c> project (https://github.com/theli-ua/pyHoNBot) — Project KONGOR would not have been possible without them being in the public domain.
+///     The first is present in the <c>k2</c> DLL shipped with the Windows client; the second was obtained from the public <c>pyHoNBot</c> project (https://github.com/theli-ua/pyHoNBot) — Project KONGOR would not have been possible without them being in the public domain.
 /// </remarks>
 internal static class SRPPasswordHasher
 {

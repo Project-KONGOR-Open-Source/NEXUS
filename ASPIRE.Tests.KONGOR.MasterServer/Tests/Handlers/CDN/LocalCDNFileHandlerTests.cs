@@ -20,7 +20,7 @@ public sealed class LocalCDNFileHandlerTests
     [Test]
     public async Task Requesting_A_Manifest_Returns_Its_Content_As_JSON()
     {
-        await WriteLocalCDNFile("wac/manifest.json", Encoding.UTF8.GetBytes("""{ "version": "4.10.1" }"""));
+        await WriteLocalCDNFile("wac/manifest.json", Encoding.UTF8.GetBytes("""{ "versionExecutable": "5.26.10.31" }"""));
 
         await using WebApplication application = await StartApplication(LocalCDNDirectory);
 
@@ -30,12 +30,12 @@ public sealed class LocalCDNFileHandlerTests
         {
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
             await Assert.That(response.Content.Headers.ContentType?.MediaType).IsEqualTo("application/json");
-            await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo("""{ "version": "4.10.1" }""");
+            await Assert.That(await response.Content.ReadAsStringAsync()).IsEqualTo("""{ "versionExecutable": "5.26.10.31" }""");
         }
     }
 
     [Test]
-    [Arguments("las/hon-x86_64-server")]
+    [Arguments("las/hon")]
     [Arguments("wac/base/resources0.s2z")]
     public async Task Requesting_A_File_Without_A_Registered_MIME_Type_Returns_It_As_Binary_Content(string relativePath)
     {
@@ -58,7 +58,7 @@ public sealed class LocalCDNFileHandlerTests
     [Test]
     public async Task Probing_A_Manifest_With_A_HEAD_Request_Returns_Its_Headers_Without_A_Body()
     {
-        byte[] content = Encoding.UTF8.GetBytes("""{ "version": "4.10.1" }""");
+        byte[] content = Encoding.UTF8.GetBytes("""{ "versionExecutable": "5.26.10.31" }""");
 
         await WriteLocalCDNFile("was/manifest.json", content);
 
@@ -124,7 +124,7 @@ public sealed class LocalCDNFileHandlerTests
 
         Directory.CreateDirectory(Path.Combine(localDirectory, "wac"));
 
-        await File.WriteAllTextAsync(Path.Combine(localDirectory, "wac", "manifest.json"), """{ "version": "4.10.1" }""");
+        await File.WriteAllTextAsync(Path.Combine(localDirectory, "wac", "manifest.json"), """{ "versionExecutable": "5.26.10.31" }""");
 
         using HttpResponseMessage responseAfterCreation = await application.GetTestClient().GetAsync("/cdn/wac/manifest.json");
 
@@ -132,7 +132,7 @@ public sealed class LocalCDNFileHandlerTests
         {
             await Assert.That(responseBeforeCreation.StatusCode).IsEqualTo(HttpStatusCode.NotFound);
             await Assert.That(responseAfterCreation.StatusCode).IsEqualTo(HttpStatusCode.OK);
-            await Assert.That(await responseAfterCreation.Content.ReadAsStringAsync()).IsEqualTo("""{ "version": "4.10.1" }""");
+            await Assert.That(await responseAfterCreation.Content.ReadAsStringAsync()).IsEqualTo("""{ "versionExecutable": "5.26.10.31" }""");
         }
     }
 
