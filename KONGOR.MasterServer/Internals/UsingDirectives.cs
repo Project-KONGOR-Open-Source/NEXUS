@@ -14,6 +14,7 @@ global using KONGOR.MasterServer.Configuration;
 global using KONGOR.MasterServer.Configuration.Announcements;
 global using KONGOR.MasterServer.Configuration.Economy;
 global using KONGOR.MasterServer.Configuration.Mastery;
+global using KONGOR.MasterServer.Configuration.MessageOfTheDay;
 global using KONGOR.MasterServer.Configuration.Matchmaking;
 global using KONGOR.MasterServer.Configuration.Plinko;
 global using KONGOR.MasterServer.Configuration.Store;

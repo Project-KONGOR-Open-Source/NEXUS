@@ -20,6 +20,8 @@ public static class JSONConfiguration
 
     private static readonly string AnnouncementsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Announcements", "AnnouncementsConfiguration.json"));
 
+    private static readonly string MessageOfTheDayConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "MessageOfTheDay", "MessageOfTheDayConfiguration.json"));
+
     private static readonly string PlinkoConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Plinko", "PlinkoConfiguration.json"));
 
     private static readonly string PlinkoTierProductsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Plinko", "PlinkoTierProducts.json"));
@@ -49,6 +51,9 @@ public static class JSONConfiguration
 
     public static readonly AnnouncementsConfiguration AnnouncementsConfiguration = JsonSerializer.Deserialize<AnnouncementsConfiguration>(AnnouncementsConfigurationJSON)
         ?? throw new NullReferenceException("Announcements Configuration Is NULL");
+
+    public static readonly MessageOfTheDayConfiguration MessageOfTheDayConfiguration = JsonSerializer.Deserialize<MessageOfTheDayConfiguration>(MessageOfTheDayConfigurationJSON)
+        ?? throw new NullReferenceException("Message Of The Day Configuration Is NULL");
 
     public static readonly PlinkoConfiguration PlinkoConfiguration = LoadPlinkoConfiguration();
 
