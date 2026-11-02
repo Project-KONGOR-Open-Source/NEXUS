@@ -198,7 +198,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     /// <summary>
     ///     The date sent with the list of special messages, which never changes.
     ///     The client fingerprints each message as an MD5 hash of its title, its address, and this date, and pops the Project KONGOR Announcement Board up only for fingerprints the account has not read.
-    ///     Because this date never changes and each address carries its announcement's published time, a fingerprint changes only when the title or the published time does, so editing either makes the announcement pop up again.
+    ///     A fingerprint changes whenever the title, the address, or this date changes, which makes the announcement pop up again.
     /// </summary>
     public const string SpecialMessagesListDate = "2026-11-02";
 
