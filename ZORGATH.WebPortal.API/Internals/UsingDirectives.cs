@@ -42,9 +42,7 @@ global using MimeKit;
 
 global using SecureRemotePassword;
 
-// StackExchange.Redis Also Holds A "Role", Which Clashes With The Database Context's, So Only The Cache's Two Types Are Brought In
-global using IConnectionMultiplexer = StackExchange.Redis.IConnectionMultiplexer;
-global using IDatabase = StackExchange.Redis.IDatabase;
+global using StackExchange.Redis;
 
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Net;

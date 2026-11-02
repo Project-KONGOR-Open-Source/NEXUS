@@ -30,8 +30,7 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 
-// StackExchange.Redis Also Holds A "Role", Which Clashes With The Database Context's, So Only The Cache's Type Is Brought In
-global using IDatabase = StackExchange.Redis.IDatabase;
+global using StackExchange.Redis;
 
 global using System.Collections.Concurrent;
 global using System.IdentityModel.Tokens.Jwt;

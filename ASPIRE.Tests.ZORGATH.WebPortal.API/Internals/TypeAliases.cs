@@ -1,0 +1,1 @@
+global using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
