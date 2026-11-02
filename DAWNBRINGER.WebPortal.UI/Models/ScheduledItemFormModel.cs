@@ -14,15 +14,27 @@ public abstract class ScheduledItemFormModel
 
     public TimeSpan? ExpiresTime { get; set; }
 
+    private DateTimeOffset? OriginalPublished { get; set; }
+
     /// <summary>
     ///     Returns the published time, or <see langword="null"/> when no date is picked, so that a new item is published at once and an edited item keeps its time.
+    ///     An edited item whose published time is unchanged to the minute also returns <see langword="null"/>, so that a picker which drops the seconds cannot move the time, which would make an announcement pop up again for every player.
     /// </summary>
-    public DateTimeOffset? PublishedAt() => Combine(PublishedDate, PublishedTime);
+    public DateTimeOffset? PublishedAt()
+    {
+        DateTimeOffset? published = Combine(PublishedDate, PublishedTime);
+
+        if (published is DateTimeOffset chosen && OriginalPublished is DateTimeOffset original && chosen.UtcTicks / TimeSpan.TicksPerMinute == original.UtcTicks / TimeSpan.TicksPerMinute)
+            return null;
+
+        return published;
+    }
 
     public DateTimeOffset? ExpiresAt() => Combine(ExpiresDate, ExpiresTime);
 
     protected void SetTimes(DateTimeOffset published, DateTimeOffset expires)
     {
+        OriginalPublished = published;
         PublishedDate = published.UtcDateTime.Date;
         PublishedTime = published.UtcDateTime.TimeOfDay;
         ExpiresDate = expires.UtcDateTime.Date;
