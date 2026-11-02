@@ -46,7 +46,7 @@ public class AnnouncementAdministrationController(IDatabase distributedCache, IL
         if ((await DistributedCache.GetAnnouncements()).Count >= ContentLimits.UnexpiredAnnouncementsMaximum)
             return Conflict($"No More Than {ContentLimits.UnexpiredAnnouncementsMaximum} Announcements May Be Live Or Scheduled At Once");
 
-        Announcement announcement = new (Guid.CreateVersion7(), payload.Title, payload.Body, published, payload.Expires);
+        Announcement announcement = new (Guid.CreateVersion7(), payload.Title, SafeHTML.Sanitise(payload.Body), published, payload.Expires);
 
         await DistributedCache.SetAnnouncement(announcement);
 
@@ -77,7 +77,7 @@ public class AnnouncementAdministrationController(IDatabase distributedCache, IL
         if (validationResult.IsValid is false)
             return BadRequest(validationResult.Errors.Select(error => error.ErrorMessage));
 
-        Announcement announcement = new (id, payload.Title, payload.Body, published, payload.Expires);
+        Announcement announcement = new (id, payload.Title, SafeHTML.Sanitise(payload.Body), published, payload.Expires);
 
         await DistributedCache.SetAnnouncement(announcement);
 

@@ -39,7 +39,7 @@ public class MessageOfTheDayAdministrationController(IDatabase distributedCache,
         if (validationResult.IsValid is false)
             return BadRequest(validationResult.Errors.Select(error => error.ErrorMessage));
 
-        MessageOfTheDayItem item = new (Guid.CreateVersion7(), payload.Title, payload.Subtitle, payload.Body, payload.Picture, published, payload.Expires);
+        MessageOfTheDayItem item = new (Guid.CreateVersion7(), payload.Title, payload.Subtitle, SafeHTML.Sanitise(payload.Body), payload.Picture, published, payload.Expires);
 
         await DistributedCache.SetMessageOfTheDayEvent(item);
 
@@ -69,7 +69,7 @@ public class MessageOfTheDayAdministrationController(IDatabase distributedCache,
         if (validationResult.IsValid is false)
             return BadRequest(validationResult.Errors.Select(error => error.ErrorMessage));
 
-        MessageOfTheDayItem item = new (id, payload.Title, payload.Subtitle, payload.Body, payload.Picture, published, payload.Expires);
+        MessageOfTheDayItem item = new (id, payload.Title, payload.Subtitle, SafeHTML.Sanitise(payload.Body), payload.Picture, published, payload.Expires);
 
         await DistributedCache.SetMessageOfTheDayEvent(item);
 

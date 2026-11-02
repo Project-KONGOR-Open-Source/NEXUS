@@ -26,6 +26,34 @@ public sealed class AnnouncementAdministrationTests(ZORGATHIntegrationWebApplica
     }
 
     [Test]
+    [Arguments("""<body onload="alert(1)"><p>Hello.</p></body>""")]
+    [Arguments("""<html onmouseover="alert(1)"><p>Hello.</p></html>""")]
+    public async Task A_Handler_On_A_Body_Or_HTML_Tag_Is_Refused(string body)
+    {
+        // A Page Would Merge A Stray "body" Or "html" Tag's Attributes Into Its Own Element, Where A Handler Would Run
+        IActionResult response = await CreateController().CreateAnnouncement(NewAnnouncement() with { Body = body });
+
+        await Assert.That(response).IsTypeOf<BadRequestObjectResult>();
+    }
+
+    [Test]
+    public async Task A_Stray_Closing_Tag_Is_Not_Stored()
+    {
+        AnnouncementAdministrationController controller = CreateController();
+
+        // The Parser Drops A Closing Tag With Nothing To Close Without Reporting It, And Stored As Written It Would Close The Page's Own Wrapper
+        await Created(await controller.CreateAnnouncement(NewAnnouncement() with { Body = "<p>Hello.</p></div><p>Goodbye.</p>" }));
+
+        string stored = (await Listed(await controller.GetAnnouncements())).Single().Body;
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(stored).DoesNotContain("</div>");
+            await Assert.That(stored).IsEqualTo("<p>Hello.</p><p>Goodbye.</p>");
+        }
+    }
+
+    [Test]
     public async Task An_Expiry_In_The_Past_Is_Refused()
     {
         IActionResult response = await CreateController().CreateAnnouncement(NewAnnouncement() with { Published = DateTimeOffset.UtcNow.AddDays(-2), Expires = DateTimeOffset.UtcNow.AddMinutes(-1) });

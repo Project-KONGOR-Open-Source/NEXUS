@@ -62,11 +62,33 @@ public sealed class MessageOfTheDayAdministrationTests(ZORGATHIntegrationWebAppl
     }
 
     [Test]
-    public async Task A_Link_With_A_Script_Scheme_Is_Refused()
+    [Arguments("javascript:alert(1)")]
+    [Arguments("java&#x09;script:alert(1)")]
+    [Arguments("data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==")]
+    [Arguments("file:///C:/Windows/win.ini")]
+    public async Task A_Link_With_A_Scheme_Other_Than_HTTP_Or_HTTPS_Is_Refused(string address)
     {
-        IActionResult response = await CreateController().CreateEvent(NewEvent() with { Body = """<p><a href="javascript:alert(1)">Sign Up</a></p>""" });
+        IActionResult response = await CreateController().CreateEvent(NewEvent() with { Body = $"""<p><a href="{address}">Sign Up</a></p>""" });
 
         await Assert.That(response).IsTypeOf<BadRequestObjectResult>();
+    }
+
+    [Test]
+    public async Task A_Handler_On_A_Body_Tag_Is_Refused()
+    {
+        IActionResult response = await CreateController().CreateEvent(NewEvent() with { Body = """<body onload="alert(1)"><p>Hello.</p></body>""" });
+
+        await Assert.That(response).IsTypeOf<BadRequestObjectResult>();
+    }
+
+    [Test]
+    public async Task A_Stray_Closing_Tag_Is_Not_Stored()
+    {
+        MessageOfTheDayAdministrationController controller = CreateController();
+
+        await Created<MessageOfTheDayEventDTO>(await controller.CreateEvent(NewEvent() with { Body = "<p>Hello.</p></div><p>Goodbye.</p>" }));
+
+        await Assert.That((await Listed(await controller.GetEvents())).Single().Body).IsEqualTo("<p>Hello.</p><p>Goodbye.</p>");
     }
 
     [Test]
