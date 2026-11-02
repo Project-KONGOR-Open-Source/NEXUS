@@ -41,14 +41,14 @@ public static class MessageOfTheDayPage
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: "Ubuntu Sans", sans-serif; color: #e8d4b0; user-select: none; }
                     .frame { position: relative; width: 100%; height: 100%; }
-                    .viewport { position: absolute; inset: 6% 7% 12% 7%; }
-                    .track { position: absolute; inset: 0; display: flex; }
+                    .viewport { position: absolute; top: 6%; right: 7%; bottom: 12%; left: 7%; }
+                    .track { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; }
                     .slot { flex: 0 0 33.33%; }
                     .card { position: relative; flex: 0 0 33.33%; border-radius: 6px; overflow: hidden; background: #241210; border: 1px solid #5a3d24; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6); cursor: pointer; transform: scale(0.84); opacity: 0.55; transition: transform 0.4s, opacity 0.4s; }
                     .card.centre { transform: scale(1.04); opacity: 1; z-index: 1; border-color: #c8a060; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8); }
                     .card:hover { opacity: 0.85; }
                     .card.centre:hover { opacity: 1; border-color: #f0c878; }
-                    .picture { position: absolute; inset: 0; background-size: cover; background-position: center; }
+                    .picture { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-size: cover; background-position: center; }
                     .words { position: absolute; left: 0; right: 0; bottom: 0; padding: 18% 6% 5%; background: linear-gradient(transparent, rgba(10, 4, 3, 0.92) 45%); }
                     .words h2 { margin-bottom: 0.25em; font-size: 1.5vw; font-weight: 700; color: #f4dfb4; text-shadow: 1px 1px 3px #000; }
                     .words p { font-size: 1.05vw; color: #c8ac84; }
@@ -61,7 +61,7 @@ public static class MessageOfTheDayPage
                     .dots span { width: 0.6vw; height: 0.6vw; border-radius: 50%; background: rgba(90, 61, 36, 0.9); box-shadow: 0 0 3px rgba(0, 0, 0, 0.9); transition: background 0.3s; }
                     .dots span.on { background: #e0b060; }
                     .hidden { display: none; }
-                    .article { position: absolute; inset: 0; display: none; flex-direction: column; z-index: 5; background: #160807; border-radius: 6px; }
+                    .article { position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: none; flex-direction: column; z-index: 5; background: #160807; border-radius: 6px; }
                     .article.open { display: flex; }
                     .back { position: absolute; top: 5%; left: 2%; z-index: 2; display: flex; align-items: center; gap: 0.4em; padding: 0.5vw 1.4vw 0.5vw 0.8vw; border-radius: 999px; background: var(--back-background, rgba(20, 8, 6, 0.6)); border: 2px solid var(--back-border, #8a6a40); color: var(--back-text, #f0d090); font-size: 1.3vw; font-weight: 500; cursor: pointer; transition: filter 0.2s; }
                     .back svg { width: 1.3em; height: 1.3em; }

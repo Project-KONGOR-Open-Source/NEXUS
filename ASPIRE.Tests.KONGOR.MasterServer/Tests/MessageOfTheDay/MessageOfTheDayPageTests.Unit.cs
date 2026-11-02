@@ -61,6 +61,15 @@ public sealed class MessageOfTheDayPage_Unit
         }
     }
 
+    [Test]
+    public async Task The_Page_Places_Its_Boxes_Without_The_Inset_Property()
+    {
+        string html = MessageOfTheDayPage.Render([NewItem("Weekend Event", Now, expires: null)]);
+
+        // The In-Game Browser's Chromium Predates "inset", Ignores It, And Collapses Every Box Placed With It, So The Cards Vanish
+        await Assert.That(html).DoesNotContain("inset:");
+    }
+
     private static MessageOfTheDayItem NewItem(string title, DateTimeOffset published, DateTimeOffset? expires)
         => new (Guid.CreateVersion7(), title, "a subtitle", "<p>A body.</p>", Convert.ToBase64String([0x89, 0x50, 0x4E, 0x47]), published, expires);
 }
