@@ -109,6 +109,34 @@ public sealed class AnnouncementBoardTests(KONGORIntegrationWebApplicationFactor
     }
 
     [Test]
+    public async Task An_Announcement_Page_Forbids_Scripts_And_Grows_With_Its_Text()
+    {
+        Announcement announcement = NewAnnouncement("Server Maintenance", DateTimeOffset.UtcNow.AddMinutes(-5));
+
+        await DistributedCache.SetAnnouncement(announcement);
+
+        using HttpClient client = webApplicationFactory.CreateClient();
+
+        using HttpResponseMessage response = await client.GetAsync($"/announcements/{announcement.ID}");
+
+        string policy = response.Headers.TryGetValues("Content-Security-Policy", out IEnumerable<string>? values) ? string.Join(" ", values) : string.Empty;
+
+        // A Page Held To "min-height" Grows And Scrolls From Its Title, Where "height" With Centring Would Push A Long Announcement's Title Out Of Reach
+        using (Assert.Multiple())
+        {
+            await Assert.That(policy).Contains("script-src 'none'");
+            await Assert.That(await response.Content.ReadAsStringAsync()).Contains("body { min-height: 100%;");
+        }
+    }
+
+    [Test]
+    public async Task An_Announcement_Page_Is_Exempt_From_Rate_Limiting()
+    {
+        // Every Player With An Unread Announcement Loads Its Page At Login, And A Refused Page Shows Blank Yet Still Counts As Read
+        await Assert.That(typeof(AnnouncementsController).GetMethod(nameof(AnnouncementsController.GetAnnouncementPage))?.GetCustomAttribute<DisableRateLimitingAttribute>()).IsNotNull();
+    }
+
+    [Test]
     public async Task An_Expired_Or_Unknown_Announcement_Page_Is_Not_Found()
     {
         Announcement expiring = NewAnnouncement("Server Maintenance", DateTimeOffset.UtcNow.AddMinutes(-5)) with { Expires = DateTimeOffset.UtcNow.AddSeconds(2) };

@@ -20,6 +20,7 @@ global using KONGOR.MasterServer.Configuration.Economy;
 global using KONGOR.MasterServer.Configuration.Plinko;
 global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
+global using KONGOR.MasterServer.Controllers.Announcements;
 global using KONGOR.MasterServer.Controllers.MessageOfTheDay;
 global using KONGOR.MasterServer.Controllers.StatisticsRequester;
 global using KONGOR.MasterServer.Extensions.Cache;
