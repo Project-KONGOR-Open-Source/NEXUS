@@ -9,7 +9,8 @@ public sealed class FontTests(KONGORIntegrationWebApplicationFactory webApplicat
     private static readonly string[] FontFileNames =
     [
         "ubuntu-light.ttf", "ubuntu-light-italic.ttf", "ubuntu-regular.ttf", "ubuntu-italic.ttf",
-        "ubuntu-medium.ttf", "ubuntu-medium-italic.ttf", "ubuntu-bold.ttf", "ubuntu-bold-italic.ttf"
+        "ubuntu-medium.ttf", "ubuntu-medium-italic.ttf", "ubuntu-bold.ttf", "ubuntu-bold-italic.ttf",
+        "ubuntu-mono-regular.ttf", "ubuntu-mono-italic.ttf", "ubuntu-mono-bold.ttf", "ubuntu-mono-bold-italic.ttf"
     ];
 
     [Before(HookType.Test)]
@@ -46,6 +47,18 @@ public sealed class FontTests(KONGORIntegrationWebApplicationFactory webApplicat
 
         // The Name Table Stores The Family Name In UTF-16 Big-Endian
         byte[] familyName = Encoding.BigEndianUnicode.GetBytes("Ubuntu Sans");
+
+        await Assert.That(content.AsSpan().IndexOf(familyName)).IsGreaterThanOrEqualTo(0);
+    }
+
+    [Test]
+    public async Task The_Served_Code_Font_Is_Ubuntu_Sans_Mono()
+    {
+        using HttpClient client = webApplicationFactory.CreateClient();
+
+        byte[] content = await client.GetByteArrayAsync("/fonts/ubuntu-mono-regular.ttf");
+
+        byte[] familyName = Encoding.BigEndianUnicode.GetBytes("Ubuntu Sans Mono");
 
         await Assert.That(content.AsSpan().IndexOf(familyName)).IsGreaterThanOrEqualTo(0);
     }
