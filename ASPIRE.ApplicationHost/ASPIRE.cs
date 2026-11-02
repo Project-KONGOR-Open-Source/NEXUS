@@ -160,6 +160,7 @@ public class ASPIRE
         // Add Web Portal API Project
         IResourceBuilder<ProjectResource> webPortalAPI = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
             .WithReference(logServer) // Connect To Structured Log Server
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
