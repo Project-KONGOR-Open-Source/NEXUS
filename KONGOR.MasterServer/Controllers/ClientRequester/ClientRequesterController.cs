@@ -110,7 +110,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "take_mastery_reward"           => await TakeMasteryReward(),
             "boost_match_mastery"           => await BoostMatchMastery(),
             "client_events_info"            => GetClientEventsInformation(),
-            "get_special_messages"          => GetSpecialMessages(),
+            "get_special_messages"          => await GetSpecialMessages(),
             "claim_season_rewards"          => ClaimSeasonRewards(),
             "get_products"                  => GetProducts(),
             "get_upgrades"                  => await GetUpgrades(),
@@ -178,7 +178,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
     /// <summary>
     ///     Returns client events information as a JSON response.
-    ///     The client uses this to populate the HoN Event notification panel with revival events, newbie events, and other promotional content.
+    ///     The client uses this to populate the Project KONGOR Announcement Board with revival events, newbie events, and other promotional content.
     ///     Currently returns an empty events object as the revival and newbie event systems are not yet implemented.
     /// </summary>
     private IActionResult GetClientEventsInformation()
@@ -196,32 +196,38 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     }
 
     /// <summary>
-    ///     Returns special messages to be displayed in the client's HoN Event notification panel.
-    ///     Messages are loaded from the announcements configuration file. Each message URL points to the
-    ///     master server's announcements endpoint, which serves an HTML page embedding the configured external URL
-    ///     in an iframe that the client's embedded web browser can render.
-    ///     The client generates an MD5 hash from the title, URL, and date to track which messages have already been seen.
+    ///     The date sent with the list of special messages, which never changes.
+    ///     The client fingerprints each message as an MD5 hash of its title, its address, and this date, and pops the Project KONGOR Announcement Board up only for fingerprints the account has not read.
+    ///     Because this date never changes and each address carries its announcement's published time, a fingerprint changes only when the title or the published time does, so editing either makes the announcement pop up again.
     /// </summary>
-    private IActionResult GetSpecialMessages()
+    public const string SpecialMessagesListDate = "2026-11-02";
+
+    /// <summary>
+    ///     Returns the announcements to list on the client's Project KONGOR Announcement Board: every published, unexpired announcement in the distributed cache, newest first.
+    ///     Each message's address points at the master server's announcement page, by the announcement's identity and with its published time.
+    /// </summary>
+    private async Task<IActionResult> GetSpecialMessages()
     {
-        string date = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd");
+        DateTimeOffset now = DateTimeOffset.UtcNow;
         string baseURL = $"{Request.Scheme}://{Request.Host}";
 
-        List<Dictionary<string, object>> messages = JSONConfiguration.AnnouncementsConfiguration.SpecialMessages
-            .Select((specialMessage, index) => new Dictionary<string, object>
-            {
-                ["message_id"] = index + 1,
-                ["title"]      = specialMessage.Title,
-                ["url"]        = $"{baseURL}/announcements/{index}",
-                ["start_time"] = date,
-                ["end_time"]   = string.Empty,
-                ["left_secs"]  = 0
-            })
-            .ToList();
+        List<Announcement> announcements = [.. (await DistributedCache.GetAnnouncements())
+            .Where(announcement => announcement.Published <= now && announcement.Expires > now)
+            .OrderByDescending(announcement => announcement.Published)];
+
+        List<Dictionary<string, object>> messages = [.. announcements.Select((announcement, index) => new Dictionary<string, object>
+        {
+            ["message_id"] = index + 1,
+            ["title"]      = announcement.Title,
+            ["url"]        = $"{baseURL}/announcements/{announcement.ID}?published={announcement.Published.ToUnixTimeSeconds()}",
+            ["start_time"] = announcement.Published.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["end_time"]   = announcement.Expires.UtcDateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            ["left_secs"]  = (int) (announcement.Expires - now).TotalSeconds
+        })];
 
         Dictionary<string, object> response = new ()
         {
-            ["date"] = date,
+            ["date"] = SpecialMessagesListDate,
             ["messages"] = messages,
             ["vested_threshold"] = 5
         };

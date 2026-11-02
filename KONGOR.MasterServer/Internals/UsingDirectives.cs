@@ -11,7 +11,6 @@ global using ASPIRE.Common.Extensions.Services;
 
 global using KONGOR.MasterServer.Attributes.Serialisation;
 global using KONGOR.MasterServer.Configuration;
-global using KONGOR.MasterServer.Configuration.Announcements;
 global using KONGOR.MasterServer.Configuration.Economy;
 global using KONGOR.MasterServer.Configuration.Mastery;
 global using KONGOR.MasterServer.Configuration.MessageOfTheDay;
