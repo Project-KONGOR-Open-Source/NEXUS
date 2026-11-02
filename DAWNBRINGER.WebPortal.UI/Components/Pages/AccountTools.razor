@@ -246,7 +246,7 @@
 
         new ToolDefinition(
             Name: "Manage Announcements",
-            Description: "Add, edit, and delete the announcements on the Project KONGOR Announcement Board, which pop up once for every player at login until they expire.",
+            Description: "Add, edit, and delete the announcements on the Project KONGOR Announcement Board. An unread announcement pops up at login and is marked read once it has been open for a few seconds, after which it stays in the collapsed announcement board until it expires.",
             Icon: Icons.Material.Filled.Campaign,
             ActionLabel: "Manage",
             IsVisible: () => IsAdministrator || IsCustodian,
