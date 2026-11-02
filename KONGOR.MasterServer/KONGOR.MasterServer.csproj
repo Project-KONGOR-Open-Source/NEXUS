@@ -18,6 +18,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!-- The Web Portal's Own Font Files, Copied Into The Output, So That The Message Of The Day And The Announcement Pages Show The Same Font As The Portal -->
+        <Content Include="../DAWNBRINGER.WebPortal.UI/wwwroot/fonts/ubuntu-*.ttf" Link="Resources/Fonts/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
         <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     </ItemGroup>

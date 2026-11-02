@@ -1,3 +1,5 @@
+global using ASPIRE.Common.Constants;
+
 global using ASPIRE.Tests.Infrastructure.Container;
 global using ASPIRE.Tests.Infrastructure.DependencyInversion;
 global using ASPIRE.Tests.Infrastructure.Factory;
@@ -16,6 +18,7 @@ global using MERRICK.DatabaseContext.Entities.Utility;
 global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Persistence;
 
+global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Mvc;
@@ -27,8 +30,11 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 
+global using StackExchange.Redis;
+
 global using System.Collections.Concurrent;
 global using System.IdentityModel.Tokens.Jwt;
+global using System.Reflection;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Text;

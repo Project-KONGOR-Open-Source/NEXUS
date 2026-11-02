@@ -210,6 +210,13 @@ public class KONGOR
             RequestPath = "/swagger"
         });
 
+        // Serve The Web Portal's Fonts, Copied Into The Output, To The Message Of The Day And The Announcement Pages
+        application.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(AppContext.BaseDirectory, "Resources", "Fonts")),
+            RequestPath = "/fonts"
+        });
+
         // Serve CDN Files From A Local Directory, When Configured
         LocalCDNFileHandler.Use(application, application.Services.GetRequiredService<IOptions<OperationalConfiguration>>().Value.CDN);
 

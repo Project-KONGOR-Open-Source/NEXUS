@@ -5,6 +5,7 @@
 @inject PortalAuthenticationService AuthenticationService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <PageTitle>Account Tools - Project KONGOR</PageTitle>
 
@@ -233,7 +234,23 @@
             Icon: Icons.Material.Filled.AdminPanelSettings,
             ActionLabel: "Issue",
             IsVisible: () => IsAdministrator || IsCustodian,
-            OnInvoke: OpenIssueHostAuthorisationDialog)
+            OnInvoke: OpenIssueHostAuthorisationDialog),
+
+        new ToolDefinition(
+            Name: "Manage Message Of The Day Events",
+            Description: "Add, edit, and delete the timed events that the client's message of the day shows beside its permanent items, each with its own card picture.",
+            Icon: Icons.Material.Filled.ViewCarousel,
+            ActionLabel: "Manage",
+            IsVisible: () => IsAdministrator || IsCustodian,
+            OnInvoke: () => NavigationManager.NavigateTo("/administration/message-of-the-day")),
+
+        new ToolDefinition(
+            Name: "Manage Announcements",
+            Description: "Add, edit, and delete the announcements on the Project KONGOR Announcement Board, which pop up once for every player at login until they expire.",
+            Icon: Icons.Material.Filled.Campaign,
+            ActionLabel: "Manage",
+            IsVisible: () => IsAdministrator || IsCustodian,
+            OnInvoke: () => NavigationManager.NavigateTo("/administration/announcements"))
     };
 
     private IEnumerable<ToolDefinition> VisibleTools => AllTools.Where(tool => tool.IsVisible());

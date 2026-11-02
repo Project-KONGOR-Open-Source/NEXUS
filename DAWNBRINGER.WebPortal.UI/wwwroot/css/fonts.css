@@ -63,6 +63,38 @@
 }
 
 @font-face {
+    font-family: "Ubuntu Mono";
+    src: url("../fonts/ubuntu-mono-regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu Mono";
+    src: url("../fonts/ubuntu-mono-italic.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu Mono";
+    src: url("../fonts/ubuntu-mono-bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ubuntu Mono";
+    src: url("../fonts/ubuntu-mono-bold-italic.ttf") format("truetype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
     font-family: "Scurlock";
     src: url("../fonts/scurlock.ttf") format("truetype");
     font-display: swap;
@@ -85,6 +117,11 @@
 .font-ubuntu-bold {
     font-family: "Ubuntu", sans-serif;
     font-weight: 700;
+}
+
+.font-ubuntu-mono,
+.font-ubuntu-mono .mud-input {
+    font-family: "Ubuntu Mono", monospace;
 }
 
 .font-scurlock {

@@ -1,0 +1,387 @@
+@page "/administration/message-of-the-day"
+
+@attribute [Authorize]
+
+@using System.Globalization
+
+@inject PortalAuthenticationService AuthenticationService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Message Of The Day - Project KONGOR</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6 pt-8">
+    <AuthorizeView Context="authContext">
+        <Authorized>
+            @* Page Header *@
+            <MudCard Class="glass-card pa-6 mb-6 animate-fade-in" Elevation="0" Style="position: relative;">
+                <MudButton Href="/account/tools" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Style="position: absolute; top: 24px; right: 24px;">
+                    Back
+                </MudButton>
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Administration</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Primary">Message Of The Day</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Events show in the client's message of the day beside the permanent items, newest first, from their published time until they expire. All times are in UTC.
+                    </MudText>
+                </MudStack>
+            </MudCard>
+
+            @if (IsAdministrator || IsCustodian)
+            {
+                @* Events Table *@
+                <MudCard Class="glass-card pa-4 mb-6 animate-fade-in-delay-1" Elevation="0">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudText Typo="Typo.h6">Events</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateDialog">
+                            Add Event
+                        </MudButton>
+                    </MudStack>
+
+                    <MudTable T="MessageOfTheDayEventResponse" Items="Events" Loading="Loading" Hover="true" Elevation="0" Style="background: transparent;">
+                        <HeaderContent>
+                            <MudTh>Title</MudTh>
+                            <MudTh>Published</MudTh>
+                            <MudTh>Expires</MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Title">@context.Title</MudTd>
+                            <MudTd DataLabel="Published">
+                                @FormatTime(context.Published)
+                                @if (context.Published > DateTimeOffset.UtcNow)
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Warning">Scheduled</MudText>
+                                }
+                            </MudTd>
+                            <MudTd DataLabel="Expires">@FormatTime(context.Expires)</MudTd>
+                            <MudTd Style="text-align: right; white-space: nowrap;">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" aria-label="Edit" OnClick="() => OpenEditDialog(context)" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" OnClick="() => DeleteEvent(context)" />
+                            </MudTd>
+                        </RowTemplate>
+                        <NoRecordsContent>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">No events are live or scheduled.</MudText>
+                        </NoRecordsContent>
+                    </MudTable>
+                </MudCard>
+
+                @* Add Or Edit Event Dialog *@
+                <MudDialog @bind-Visible="EventDialogVisible" Options="DialogOptions">
+                    <TitleContent>
+                        <MudText Typo="Typo.h6">@(EditingEventID is null ? "Add Event" : "Edit Event")</MudText>
+                    </TitleContent>
+                    <DialogContent>
+                        <EditForm Model="EventFormModel" OnValidSubmit="HandleEventSubmit" id="message-of-the-day-event-form">
+                            <DataAnnotationsValidator />
+
+                            <MudGrid Spacing="4">
+                                <MudItem xs="12" md="7">
+                                    <MudStack Spacing="3">
+                                        <MudTextField @bind-Value="EventFormModel.Title"
+                                                      For="@(() => EventFormModel.Title)"
+                                                      Label="Title"
+                                                      HelperText="In Start Case."
+                                                      Variant="Variant.Outlined"
+                                                      Immediate="true" />
+
+                                        <MudTextField @bind-Value="EventFormModel.Subtitle"
+                                                      For="@(() => EventFormModel.Subtitle)"
+                                                      Label="Subtitle"
+                                                      HelperText="Starts with a lowercase word, unless that word is a proper noun."
+                                                      Variant="Variant.Outlined"
+                                                      Immediate="true" />
+
+                                        <MudTextField @bind-Value="EventFormModel.Body"
+                                                      For="@(() => EventFormModel.Body)"
+                                                      Label="Article"
+                                                      HelperText="HTML: paragraphs, line breaks, bold, italic, and underlined text, lists, inline code, code blocks, and links."
+                                                      Variant="Variant.Outlined"
+                                                      Lines="8"
+                                                      Class="font-ubuntu-mono" />
+
+                                        <MudStack Row="true" Spacing="2">
+                                            <MudDatePicker @bind-Date="EventFormModel.PublishedDate"
+                                                           Label="Published (UTC)"
+                                                           HelperText="Empty publishes a new event at once, and keeps an edited event's time."
+                                                           Variant="Variant.Outlined"
+                                                           Clearable="true" />
+                                            <MudTimePicker @bind-Time="EventFormModel.PublishedTime"
+                                                           Label="Time"
+                                                           Variant="Variant.Outlined"
+                                                           Clearable="true" />
+                                        </MudStack>
+
+                                        <MudStack Row="true" Spacing="2">
+                                            <MudDatePicker @bind-Date="EventFormModel.ExpiresDate"
+                                                           For="@(() => EventFormModel.ExpiresDate)"
+                                                           Label="Expires (UTC)"
+                                                           Variant="Variant.Outlined" />
+                                            <MudTimePicker @bind-Time="EventFormModel.ExpiresTime"
+                                                           Label="Time"
+                                                           Variant="Variant.Outlined"
+                                                           Clearable="true" />
+                                        </MudStack>
+                                    </MudStack>
+                                </MudItem>
+
+                                <MudItem xs="12" md="5">
+                                    <MudStack Spacing="3" AlignItems="AlignItems.Center">
+                                        @* Card Preview, As The Client's Carousel Shows The Card In Focus *@
+                                        <div style="position: relative; width: 100%; max-width: 280px; aspect-ratio: @ContentLimits.PictureWidth / @ContentLimits.PictureHeight; border-radius: 6px; overflow: hidden; background: #241210; border: 1px solid #c8a060; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.8);">
+                                            @if (string.IsNullOrEmpty(EventFormModel.Picture) is false)
+                                            {
+                                                <div style="position: absolute; inset: 0; background-image: url('@PictureDataURI(EventFormModel.Picture)'); background-size: cover; background-position: center;"></div>
+                                            }
+                                            <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 18% 6% 5%; background: linear-gradient(transparent, rgba(10, 4, 3, 0.92) 45%);">
+                                                <div class="font-ubuntu-bold" style="margin-bottom: 0.25em; font-size: 20px; color: #f4dfb4; text-shadow: 1px 1px 3px #000;">@EventFormModel.Title</div>
+                                                <div class="font-ubuntu" style="font-size: 14px; color: #c8ac84;">@EventFormModel.Subtitle</div>
+                                            </div>
+                                        </div>
+
+                                        <MudFileUpload T="IBrowserFile" Accept=".png,.jpg,.jpeg,.webp" FilesChanged="HandlePictureSelected">
+                                            <CustomContent Context="fileUpload">
+                                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Image" OnClick="@fileUpload.OpenFilePickerAsync">
+                                                    Choose Picture
+                                                </MudButton>
+                                            </CustomContent>
+                                        </MudFileUpload>
+
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary" Align="Align.Center">
+                                            Exactly @ContentLimits.PictureWidth by @ContentLimits.PictureHeight pixels, in PNG, JPEG, or WebP, and at most @PictureMaximumMegabytes MB.
+                                        </MudText>
+                                    </MudStack>
+                                </MudItem>
+                            </MudGrid>
+                        </EditForm>
+                    </DialogContent>
+                    <DialogActions>
+                        <MudButton OnClick="CloseEventDialog" Disabled="EventProcessing">Cancel</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   form="message-of-the-day-event-form"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Class="glow-button"
+                                   Disabled="EventProcessing">
+                            @if (EventProcessing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Saving ...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Save</MudText>
+                            }
+                        </MudButton>
+                    </DialogActions>
+                </MudDialog>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    This page is for administrators and custodians.
+                </MudAlert>
+            }
+        </Authorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private bool IsAdministrator { get; set; }
+    private bool IsCustodian { get; set; }
+
+    private bool Loading { get; set; }
+    private bool EventDialogVisible { get; set; }
+    private bool EventProcessing { get; set; }
+
+    private List<MessageOfTheDayEventResponse> Events { get; set; } = [];
+
+    private Guid? EditingEventID { get; set; }
+
+    private MessageOfTheDayEventFormModel EventFormModel { get; set; } = new ();
+
+    private static readonly string PictureMaximumMegabytes = (ContentLimits.PictureMaximumBytes / 1_048_576.0).ToString("0.#", CultureInfo.InvariantCulture);
+
+    private static readonly DialogOptions DialogOptions = new ()
+    {
+        CloseOnEscapeKey = true,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is null)
+            return;
+
+        AuthenticationState authenticationState = await AuthenticationStateTask;
+
+        string? userRole = authenticationState.User.Claims.SingleOrDefault(claim => claim.Type.Equals("user_role"))?.Value;
+
+        IsAdministrator = string.Equals(userRole, "ADMINISTRATOR", StringComparison.Ordinal);
+        IsCustodian = string.Equals(userRole, "CUSTODIAN", StringComparison.Ordinal);
+
+        if (IsAdministrator || IsCustodian)
+            await LoadEvents();
+    }
+
+    private async Task LoadEvents()
+    {
+        Loading = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            HttpResponseMessage response = await client.GetAsync("/Administration/MessageOfTheDay/Events");
+
+            if (response.IsSuccessStatusCode)
+                Events = await response.Content.ReadFromJsonAsync<List<MessageOfTheDayEventResponse>>() ?? [];
+
+            else
+                await Snackbar.AddResponseErrors(response, "Failed to load the events.");
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private void OpenCreateDialog()
+    {
+        EditingEventID = null;
+        EventFormModel = new MessageOfTheDayEventFormModel();
+        EventDialogVisible = true;
+    }
+
+    private void OpenEditDialog(MessageOfTheDayEventResponse item)
+    {
+        EditingEventID = item.ID;
+        EventFormModel = MessageOfTheDayEventFormModel.From(item);
+        EventDialogVisible = true;
+    }
+
+    private void CloseEventDialog()
+    {
+        EventDialogVisible = false;
+    }
+
+    private async Task HandlePictureSelected(IBrowserFile? file)
+    {
+        if (file is null)
+            return;
+
+        if (file.Size > ContentLimits.PictureMaximumBytes)
+        {
+            Snackbar.Add($"The picture must be at most {PictureMaximumMegabytes} MB.", Severity.Error);
+
+            return;
+        }
+
+        await using Stream stream = file.OpenReadStream(ContentLimits.PictureMaximumBytes);
+
+        using MemoryStream memory = new ();
+
+        await stream.CopyToAsync(memory);
+
+        EventFormModel.Picture = Convert.ToBase64String(memory.ToArray());
+    }
+
+    private async Task HandleEventSubmit()
+    {
+        EventProcessing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            SaveMessageOfTheDayEventRequest request = new (EventFormModel.Title, EventFormModel.Subtitle, EventFormModel.Body, EventFormModel.Picture,
+                EventFormModel.PublishedAt(), EventFormModel.ExpiresAt() ?? DateTimeOffset.MinValue);
+
+            HttpResponseMessage response = EditingEventID is Guid id
+                ? await client.PutAsJsonAsync($"/Administration/MessageOfTheDay/Events/{id}", request)
+                : await client.PostAsJsonAsync("/Administration/MessageOfTheDay/Events", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($@"Event ""{request.Title}"" was saved.", Severity.Success);
+
+                EventDialogVisible = false;
+
+                await LoadEvents();
+            }
+
+            else
+            {
+                await Snackbar.AddResponseErrors(response, "Failed to save the event.");
+            }
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+
+        finally
+        {
+            EventProcessing = false;
+        }
+    }
+
+    private async Task DeleteEvent(MessageOfTheDayEventResponse item)
+    {
+        bool? confirmed = await DialogService.ShowMessageBoxAsync("Delete Event", $@"Delete ""{item.Title}""? It leaves the message of the day at once.", yesText: "Delete", cancelText: "Cancel");
+
+        if (confirmed is not true)
+            return;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            HttpResponseMessage response = await client.DeleteAsync($"/Administration/MessageOfTheDay/Events/{item.ID}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($@"Event ""{item.Title}"" was deleted.", Severity.Success);
+
+                await LoadEvents();
+            }
+
+            else
+            {
+                await Snackbar.AddResponseErrors(response, "Failed to delete the event.");
+            }
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+    }
+
+    private static string FormatTime(DateTimeOffset time)
+        => time.UtcDateTime.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture);
+
+    // The Picture Is Stored Without Its Type, So The Type Is Read From The Start Of Its Base64 Text
+    private static string PictureDataURI(string picture)
+    {
+        string contentType = picture.StartsWith("/9j/", StringComparison.Ordinal) ? "image/jpeg"
+            : picture.StartsWith("UklGR", StringComparison.Ordinal) ? "image/webp"
+            : "image/png";
+
+        return $"data:{contentType};base64,{picture}";
+    }
+}

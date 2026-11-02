@@ -46,6 +46,12 @@ public class ZORGATH
             options.AddMerrickInterceptors();
         });
 
+        // Add Distributed Cache, Which Holds The Message Of The Day's Events And The Announcement Board's Announcements; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.ApplicationHost
+        builder.AddRedisClient("DISTRIBUTED-CACHE");
+
+        // Register IDatabase From IConnectionMultiplexer
+        builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
 
