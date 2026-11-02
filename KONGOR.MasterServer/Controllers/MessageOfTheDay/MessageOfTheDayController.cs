@@ -5,22 +5,37 @@ namespace KONGOR.MasterServer.Controllers.MessageOfTheDay;
 ///     The items are the permanent ones from the master server's configuration together with the events administrators keep in the distributed cache.
 /// </summary>
 [ApiController]
-public class MessageOfTheDayController(IDatabase distributedCache) : ControllerBase
+public class MessageOfTheDayController(IDatabase distributedCache, IMemoryCache memoryCache) : ControllerBase
 {
     private IDatabase DistributedCache { get; } = distributedCache;
+    private IMemoryCache MemoryCache { get; } = memoryCache;
+
+    private const string PageMemoryCacheKey = "MESSAGE-OF-THE-DAY-PAGE";
+
+    /// <summary>
+    ///     How long a built page is served from memory; an added, edited, or deleted event shows once it passes.
+    /// </summary>
+    private static readonly TimeSpan PageLifetime = TimeSpan.FromSeconds(10);
 
     /// <summary>
     ///     Returns the message of the day page with every published, unexpired item, newest first.
     ///     The client appends "lang" and "cookie" query parameters, which are ignored, because every item is in English.
-    ///     Every player's home page loads this page, so the master server's shared rate limit does not apply to it.
+    ///     Every player's home page loads this page, so the master server's shared rate limit does not apply to it, and the page is built at most once per <see cref="PageLifetime"/>, because building it reads every event's picture from the distributed cache.
     /// </summary>
     [HttpGet("motd", Name = "Message Of The Day Page")]
     [DisableRateLimiting]
     public async Task<IActionResult> GetPage()
     {
-        List<MessageOfTheDayItem> items = MessageOfTheDayPage.Visible([.. JSONConfiguration.MessageOfTheDayConfiguration.Items, .. await DistributedCache.GetMessageOfTheDayEvents()], DateTimeOffset.UtcNow);
+        string? page = await MemoryCache.GetOrCreateAsync(PageMemoryCacheKey, async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = PageLifetime;
 
-        return Content(MessageOfTheDayPage.Render(items), "text/html");
+            List<MessageOfTheDayItem> items = MessageOfTheDayPage.Visible([.. JSONConfiguration.MessageOfTheDayConfiguration.Items, .. await DistributedCache.GetMessageOfTheDayEvents()], DateTimeOffset.UtcNow);
+
+            return MessageOfTheDayPage.Render(items);
+        });
+
+        return Content(page ?? string.Empty, "text/html");
     }
 
     /// <summary>

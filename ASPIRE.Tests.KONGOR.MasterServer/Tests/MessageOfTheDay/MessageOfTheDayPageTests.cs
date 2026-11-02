@@ -34,6 +34,21 @@ public sealed class MessageOfTheDayPageTests(KONGORIntegrationWebApplicationFact
     }
 
     [Test]
+    public async Task The_Page_Is_Built_Once_And_Served_From_Memory_For_A_While()
+    {
+        using HttpClient client = webApplicationFactory.CreateClient();
+
+        string first = await client.GetStringAsync("/motd");
+
+        await DistributedCache.SetMessageOfTheDayEvent(NewEvent("Tonight's Tournament", DateTimeOffset.UtcNow.AddMinutes(-1)));
+
+        string second = await client.GetStringAsync("/motd");
+
+        // Building The Page Reads Every Event's Picture From The Cache, So Every Player's Home Page Loading At Once Must Not Rebuild It Each Time
+        await Assert.That(second).IsEqualTo(first);
+    }
+
+    [Test]
     public async Task The_Page_Ignores_Its_Language_And_Cookie()
     {
         using HttpClient client = webApplicationFactory.CreateClient();
