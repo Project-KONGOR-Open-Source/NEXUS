@@ -119,6 +119,11 @@
     font-weight: 700;
 }
 
+.font-ubuntu-mono,
+.font-ubuntu-mono .mud-input {
+    font-family: "Ubuntu Mono", monospace;
+}
+
 .font-scurlock {
     font-family: "Scurlock", sans-serif;
     text-transform: lowercase;

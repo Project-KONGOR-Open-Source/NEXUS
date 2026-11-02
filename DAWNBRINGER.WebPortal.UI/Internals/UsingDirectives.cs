@@ -3,6 +3,8 @@ global using ASPIRE.Common.Extensions.Logging;
 global using ASPIRE.Common.Extensions.Services;
 
 global using DAWNBRINGER.WebPortal.UI.Attributes;
+global using DAWNBRINGER.WebPortal.UI.Contracts;
+global using DAWNBRINGER.WebPortal.UI.Extensions;
 global using DAWNBRINGER.WebPortal.UI.Services;
 
 global using Microsoft.AspNetCore.Authorization;
@@ -18,3 +20,4 @@ global using System.ComponentModel.DataAnnotations;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Runtime.CompilerServices;
 global using System.Security.Claims;
+global using System.Text.Json;

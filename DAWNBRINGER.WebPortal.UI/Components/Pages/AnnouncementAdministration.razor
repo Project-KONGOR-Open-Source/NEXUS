@@ -1,0 +1,321 @@
+@page "/administration/announcements"
+
+@attribute [Authorize]
+
+@using System.Globalization
+
+@inject PortalAuthenticationService AuthenticationService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<PageTitle>Announcements - Project KONGOR</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="px-4 px-sm-6 pt-8">
+    <AuthorizeView Context="authContext">
+        <Authorized>
+            @* Page Header *@
+            <MudCard Class="glass-card pa-6 mb-6 animate-fade-in" Elevation="0" Style="position: relative;">
+                <MudButton Href="/account/tools" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ArrowBack"
+                           Style="position: absolute; top: 24px; right: 24px;">
+                    Back
+                </MudButton>
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Administration</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Primary">Announcements</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Announcements list on the client's Project KONGOR Announcement Board from their published time until they expire, and pop up once for every player. Changing an announcement's title or published time makes it pop up again. All times are in UTC.
+                    </MudText>
+                </MudStack>
+            </MudCard>
+
+            @if (IsAdministrator || IsCustodian)
+            {
+                @* Announcements Table *@
+                <MudCard Class="glass-card pa-4 mb-6 animate-fade-in-delay-1" Elevation="0">
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-4">
+                        <MudStack Spacing="0">
+                            <MudText Typo="Typo.h6">Announcements</MudText>
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">
+                                @Announcements.Count of @ContentLimits.UnexpiredAnnouncementsMaximum live or scheduled, which is as many as the board has room for.
+                            </MudText>
+                        </MudStack>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="glow-button" StartIcon="@Icons.Material.Filled.Add" OnClick="OpenCreateDialog"
+                                   Disabled="@(Announcements.Count >= ContentLimits.UnexpiredAnnouncementsMaximum)">
+                            Add Announcement
+                        </MudButton>
+                    </MudStack>
+
+                    <MudTable T="AnnouncementResponse" Items="Announcements" Loading="Loading" Hover="true" Elevation="0" Style="background: transparent;">
+                        <HeaderContent>
+                            <MudTh>Title</MudTh>
+                            <MudTh>Published</MudTh>
+                            <MudTh>Expires</MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Title">@context.Title</MudTd>
+                            <MudTd DataLabel="Published">
+                                @FormatTime(context.Published)
+                                @if (context.Published > DateTimeOffset.UtcNow)
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Warning">Scheduled</MudText>
+                                }
+                            </MudTd>
+                            <MudTd DataLabel="Expires">@FormatTime(context.Expires)</MudTd>
+                            <MudTd Style="text-align: right; white-space: nowrap;">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" aria-label="Edit" OnClick="() => OpenEditDialog(context)" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" aria-label="Delete" OnClick="() => DeleteAnnouncement(context)" />
+                            </MudTd>
+                        </RowTemplate>
+                        <NoRecordsContent>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">No announcements are live or scheduled.</MudText>
+                        </NoRecordsContent>
+                    </MudTable>
+                </MudCard>
+
+                @* Add Or Edit Announcement Dialog *@
+                <MudDialog @bind-Visible="AnnouncementDialogVisible" Options="DialogOptions">
+                    <TitleContent>
+                        <MudText Typo="Typo.h6">@(EditingAnnouncementID is null ? "Add Announcement" : "Edit Announcement")</MudText>
+                    </TitleContent>
+                    <DialogContent>
+                        <EditForm Model="AnnouncementFormModel" OnValidSubmit="HandleAnnouncementSubmit" id="announcement-form">
+                            <DataAnnotationsValidator />
+
+                            <MudStack Spacing="3">
+                                <MudTextField @bind-Value="AnnouncementFormModel.Title"
+                                              For="@(() => AnnouncementFormModel.Title)"
+                                              Label="Title"
+                                              HelperText="In Start Case."
+                                              Variant="Variant.Outlined"
+                                              Immediate="true" />
+
+                                <MudTextField @bind-Value="AnnouncementFormModel.Body"
+                                              For="@(() => AnnouncementFormModel.Body)"
+                                              Label="Announcement"
+                                              HelperText="HTML: paragraphs, line breaks, bold, italic, and underlined text, lists, inline code, code blocks, and links."
+                                              Variant="Variant.Outlined"
+                                              Lines="8"
+                                              Class="font-ubuntu-mono" />
+
+                                <MudStack Row="true" Spacing="2">
+                                    <MudDatePicker @bind-Date="AnnouncementFormModel.PublishedDate"
+                                                   Label="Published (UTC)"
+                                                   HelperText="Empty publishes a new announcement at once, and keeps an edited announcement's time."
+                                                   Variant="Variant.Outlined"
+                                                   Clearable="true" />
+                                    <MudTimePicker @bind-Time="AnnouncementFormModel.PublishedTime"
+                                                   Label="Time"
+                                                   Variant="Variant.Outlined"
+                                                   Clearable="true" />
+                                </MudStack>
+
+                                <MudStack Row="true" Spacing="2">
+                                    <MudDatePicker @bind-Date="AnnouncementFormModel.ExpiresDate"
+                                                   For="@(() => AnnouncementFormModel.ExpiresDate)"
+                                                   Label="Expires (UTC)"
+                                                   Variant="Variant.Outlined" />
+                                    <MudTimePicker @bind-Time="AnnouncementFormModel.ExpiresTime"
+                                                   Label="Time"
+                                                   Variant="Variant.Outlined"
+                                                   Clearable="true" />
+                                </MudStack>
+                            </MudStack>
+                        </EditForm>
+                    </DialogContent>
+                    <DialogActions>
+                        <MudButton OnClick="CloseAnnouncementDialog" Disabled="AnnouncementProcessing">Cancel</MudButton>
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   form="announcement-form"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Class="glow-button"
+                                   Disabled="AnnouncementProcessing">
+                            @if (AnnouncementProcessing)
+                            {
+                                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                                <MudText>Saving ...</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Save</MudText>
+                            }
+                        </MudButton>
+                    </DialogActions>
+                </MudDialog>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    This page is for administrators and custodians.
+                </MudAlert>
+            }
+        </Authorized>
+    </AuthorizeView>
+</MudContainer>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private bool IsAdministrator { get; set; }
+    private bool IsCustodian { get; set; }
+
+    private bool Loading { get; set; }
+    private bool AnnouncementDialogVisible { get; set; }
+    private bool AnnouncementProcessing { get; set; }
+
+    private List<AnnouncementResponse> Announcements { get; set; } = [];
+
+    private Guid? EditingAnnouncementID { get; set; }
+
+    private AnnouncementFormModel AnnouncementFormModel { get; set; } = new ();
+
+    private static readonly DialogOptions DialogOptions = new ()
+    {
+        CloseOnEscapeKey = true,
+        BackdropClick = false,
+        MaxWidth = MaxWidth.Small,
+        FullWidth = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask is null)
+            return;
+
+        AuthenticationState authenticationState = await AuthenticationStateTask;
+
+        string? userRole = authenticationState.User.Claims.SingleOrDefault(claim => claim.Type.Equals("user_role"))?.Value;
+
+        IsAdministrator = string.Equals(userRole, "ADMINISTRATOR", StringComparison.Ordinal);
+        IsCustodian = string.Equals(userRole, "CUSTODIAN", StringComparison.Ordinal);
+
+        if (IsAdministrator || IsCustodian)
+            await LoadAnnouncements();
+    }
+
+    private async Task LoadAnnouncements()
+    {
+        Loading = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            HttpResponseMessage response = await client.GetAsync("/Administration/Announcements");
+
+            if (response.IsSuccessStatusCode)
+                Announcements = await response.Content.ReadFromJsonAsync<List<AnnouncementResponse>>() ?? [];
+
+            else
+                await Snackbar.AddResponseErrors(response, "Failed to load the announcements.");
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+
+        finally
+        {
+            Loading = false;
+        }
+    }
+
+    private void OpenCreateDialog()
+    {
+        EditingAnnouncementID = null;
+        AnnouncementFormModel = new AnnouncementFormModel();
+        AnnouncementDialogVisible = true;
+    }
+
+    private void OpenEditDialog(AnnouncementResponse announcement)
+    {
+        EditingAnnouncementID = announcement.ID;
+        AnnouncementFormModel = AnnouncementFormModel.From(announcement);
+        AnnouncementDialogVisible = true;
+    }
+
+    private void CloseAnnouncementDialog()
+    {
+        AnnouncementDialogVisible = false;
+    }
+
+    private async Task HandleAnnouncementSubmit()
+    {
+        AnnouncementProcessing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            SaveAnnouncementRequest request = new (AnnouncementFormModel.Title, AnnouncementFormModel.Body,
+                AnnouncementFormModel.PublishedAt(), AnnouncementFormModel.ExpiresAt() ?? DateTimeOffset.MinValue);
+
+            HttpResponseMessage response = EditingAnnouncementID is Guid id
+                ? await client.PutAsJsonAsync($"/Administration/Announcements/{id}", request)
+                : await client.PostAsJsonAsync("/Administration/Announcements", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($@"Announcement ""{request.Title}"" was saved.", Severity.Success);
+
+                AnnouncementDialogVisible = false;
+
+                await LoadAnnouncements();
+            }
+
+            else
+            {
+                await Snackbar.AddResponseErrors(response, "Failed to save the announcement.");
+            }
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+
+        finally
+        {
+            AnnouncementProcessing = false;
+        }
+    }
+
+    private async Task DeleteAnnouncement(AnnouncementResponse announcement)
+    {
+        bool? confirmed = await DialogService.ShowMessageBoxAsync("Delete Announcement", $@"Delete ""{announcement.Title}""? It leaves the announcement board at once.", yesText: "Delete", cancelText: "Cancel");
+
+        if (confirmed is not true)
+            return;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            HttpResponseMessage response = await client.DeleteAsync($"/Administration/Announcements/{announcement.ID}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add($@"Announcement ""{announcement.Title}"" was deleted.", Severity.Success);
+
+                await LoadAnnouncements();
+            }
+
+            else
+            {
+                await Snackbar.AddResponseErrors(response, "Failed to delete the announcement.");
+            }
+        }
+
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+    }
+
+    private static string FormatTime(DateTimeOffset time)
+        => time.UtcDateTime.ToString("dd MMM yyyy HH:mm", CultureInfo.InvariantCulture);
+}
