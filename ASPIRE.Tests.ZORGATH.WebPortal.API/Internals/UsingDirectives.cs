@@ -1,3 +1,5 @@
+global using ASPIRE.Common.Constants;
+
 global using ASPIRE.Tests.Infrastructure.Container;
 global using ASPIRE.Tests.Infrastructure.DependencyInversion;
 global using ASPIRE.Tests.Infrastructure.Factory;
@@ -9,9 +11,6 @@ global using ASPIRE.Tests.ZORGATH.WebPortal.API.Services;
 
 global using KONGOR.MasterServer.Configuration;
 global using KONGOR.MasterServer.Configuration.Economy;
-
-// The Master Server's Constants Also Hold A "RateLimiterPolicies", So Only "ContentLimits" Is Brought In
-global using ContentLimits = KONGOR.MasterServer.Constants.ContentLimits;
 
 global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Entities.Core;

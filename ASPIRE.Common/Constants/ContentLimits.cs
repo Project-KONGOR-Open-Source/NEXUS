@@ -1,7 +1,7 @@
-namespace KONGOR.MasterServer.Constants;
+namespace ASPIRE.Common.Constants;
 
 /// <summary>
-///     The limits on the message of the day's items and the announcement board's announcements, in one place, so that the web portal's checks and messages agree with what the client can show.
+///     The limits on the message of the day's items and the announcement board's announcements, in one place, so that the master server's pages, the web portal's API, and the web portal's pages agree with what the client can show.
 /// </summary>
 public static class ContentLimits
 {

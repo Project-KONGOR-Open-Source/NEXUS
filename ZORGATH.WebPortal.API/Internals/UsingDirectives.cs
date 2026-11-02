@@ -10,9 +10,6 @@ global using KONGOR.MasterServer.Helpers.MessageOfTheDay;
 global using KONGOR.MasterServer.Models.Announcements;
 global using KONGOR.MasterServer.Models.MessageOfTheDay;
 
-// The Master Server's Constants Also Hold A "RateLimiterPolicies", So Only "ContentLimits" Is Brought In
-global using ContentLimits = KONGOR.MasterServer.Constants.ContentLimits;
-
 global using FluentValidation;
 global using FluentValidation.Results;
 
