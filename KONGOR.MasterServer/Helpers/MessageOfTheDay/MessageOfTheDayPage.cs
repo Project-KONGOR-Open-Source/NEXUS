@@ -36,6 +36,8 @@ public static class MessageOfTheDayPage
                     @font-face { font-family: "Ubuntu Sans"; src: url("/fonts/ubuntu-regular.ttf"); font-weight: 400; }
                     @font-face { font-family: "Ubuntu Sans"; src: url("/fonts/ubuntu-medium.ttf"); font-weight: 500; }
                     @font-face { font-family: "Ubuntu Sans"; src: url("/fonts/ubuntu-bold.ttf"); font-weight: 700; }
+                    @font-face { font-family: "Ubuntu Sans Mono"; src: url("/fonts/ubuntu-mono-regular.ttf"); font-weight: 400; }
+                    @font-face { font-family: "Ubuntu Sans Mono"; src: url("/fonts/ubuntu-mono-bold.ttf"); font-weight: 700; }
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: "Ubuntu Sans", sans-serif; color: #e8d4b0; user-select: none; }
                     .frame { position: relative; width: 100%; height: 100%; }
@@ -70,8 +72,12 @@ public static class MessageOfTheDayPage
                     .heading h1 { margin-bottom: 0.2em; font-size: 2.6vw; line-height: 1.15; font-weight: 700; color: #f4dfb4; text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6); }
                     .heading p { font-size: 1.4vw; color: #d0b890; }
                     .body { font-size: 1.3vw; line-height: 1.65; color: #ead6b4; user-select: text; }
-                    .body p, .body ul, .body ol { margin-bottom: 0.8em; }
+                    .body p, .body ul, .body ol, .body pre { margin-bottom: 0.8em; }
                     .body ul, .body ol { padding-left: 1.4em; }
+                    .body code, .body pre { font-family: "Ubuntu Sans Mono", monospace; font-size: 0.92em; }
+                    .body code { padding: 0.1em 0.35em; border-radius: 4px; background: rgba(0, 0, 0, 0.35); }
+                    .body pre { padding: 0.8em 1em; border-radius: 6px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(138, 106, 64, 0.35); white-space: pre-wrap; overflow-wrap: anywhere; }
+                    .body pre code { padding: 0; background: none; font-size: 1em; }
                     .body a { color: #6ad0f5; text-decoration: none; }
                     .body a:hover { text-decoration: underline; }
                 </style>

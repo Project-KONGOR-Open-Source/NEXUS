@@ -49,6 +49,18 @@ public sealed class MessageOfTheDayPage_Unit
         }
     }
 
+    [Test]
+    public async Task Code_Is_Shown_In_Ubuntu_Sans_Mono()
+    {
+        string html = MessageOfTheDayPage.Render([NewItem("Weekend Event", Now, expires: null)]);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(html).Contains(@"@font-face { font-family: ""Ubuntu Sans Mono""; src: url(""/fonts/ubuntu-mono-regular.ttf"")");
+            await Assert.That(html).Contains(@".body code, .body pre { font-family: ""Ubuntu Sans Mono"", monospace;");
+        }
+    }
+
     private static MessageOfTheDayItem NewItem(string title, DateTimeOffset published, DateTimeOffset? expires)
         => new (Guid.CreateVersion7(), title, "a subtitle", "<p>A body.</p>", Convert.ToBase64String([0x89, 0x50, 0x4E, 0x47]), published, expires);
 }

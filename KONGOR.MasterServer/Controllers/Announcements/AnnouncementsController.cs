@@ -36,12 +36,18 @@ public class AnnouncementsController(IDatabase distributedCache) : ControllerBas
                 <style>
                     @font-face { font-family: "Ubuntu Sans"; src: url("/fonts/ubuntu-regular.ttf"); font-weight: 400; }
                     @font-face { font-family: "Ubuntu Sans"; src: url("/fonts/ubuntu-bold.ttf"); font-weight: 700; }
+                    @font-face { font-family: "Ubuntu Sans Mono"; src: url("/fonts/ubuntu-mono-regular.ttf"); font-weight: 400; }
+                    @font-face { font-family: "Ubuntu Sans Mono"; src: url("/fonts/ubuntu-mono-bold.ttf"); font-weight: 700; }
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     html, body { width: 100%; height: 100%; background: #1a0000; color: #e0c8a0; font-family: "Ubuntu Sans", sans-serif; }
                     body { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
                     h1 { font-size: 28px; color: #f0d8b0; margin-bottom: 24px; text-shadow: 1px 1px 3px #000; }
                     .body-content { font-size: 16px; line-height: 1.6; max-width: 700px; }
-                    .body-content p { margin-bottom: 16px; }
+                    .body-content p, .body-content pre { margin-bottom: 16px; }
+                    .body-content code, .body-content pre { font-family: "Ubuntu Sans Mono", monospace; font-size: 0.92em; }
+                    .body-content code { padding: 0.1em 0.35em; border-radius: 4px; background: rgba(0, 0, 0, 0.35); }
+                    .body-content pre { padding: 12px 16px; border-radius: 6px; background: rgba(0, 0, 0, 0.4); text-align: left; white-space: pre-wrap; overflow-wrap: anywhere; }
+                    .body-content pre code { padding: 0; background: none; font-size: 1em; }
                     a { color: #3abde7; text-decoration: none; font-size: 18px; }
                     a:hover { text-decoration: underline; color: #5dd0f5; }
                     .link { margin-top: 16px; }

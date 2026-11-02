@@ -15,7 +15,7 @@ public class AnnouncementValidator : AbstractValidator<SaveAnnouncementDTO>
         RuleFor(announcement => announcement.Body).Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Body Must Not Be Empty")
             .MaximumLength(ContentLimits.BodyMaximumLength).WithMessage($"Body Must Be At Most {ContentLimits.BodyMaximumLength} Characters Long")
-            .Must(SafeHTML.IsWithinSubset).WithMessage("Body May Only Contain Paragraphs, Line Breaks, Bold, Italic, And Underlined Text, Lists, And Links To HTTP Or HTTPS Addresses");
+            .Must(SafeHTML.IsWithinSubset).WithMessage("Body May Only Contain Paragraphs, Line Breaks, Bold, Italic, And Underlined Text, Lists, Code, And Links To HTTP Or HTTPS Addresses");
 
         RuleFor(announcement => announcement.Expires)
             .GreaterThan(published).WithMessage("Expiry Must Be After The Published Time");

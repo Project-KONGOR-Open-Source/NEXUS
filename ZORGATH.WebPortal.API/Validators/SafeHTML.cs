@@ -1,7 +1,7 @@
 namespace ZORGATH.WebPortal.API.Validators;
 
 /// <summary>
-///     Checks that the HTML of an event's or an announcement's body stays within the small subset the client's pages show: paragraphs, line breaks, bold, italic, and underlined text, lists, and links to HTTP or HTTPS addresses.
+///     Checks that the HTML of an event's or an announcement's body stays within the small subset the client's pages show: paragraphs, line breaks, bold, italic, and underlined text, lists, inline code and code blocks, and links to HTTP or HTTPS addresses.
 /// </summary>
 public static class SafeHTML
 {
@@ -12,7 +12,7 @@ public static class SafeHTML
     {
         HtmlSanitizer sanitiser = new (new HtmlSanitizerOptions
         {
-            AllowedTags = new HashSet<string>(["p", "br", "strong", "em", "b", "i", "u", "ul", "ol", "li", "a"], StringComparer.OrdinalIgnoreCase),
+            AllowedTags = new HashSet<string>(["p", "br", "strong", "em", "b", "i", "u", "ul", "ol", "li", "a", "code", "pre"], StringComparer.OrdinalIgnoreCase),
             AllowedAttributes = new HashSet<string>(["href"], StringComparer.OrdinalIgnoreCase),
             AllowedSchemes = new HashSet<string>(["http", "https"], StringComparer.OrdinalIgnoreCase),
             UriAttributes = new HashSet<string>(["href"], StringComparer.OrdinalIgnoreCase)

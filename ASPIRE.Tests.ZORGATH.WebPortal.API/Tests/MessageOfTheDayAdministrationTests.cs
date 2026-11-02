@@ -54,7 +54,7 @@ public sealed class MessageOfTheDayAdministrationTests(ZORGATHIntegrationWebAppl
     [Test]
     public async Task A_Body_Using_Every_Allowed_Element_Is_Accepted()
     {
-        const string body = """<p>Line one.<br>Line two, with <strong>strong</strong>, <em>emphasised</em>, <b>bold</b>, <i>italic</i>, and <u>underlined</u> text.</p><ul><li>One</li></ul><ol><li>Two</li></ol><p><a href="https://discord.gg/example">Discord</a> and <a href="http://example.com/">a page</a>.</p>""";
+        const string body = """<p>Line one.<br>Line two, with <strong>strong</strong>, <em>emphasised</em>, <b>bold</b>, <i>italic</i>, and <u>underlined</u> text.</p><ul><li>One</li></ul><ol><li>Two</li></ol><p><a href="https://discord.gg/example">Discord</a> and <a href="http://example.com/">a page</a>.</p><p>Type <code>/join</code> in chat.</p><pre><code>map: caldavar, mode: all pick</code></pre>""";
 
         IActionResult response = await CreateController().CreateEvent(NewEvent() with { Body = body });
 

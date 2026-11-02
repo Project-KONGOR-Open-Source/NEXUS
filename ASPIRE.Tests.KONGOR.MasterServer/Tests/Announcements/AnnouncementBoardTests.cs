@@ -104,6 +104,7 @@ public sealed class AnnouncementBoardTests(KONGORIntegrationWebApplicationFactor
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
             await Assert.That(html).Contains("Server Maintenance");
             await Assert.That(html).Contains(@"""Ubuntu Sans""");
+            await Assert.That(html).Contains(@".body-content code, .body-content pre { font-family: ""Ubuntu Sans Mono"", monospace;");
         }
     }
 

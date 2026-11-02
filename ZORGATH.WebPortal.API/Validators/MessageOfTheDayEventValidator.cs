@@ -22,7 +22,7 @@ public class MessageOfTheDayEventValidator : AbstractValidator<SaveMessageOfTheD
         RuleFor(item => item.Body).Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Body Must Not Be Empty")
             .MaximumLength(ContentLimits.BodyMaximumLength).WithMessage($"Body Must Be At Most {ContentLimits.BodyMaximumLength} Characters Long")
-            .Must(SafeHTML.IsWithinSubset).WithMessage("Body May Only Contain Paragraphs, Line Breaks, Bold, Italic, And Underlined Text, Lists, And Links To HTTP Or HTTPS Addresses");
+            .Must(SafeHTML.IsWithinSubset).WithMessage("Body May Only Contain Paragraphs, Line Breaks, Bold, Italic, And Underlined Text, Lists, Code, And Links To HTTP Or HTTPS Addresses");
 
         RuleFor(item => item.Picture).Cascade(CascadeMode.Stop)
             .NotEmpty().WithMessage("Picture Must Not Be Empty")
