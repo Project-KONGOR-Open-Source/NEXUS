@@ -25,7 +25,6 @@ jobs:
       uses: "actions/setup-dotnet@v6"
       with:
         dotnet-version: "11.x"
-        dotnet-quality: "preview"
 
     - name: "Print .NET Version"
       run: "dotnet --version"
