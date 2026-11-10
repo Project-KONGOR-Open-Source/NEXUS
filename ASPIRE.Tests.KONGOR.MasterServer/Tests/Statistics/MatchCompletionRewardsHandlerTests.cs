@@ -618,6 +618,63 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
     }
 
     [Test]
+    public async Task Apply_Accumulates_Per_Hero_Statistics_Across_Matches_Saved_From_Separate_Contexts()
+    {
+        Account account = await SeedMainAccount("separate.contexts@kongor.com", "SeparateSaves");
+
+        MatchInformation matchInformation = MatchDataHelper.BuildMatchInformation(MatchType.AM_PUBLIC);
+
+        MatchParticipantStatistics firstParticipant = MatchDataHelper.BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, matchID: 1);
+        firstParticipant.HeroIdentifier = "Hero_Engineer";
+        firstParticipant.HeroKills = 4;
+
+        MatchParticipantStatistics secondParticipant = MatchDataHelper.BuildParticipant(account.ID, account.Name, groupNumber: 1, loss: 1, matchID: 2);
+        secondParticipant.HeroIdentifier = "Hero_Engineer";
+        secondParticipant.HeroKills = 6;
+
+        MatchParticipantStatistics thirdParticipant = MatchDataHelper.BuildParticipant(account.ID, account.Name, groupNumber: 1, win: 1, matchID: 3);
+        thirdParticipant.HeroIdentifier = "Hero_Pyromancer";
+        thirdParticipant.HeroKills = 2;
+
+        List<MatchParticipantStatistics> participants = [firstParticipant, secondParticipant, thirdParticipant];
+
+        // Each Match Is Applied And Saved From Its Own Context, Like Separate Submissions, So Later Matches Update The Per-Hero Entries Which Earlier Matches Persisted
+        foreach (MatchParticipantStatistics participant in participants)
+        {
+            using IServiceScope writeScope = webApplicationFactory.Services.CreateScope();
+
+            MerrickContext writeContext = writeScope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+            Account trackedAccount = await writeContext.Accounts.Include(candidate => candidate.User).SingleAsync(candidate => candidate.ID == account.ID);
+
+            await MatchCompletionRewardsHandler.Apply(writeContext, NullLogger.Instance, trackedAccount, matchInformation, MatchDataHelper.BuildMatchStatistics(matchID: participant.MatchID), participant);
+            await writeContext.SaveChangesAsync();
+        }
+
+        using IServiceScope readScope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext readContext = readScope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        AccountStatistics statistics = await readContext.AccountStatistics.SingleAsync(record => record.AccountID == account.ID && record.Type == AccountStatisticsType.Public);
+
+        HeroStats engineerStatistics = statistics.HeroStatistics.Heroes.Single(hero => hero.HeroIdentifier == "Hero_Engineer");
+        HeroStats pyromancerStatistics = statistics.HeroStatistics.Heroes.Single(hero => hero.HeroIdentifier == "Hero_Pyromancer");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(statistics.HeroStatistics.Heroes.Count).IsEqualTo(2);
+
+            await Assert.That(engineerStatistics.GamesPlayed).IsEqualTo(2);
+            await Assert.That(engineerStatistics.Wins).IsEqualTo(1);
+            await Assert.That(engineerStatistics.Losses).IsEqualTo(1);
+            await Assert.That(engineerStatistics.HeroKills).IsEqualTo(10);
+
+            await Assert.That(pyromancerStatistics.GamesPlayed).IsEqualTo(1);
+            await Assert.That(pyromancerStatistics.HeroKills).IsEqualTo(2);
+        }
+    }
+
+    [Test]
     public async Task Apply_Routes_Statistics_To_The_Cooperative_Row_For_A_Bot_Match()
     {
         Account account = await SeedMainAccount("coop.routing@kongor.com", "CoopRouting");
