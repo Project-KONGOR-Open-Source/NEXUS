@@ -177,7 +177,7 @@ public sealed class MerrickContext : DbContext
                 collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())), collection => collection.ToList())
         );
 
-        builder.OwnsMany(statistics => statistics.ItemHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+        builder.ComplexCollection(statistics => statistics.ItemHistory, complexCollectionBuilder => complexCollectionBuilder.ToJson());
         builder.OwnsMany(statistics => statistics.AbilityHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
         builder.OwnsOne(statistics => statistics.MasteryProgression, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
     }
