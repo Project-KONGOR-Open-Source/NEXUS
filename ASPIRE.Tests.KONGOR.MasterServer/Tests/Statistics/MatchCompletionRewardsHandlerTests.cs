@@ -517,7 +517,7 @@ public sealed class MatchCompletionRewardsHandlerTests(KONGORIntegrationWebAppli
             await writeContext.SaveChangesAsync();
         }
 
-        // Re-read From A Fresh Context To Confirm The Owned JSON Columns Were Actually Persisted
+        // Re-read From A Fresh Context To Confirm The JSON Columns Were Actually Persisted
         using IServiceScope readScope = webApplicationFactory.Services.CreateScope();
 
         MerrickContext readContext = readScope.ServiceProvider.GetRequiredService<MerrickContext>();

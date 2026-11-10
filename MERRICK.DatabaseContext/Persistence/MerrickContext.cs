@@ -155,10 +155,10 @@ public sealed class MerrickContext : DbContext
 
     private static void ConfigureAccountStatistics(EntityTypeBuilder<AccountStatistics> builder)
     {
-        builder.OwnsOne(statistics => statistics.HeroStatistics, ownedNavigationBuilder =>
+        builder.ComplexProperty(statistics => statistics.HeroStatistics, complexPropertyBuilder =>
         {
-            ownedNavigationBuilder.ToJson();
-            ownedNavigationBuilder.OwnsMany(summary => summary.Heroes);
+            complexPropertyBuilder.ToJson();
+            complexPropertyBuilder.ComplexCollection(summary => summary.Heroes);
         });
 
         builder.OwnsOne(statistics => statistics.AwardStatistics, ownedNavigationBuilder =>
